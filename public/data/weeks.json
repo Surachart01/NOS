@@ -1,17 +1,10 @@
 [
-  { "week": 1,  "title": "OSI 7 Layer & TCP/IP Protocol",          "topic": "OSI Model & TCP/IP Stack",                          "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 2,  "title": "เข้าหัวสาย LAN & เครือข่ายพื้นฐาน",      "topic": "LAN Cabling & Basic Networking",                    "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 3,  "title": "ภาพรวม NOS & สถาปัตยกรรม Server",        "topic": "NOS Overview & Server Architecture",                "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 4,  "title": "Proxmox VE — ติดตั้ง Hypervisor",         "topic": "Proxmox VE Installation & Configuration",           "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 5,  "title": "สร้าง VM & ติดตั้ง Linux Server",         "topic": "VM Creation & Ubuntu Server 24.04 Installation",    "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 6,  "title": "SSH Remote Access & CLI พื้นฐาน",         "topic": "SSH Protocol & Linux CLI Fundamentals",             "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 7,  "title": "User & Permission + Firewall",            "topic": "User Management & UFW Firewall",                    "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 8,  "title": "สอบกลางภาค",                              "topic": "Midterm Examination (Theory + Practical)",          "hours": 5, "theory": 2, "lab": 3 },
-  { "week": 9,  "title": "DHCP Server",                             "topic": "DHCP Service Configuration",                       "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 10, "title": "DNS Server",                              "topic": "DNS Service with BIND9",                           "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 11, "title": "Web Server (Nginx / Apache)",             "topic": "Web Server & Virtual Host Setup",                  "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 12, "title": "Database Server + LAMP/LEMP Stack",       "topic": "MariaDB & LAMP/LEMP Stack Integration",             "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 13, "title": "File Sharing (Samba/NFS) + Proxy",        "topic": "File & Resource Sharing + Squid Proxy",             "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 14, "title": "SSL Certificate + AAA Server",            "topic": "HTTPS, TLS/SSL & RADIUS Authentication",           "hours": 5, "theory": 1, "lab": 4 },
-  { "week": 15, "title": "Docker + DevOps & สอบปลายภาค",           "topic": "Container Platform, CI/CD & Final Exam",            "hours": 5, "theory": 1, "lab": 4 }
+  {
+    "week": 1,
+    "title": "ระบบปฏิบัติการเครื่องแม่ข่าย (Part 1)",
+    "topic": "Understanding Network Operating System",
+    "hours": 5,
+    "theory": 1,
+    "lab": 4
+  }
 ]
