@@ -1,0 +1,187 @@
+{
+  "week": 3,
+  "title": "ภาพรวม NOS & สถาปัตยกรรม Server",
+  "topic": "NOS Overview & Server Architecture",
+  "description": "ศึกษาบทบาทของ Server, เปรียบเทียบ Windows vs Linux Server, Client-Server Model และสำรวจ Hardware Server จริงในห้องปฏิบัติการ",
+  "learningObjectives": [
+    "อธิบายบทบาทและหน้าที่ของเครื่องแม่ข่าย (Server) ได้",
+    "เปรียบเทียบ Windows Server กับ Linux Server ได้",
+    "อธิบาย Client-Server Model และ Service ต่างๆ ได้",
+    "ระบุ Hardware ส่วนประกอบของ Server จริงได้"
+  ],
+  "slides": [
+    {
+      "id": "w3-s1",
+      "type": "cover",
+      "title": "NOS & Server Architecture",
+      "subtitle": "ภาพรวม Network Operating System",
+      "tag": "สัปดาห์ที่ 3",
+      "body": "เรียนรู้ว่า Server คืออะไร และ NOS ต่างจาก OS ทั่วไปอย่างไร",
+      "speakerNotes": "สัปดาห์นี้จะเริ่มเข้าสู่หัวใจหลักของวิชาครับ ทำความเข้าใจ Server ก่อนที่เราจะลงมือติดตั้งจริง"
+    },
+    {
+      "id": "w3-s2",
+      "type": "content",
+      "title": "Server คืออะไร?",
+      "tag": "Server Definition",
+      "items": [
+        "Server = คอมพิวเตอร์หรืออุปกรณ์ที่ให้บริการ (Service) แก่เครื่องอื่นในเครือข่าย",
+        "Client-Server Model: Client ส่ง Request → Server ประมวลผล → ส่ง Response กลับ",
+        "ออกแบบมาให้ทำงาน 24/7 ไม่ดับ มีความเสถียรสูง",
+        "มี CPU, RAM, Storage สูงกว่า PC ทั่วไปมาก",
+        "ตัวอย่าง Server จริง: Web Server (YouTube, Facebook), Mail Server, DNS Server",
+        "ในองค์กร: File Server, Print Server, Database Server, Authentication Server"
+      ],
+      "speakerNotes": "เปรียบ Server เหมือนครัวของร้านอาหาร Client คือลูกค้าที่สั่งอาหาร (Request) ครัวทำแล้วส่งมาให้ (Response) ครับ"
+    },
+    {
+      "id": "w3-s3",
+      "type": "two-col",
+      "title": "Desktop OS vs Server OS",
+      "tag": "OS Comparison",
+      "cols": [
+        {
+          "icon": "🖥️",
+          "title": "Desktop OS (Windows 11)",
+          "items": [
+            "ออกแบบสำหรับผู้ใช้ 1 คน",
+            "เน้น GUI สวยงาม ใช้งานง่าย",
+            "ทรัพยากร CPU/RAM จำกัด",
+            "ไม่ต้องทำงาน 24/7",
+            "มีโปรแกรมสำนักงาน, เกม, มัลติมีเดีย",
+            "ราคาถูกกว่า (~5,000-8,000 บาท)"
+          ]
+        },
+        {
+          "icon": "🖧",
+          "title": "Server OS (Windows Server / Linux)",
+          "items": [
+            "รองรับผู้ใช้หลายร้อย-หลายพันคนพร้อมกัน",
+            "เน้น CLI, ความเสถียร, ความปลอดภัย",
+            "รองรับ RAM หลาย TB, CPU หลาย Socket",
+            "ต้องทำงาน 24/7 ไม่หยุด",
+            "มีบริการ Network: DNS, DHCP, AD, Web",
+            "ราคาสูงหรือฟรี (Linux) แต่ต้องการผู้เชี่ยวชาญ"
+          ]
+        }
+      ],
+      "speakerNotes": "Windows Server มี GUI แต่ในการใช้งานจริง Admin จะใช้ PowerShell มากกว่า เพราะเร็วและ Automate ได้ครับ"
+    },
+    {
+      "id": "w3-s4",
+      "type": "content",
+      "title": "Network Operating System (NOS) คืออะไร?",
+      "tag": "NOS Definition",
+      "items": [
+        "ซอฟต์แวร์ระบบที่ออกแบบมาเฉพาะสำหรับบริหารจัดการทรัพยากรบนเครือข่าย",
+        "รองรับ Multi-user: ผู้ใช้หลายร้อยคนเข้าถึงพร้อมกัน",
+        "รองรับ Multi-tasking: ประมวลผลหลายงานพร้อมกัน",
+        "มีระบบรักษาความปลอดภัย (Authentication, Authorization, Accounting)",
+        "สนับสนุน Network Services: DNS, DHCP, File Sharing, Web, Database",
+        "ตัวอย่าง: Windows Server 2022, Ubuntu Server 24.04, Red Hat Enterprise Linux"
+      ],
+      "speakerNotes": "NOS ไม่ใช่แค่ OS ธรรมดา แต่เป็น OS ที่ถูกออกแบบมาเฉพาะสำหรับให้บริการแก่คนอื่นบนเครือข่ายครับ"
+    },
+    {
+      "id": "w3-s5",
+      "type": "two-col",
+      "title": "Windows Server vs Linux Server",
+      "tag": "Platform Comparison",
+      "cols": [
+        {
+          "icon": "🪟",
+          "title": "Windows Server 2022",
+          "items": [
+            "GUI: ใช้งานง่าย มี Desktop Interface",
+            "Active Directory: จัดการผู้ใช้องค์กรได้ดี",
+            "Hyper-V: Virtualization ในตัว",
+            "ราคา: ค่าลิขสิทธิ์สูง (~$500-6,000)",
+            "เหมาะ: องค์กรที่ใช้ Microsoft Products",
+            "ข้อเสีย: ต้องการทรัพยากรมากกว่า"
+          ]
+        },
+        {
+          "icon": "🐧",
+          "title": "Ubuntu Server 24.04 LTS",
+          "items": [
+            "CLI-based: ใช้คำสั่ง Terminal เป็นหลัก",
+            "Open Source: ฟรี ชุมชนใหญ่",
+            "apt: จัดการ Package ง่าย",
+            "ราคา: ฟรี (LTS 5 ปี)",
+            "เหมาะ: Cloud, DevOps, Web Server",
+            "ข้อเสีย: ต้องรู้ Linux Command"
+          ]
+        }
+      ],
+      "speakerNotes": "ใน Lab เราจะใช้ Ubuntu Server 24.04 LTS เป็นหลัก เพราะฟรีและใกล้เคียงกับ Production จริงในองค์กร IT ครับ"
+    },
+    {
+      "id": "w3-s6",
+      "type": "content",
+      "title": "Server Hardware — ส่วนประกอบหลัก",
+      "tag": "Server Hardware",
+      "items": [
+        "CPU (Processor): Intel Xeon / AMD EPYC รองรับหลาย Core และ Socket",
+        "RAM: ECC (Error-Correcting Code) ป้องกัน Memory Error ความจุสูง 32GB-TB",
+        "Storage: SAS HDD / SSD ความเร็วสูง ทนทาน + RAID Controller",
+        "NIC: Network Interface Card 1-100 Gbps มักมีหลายพอร์ต",
+        "PSU: Redundant Power Supply 2 ชุด ป้องกันไฟดับ",
+        "Remote Management: IPMI / iDRAC / iLO จัดการได้แม้ OS ล่ม"
+      ],
+      "speakerNotes": "ECC RAM สำคัญมากครับ ถ้า RAM Error บน Server จะกระทบผู้ใช้ทุกคน ECC จะแก้ Error อัตโนมัติ"
+    },
+    {
+      "id": "w3-s7",
+      "type": "content",
+      "title": "RAID — การจัดการ Disk หลายลูก",
+      "tag": "RAID",
+      "items": [
+        "RAID 0 (Striping): แบ่งข้อมูลกระจายหลาย Disk → เร็วขึ้น แต่ไม่ป้องกันข้อมูล",
+        "RAID 1 (Mirroring): สำเนาข้อมูล 2 Disk → Disk ตายลูกหนึ่งยังใช้ได้",
+        "RAID 5 (Striping+Parity): ต้องการ Disk ≥ 3 ลูก, สมดุลความเร็วและความปลอดภัย",
+        "RAID 10 (RAID 1+0): ต้องการ Disk ≥ 4 ลูก, เร็วสุดและปลอดภัยสุด แต่แพง",
+        "Hot-swap: เปลี่ยน Disk ที่เสียได้โดยไม่ต้องปิดเครื่อง",
+        "เลือก RAID ตาม Priority: เร็ว vs ปลอดภัย vs ประหยัด"
+      ],
+      "speakerNotes": "ในองค์กรจริงนิยมใช้ RAID 5 หรือ RAID 10 ครับ ถ้า Budget น้อยใช้ RAID 1 ก็ปลอดภัยพอสมควร"
+    },
+    {
+      "id": "w3-s8",
+      "type": "lab",
+      "title": "Lab 03 — สำรวจ Hardware Server จริง",
+      "tag": "Hands-on Lab",
+      "duration": "4 ชั่วโมง",
+      "objectives": [
+        "ระบุส่วนประกอบ Hardware บน Server จริงในห้อง Lab ได้",
+        "ตรวจสอบ Spec CPU, RAM, Storage, NIC ผ่านระบบ",
+        "เปรียบเทียบ Spec กับ Minimum Requirements ของ Ubuntu Server 24.04",
+        "บันทึกผลใน Lab Report พร้อมภาพถ่าย"
+      ],
+      "steps": [
+        "เปิดฝาครอบ Server (ถ้าเป็น Tower) หรือดึง Server ออกจาก Rack",
+        "ถ่ายภาพและระบุ: CPU Model, RAM จำนวนและประเภท, HDD/SSD จำนวน",
+        "เปิดเครื่อง → เข้า BIOS/UEFI → ดู Hardware Summary",
+        "บูตเข้า OS → เปิด Terminal: lscpu, free -h, lsblk, ip a",
+        "บันทึก: CPU Cores/Threads, RAM (GB), Disk (GB), NIC (จำนวนพอร์ต)",
+        "เปรียบเทียบ: Ubuntu Server 24.04 ต้องการ RAM ≥ 512MB, Disk ≥ 25GB — เครื่องนี้ผ่านหรือไม่?"
+      ],
+      "speakerNotes": "แจก Lab Sheet ก่อนเริ่ม ให้นักเรียนถ่ายรูปประกอบด้วยทุกขั้นตอนครับ"
+    },
+    {
+      "id": "w3-s9",
+      "type": "summary",
+      "title": "สรุปสัปดาห์ที่ 3",
+      "tag": "Week Summary",
+      "items": [
+        "✅ Server ให้บริการ (Service) แก่ Client ทำงาน 24/7 มีทรัพยากรสูง",
+        "✅ NOS รองรับ Multi-user, Multi-tasking และ Network Services",
+        "✅ Windows Server: GUI ดี, AD, ราคาสูง | Linux: ฟรี, CLI, ชุมชนใหญ่",
+        "✅ ECC RAM, RAID, Redundant PSU คือ Key Features ของ Server",
+        "✅ RAID 1=Mirror, RAID 5=Striping+Parity, RAID 10=เร็ว+ปลอดภัย",
+        "📝 Lab Report: Spec Server + เปรียบเทียบ Requirement ส่งภายใน 2 วัน",
+        "📚 สัปดาห์หน้า: ติดตั้ง Proxmox VE Hypervisor บน Server จริง"
+      ],
+      "speakerNotes": "ถามปิดท้าย: ทำไม Server ต้องใช้ ECC RAM? RAID 5 ต้องการ Disk กี่ลูกอย่างน้อย?"
+    }
+  ]
+}

@@ -1,0 +1,165 @@
+{
+  "week": 4,
+  "title": "Proxmox VE — ติดตั้ง Hypervisor",
+  "topic": "Proxmox VE Installation & Configuration",
+  "description": "ศึกษาแนวคิด Virtualization, ประเภท Hypervisor, สถาปัตยกรรม Proxmox VE และฝึกติดตั้ง Proxmox พร้อมตั้งค่า Network Bridge และ Storage Pool",
+  "learningObjectives": [
+    "อธิบายแนวคิด Virtualization และความแตกต่างระหว่าง Type 1 / Type 2 Hypervisor ได้",
+    "อธิบายสถาปัตยกรรมของ Proxmox VE ได้",
+    "ติดตั้ง Proxmox VE บน Server จริงได้",
+    "ตั้งค่า Network Bridge, Storage Pool และเข้าใช้งาน Web UI ได้"
+  ],
+  "slides": [
+    {
+      "id": "w4-s1",
+      "type": "cover",
+      "title": "Proxmox VE",
+      "subtitle": "ติดตั้งและตั้งค่า Hypervisor",
+      "tag": "สัปดาห์ที่ 4",
+      "body": "เปลี่ยน Server เครื่องเดียวให้รัน VM หลายเครื่องพร้อมกัน",
+      "speakerNotes": "สัปดาห์นี้เราจะเริ่มติดตั้ง Proxmox บน Server จริงครับ นี่คือจุดเริ่มต้นของ Home Lab ที่เราจะสร้างตลอดเทอม"
+    },
+    {
+      "id": "w4-s2",
+      "type": "content",
+      "title": "Virtualization คืออะไร?",
+      "tag": "Virtualization Concept",
+      "items": [
+        "การสร้างระบบปฏิบัติการเสมือน (Virtual Machine) หลายระบบบนเครื่องเดียว",
+        "แต่ละ VM แยกกันอิสระ: มี OS, CPU, RAM, Disk ของตัวเอง",
+        "ประหยัดค่าใช้จ่าย: 1 Server ทำงานแทน 10 เครื่องได้",
+        "ยืดหยุ่น: สร้าง/ลบ/Snapshot/Restore VM ได้รวดเร็ว",
+        "ใช้ในองค์กรจริง: Cloud Computing (AWS, Azure, GCP) ล้วนใช้ Virtualization",
+        "ในวิชานี้: ทุก Service (DNS, Web, DB) จะรันบน VM แยกกัน"
+      ],
+      "speakerNotes": "เปรียบเหมือนอพาร์ตเมนต์ครับ อาคารหลังเดียว (Server) แต่มีหลายห้อง (VM) แต่ละห้องอยู่อิสระ"
+    },
+    {
+      "id": "w4-s3",
+      "type": "two-col",
+      "title": "Type 1 vs Type 2 Hypervisor",
+      "tag": "Hypervisor Types",
+      "cols": [
+        {
+          "icon": "🥇",
+          "title": "Type 1 — Bare-metal (ติดตั้งตรงบน Hardware)",
+          "items": [
+            "ติดตั้งโดยตรงบน Hardware ไม่ต้องมี OS ก่อน",
+            "ประสิทธิภาพสูงสุด เหมาะสำหรับ Production",
+            "ตัวอย่าง: Proxmox VE, VMware ESXi, Microsoft Hyper-V",
+            "ใช้ในองค์กรจริงและ Data Center"
+          ]
+        },
+        {
+          "icon": "🥈",
+          "title": "Type 2 — Hosted (ติดตั้งบน OS)",
+          "items": [
+            "ติดตั้งบน OS ปกติ เช่น บน Windows หรือ macOS",
+            "ประสิทธิภาพต่ำกว่า Type 1 เพราะมี OS ขวางกลาง",
+            "ตัวอย่าง: VirtualBox, VMware Workstation, Parallels",
+            "เหมาะสำหรับการเรียน ทดสอบ และพัฒนา"
+          ]
+        }
+      ],
+      "speakerNotes": "เราใช้ Proxmox ซึ่งเป็น Type 1 ครับ ดังนั้นมันจะทำงานได้มีประสิทธิภาพสูงสุด เหมือนที่องค์กรจริงใช้"
+    },
+    {
+      "id": "w4-s4",
+      "type": "content",
+      "title": "Proxmox VE คืออะไร?",
+      "tag": "Proxmox Overview",
+      "items": [
+        "Proxmox Virtual Environment: Open Source Type 1 Hypervisor ฟรี",
+        "รองรับ KVM (Kernel-based Virtual Machine): สำหรับรัน Full VM",
+        "รองรับ LXC (Linux Containers): เบากว่า VM เร็วกว่าในการสร้าง",
+        "มี Web UI สวยงาม: จัดการ VM ผ่าน Browser ได้เลย",
+        "รองรับ Cluster: เชื่อมหลาย Proxmox Node เข้าด้วยกัน",
+        "ใช้ Debian Linux เป็น Base → คำสั่ง apt ใช้งานได้"
+      ],
+      "speakerNotes": "Proxmox ฟรีแต่มีคุณสมบัติระดับ Enterprise ครับ บริษัท IT หลายแห่งในไทยใช้ Proxmox แทน VMware เพราะประหยัดค่าใช้จ่าย"
+    },
+    {
+      "id": "w4-s5",
+      "type": "content",
+      "title": "Proxmox Architecture",
+      "tag": "Architecture",
+      "items": [
+        "Hardware Layer: CPU (VT-x/AMD-V), RAM, Storage, NIC",
+        "Proxmox VE (Hypervisor): จัดการ VM/Container ทั้งหมด",
+        "KVM VMs: Windows Server, Ubuntu Server แต่ละ VM แยกอิสระ",
+        "LXC Containers: เบากว่า VM ใช้ Kernel ร่วมกับ Proxmox",
+        "Web UI (Port 8006): จัดการผ่าน Browser https://IP:8006",
+        "Storage: Local Disk, NFS, iSCSI, Ceph สำหรับเก็บ VM Image"
+      ],
+      "speakerNotes": "ให้นักเรียนเปิด Browser และเข้า https://192.168.x.x:8006 ดูหน้า Proxmox Web UI ของเครื่องจริงในห้องครับ"
+    },
+    {
+      "id": "w4-s6",
+      "type": "content",
+      "title": "Minimum Requirements สำหรับ Proxmox VE",
+      "tag": "Requirements",
+      "items": [
+        "CPU: Intel/AMD 64-bit ที่รองรับ Hardware Virtualization (VT-x หรือ AMD-V)",
+        "RAM: ขั้นต่ำ 2 GB สำหรับ Proxmox เอง + RAM สำหรับ VM แต่ละตัว",
+        "Storage: ขั้นต่ำ 32 GB สำหรับ OS + พื้นที่สำหรับ VM Image",
+        "Network: NIC อย่างน้อย 1 พอร์ต (แนะนำ 2 พอร์ต)",
+        "แนะนำ: RAM 16 GB+ ถ้าจะรัน VM หลายตัวพร้อมกัน",
+        "ตรวจสอบ VT-x: BIOS → Advanced → CPU → Enable Intel VT-x"
+      ],
+      "speakerNotes": "ให้นักเรียนเปิด BIOS เช็คว่า VT-x หรือ AMD-V เปิดอยู่ไหม ถ้าไม่เปิด Proxmox จะสร้าง KVM VM ไม่ได้ครับ"
+    },
+    {
+      "id": "w4-s7",
+      "type": "lab",
+      "title": "Lab 04 — ติดตั้ง Proxmox VE",
+      "tag": "Hands-on Lab",
+      "duration": "4 ชั่วโมง",
+      "objectives": [
+        "Download Proxmox VE ISO และสร้าง Bootable USB",
+        "ติดตั้ง Proxmox VE บน Server และตั้งค่าเบื้องต้น",
+        "ตั้งค่า Network Bridge (vmbr0) เพื่อให้ VM เข้าถึงเครือข่ายได้",
+        "สร้าง Storage Pool และตรวจสอบระบบผ่าน Web UI"
+      ],
+      "steps": [
+        "Download: proxmox.com → Proxmox VE → Download ISO → Flash ด้วย Rufus/Balena Etcher",
+        "บูตจาก USB → เลือก 'Install Proxmox VE' → ยอมรับ EULA",
+        "ตั้งค่า: เลือก Target Disk, ตั้ง Timezone (Asia/Bangkok), Password และ Email",
+        "Network: ใส่ IP Server (เช่น 192.168.1.10/24), Gateway, DNS",
+        "รอติดตั้ง 5-10 นาที → Reboot → ถอด USB",
+        "เปิด Browser บน PC: https://192.168.1.10:8006 → Login root / ที่ตั้งไว้",
+        "Shell → apt update && apt upgrade -y → ตรวจสอบ Storage และ Network"
+      ],
+      "speakerNotes": "ถ้า Browser แจ้ง Not Secure ให้กด Advanced → Proceed ได้ครับ เป็น Self-signed Certificate ปกติ"
+    },
+    {
+      "id": "w4-s8",
+      "type": "content",
+      "title": "ตั้งค่า Network Bridge บน Proxmox",
+      "tag": "Network Config",
+      "items": [
+        "Network Bridge (vmbr0): สะพานเชื่อมระหว่าง Physical NIC กับ VM",
+        "VM ที่ต่อกับ vmbr0 จะได้รับ IP จาก DHCP ของ Router เหมือนเครื่องจริง",
+        "แก้ไขผ่าน Web UI: Datacenter → Node → System → Network",
+        "ตรวจสอบ /etc/network/interfaces ผ่าน Shell",
+        "vmbr0 ควรผูกกับ Physical NIC (เช่น eno1 หรือ eth0)",
+        "หลังแก้ไข: Apply Configuration → อาจต้อง Reboot เพื่อให้มีผล"
+      ],
+      "speakerNotes": "Network Bridge สำคัญมากครับ ถ้าตั้งผิด VM จะไม่มี Internet และ Ping กันไม่ได้"
+    },
+    {
+      "id": "w4-s9",
+      "type": "summary",
+      "title": "สรุปสัปดาห์ที่ 4",
+      "tag": "Week Summary",
+      "items": [
+        "✅ Virtualization: รัน VM หลายเครื่องบน Hardware เดียว",
+        "✅ Type 1 Hypervisor (Proxmox): ติดตั้งตรงบน Hardware ประสิทธิภาพสูง",
+        "✅ Proxmox VE: Open Source, KVM + LXC, Web UI Port 8006",
+        "✅ Network Bridge (vmbr0): เชื่อม VM เข้ากับเครือข่ายจริง",
+        "📝 Lab Report: Screenshot ขั้นตอนติดตั้ง + Web UI ที่ Login ได้สำเร็จ",
+        "📚 สัปดาห์หน้า: สร้าง VM และติดตั้ง Ubuntu Server 24.04 บน Proxmox"
+      ],
+      "speakerNotes": "ถามปิดท้าย: Proxmox เป็น Type Hypervisor อะไร? Web UI ของ Proxmox ใช้ Port อะไร?"
+    }
+  ]
+}

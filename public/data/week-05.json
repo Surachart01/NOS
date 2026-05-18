@@ -1,0 +1,178 @@
+{
+  "week": 5,
+  "title": "สร้าง VM & ติดตั้ง Linux Server",
+  "topic": "VM Creation & Ubuntu Server 24.04 Installation",
+  "description": "ฝึกสร้าง Virtual Machine บน Proxmox, อัปโหลด ISO, ติดตั้ง Ubuntu Server 24.04 LTS และตั้งค่าพื้นฐาน: Static IP, Hostname, System Update",
+  "learningObjectives": [
+    "สร้าง Virtual Machine บน Proxmox VE และกำหนด Resource ได้",
+    "ติดตั้ง Ubuntu Server 24.04 LTS ได้ถูกต้อง",
+    "ตั้งค่า Static IP Address, Hostname และ DNS ได้",
+    "อัปเดตระบบและติดตั้ง Package เบื้องต้นได้"
+  ],
+  "slides": [
+    {
+      "id": "w5-s1",
+      "type": "cover",
+      "title": "VM Creation & Linux Server",
+      "subtitle": "สร้าง VM & ติดตั้ง Ubuntu Server 24.04",
+      "tag": "สัปดาห์ที่ 5",
+      "body": "สร้าง Server เสมือนเครื่องแรกบน Proxmox",
+      "speakerNotes": "สัปดาห์นี้สนุกมากครับ เราจะสร้าง VM เครื่องแรกและติดตั้ง Ubuntu Server จนพร้อมใช้งานจริง"
+    },
+    {
+      "id": "w5-s2",
+      "type": "content",
+      "title": "VM คืออะไร? ต่างจาก Container อย่างไร?",
+      "tag": "VM vs Container",
+      "items": [
+        "VM (Virtual Machine): จำลอง Hardware ทั้งหมด มี OS เป็นของตัวเอง แยกกันสมบูรณ์",
+        "Container (LXC/Docker): ใช้ Kernel ร่วมกับ Host แต่แยก Process/Storage แบบเบา",
+        "VM: เหมาะกับ OS ต่างชนิด (Windows บน Linux), ความปลอดภัยสูง",
+        "Container: เหมาะกับ Linux Application, เร็วกว่า ใช้ RAM น้อยกว่า",
+        "ในวิชานี้: ใช้ KVM VM สำหรับ Service หลัก (DNS, Web, DB)",
+        "แต่ละ Service แยก VM → ถ้า Service หนึ่งล่ม ไม่กระทบตัวอื่น"
+      ],
+      "speakerNotes": "เปรียบ VM เหมือนบ้านแยกต่างหาก Container เหมือนห้องในอพาร์ตเมนต์ที่ใช้ระบบส่วนกลางร่วมกันครับ"
+    },
+    {
+      "id": "w5-s3",
+      "type": "content",
+      "title": "Ubuntu Server 24.04 LTS — ทำไมถึงเลือก?",
+      "tag": "Why Ubuntu Server",
+      "items": [
+        "LTS (Long-Term Support): รับ Security Update นาน 5 ปี (2024-2029)",
+        "ฟรี: ไม่มีค่าลิขสิทธิ์ เหมาะสำหรับการเรียนและองค์กร",
+        "apt Package Manager: ติดตั้ง Software ง่าย เช่น apt install nginx",
+        "ชุมชนใหญ่: หาวิธีแก้ปัญหาได้ง่ายจาก Forum, StackOverflow",
+        "ใกล้เคียง Production: บริษัท IT ส่วนใหญ่ใช้ Ubuntu หรือ Debian",
+        "Minimum Req: CPU 1 Core, RAM 512MB, Disk 25GB"
+      ],
+      "speakerNotes": "Ubuntu Server 24.04 เป็นเวอร์ชันล่าสุด LTS ครับ ในองค์กรจริงนิยมใช้ LTS เพราะได้รับ Update นาน"
+    },
+    {
+      "id": "w5-s4",
+      "type": "content",
+      "title": "การกำหนด Resource สำหรับ VM",
+      "tag": "VM Resources",
+      "items": [
+        "CPU: กำหนดจำนวน vCPU ที่ VM จะได้ใช้ (1-2 Core สำหรับ Service เบาๆ)",
+        "RAM: กำหนด Memory (1-2 GB สำหรับ Ubuntu Server)",
+        "Storage: กำหนดขนาด Virtual Disk (20-50 GB ขึ้นอยู่กับ Service)",
+        "Network: เลือก Bridge (vmbr0) เพื่อให้ VM เชื่อมต่อกับเครือข่าย",
+        "ISO: เลือก Ubuntu Server 24.04 ISO ที่ Upload ไว้ใน Proxmox",
+        "OS Type: เลือก Linux 6.x-2.6 Kernel ให้ Proxmox Optimize ได้ถูก"
+      ],
+      "speakerNotes": "อย่า Allocate RAM มากเกินไปครับ เราจะสร้าง VM หลายเครื่อง ต้องแบ่ง RAM ให้พอสำหรับทุกตัว"
+    },
+    {
+      "id": "w5-s5",
+      "type": "content",
+      "title": "ขั้นตอนการติดตั้ง Ubuntu Server 24.04",
+      "tag": "Installation Steps",
+      "items": [
+        "1. เลือกภาษา: English (แนะนำ ให้ consistent กับ Command และ Manual)",
+        "2. Keyboard Layout: เลือกตาม Keyboard จริง (Thai หรือ English)",
+        "3. Network: ตั้งค่า IP หรือใช้ DHCP ชั่วคราวก่อน",
+        "4. Storage: 'Use Entire Disk' และยืนยัน (Erase Data ใน VM)",
+        "5. Profile: ตั้ง Server Name, Username, Password",
+        "6. Ubuntu Pro: Skip → Continue without Ubuntu Pro",
+        "7. SSH: เปิด Install OpenSSH server (สำคัญมาก!)",
+        "8. Featured Snaps: ไม่ต้องเลือก → Done → รอติดตั้ง"
+      ],
+      "speakerNotes": "ขั้นตอนที่ 7 เปิด SSH สำคัญมากครับ ถ้าไม่เปิด สัปดาห์หน้าจะ SSH เข้ามาไม่ได้"
+    },
+    {
+      "id": "w5-s6",
+      "type": "content",
+      "title": "ตั้งค่า Static IP ด้วย Netplan",
+      "tag": "Static IP Configuration",
+      "items": [
+        "Ubuntu Server ใช้ Netplan จัดการ Network Configuration",
+        "ไฟล์ Config: /etc/netplan/00-installer-config.yaml",
+        "Static IP ดีกว่า DHCP สำหรับ Server เพราะ IP ไม่เปลี่ยน",
+        "ตัวอย่าง Config: addresses: [192.168.1.20/24], gateway4: 192.168.1.1",
+        "Apply: sudo netplan apply → ตรวจสอบ: ip a",
+        "ถ้าพิมพ์ YAML ผิด Indentation จะ Error → ระวังการเว้นวรรค"
+      ],
+      "speakerNotes": "YAML ใช้ Space ไม่ใช่ Tab นะครับ ถ้าใช้ Tab จะ Error ให้ระวังตรงนี้"
+    },
+    {
+      "id": "w5-s7",
+      "type": "content",
+      "title": "คำสั่งพื้นฐานหลังติดตั้ง",
+      "tag": "Post-install Commands",
+      "items": [
+        "sudo apt update — อัปเดตรายการ Package ล่าสุด",
+        "sudo apt upgrade -y — ติดตั้ง Update ทั้งหมด",
+        "hostnamectl set-hostname server01 — เปลี่ยน Hostname",
+        "ip a — ดู IP Address ของทุก Interface",
+        "ping 8.8.8.8 — ทดสอบว่าออก Internet ได้",
+        "ping google.com — ทดสอบว่า DNS ทำงาน",
+        "df -h — ดูพื้นที่ Disk ที่ใช้และเหลือ",
+        "free -h — ดู RAM ที่ใช้และเหลือ"
+      ],
+      "speakerNotes": "คำสั่งเหล่านี้เป็น Checklist ที่ต้องทำทุกครั้งหลังติดตั้ง Server ใหม่ครับ เหมือน Checklist ก่อน Takeoff ของนักบิน"
+    },
+    {
+      "id": "w5-s8",
+      "type": "lab",
+      "title": "Lab 05 — สร้าง VM & ติดตั้ง Ubuntu Server",
+      "tag": "Hands-on Lab",
+      "duration": "4 ชั่วโมง",
+      "objectives": [
+        "Upload Ubuntu Server 24.04 ISO เข้า Proxmox",
+        "สร้าง VM ด้วย Spec: 2 vCPU, 2GB RAM, 30GB Disk",
+        "ติดตั้ง Ubuntu Server 24.04 LTS บน VM สำเร็จ",
+        "ตั้งค่า Static IP และทดสอบ Ping ออก Internet"
+      ],
+      "steps": [
+        "Proxmox Web UI → local Storage → ISO Images → Upload → เลือกไฟล์ ubuntu-24.04-server.iso",
+        "Create VM: General (Name: ubuntu-server-01, VM ID: 100)",
+        "OS: ISO = ubuntu-24.04, Type = Linux, Version = 6.x-2.6 Kernel",
+        "System: ค่า Default → Disks: 30GB, Virtio Block",
+        "CPU: 2 Cores → Memory: 2048 MB → Network: vmbr0, Virtio",
+        "Confirm → Start VM → คลิก Console → ทำตามขั้นตอน Install",
+        "หลัง Reboot: Login → แก้ /etc/netplan/... → sudo netplan apply",
+        "ทดสอบ: ping 8.8.8.8, ping google.com, ip a → บันทึก IP ที่ได้"
+      ],
+      "speakerNotes": "ถ้า VM Reboot แล้วกลับเข้า ISO ให้ไปที่ Hardware → CD/DVD Drive → Do Not Use Media ครับ"
+    },
+    {
+      "id": "w5-s9",
+      "type": "content",
+      "title": "ตรวจสอบ Netplan Config ตัวอย่าง",
+      "tag": "Netplan Example",
+      "items": [
+        "sudo nano /etc/netplan/00-installer-config.yaml",
+        "network:",
+        "  version: 2",
+        "  ethernets:",
+        "    ens18:",
+        "      addresses: [192.168.1.20/24]",
+        "      routes:",
+        "        - to: default",
+        "          via: 192.168.1.1",
+        "      nameservers:",
+        "        addresses: [8.8.8.8, 1.1.1.1]",
+        "sudo netplan apply"
+      ],
+      "speakerNotes": "ชื่อ Interface อาจไม่ใช่ ens18 ครับ ให้ใช้ ip a ดูก่อนว่า Interface ชื่ออะไร แล้วค่อยแก้ในไฟล์"
+    },
+    {
+      "id": "w5-s10",
+      "type": "summary",
+      "title": "สรุปสัปดาห์ที่ 5",
+      "tag": "Week Summary",
+      "items": [
+        "✅ VM: จำลอง Hardware สมบูรณ์ แยกอิสระ เหมาะรัน Service แต่ละตัว",
+        "✅ Ubuntu Server 24.04 LTS: ฟรี เสถียร เหมาะ Production",
+        "✅ ติดตั้งผ่าน Proxmox Console → เปิด OpenSSH เสมอ",
+        "✅ Netplan: ตั้งค่า Static IP บน Ubuntu Server (/etc/netplan/)",
+        "✅ Post-install: apt update/upgrade, hostname, ping, df -h, free -h",
+        "📝 Lab Report: Screenshot ขั้นตอน Install + ผล ip a ที่แสดง Static IP",
+        "📚 สัปดาห์หน้า: SSH Remote Access — จัดการ Server ผ่าน Terminal"
+      ],
+      "speakerNotes": "ถามปิดท้าย: ทำไมต้องตั้ง Static IP บน Server? คำสั่งอะไรใช้ดู IP บน Linux?"
+    }
+  ]
+}
