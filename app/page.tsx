@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 
-/* ─── Types ─── */
+/* --- Types --- */
 interface SlideData {
   id: string; type: string; title: string; tag: string; speakerNotes?: string;
   subtitle?: string; body?: string;
@@ -16,13 +16,14 @@ interface SlideData {
   steps?: string[];
 }
 interface WeekData {
-  week: number; title: string; topic: string; description: string;
+  week: string; title: string; topic: string; description: string;
   learningObjectives: string[];
   slides: SlideData[];
 }
-interface WeekMeta { week: number; title: string; topic: string; }
+interface SessionMeta { id: string; displayNum: string; title: string; topic: string; disabled?: boolean; }
+interface WeekGroup { weekLabel: string; sessions: SessionMeta[]; }
 
-/* ─── SVG Icons ─── */
+/* --- SVG Icons --- */
 const MenuIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
 const ChevLeft = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15,18 9,12 15,6"/></svg>;
 const ChevRight = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9,6 15,12 9,18"/></svg>;
@@ -31,7 +32,7 @@ const MinIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
 const DownloadIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
 const NoteIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>;
 
-/* ─── Slide Renderers ─── */
+/* --- Slide Renderers --- */
 function CoverSlide({ s }: { s: SlideData }) {
   return (
     <div className="slide slide-cover">
@@ -138,7 +139,7 @@ function SummarySlide({ s }: { s: SlideData }) {
   );
 }
 
-/* ─── Diagram SVGs ─── */
+/* --- Diagram SVGs --- */
 function DiagramClientServer() {
   const box = { fill: "#191d29", stroke: "#22d3ee", strokeWidth: 1.5, rx: 8 };
   const txt = { fill: "#e8eaf0", fontSize: 13, fontFamily: "Inter,sans-serif", textAnchor: "middle" as const };
@@ -356,7 +357,7 @@ function DiagramAnimOSI() {
   );
 }
 
-/* ─── Layer 7 (Application) Animation ─── */
+/* --- Layer 7 (Application) Animation --- */
 function DiagramAnimL7() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
@@ -387,7 +388,7 @@ function DiagramAnimL7() {
   );
 }
 
-/* ─── Layer 6 (Presentation) Animation ─── */
+/* --- Layer 6 (Presentation) Animation --- */
 function DiagramAnimL6() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
@@ -418,7 +419,7 @@ function DiagramAnimL6() {
   );
 }
 
-/* ─── Layer 5 (Session) Animation ─── */
+/* --- Layer 5 (Session) Animation --- */
 function DiagramAnimL5() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
@@ -455,7 +456,7 @@ function DiagramAnimL5() {
   );
 }
 
-/* ─── Layer 4 (Transport) Animation ─── */
+/* --- Layer 4 (Transport) Animation --- */
 function DiagramAnimL4() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
@@ -494,7 +495,7 @@ function DiagramAnimL4() {
   );
 }
 
-/* ─── Layer 3 (Network) Animation ─── */
+/* --- Layer 3 (Network) Animation --- */
 function DiagramAnimL3() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
@@ -541,7 +542,7 @@ function DiagramAnimL3() {
   );
 }
 
-/* ─── Layer 2 (Data Link) Animation ─── */
+/* --- Layer 2 (Data Link) Animation --- */
 function DiagramAnimL2() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
@@ -582,7 +583,7 @@ function DiagramAnimL2() {
   );
 }
 
-/* ─── Layer 1 (Physical) Animation ─── */
+/* --- Layer 1 (Physical) Animation --- */
 function DiagramAnimL1() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
@@ -618,7 +619,7 @@ function DiagramAnimL1() {
   );
 }
 
-/* ─── Animated Networking Equipment Diagrams ─── */
+/* --- Animated Networking Equipment Diagrams --- */
 function DiagramAnimSwitch() {
   return (
     <svg viewBox="0 0 560 200" style={{ width: "100%", height: "100%" }}>
@@ -780,7 +781,379 @@ function DiagramAnimAP() {
   );
 }
 
-/* ─── Full Network Topology Animation ─── */
+/* --- UTP Cable Anatomy --- */
+function DiagramUTPAnatomy() {
+  const colors = [
+    { wire: "#f97316", label: "ขาวส้ม", cx: 200 },
+    { wire: "#fb923c", label: "ส้ม",    cx: 220 },
+    { wire: "#4ade80", label: "ขาวเขียว", cx: 240 },
+    { wire: "#3b82f6", label: "น้ำเงิน", cx: 260 },
+    { wire: "#93c5fd", label: "ขาวน้ำเงิน", cx: 280 },
+    { wire: "#22c55e", label: "เขียว",  cx: 300 },
+    { wire: "#c8a285", label: "ขาวน้ำตาล", cx: 320 },
+    { wire: "#92400e", label: "น้ำตาล", cx: 340 },
+  ];
+  return (
+    <svg viewBox="0 0 560 230" style={{ width: "100%", height: "100%" }}>
+      <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="15" fontWeight="bold">โครงสร้างภายในสาย UTP (Unshielded Twisted Pair)</text>
+      {/* Outer jacket */}
+      <rect x="60" y="50" width="440" height="90" rx="45" fill="none" stroke="#4a5568" strokeWidth="4"/>
+      <rect x="60" y="50" width="440" height="90" rx="45" fill="#1e293b" opacity="0.8"/>
+      {/* Cut-away label */}
+      <line x1="185" y1="50" x2="185" y2="140" stroke="#ef4444" strokeWidth="2" strokeDasharray="4 2"/>
+      <text x="122" y="46" textAnchor="middle" fill="#ef4444" fontSize="11">ตัดเปลือกนอกออก</text>
+      {/* Twisted pairs (left intact side) */}
+      {[["#f97316","#fb923c"],["#4ade80","#22c55e"],["#3b82f6","#93c5fd"],["#c8a285","#92400e"]].map(([c1,c2], pi) => (
+        <g key={pi}>
+          <ellipse cx={90 + pi * 22} cy={95} rx="8" ry="36" fill="#12151d" stroke={c1} strokeWidth="2"/>
+          <path d={`M${80+pi*22},75 Q${88+pi*22},95 ${80+pi*22},115`} fill="none" stroke={c1} strokeWidth="2"/>
+          <path d={`M${100+pi*22},75 Q${92+pi*22},95 ${100+pi*22},115`} fill="none" stroke={c2} strokeWidth="2"/>
+        </g>
+      ))}
+      {/* Exposed wires (right cut-away side) */}
+      {colors.map((c, i) => (
+        <g key={i}>
+          <line x1="190" y1={95} x2="490" y2={95} stroke={c.wire} strokeWidth="6" strokeDasharray="0"
+            transform={`translate(0, ${(i - 3.5) * 9})`}/>
+          <circle cx="492" cy={95 + (i - 3.5) * 9} r="5" fill={c.wire}/>
+          <text x="506" y={99 + (i - 3.5) * 9} fill={c.wire} fontSize="9" fontFamily="Inter,sans-serif">{c.label}</text>
+        </g>
+      ))}
+      <text x="280" y="200" textAnchor="middle" fill="#8892a4" fontSize="11">สาย UTP มี 8 เส้น (4 คู่) แต่ละคู่พันกันเพื่อลดสัญญาณรบกวน (Crosstalk)</text>
+      <text x="280" y="218" textAnchor="middle" fill="#4a5568" fontSize="10">Layer 1 (Physical): สาย UTP คืออุปกรณ์หลักในชั้นนี้</text>
+    </svg>
+  );
+}
+
+/* --- T568A / T568B Color Coding Comparison --- */
+function DiagramColorCode() {
+  const t568b = [
+    { color: "#fb923c", stripe: true,  label: "ขาวส้ม" },
+    { color: "#fb923c", stripe: false, label: "ส้ม" },
+    { color: "#22c55e", stripe: true,  label: "ขาวเขียว" },
+    { color: "#3b82f6", stripe: false, label: "น้ำเงิน" },
+    { color: "#3b82f6", stripe: true,  label: "ขาวน้ำเงิน" },
+    { color: "#22c55e", stripe: false, label: "เขียว" },
+    { color: "#92400e", stripe: true,  label: "ขาวน้ำตาล" },
+    { color: "#92400e", stripe: false, label: "น้ำตาล" },
+  ];
+  const t568a = [
+    { color: "#22c55e", stripe: true,  label: "ขาวเขียว" },
+    { color: "#22c55e", stripe: false, label: "เขียว" },
+    { color: "#fb923c", stripe: true,  label: "ขาวส้ม" },
+    { color: "#3b82f6", stripe: false, label: "น้ำเงิน" },
+    { color: "#3b82f6", stripe: true,  label: "ขาวน้ำเงิน" },
+    { color: "#fb923c", stripe: false, label: "ส้ม" },
+    { color: "#92400e", stripe: true,  label: "ขาวน้ำตาล" },
+    { color: "#92400e", stripe: false, label: "น้ำตาล" },
+  ];
+
+  const targetB = [2, 5, 0, 3, 4, 1, 6, 7];
+
+  return (
+    <svg viewBox="0 0 560 380" style={{ width: "100%", height: "100%" }}>
+      <defs>
+        <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#22c55e" />
+        </marker>
+        <marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#fb923c" />
+        </marker>
+      </defs>
+
+      <text x="280" y="18" textAnchor="middle" fill="#e8eaf0" fontSize="15" fontWeight="bold">การเรียงรหัสสีตามมาตรฐาน T568A และ T568B</text>
+
+      {/* --- T568A (Left) --- */}
+      <g>
+        <text x="115" y="38" textAnchor="middle" fill="#94a3b8" fontSize="12" fontWeight="bold">มาตรฐาน T568A</text>
+        {/* Plug Body */}
+        <rect x="60" y="46" width="110" height="66" rx="6" fill="#1e293b" stroke="#4a5568" strokeWidth="1.5" />
+        {/* Metallic Contacts Shield */}
+        <rect x="65" y="51" width="100" height="10" rx="1.5" fill="#0f172a" />
+        {/* Wires inside plug */}
+        {t568a.map((w, i) => {
+          const xWire = 60 + 10 + i * 11;
+          return (
+            <g key={i}>
+              <rect x={xWire} y="64" width="9" height="38" rx="1" fill={w.color} />
+              {w.stripe && <line x1={xWire} y1="64" x2={xWire + 9} y2="102" stroke="white" strokeWidth="2" opacity="0.6" />}
+              <text x={xWire + 4.5} y="60" textAnchor="middle" fill="#94a3b8" fontSize="7.5" fontWeight="bold">{i + 1}</text>
+            </g>
+          );
+        })}
+        {/* Vertical list under T568A */}
+        {t568a.map((w, i) => {
+          const yRow = 145 + i * 26;
+          const xWire = 60 + 10 + i * 11;
+          return (
+            <g key={i}>
+              {/* Fan-out wire from plug pin to list box */}
+              <path d={`M ${xWire + 4.5} 112 C ${xWire + 4.5} 128, 67 128, 67 ${yRow + 7}`} fill="none" stroke={w.color} strokeWidth="1.5" opacity="0.75" />
+              {/* Color Box */}
+              <rect x="60" y={yRow} width="14" height="14" rx="2.5" fill={w.stripe ? "#fff" : w.color} stroke={w.color} strokeWidth="1.5" />
+              {w.stripe && <line x1="60" y1={yRow + 14} x2="74" y2={yRow} stroke={w.color} strokeWidth="2.5" />}
+              {/* Text */}
+              <text x="82" y={yRow + 11} textAnchor="start" fill="#e8eaf0" fontSize="10.5" fontFamily="Inter, sans-serif">{i + 1}. {w.label}</text>
+            </g>
+          );
+        })}
+      </g>
+
+      {/* --- T568B (Right) --- */}
+      <g>
+        <text x="445" y="38" textAnchor="middle" fill="#22d3ee" fontSize="12" fontWeight="bold">มาตรฐาน T568B (หลักที่ใช้ในไทย) ⭐</text>
+        {/* Plug Body */}
+        <rect x="390" y="46" width="110" height="66" rx="6" fill="#1e293b" stroke="#22d3ee" strokeWidth="2" />
+        {/* Metallic Contacts Shield */}
+        <rect x="395" y="51" width="100" height="10" rx="1.5" fill="#0f172a" />
+        {/* Wires inside plug */}
+        {t568b.map((w, i) => {
+          const xWire = 390 + 10 + i * 11;
+          return (
+            <g key={i}>
+              <rect x={xWire} y="64" width="9" height="38" rx="1" fill={w.color} />
+              {w.stripe && <line x1={xWire} y1="64" x2={xWire + 9} y2="102" stroke="white" strokeWidth="2" opacity="0.6" />}
+              <text x={xWire + 4.5} y="60" textAnchor="middle" fill="#94a3b8" fontSize="7.5" fontWeight="bold">{i + 1}</text>
+            </g>
+          );
+        })}
+        {/* Vertical list under T568B */}
+        {t568b.map((w, i) => {
+          const yRow = 145 + i * 26;
+          const xWire = 390 + 10 + i * 11;
+          return (
+            <g key={i}>
+              {/* Fan-out wire from plug pin to list box */}
+              <path d={`M ${xWire + 4.5} 112 C ${xWire + 4.5} 128, 407 128, 407 ${yRow + 7}`} fill="none" stroke={w.color} strokeWidth="1.5" opacity="0.75" />
+              {/* Color Box */}
+              <rect x="400" y={yRow} width="14" height="14" rx="2.5" fill={w.stripe ? "#fff" : w.color} stroke={w.color} strokeWidth="1.5" />
+              {w.stripe && <line x1="400" y1={yRow + 14} x2="414" y2={yRow} stroke={w.color} strokeWidth="2.5" />}
+              {/* Text */}
+              <text x="422" y={yRow + 11} textAnchor="start" fill="#e8eaf0" fontSize="10.5" fontFamily="Inter, sans-serif">{i + 1}. {w.label}</text>
+            </g>
+          );
+        })}
+      </g>
+
+      {/* --- Middle Connections & Crossover Paths --- */}
+      <text x="280" y="136" textAnchor="middle" fill="#f59e0b" fontSize="10.5" fontWeight="bold">🔄 Crossover (สูตรลัดการสลับคู่สาย)</text>
+      
+      {t568a.map((w, i) => {
+        const yStart = 145 + i * 26 + 7;
+        const j = targetB[i];
+        const yEnd = 145 + j * 26 + 7;
+        const isSwapped = i !== j;
+
+        if (isSwapped) {
+          // Green or orange crossover curves
+          const strokeColor = w.color;
+          const markerName = strokeColor === "#22c55e" ? "arrow-green" : "arrow-orange";
+          
+          return (
+            <g key={i}>
+              {/* Left connection node */}
+              <circle cx="170" cy={yStart} r="3" fill="#1e293b" stroke={strokeColor} strokeWidth="1.5" />
+              {/* Curve path */}
+              <path
+                d={`M 170 ${yStart} C 280 ${yStart}, 280 ${yEnd}, 390 ${yEnd}`}
+                fill="none"
+                stroke={strokeColor}
+                strokeWidth="2.5"
+                strokeDasharray={w.stripe ? "5 3" : undefined}
+                markerEnd={`url(#${markerName})`}
+              />
+            </g>
+          );
+        } else {
+          // Unchanged lines (blue and brown) drawn with subtle styling
+          return (
+            <g key={i}>
+              {/* Left node */}
+              <circle cx="170" cy={yStart} r="2.5" fill="#1e293b" stroke="#4a5568" strokeWidth="1.2" opacity="0.5" />
+              {/* Straight line */}
+              <line
+                x1="170"
+                y1={yStart}
+                x2="390"
+                y2={yEnd}
+                stroke="#4a5568"
+                strokeWidth="1.2"
+                strokeDasharray="3 3"
+                opacity="0.5"
+              />
+              {/* Right node */}
+              <circle cx="390" cy={yEnd} r="2.5" fill="#1e293b" stroke="#4a5568" strokeWidth="1.2" opacity="0.5" />
+            </g>
+          );
+        }
+      })}
+
+      <text x="280" y="364" textAnchor="middle" fill="#8892a4" fontSize="10">พินที่นิ่งอยู่กับที่: พิน 4-5 (คู่สีน้ำเงิน) และ พิน 7-8 (คู่สีน้ำตาล) จะล็อกอยู่ที่เดิมเสมอ ไม่เปลี่ยนตำแหน่ง</text>
+    </svg>
+  );
+}
+
+/* --- Straight-Through vs Crossover Cable --- */
+function DiagramCableType() {
+  return (
+    <svg viewBox="0 0 560 230" style={{ width: "100%", height: "100%" }}>
+      <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="15" fontWeight="bold">รูปแบบการเชื่อมต่อ: สายตรง vs สายไขว้</text>
+      {/* Straight Through */}
+      <text x="140" y="44" textAnchor="middle" fill="#22d3ee" fontSize="12" fontWeight="bold">✅ สายตรง (Straight-Through)</text>
+      <text x="140" y="58" textAnchor="middle" fill="#4a5568" fontSize="10">T568B ↔ T568B (เหมือนกัน)</text>
+      {/* Left RJ45 */}
+      <rect x="30" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#22d3ee" strokeWidth="2"/>
+      {["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"].map((c, i) => (
+        <rect key={i} x={33 + i * 3} y="70" width="2.5" height="70" fill={c}/>
+      ))}
+      {/* Wires going straight */}
+      {["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"].map((c, i) => (
+        <line key={i} x1="58" y1={72 + i * 8.5} x2="192" y2={72 + i * 8.5} stroke={c} strokeWidth="1.5"/>
+      ))}
+      {/* Right RJ45 */}
+      <rect x="192" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#22d3ee" strokeWidth="2"/>
+      {["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"].map((c, i) => (
+        <rect key={i} x={195 + i * 3} y="70" width="2.5" height="70" fill={c}/>
+      ))}
+      {/* Use case icons */}
+      <text x="50" y="162" textAnchor="middle" fill="#94a3b8" fontSize="18">💻</text>
+      <text x="210" y="162" textAnchor="middle" fill="#94a3b8" fontSize="18">🔀</text>
+      <text x="130" y="175" textAnchor="middle" fill="#94a3b8" fontSize="10">PC → Switch/Router</text>
+
+      {/* Crossover */}
+      <text x="420" y="44" textAnchor="middle" fill="#f59e0b" fontSize="12" fontWeight="bold">⚡ สายไขว้ (Crossover)</text>
+      <text x="420" y="58" textAnchor="middle" fill="#4a5568" fontSize="10">T568A ↔ T568B (ต่างกัน)</text>
+      {/* Left RJ45 A */}
+      <rect x="310" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#f59e0b" strokeWidth="2"/>
+      {["#22c55e","#22c55e","#fb923c","#3b82f6","#3b82f6","#fb923c","#c8a285","#92400e"].map((c, i) => (
+        <rect key={i} x={313 + i * 3} y="70" width="2.5" height="70" fill={c}/>
+      ))}
+      {/* Crossover wires (pin 1↔3, 2↔6 crossed) */}
+      <line x1="338" y1="72" x2="472" y2="97" stroke="#22c55e" strokeWidth="1.5"/>
+      <line x1="338" y1="80" x2="472" y2="122" stroke="#22c55e" strokeWidth="1.5"/>
+      <line x1="338" y1="89" x2="472" y2="72" stroke="#fb923c" strokeWidth="1.5"/>
+      <line x1="338" y1="97" x2="472" y2="80" stroke="#fb923c" strokeWidth="1.5"/>
+      {["#3b82f6","#3b82f6","#c8a285","#92400e"].map((c, i) => (
+        <line key={i} x1="338" y1={106 + i * 8.5} x2="472" y2={106 + i * 8.5} stroke={c} strokeWidth="1.5"/>
+      ))}
+      {/* Right RJ45 B */}
+      <rect x="472" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#f59e0b" strokeWidth="2"/>
+      {["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"].map((c, i) => (
+        <rect key={i} x={475 + i * 3} y="70" width="2.5" height="70" fill={c}/>
+      ))}
+      <text x="330" y="162" textAnchor="middle" fill="#94a3b8" fontSize="18">💻</text>
+      <text x="490" y="162" textAnchor="middle" fill="#94a3b8" fontSize="18">💻</text>
+      <text x="410" y="175" textAnchor="middle" fill="#94a3b8" fontSize="10">PC ↔ PC หรือ Switch ↔ Switch</text>
+      <text x="280" y="200" textAnchor="middle" fill="#8892a4" fontSize="11">📌 ปัจจุบันอุปกรณ์รุ่นใหม่มี Auto MDI-X แต่ต้องจำไว้เพื่อการสอบ</text>
+    </svg>
+  );
+}
+
+/* --- Crimping Steps Animation --- */
+function DiagramCrimpSteps() {
+  const steps = [
+    { num: "1", icon: "🔌", label: "สวมปลอก Boot", color: "#22d3ee" },
+    { num: "2", icon: "✂️", label: "ปอกสาย 3 ซม.", color: "#22c55e" },
+    { num: "3", icon: "🎨", label: "เรียงสี T568B", color: "#f59e0b" },
+    { num: "4", icon: "📏", label: "ตัดปลาย 1.5 ซม.", color: "#f97316" },
+    { num: "5", icon: "🔷", label: "สอดเข้าหัว RJ-45", color: "#a78bfa" },
+    { num: "6", icon: "🔨", label: "ย้ำด้วยคีม", color: "#ef4444" },
+    { num: "7", icon: "✅", label: "ทดสอบ LAN Tester", color: "#22c55e" },
+  ];
+  return (
+    <svg viewBox="0 0 560 230" style={{ width: "100%", height: "100%" }}>
+      <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="15" fontWeight="bold">ขั้นตอนการเข้าหัว RJ-45 (7 ขั้นตอน)</text>
+      {steps.map((s, i) => {
+        const cx = 42 + i * 72;
+        const cy = 110;
+        return (
+          <g key={i}>
+            {/* Connector line */}
+            {i < steps.length - 1 && (
+              <line x1={cx + 28} y1={cy} x2={cx + 72 - 28} y2={cy} stroke="#334155" strokeWidth="2" strokeDasharray="4 2">
+                <animate attributeName="opacity" values="0.3;1;0.3" dur={`${1 + i * 0.2}s`} repeatCount="indefinite"/>
+              </line>
+            )}
+            {/* Circle */}
+            <circle cx={cx} cy={cy} r="28" fill="#1e293b" stroke={s.color} strokeWidth="2">
+              <animate attributeName="r" values="27;29;27" dur="2s" begin={`${i * 0.3}s`} repeatCount="indefinite"/>
+            </circle>
+            <text x={cx} y={cy - 4} textAnchor="middle" fontSize="18">{s.icon}</text>
+            <text x={cx} y={cy + 15} textAnchor="middle" fill={s.color} fontSize="9" fontWeight="bold">{s.num}</text>
+            {/* Label */}
+            <text x={cx} y={cy + 46} textAnchor="middle" fill="#94a3b8" fontSize="9">{s.label.split(' ').map((w: string, wi: number) => (
+              <tspan key={wi} x={cx} dy={wi === 0 ? 0 : 11}>{w}</tspan>
+            ))}</text>
+          </g>
+        );
+      })}
+      {/* Animated packet */}
+      <circle r="6" fill="#facc15" opacity="0">
+        <animate attributeName="cx" values="42;114;186;258;330;402;474" calcMode="discrete" dur="3.5s" repeatCount="indefinite"/>
+        <animate attributeName="cy" values="110;110;110;110;110;110;110" dur="3.5s" repeatCount="indefinite"/>
+        <animate attributeName="opacity" values="1;1;1;1;1;1;1;0" keyTimes="0;0.14;0.28;0.43;0.57;0.71;0.86;1" dur="3.5s" repeatCount="indefinite"/>
+      </circle>
+      <text x="280" y="185" textAnchor="middle" fill="#8892a4" fontSize="11">ทำตามลำดับครบทั้ง 7 ขั้นตอน เพื่อให้สายแลนมีคุณภาพและผ่านการทดสอบ</text>
+      <text x="280" y="200" textAnchor="middle" fill="#4a5568" fontSize="10">⚠️ ระวัง: สอดสายให้ทองแดงชนสุดก่อนย้ำ และตรวจสีก่อนทุกครั้ง</text>
+    </svg>
+  );
+}
+
+/* --- LAN Tester Animation --- */
+function DiagramLANTester() {
+  const straight = [1, 2, 3, 4, 5, 6, 7, 8];
+  return (
+    <svg viewBox="0 0 560 240" style={{ width: "100%", height: "100%" }}>
+      <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="15" fontWeight="bold">การทดสอบสายแลนด้วย LAN Tester</text>
+      {/* Tester Left (Master) */}
+      <rect x="60" y="50" width="90" height="130" rx="8" fill="#1e293b" stroke="#22d3ee" strokeWidth="2"/>
+      <text x="105" y="72" textAnchor="middle" fill="#22d3ee" fontSize="11" fontWeight="bold">MASTER</text>
+      {straight.map((n, i) => {
+        const pinsColor = ["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"][i];
+        return (
+          <g key={i}>
+            <circle cx="135" cy={83 + i * 12} r="4" fill="#0f172a" stroke={pinsColor} strokeWidth="1.5">
+              <animate attributeName="fill" values={`#0f172a;${pinsColor};#0f172a`} dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite"/>
+            </circle>
+            <text x="75" y={87 + i * 12} textAnchor="middle" fill={pinsColor} fontSize="9">Pin {n}</text>
+          </g>
+        );
+      })}
+      {/* Cable Line */}
+      {straight.map((_, i) => (
+        <line key={i} x1="135" y1={83 + i * 12} x2="365" y2={83 + i * 12} stroke="#334155" strokeWidth="1.5" strokeDasharray="4 2">
+          <animate attributeName="stroke" values={["#334155","#22c55e","#334155"].join(";")} dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite"/>
+        </line>
+      ))}
+      {/* Light Animation Ball */}
+      {straight.map((_, i) => (
+        <circle key={i} cx="135" cy={83 + i * 12} r="3" fill="#22c55e" opacity="0">
+          <animate attributeName="cx" values="135;365" dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite"/>
+        </circle>
+      ))}
+      {/* Tester Right (Remote) */}
+      <rect x="365" y="50" width="90" height="130" rx="8" fill="#1e293b" stroke="#22c55e" strokeWidth="2"/>
+      <text x="410" y="72" textAnchor="middle" fill="#22c55e" fontSize="11" fontWeight="bold">REMOTE</text>
+      {straight.map((n, i) => {
+        const pinsColor = ["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"][i];
+        return (
+          <g key={i}>
+            <circle cx="370" cy={83 + i * 12} r="4" fill="#0f172a" stroke={pinsColor} strokeWidth="1.5">
+              <animate attributeName="fill" values={`#0f172a;${pinsColor};#0f172a`} dur="1s" begin={`${i * 0.12 + 0.6}s`} repeatCount="indefinite"/>
+            </circle>
+            <text x="440" y={87 + i * 12} textAnchor="middle" fill={pinsColor} fontSize="9">Pin {n}</text>
+          </g>
+        );
+      })}
+      <text x="280" y="200" textAnchor="middle" fill="#8892a4" fontSize="11">✅ สายตรง: ไฟวิ่ง 1→1, 2→2, ... 8→8 (ตรงกันทั้ง 8 ขา)</text>
+      <text x="280" y="215" textAnchor="middle" fill="#f59e0b" fontSize="10">⚠️ สายไขว้: ไฟวิ่ง 1→3, 2→6, 3→1, 6→2 (สลับกัน)</text>
+      <text x="280" y="228" textAnchor="middle" fill="#ef4444" fontSize="10">❌ หากไฟดับ หรือวิ่งผิดขา = ต้องเข้าหัวใหม่</text>
+    </svg>
+  );
+}
+
+/* --- Full Network Topology Animation --- */
 function DiagramAnimNetworkFull() {
   return (
     <svg viewBox="0 0 560 260" style={{ width: "100%", height: "100%" }}>
@@ -872,6 +1245,12 @@ const DIAGRAMS: Record<string, React.FC> = {
   "anim-l6": DiagramAnimL6,
   "anim-l5": DiagramAnimL5,
   "anim-network-full": DiagramAnimNetworkFull,
+  /* RJ-45 Diagrams */
+  "utp-anatomy": DiagramUTPAnatomy,
+  "color-code": DiagramColorCode,
+  "cable-type": DiagramCableType,
+  "crimp-steps": DiagramCrimpSteps,
+  "lan-tester": DiagramLANTester,
 };
 
 function DiagramSlide({ s }: { s: SlideData }) {
@@ -910,7 +1289,7 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
   }
 }
 
-/* ─── Download helper ─── */
+/* --- Download helper --- */
 function downloadSlideJSON(weekData: WeekData) {
   const blob = new Blob([JSON.stringify(weekData, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -921,12 +1300,13 @@ function downloadSlideJSON(weekData: WeekData) {
   URL.revokeObjectURL(url);
 }
 
-/* ═══════════════════════════════════════ */
-/* ─── MAIN APP ─── */
-/* ═══════════════════════════════════════ */
+/* ======================================= */
+/* --- MAIN APP --- */
+/* ======================================= */
 export default function Home() {
-  const [weeks, setWeeks] = useState<WeekMeta[]>([]);
-  const [activeWeek, setActiveWeek] = useState(1);
+  const [weekGroups, setWeekGroups] = useState<WeekGroup[]>([]);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({"Week 1": true});
+  const [activeWeek, setActiveWeek] = useState<string>("1a");
   const [weekData, setWeekData] = useState<WeekData | null>(null);
   const [slideIdx, setSlideIdx] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -934,16 +1314,21 @@ export default function Home() {
   const [fullscreen, setFullscreen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Load week index
   useEffect(() => {
-    fetch("/data/weeks.json").then(r => r.json()).then((d: WeekMeta[]) => { setWeeks(d); setLoading(false); });
+    fetch(`/data/weeks.json?v=${Date.now()}`).then(r => r.json()).then((d: WeekGroup[]) => { 
+      setWeekGroups(d); 
+      setLoading(false); 
+      const exp: Record<string, boolean> = {};
+      d.forEach(g => exp[g.weekLabel] = true);
+      setExpandedGroups(exp);
+    });
   }, []);
 
   // Load week data
   useEffect(() => {
     setLoading(true);
-    const num = String(activeWeek).padStart(2, "0");
-    fetch(`/data/week-${num}.json`).then(r => r.json()).then((d: WeekData) => {
+    const num = activeWeek;
+    fetch(`/data/week-${num}.json?v=${Date.now()}`).then(r => r.json()).then((d: WeekData) => {
       setWeekData(d); setSlideIdx(0); setLoading(false);
     });
   }, [activeWeek]);
@@ -972,14 +1357,8 @@ export default function Home() {
   const currentSlide = weekData?.slides[slideIdx] ?? null;
   const progressPct = totalSlides > 0 ? ((slideIdx + 1) / totalSlides * 100) : 0;
 
-  // Group weeks by section
-  const sections = [
-    { label: "Windows Server", range: [1, 11] },
-    { label: "Linux Server", range: [12, 14] },
-    { label: "Advanced Topics", range: [15, 18] },
-  ];
 
-  /* ─── Fullscreen View ─── */
+  /* --- Fullscreen View --- */
   if (fullscreen && currentSlide) {
     return (
       <div className="fullscreen-overlay">
@@ -1003,7 +1382,7 @@ export default function Home() {
     );
   }
 
-  /* ─── Normal View ─── */
+  /* --- Normal View --- */
   return (
     <div className="app-layout">
       {/* Sidebar */}
@@ -1018,31 +1397,44 @@ export default function Home() {
             </svg>
             <div>
               <div className="logo-title">NOS</div>
-              <div className="logo-sub">Network Operating System</div>
+              <div className="logo-sub">ระบบปฏิบัติการเครื่องแม่ข่าย</div>
             </div>
           </div>
           <button className="icon-btn" onClick={() => setSidebarOpen(false)}><MenuIcon /></button>
         </div>
 
         <div className="week-list">
-          {sections.map(sec => (
-            <div key={sec.label}>
-              <div className="week-section-label">{sec.label}</div>
-              {weeks.filter(w => w.week >= sec.range[0] && w.week <= sec.range[1]).map(w => (
-                <button
-                  key={w.week}
-                  className={`week-item ${w.week === activeWeek ? "active" : ""}`}
-                  onClick={() => w.week === 1 && setActiveWeek(w.week)}
-                  disabled={w.week !== 1}
-                  style={{ opacity: w.week !== 1 ? 0.3 : 1, cursor: w.week !== 1 ? "not-allowed" : "pointer" }}
-                >
-                  <span className="week-num">{w.week}</span>
-                  <span className="week-label">
-                    {w.title}
-                    <span className="week-topic">{w.topic}</span>
-                  </span>
-                </button>
-              ))}
+          {weekGroups.map(group => (
+            <div key={group.weekLabel} className="week-group" style={{ marginBottom: '8px' }}>
+              <div 
+                className="week-group-header" 
+                onClick={() => setExpandedGroups(prev => ({...prev, [group.weekLabel]: !prev[group.weekLabel]}))}
+                style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 15px', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}
+              >
+                <span>{group.weekLabel}</span>
+                <span style={{ fontSize: '10px' }}>{expandedGroups[group.weekLabel] ? '▼' : '▶'}</span>
+              </div>
+              {expandedGroups[group.weekLabel] && <div style={{ paddingTop: '4px' }}>
+                {group.sessions && group.sessions.map(s => (
+                  <button
+                    key={s.id}
+                    className={`week-item ${s.id === activeWeek ? "active" : ""}`}
+                    onClick={() => !s.disabled && setActiveWeek(s.id)}
+                    disabled={s.disabled}
+                    style={{ 
+                      paddingLeft: '24px', 
+                      opacity: s.disabled ? 0.3 : 1, 
+                      cursor: s.disabled ? 'not-allowed' : 'pointer' 
+                    }}
+                  >
+                    <span className="week-num" style={{fontSize: '13px', width: '36px', height: '36px'}}>{s.displayNum}</span>
+                    <span className="week-label">
+                      {s.title}
+                      <span className="week-topic">{s.topic}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>}
             </div>
           ))}
         </div>

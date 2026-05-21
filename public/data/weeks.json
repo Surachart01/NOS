@@ -1,10 +1,19 @@
 [
   {
-    "week": 1,
-    "title": "ระบบปฏิบัติการเครื่องแม่ข่าย (Part 1)",
-    "topic": "Understanding Network Operating System",
-    "hours": 5,
-    "theory": 1,
-    "lab": 4
+    "weekLabel": "สัปดาห์ที่ 1: พื้นฐานและอุปกรณ์เครือข่าย",
+    "sessions": [
+      {
+        "id": "1a",
+        "displayNum": "จ.",
+        "title": "ระบบปฏิบัติการเครื่องแม่ข่าย & OSI Model",
+        "topic": "NOS & OSI 7 Layers"
+      },
+      {
+        "id": "1b",
+        "displayNum": "ศ.",
+        "title": "พื้นฐานสายแลนและการเข้าหัว RJ-45",
+        "topic": "UTP Cable & RJ-45 Crimping"
+      }
+    ]
   }
 ]
