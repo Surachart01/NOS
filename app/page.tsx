@@ -1225,7 +1225,426 @@ function DiagramAnimNetworkFull() {
   );
 }
 
+/* --- Week 2 Custom Interactive Animated Diagrams --- */
+function DiagramTerminalSim() {
+  const [activeTab, setActiveTab] = useState("pwd");
+
+  const terminalData: Record<string, {
+    cmd: string;
+    description: string;
+    explanation: string;
+    output: string[];
+    spacedCmd?: string;
+  }> = {
+    "pwd": {
+      cmd: "pwd",
+      description: "เช็กพิกัดปัจจุบัน (GPS)",
+      explanation: "คำสั่งแสดงเส้นทางโฟลเดอร์ปัจจุบันที่เราทำงานอยู่ (Print Working Directory)",
+      output: [
+        "/home/student"
+      ]
+    },
+    "ls": {
+      cmd: "ls -la",
+      spacedCmd: "ls[เว้นวรรค]-la",
+      description: "ส่องสิ่งของในโฟลเดอร์",
+      explanation: "คำสั่งแสดงรายชื่อไฟล์และโฟลเดอร์ทั้งหมด รวมถึงไฟล์ระบบที่ถูกซ่อน (-la)",
+      output: [
+        "total 24",
+        "drwxr-xr-x 4 student student 4096 May 25 10:50 .",
+        "drwxr-xr-x 3 root    root    4096 May 25 10:45 ..",
+        "-rw-r--r-- 1 student student  220 May 25 10:45 .bash_logout",
+        "-rw-r--r-- 1 student student 3771 May 25 10:45 .bashrc",
+        "drwxr-xr-x 2 student student 4096 May 25 10:50 Documents",
+        "-rw-r--r-- 1 student student    0 May 25 10:50 note.txt"
+      ]
+    },
+    "cd": {
+      cmd: "cd Documents",
+      spacedCmd: "cd[เว้นวรรค]Documents",
+      description: "เดินทางเข้าห้องย่อย",
+      explanation: "คำสั่งเปลี่ยนไดเรกทอรีการทำงาน (Change Directory) ไปยังโฟลเดอร์ปลายทาง Documents",
+      output: [
+        "student@ubuntu-server:~/Documents$ "
+      ]
+    },
+    "cd-back": {
+      cmd: "cd ..",
+      spacedCmd: "cd[เว้นวรรค]..",
+      description: "ปีนถอยหลัง 1 ชั้น",
+      explanation: "คำสั่งถอยหลังกลับไปโฟลเดอร์ระดับบน 1 ระดับ ห้ามพิมพ์ cd.. ชิดกันเด็ดขาด!",
+      output: [
+        "student@ubuntu-server:~$ "
+      ]
+    },
+    "mkdir": {
+      cmd: "mkdir lab-week2",
+      spacedCmd: "mkdir[เว้นวรรค]lab-week2",
+      description: "สร้างโฟลเดอร์ใหม่",
+      explanation: "คำสั่งสร้างโฟลเดอร์ย่อยใหม่ (Make Directory) ห้ามเว้นวรรคในชื่อโฟลเดอร์",
+      output: [
+        "(สร้างโฟลเดอร์ lab-week2 สำเร็จ - ลองสั่ง ls เพื่อตรวจดู)"
+      ]
+    },
+    "touch": {
+      cmd: "touch my-profile.txt",
+      spacedCmd: "touch[เว้นวรรค]my-profile.txt",
+      description: "เสกสร้างไฟล์เปล่า",
+      explanation: "คำสั่งสร้างไฟล์ใหม่ขนาด 0 ไบต์ หรืออัปเดตเวลาการแก้ไขไฟล์",
+      output: [
+        "(สร้างไฟล์ my-profile.txt สำเร็จ - ลองสั่ง ls เพื่อตรวจดู)"
+      ]
+    },
+    "nano": {
+      cmd: "nano profile.txt",
+      spacedCmd: "nano[เว้นวรรค]profile.txt",
+      description: "เขียนและแก้ไขข้อความ",
+      explanation: "คำสั่งเปิดโปรแกรมแก้ไขข้อความในคอนโซล (Text Editor) บันทึกด้วย Ctrl+O และออกด้วย Ctrl+X",
+      output: [
+        "[ GNU nano 7.2              profile.txt              Modified ]",
+        "สมชาย เรียนดี",
+        "รหัสประจำตัวนักศึกษา ปวส.1",
+        "IP Address: 192.168.1.100",
+        "",
+        "^G Help      ^O WriteOut  ^R Read File ^Y Prev Pg   ^K Cut Text  ^C Cur Pos",
+        "^X Exit      ^R Justify   ^W Where Is  ^V Next Pg   ^U Uncut Text^T To Spell"
+      ]
+    },
+    "cat": {
+      cmd: "cat my-profile.txt",
+      spacedCmd: "cat[เว้นวรรค]my-profile.txt",
+      description: "เปิดแสดงข้อความไฟล์",
+      explanation: "คำสั่งแสดงข้อมูลตัวอักษรทั้งหมดที่อยู่ข้างในไฟล์ออกมาทางหน้าจอดำทันที",
+      output: [
+        "สมชาย เรียนดี",
+        "ปวส.1 แผนกเทคโนโลยีสารสนเทศ",
+        "IP Address: 192.168.1.100"
+      ]
+    },
+    "rm": {
+      cmd: "rm my-profile.txt",
+      spacedCmd: "rm[เว้นวรรค]my-profile.txt",
+      description: "ทำลายไฟล์ถาวร",
+      explanation: "คำสั่งลบไฟล์ออกจากระบบถาวรทันที ไม่มีถังขยะพักไฟล์ โปรดใช้ด้วยความระมัดระวัง!",
+      output: [
+        "(ลบไฟล์ my-profile.txt สำเร็จ - ไฟล์สลายตัวถาวร)"
+      ]
+    },
+    "ip-a": {
+      cmd: "ip a",
+      spacedCmd: "ip[เว้นวรรค]a",
+      description: "ตรวจสอบ IP Address",
+      explanation: "คำสั่งตรวจสอบที่อยู่เครือข่ายและสถานะการ์ดแลนทั้งหมดบนเครื่องเซิร์ฟเวอร์",
+      output: [
+        "1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000",
+        "    inet 127.0.0.1/8 scope host lo",
+        "2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000",
+        "    inet 192.168.1.100/24 brd 192.168.1.255 scope global dynamic eth0",
+        "    valid_lft 86321sec preferred_lft 86321sec"
+      ]
+    }
+  };
+
+  const data = terminalData[activeTab] || terminalData.pwd;
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", fontFamily: "Inter, sans-serif" }}>
+      {/* Tab Navigation */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginBottom: "12px", borderBottom: "1px solid var(--border)", paddingBottom: "10px" }}>
+        {Object.entries(terminalData).map(([key, item]) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            style={{
+              padding: "6px 12px",
+              borderRadius: "6px",
+              border: "1px solid " + (activeTab === key ? "var(--accent)" : "var(--border)"),
+              background: activeTab === key ? "var(--accent-dim)" : "var(--bg-surface)",
+              color: activeTab === key ? "var(--accent)" : "var(--text-secondary)",
+              fontSize: "11px",
+              fontWeight: "bold",
+              cursor: "pointer",
+              transition: "all var(--transition)"
+            }}
+          >
+            {item.cmd}
+          </button>
+        ))}
+      </div>
+
+      {/* Description Panel */}
+      <div style={{ marginBottom: "12px", background: "var(--bg-elevated)", padding: "10px 14px", borderRadius: "8px", borderLeft: "4px solid var(--accent)" }}>
+        <div style={{ fontSize: "12px", fontWeight: "bold", color: "var(--text-primary)" }}>{data.description}</div>
+        <div style={{ fontSize: "10px", color: "var(--text-secondary)", marginTop: "4px" }}>{data.explanation}</div>
+      </div>
+
+      {/* Terminal Display */}
+      <div className="mock-terminal" style={{
+        flex: 1,
+        background: "#0f172a",
+        borderRadius: "10px",
+        padding: "16px",
+        boxShadow: "inset 0 2px 8px rgba(0,0,0,0.5)",
+        fontFamily: "'Courier New', Courier, monospace",
+        color: "#e2e8f0",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-start",
+        textAlign: "left",
+        overflowY: "auto",
+        minHeight: "180px"
+      }}>
+        {/* Terminal Header */}
+        <div style={{ display: "flex", gap: "6px", marginBottom: "12px", opacity: 0.6 }}>
+          <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#ef4444" }}></span>
+          <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#eab308" }}></span>
+          <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "#22c55e" }}></span>
+          <span style={{ color: "#94a3b8", fontSize: "10px", marginLeft: "10px", fontFamily: "Inter, sans-serif" }}>Ubuntu Terminal (Simulated)</span>
+        </div>
+
+        {/* Command Line Prompt */}
+        <div style={{ fontSize: "12px", lineHeight: "1.5" }}>
+          <span style={{ color: "#4ade80", fontWeight: "bold" }}>student@ubuntu-server</span>
+          <span style={{ color: "#e2e8f0" }}>:</span>
+          <span style={{ color: "#38bdf8", fontWeight: "bold" }}>~</span>
+          <span style={{ color: "#e2e8f0" }}>$ </span>
+          
+          {/* Main command with formatting */}
+          {data.spacedCmd ? (
+            <span>
+              {data.spacedCmd.split("[เว้นวรรค]").map((part, index, arr) => (
+                <span key={index}>
+                  <span style={{ color: index === 0 ? "#f472b6" : "#60a5fa", fontWeight: "bold" }}>{part}</span>
+                  {index < arr.length - 1 && (
+                    <span style={{
+                      display: "inline-block",
+                      background: "rgba(234, 179, 8, 0.25)",
+                      border: "1px dashed #eab308",
+                      color: "#fbbf24",
+                      fontSize: "9px",
+                      padding: "0px 4px",
+                      borderRadius: "3px",
+                      margin: "0px 4px",
+                      fontFamily: "Inter, sans-serif",
+                      fontWeight: "bold",
+                      verticalAlign: "middle"
+                    }}>[เว้นวรรค]</span>
+                  )}
+                </span>
+              ))}
+            </span>
+          ) : (
+            <span style={{ color: "#f472b6", fontWeight: "bold" }}>{data.cmd}</span>
+          )}
+          <span className="terminal-cursor" style={{
+            display: "inline-block",
+            width: "7px",
+            height: "14px",
+            background: "#38bdf8",
+            marginLeft: "4px",
+            verticalAlign: "middle"
+          }}></span>
+        </div>
+
+        {/* Terminal Output */}
+        <div style={{ marginTop: "8px", color: "#94a3b8", fontSize: "11px", lineHeight: "1.4", whiteSpace: "pre-wrap" }}>
+          {data.output.map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* --- Week 2 Custom Interactive Animated Diagrams --- */
+function DiagramInstallationSteps() {
+
+  const textStyle = { fill: "var(--text-primary)", fontSize: 10, fontFamily: "Inter, sans-serif", fontWeight: "bold" };
+  const descStyle = { fill: "var(--text-secondary)", fontSize: 8, fontFamily: "Inter, sans-serif" };
+  const nodeBg = { fill: "var(--accent-dim)", stroke: "var(--accent)", strokeWidth: 2, rx: 6 };
+
+  const steps = [
+    { num: "1", title: "สร้างเครื่องเสมือน (VM)", sub: "RAM 2GB / HDD 20GB", x: 10, y: 30, w: 160, h: 45 },
+    { num: "2", title: "เปิดเครื่อง & เลือกภาษา", sub: "เมาส์ใช้ไม่ได้ / คีย์บอร์ดเท่านั้น", x: 190, y: 30, w: 160, h: 45 },
+    { num: "3", title: "ตั้งค่าการสื่อสาร (DHCP)", sub: "รับ IP อัตโนมัติ", x: 370, y: 30, w: 160, h: 45 },
+    { num: "4", title: "แบ่งพื้นที่ฮาร์ดดิสก์", sub: "Use entire disk (20GB)", x: 370, y: 110, w: 160, h: 45 },
+    { num: "5", title: "ตั้งชื่อผู้ใช้ & รหัสผ่าน", sub: "Username / Password ห้ามลืม!", x: 190, y: 110, w: 160, h: 45 },
+    { num: "6", title: "เสร็จสิ้นและรีบูตระบบ", sub: "Reboot Now / เอาแผ่น ISO ออก", x: 10, y: 110, w: 160, h: 45 },
+  ];
+
+  return (
+    <svg viewBox="0 0 560 200" style={{ width: "100%", height: "100%" }}>
+      {/* Step connection paths */}
+      {/* Step 1 to 2 */}
+      <line x1="170" y1="52.5" x2="190" y2="52.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3 3" />
+      <polygon points="190,49.5 195,52.5 190,55.5" fill="var(--accent)" />
+
+      {/* Step 2 to 3 */}
+      <line x1="350" y1="52.5" x2="370" y2="52.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3 3" />
+      <polygon points="370,49.5 375,52.5 370,55.5" fill="var(--accent)" />
+
+      {/* Step 3 to 4 */}
+      <path d="M 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5" stroke="var(--accent)" strokeWidth="2" fill="none" strokeDasharray="3 3" />
+      <polygon points="530,129.5 525,132.5 530,135.5" fill="var(--accent)" />
+
+      {/* Step 4 to 5 */}
+      <line x1="370" y1="132.5" x2="350" y2="132.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3 3" />
+      <polygon points="350,129.5 345,132.5 350,135.5" fill="var(--accent)" />
+
+      {/* Step 5 to 6 */}
+      <line x1="190" y1="132.5" x2="170" y2="132.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3 3" />
+      <polygon points="170,129.5 165,132.5 170,135.5" fill="var(--accent)" />
+
+      {steps.map((st, i) => (
+        <g key={i}>
+          <rect x={st.x} y={st.y} width={st.w} height={st.h} {...nodeBg} />
+          <circle cx={st.x + 15} cy={st.y + 22} r="10" fill="var(--accent)" />
+          <text x={st.x + 15} y={st.y + 25} fill="var(--bg-surface)" fontSize={9} fontFamily="Inter, sans-serif" fontWeight="bold" textAnchor="middle">{st.num}</text>
+          <text x={st.x + 32} y={st.y + 18} {...textStyle} textAnchor="start">{st.title}</text>
+          <text x={st.x + 32} y={st.y + 34} {...descStyle} textAnchor="start">{st.sub}</text>
+        </g>
+      ))}
+
+      {/* Animated Flow Packets moving along the steps path */}
+      <circle cx="0" cy="0" r="3.5" fill="var(--green)" opacity="0.9">
+        <animateMotion 
+          path="M 90 52.5 L 190 52.5 L 370 52.5 L 545 52.5 L 545 132.5 L 450 132.5 L 270 132.5 L 90 132.5" 
+          dur="8s" 
+          repeatCount="indefinite" 
+        />
+      </circle>
+
+      <text x="280" y="185" textAnchor="middle" fill="var(--text-muted)" fontSize={10} fontFamily="Inter, sans-serif">
+        แผนผังกระบวนการติดตั้ง Ubuntu Server 26.04 LTS ทั้งหมด 6 ขั้นตอนหลักแบบเป็นลำดับ
+      </text>
+    </svg>
+  );
+}
+
+function DiagramLinuxDir() {
+
+  const lineStyle = { stroke: "var(--accent)", strokeWidth: 2, fill: "none" };
+  const textStyle = { fill: "var(--text-primary)", fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: "bold" };
+  const descStyle = { fill: "var(--text-secondary)", fontSize: 10, fontFamily: "Inter, sans-serif" };
+  const nodeBg = { fill: "var(--bg-elevated)", stroke: "var(--accent)", strokeWidth: 1.5, rx: 6 };
+
+  return (
+    <svg viewBox="0 0 560 200" style={{ width: "100%", height: "100%" }}>
+      {/* Root Node (/) */}
+      <rect x="230" y="15" width="100" height="36" {...nodeBg} strokeWidth={2} />
+      <text x="280" y="37" {...textStyle} textAnchor="middle" fontSize={15} fill="var(--accent)">📁 / (Root)</text>
+
+      {/* Main branches */}
+      {/* Root to bin */}
+      <path d="M 280 51 L 280 75 L 80 75 L 80 110" {...lineStyle} />
+      {/* Root to etc */}
+      <path d="M 280 51 L 280 75 L 210 75 L 210 110" {...lineStyle} />
+      {/* Root to home */}
+      <path d="M 280 51 L 280 75 L 350 75 L 350 110" {...lineStyle} />
+      {/* Root to var */}
+      <path d="M 280 51 L 280 75 L 480 75 L 480 110" {...lineStyle} />
+
+      {/* /bin node */}
+      <rect x="30" y="110" width="100" height="45" {...nodeBg} />
+      <text x="80" y="128" {...textStyle} textAnchor="middle">📁 /bin</text>
+      <text x="80" y="142" {...descStyle} textAnchor="middle">(คำสั่งระบบ / CLI)</text>
+
+      {/* /etc node */}
+      <rect x="160" y="110" width="100" height="45" {...nodeBg} />
+      <text x="210" y="128" {...textStyle} textAnchor="middle">📁 /etc</text>
+      <text x="210" y="142" {...descStyle} textAnchor="middle">(ตั้งค่าระบบ / Config)</text>
+
+      {/* /home node */}
+      <rect x="300" y="110" width="100" height="45" {...nodeBg} />
+      <text x="350" y="128" {...textStyle} textAnchor="middle">📁 /home</text>
+      <text x="350" y="142" {...descStyle} textAnchor="middle">(ห้องพักนักศึกษา)</text>
+
+      {/* /var node */}
+      <rect x="430" y="110" width="100" height="45" {...nodeBg} />
+      <text x="480" y="128" {...textStyle} textAnchor="middle">📁 /var</text>
+      <text x="480" y="142" {...descStyle} textAnchor="middle">(ข้อมูลแปรผัน / Log)</text>
+
+      {/* Animated Flow Packets from Root (/) down the paths */}
+      <circle cx="280" cy="51" r="4" fill="var(--accent)" opacity="0.8">
+        <animateMotion 
+          path="M 280 51 L 280 75 L 80 75 L 80 110" 
+          dur="3s" 
+          repeatCount="indefinite" 
+        />
+      </circle>
+      <circle cx="280" cy="51" r="4" fill="var(--accent)" opacity="0.8" begin="0.7s">
+        <animateMotion 
+          path="M 280 51 L 280 75 L 210 75 L 210 110" 
+          dur="3s" 
+          repeatCount="indefinite" 
+        />
+      </circle>
+      <circle cx="280" cy="51" r="4" fill="var(--accent)" opacity="0.8" begin="1.4s">
+        <animateMotion 
+          path="M 280 51 L 280 75 L 350 75 L 350 110" 
+          dur="3s" 
+          repeatCount="indefinite" 
+        />
+      </circle>
+      <circle cx="280" cy="51" r="4" fill="var(--accent)" opacity="0.8" begin="2.1s">
+        <animateMotion 
+          path="M 280 51 L 280 75 L 480 75 L 480 110" 
+          dur="3s" 
+          repeatCount="indefinite" 
+        />
+      </circle>
+
+      <text x="280" y="185" textAnchor="middle" fill="var(--text-muted)" fontSize={10} fontFamily="Inter, sans-serif">
+        ลินุกซ์เริ่มต้นจากจุดเดียวคือ Root (/) แตกแขนงออกเป็นห้องย่อยๆ เสมือนรากต้นไม้
+      </text>
+    </svg>
+  );
+}
+
+function DiagramCliConcept() {
+  const textStyle = { fill: "var(--text-primary)", fontSize: 13, fontFamily: "Inter, sans-serif", fontWeight: "bold" };
+  const descStyle = { fill: "var(--text-secondary)", fontSize: 11, fontFamily: "Inter, sans-serif" };
+
+  return (
+    <svg viewBox="0 0 560 200" style={{ width: "100%", height: "100%" }}>
+      {/* Dissected Blocks */}
+      {/* 1. Command Block (ls) */}
+      <rect x="60" y="50" width="100" height="50" rx="8" fill="var(--accent-dim)" stroke="var(--accent)" strokeWidth="2" />
+      <text x="110" y="80" {...textStyle} textAnchor="middle" fontSize={20} fill="var(--accent)">ls</text>
+      <text x="110" y="125" {...textStyle} textAnchor="middle" fontSize={12}>1. Command</text>
+      <text x="110" y="145" {...descStyle} textAnchor="middle">(สั่งให้ทำอะไร)</text>
+
+      {/* Operator Plus */}
+      <text x="190" y="82" fontSize={24} fill="var(--text-muted)" textAnchor="middle">+</text>
+
+      {/* 2. Option Block (-la) */}
+      <rect x="220" y="50" width="110" height="50" rx="8" fill="rgba(22,163,74,.08)" stroke="var(--green)" strokeWidth="2" />
+      <text x="275" y="80" {...textStyle} textAnchor="middle" fontSize={20} fill="var(--green)">-la</text>
+      <text x="275" y="125" {...textStyle} textAnchor="middle" fontSize={12}>2. Option</text>
+      <text x="275" y="145" {...descStyle} textAnchor="middle">(ระบุเงื่อนไข/ตัวเลือก)</text>
+
+      {/* Operator Plus */}
+      <text x="360" y="82" fontSize={24} fill="var(--text-muted)" textAnchor="middle">+</text>
+
+      {/* 3. Argument Block (/var/log) */}
+      <rect x="390" y="50" width="120" height="50" rx="8" fill="rgba(220,38,38,.08)" stroke="var(--red)" strokeWidth="2" />
+      <text x="450" y="80" {...textStyle} textAnchor="middle" fontSize={16} fill="var(--red)">/var/log</text>
+      <text x="450" y="125" {...textStyle} textAnchor="middle" fontSize={12}>3. Argument</text>
+      <text x="450" y="145" {...descStyle} textAnchor="middle">(ระบุเป้าหมาย/ปลายทาง)</text>
+
+      <text x="280" y="185" textAnchor="middle" fill="var(--text-muted)" fontSize={10} fontFamily="Inter, sans-serif">
+        โครงสร้าง: คำสั่งหลัก [ls] ➔ ส่งออปชันเงื่อนไข [-la] ➔ ทำงานบนเป้าหมาย [/var/log]
+      </text>
+    </svg>
+  );
+}
+
 const DIAGRAMS: Record<string, React.FC> = {
+  "terminal-sim": DiagramTerminalSim,
+  "install-steps": DiagramInstallationSteps,
+  "linux-dir": DiagramLinuxDir,
+  "cli-concept": DiagramCliConcept,
   "client-server": DiagramClientServer,
   "dora-process": DiagramDORA,
   "dns-hierarchy": DiagramDNS,

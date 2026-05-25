@@ -15,5 +15,22 @@
         "topic": "UTP Cable & RJ-45 Crimping"
       }
     ]
+  },
+  {
+    "weekLabel": "สัปดาห์ที่ 2: ระบบปฏิบัติการลินุกซ์และการใช้คอนโซลพื้นฐาน",
+    "sessions": [
+      {
+        "id": "2a",
+        "displayNum": "อ.",
+        "title": "ทำความรู้จัก ลินุกซ์ (Linux) เซิร์ฟเวอร์ (Server) และการติดตั้งระบบ",
+        "topic": "Linux OS & Installation"
+      },
+      {
+        "id": "2b",
+        "displayNum": "ศ.",
+        "title": "10 คำสั่งคอนโซล (Console) พื้นฐานสำหรับผู้เริ่มต้น",
+        "topic": "Linux CLI & Basic Commands"
+      }
+    ]
   }
 ]

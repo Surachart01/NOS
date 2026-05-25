@@ -2,19 +2,19 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg-base: #0b0d12;
-  --bg-surface: #12151d;
-  --bg-elevated: #191d29;
-  --bg-hover: #1e2333;
-  --accent: #22d3ee;
-  --accent-dim: rgba(34,211,238,.1);
-  --accent-glow: rgba(34,211,238,.25);
-  --green: #22c55e;
-  --red: #f87171;
-  --text-primary: #e8eaf0;
-  --text-secondary: #8892a4;
-  --text-muted: #4a5568;
-  --border: rgba(255,255,255,.06);
+  --bg-base: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f8fafc;
+  --bg-hover: #f1f5f9;
+  --accent: #0284c7;
+  --accent-dim: rgba(2,132,199,.08);
+  --accent-glow: rgba(2,132,199,.15);
+  --green: #16a34a;
+  --red: #dc2626;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --border: rgba(15,23,42,.08);
   --sidebar-w: 300px;
   --radius: 10px;
   --transition: .2s cubic-bezier(.4,0,.2,1);
@@ -131,7 +131,7 @@ html, body { height: 100%; background: var(--bg-base); color: var(--text-primary
 
 /* Cover */
 .slide-cover {
-  background: linear-gradient(135deg, #0b0d12 0%, #111827 50%, #0c1a2e 100%);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
   align-items: flex-start; justify-content: flex-end; padding: 7%;
 }
 .cover-tag {
@@ -284,3 +284,52 @@ html, body { height: 100%; background: var(--bg-base); color: var(--text-primary
   .mobile-toggle { display: flex; }
   .two-col-grid, .lab-grid { grid-template-columns: 1fr; }
 }
+
+/* ===== SMART SVG TEXT & SHAPE COLOR OVERRIDES FOR LIGHT THEME ===== */
+svg text { fill: var(--text-primary) !important; }
+svg text[fill="#e8eaf0"] { fill: var(--text-primary) !important; }
+svg text[fill="#fff"], svg text[fill="#ffffff"] { fill: var(--bg-surface) !important; }
+svg rect[fill="#191d29"], svg rect[fill="#12151d"], svg circle[fill="#12151d"], svg ellipse[fill="#12151d"], svg polygon[fill="#191d29"] {
+  fill: var(--bg-elevated) !important;
+  stroke: var(--border) !important;
+}
+svg rect[stroke="#22d3ee"] { stroke: var(--accent) !important; }
+svg circle[stroke="#3b82f6"] { stroke: var(--accent) !important; }
+svg circle[stroke="#06b6d4"] { stroke: var(--accent) !important; }
+svg rect[stroke="#06b6d4"] { stroke: var(--accent) !important; }
+svg line[stroke="#22d3ee"] { stroke: var(--accent) !important; }
+svg line[stroke="#06b6d4"] { stroke: var(--accent) !important; }
+svg polygon[fill="#22d3ee"] { fill: var(--accent) !important; }
+svg polygon[fill="#06b6d4"] { fill: var(--accent) !important; }
+svg circle[fill="#22d3ee"] { fill: var(--accent) !important; }
+svg circle[fill="#06b6d4"] { fill: var(--accent) !important; }
+svg circle[fill="#10b981"] { fill: var(--green) !important; }
+svg line[stroke="#22c55e"] { stroke: var(--green) !important; }
+svg polygon[fill="#22c55e"] { fill: var(--green) !important; }
+svg text[fill="#22c55e"] { fill: var(--green) !important; }
+svg text[fill="#f59e0b"] { fill: var(--accent) !important; }
+svg rect[stroke="#f59e0b"] { stroke: var(--accent) !important; }
+svg circle[stroke="#f59e0b"] { stroke: var(--accent) !important; }
+svg path[stroke="#10b981"] { stroke: var(--green) !important; }
+svg path[stroke="#a78bfa"] { stroke: var(--accent) !important; }
+svg rect[fill="#1e293b"] { fill: var(--bg-elevated) !important; }
+svg rect[stroke="#f43f5e"] { stroke: var(--red) !important; }
+svg text[fill="#f43f5e"] { fill: var(--red) !important; }
+svg rect[stroke="#ec4899"] { stroke: var(--accent) !important; }
+svg text[fill="#ec4899"] { fill: var(--accent) !important; }
+svg rect[fill="#ec4899"] { fill: var(--accent) !important; }
+svg rect[fill="#8b5cf6"] { fill: var(--accent) !important; }
+svg rect[stroke="#8b5cf6"] { stroke: var(--accent) !important; }
+svg line[stroke="#8b5cf6"] { stroke: var(--accent) !important; }
+svg rect[fill="#0c1a2e"] { fill: var(--bg-elevated) !important; }
+svg rect[fill="#1a1200"] { fill: var(--bg-elevated) !important; }
+svg rect[fill="#f43f5e"] { fill: var(--red) !important; }
+
+/* Terminal Simulation Animation */
+@keyframes terminal-blink {
+  50% { opacity: 0; }
+}
+.terminal-cursor {
+  animation: terminal-blink 1s step-end infinite !important;
+}
+
