@@ -1228,6 +1228,8 @@ function DiagramAnimNetworkFull() {
 /* --- Week 2 Custom Interactive Animated Diagrams --- */
 function DiagramTerminalSim() {
   const [activeTab, setActiveTab] = useState("pwd");
+  const [typedText, setTypedText] = useState("");
+  const [isTypingComplete, setIsTypingComplete] = useState(false);
 
   const terminalData: Record<string, {
     cmd: string;
@@ -1347,6 +1349,28 @@ function DiagramTerminalSim() {
 
   const data = terminalData[activeTab] || terminalData.pwd;
 
+  useEffect(() => {
+    setTypedText("");
+    setIsTypingComplete(false);
+
+    const fullText = data.cmd;
+    let currentText = "";
+    let index = 0;
+
+    const interval = setInterval(() => {
+      if (index < fullText.length) {
+        currentText += fullText[index];
+        setTypedText(currentText);
+        index++;
+      } else {
+        clearInterval(interval);
+        setIsTypingComplete(true);
+      }
+    }, 45); // 45ms per character typing speed
+
+    return () => clearInterval(interval);
+  }, [activeTab]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", fontFamily: "Inter, sans-serif" }}>
       {/* Tab Navigation */}
@@ -1410,7 +1434,9 @@ function DiagramTerminalSim() {
           <span style={{ color: "#e2e8f0" }}>$ </span>
           
           {/* Main command with formatting */}
-          {data.spacedCmd ? (
+          {!isTypingComplete ? (
+            <span style={{ color: "#f472b6", fontWeight: "bold" }}>{typedText}</span>
+          ) : data.spacedCmd ? (
             <span>
               {data.spacedCmd.split("[เว้นวรรค]").map((part, index, arr) => (
                 <span key={index}>
@@ -1447,7 +1473,16 @@ function DiagramTerminalSim() {
         </div>
 
         {/* Terminal Output */}
-        <div style={{ marginTop: "8px", color: "#94a3b8", fontSize: "11px", lineHeight: "1.4", whiteSpace: "pre-wrap" }}>
+        <div style={{
+          marginTop: "8px",
+          color: "#94a3b8",
+          fontSize: "11px",
+          lineHeight: "1.4",
+          whiteSpace: "pre-wrap",
+          opacity: isTypingComplete ? 1 : 0,
+          transform: isTypingComplete ? "translateY(0)" : "translateY(5px)",
+          transition: "opacity 0.3s ease, transform 0.3s ease"
+        }}>
           {data.output.map((line, i) => (
             <div key={i}>{line}</div>
           ))}
@@ -1459,7 +1494,6 @@ function DiagramTerminalSim() {
 
 /* --- Week 2 Custom Interactive Animated Diagrams --- */
 function DiagramInstallationSteps() {
-
   const textStyle = { fill: "var(--text-primary)", fontSize: 10, fontFamily: "Inter, sans-serif", fontWeight: "bold" };
   const descStyle = { fill: "var(--text-secondary)", fontSize: 8, fontFamily: "Inter, sans-serif" };
   const nodeBg = { fill: "var(--accent-dim)", stroke: "var(--accent)", strokeWidth: 2, rx: 6 };
@@ -1475,29 +1509,45 @@ function DiagramInstallationSteps() {
 
   return (
     <svg viewBox="0 0 560 200" style={{ width: "100%", height: "100%" }}>
-      {/* Step connection paths */}
+      {/* Step connection paths with dashoffset animation flowing forward/backward */}
       {/* Step 1 to 2 */}
-      <line x1="170" y1="52.5" x2="190" y2="52.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3 3" />
+      <line x1="170" y1="52.5" x2="190" y2="52.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 4">
+        <animate attributeName="stroke-dashoffset" values="0;-8" dur="1s" repeatCount="indefinite" />
+      </line>
       <polygon points="190,49.5 195,52.5 190,55.5" fill="var(--accent)" />
 
       {/* Step 2 to 3 */}
-      <line x1="350" y1="52.5" x2="370" y2="52.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3 3" />
+      <line x1="350" y1="52.5" x2="370" y2="52.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 4">
+        <animate attributeName="stroke-dashoffset" values="0;-8" dur="1s" repeatCount="indefinite" />
+      </line>
       <polygon points="370,49.5 375,52.5 370,55.5" fill="var(--accent)" />
 
       {/* Step 3 to 4 */}
-      <path d="M 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5" stroke="var(--accent)" strokeWidth="2" fill="none" strokeDasharray="3 3" />
+      <path d="M 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5" stroke="var(--accent)" strokeWidth="2" fill="none" strokeDasharray="4 4">
+        <animate attributeName="stroke-dashoffset" values="0;-8" dur="1s" repeatCount="indefinite" />
+      </path>
       <polygon points="530,129.5 525,132.5 530,135.5" fill="var(--accent)" />
 
       {/* Step 4 to 5 */}
-      <line x1="370" y1="132.5" x2="350" y2="132.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3 3" />
+      <line x1="370" y1="132.5" x2="350" y2="132.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 4">
+        <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite" />
+      </line>
       <polygon points="350,129.5 345,132.5 350,135.5" fill="var(--accent)" />
 
       {/* Step 5 to 6 */}
-      <line x1="190" y1="132.5" x2="170" y2="132.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="3 3" />
+      <line x1="190" y1="132.5" x2="170" y2="132.5" stroke="var(--accent)" strokeWidth="2" strokeDasharray="4 4">
+        <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite" />
+      </line>
       <polygon points="170,129.5 165,132.5 170,135.5" fill="var(--accent)" />
 
       {steps.map((st, i) => (
         <g key={i}>
+          {/* Radar halo waves */}
+          <circle cx={st.x + 15} cy={st.y + 22} r="10" fill="none" stroke="var(--accent)" strokeWidth="1.5">
+            <animate attributeName="r" values="10;16;10" dur="2s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
+            <animate attributeName="opacity" values="0.8;0;0.8" dur="2s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
+          </circle>
+
           <rect x={st.x} y={st.y} width={st.w} height={st.h} {...nodeBg} />
           <circle cx={st.x + 15} cy={st.y + 22} r="10" fill="var(--accent)" />
           <text x={st.x + 15} y={st.y + 25} fill="var(--bg-surface)" fontSize={9} fontFamily="Inter, sans-serif" fontWeight="bold" textAnchor="middle">{st.num}</text>
@@ -1506,12 +1556,29 @@ function DiagramInstallationSteps() {
         </g>
       ))}
 
-      {/* Animated Flow Packets moving along the steps path */}
-      <circle cx="0" cy="0" r="3.5" fill="var(--green)" opacity="0.9">
+      {/* Staggered Animated Flow Packets moving along the exact steps path */}
+      <circle cx="0" cy="0" r="4" fill="var(--green)" opacity="0.9">
         <animateMotion 
-          path="M 90 52.5 L 190 52.5 L 370 52.5 L 545 52.5 L 545 132.5 L 450 132.5 L 270 132.5 L 90 132.5" 
-          dur="8s" 
+          path="M 90 52.5 L 270 52.5 L 450 52.5 L 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5 L 450 132.5 L 270 132.5 L 90 132.5 Z" 
+          dur="6s" 
           repeatCount="indefinite" 
+          begin="0s"
+        />
+      </circle>
+      <circle cx="0" cy="0" r="4" fill="var(--green)" opacity="0.6">
+        <animateMotion 
+          path="M 90 52.5 L 270 52.5 L 450 52.5 L 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5 L 450 132.5 L 270 132.5 L 90 132.5 Z" 
+          dur="6s" 
+          repeatCount="indefinite" 
+          begin="2s"
+        />
+      </circle>
+      <circle cx="0" cy="0" r="4" fill="var(--green)" opacity="0.3">
+        <animateMotion 
+          path="M 90 52.5 L 270 52.5 L 450 52.5 L 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5 L 450 132.5 L 270 132.5 L 90 132.5 Z" 
+          dur="6s" 
+          repeatCount="indefinite" 
+          begin="4s"
         />
       </circle>
 
@@ -1523,7 +1590,6 @@ function DiagramInstallationSteps() {
 }
 
 function DiagramLinuxDir() {
-
   const lineStyle = { stroke: "var(--accent)", strokeWidth: 2, fill: "none" };
   const textStyle = { fill: "var(--text-primary)", fontSize: 12, fontFamily: "Inter, sans-serif", fontWeight: "bold" };
   const descStyle = { fill: "var(--text-secondary)", fontSize: 10, fontFamily: "Inter, sans-serif" };
@@ -1535,15 +1601,23 @@ function DiagramLinuxDir() {
       <rect x="230" y="15" width="100" height="36" {...nodeBg} strokeWidth={2} />
       <text x="280" y="37" {...textStyle} textAnchor="middle" fontSize={15} fill="var(--accent)">📁 / (Root)</text>
 
-      {/* Main branches */}
+      {/* Main branches with glowing animated electricity flow */}
       {/* Root to bin */}
-      <path d="M 280 51 L 280 75 L 80 75 L 80 110" {...lineStyle} />
+      <path d="M 280 51 L 280 75 L 80 75 L 80 110" {...lineStyle} strokeDasharray="4 4">
+        <animate attributeName="stroke-dashoffset" values="0;-8" dur="1.2s" repeatCount="indefinite" />
+      </path>
       {/* Root to etc */}
-      <path d="M 280 51 L 280 75 L 210 75 L 210 110" {...lineStyle} />
+      <path d="M 280 51 L 280 75 L 210 75 L 210 110" {...lineStyle} strokeDasharray="4 4">
+        <animate attributeName="stroke-dashoffset" values="0;-8" dur="1.2s" repeatCount="indefinite" />
+      </path>
       {/* Root to home */}
-      <path d="M 280 51 L 280 75 L 350 75 L 350 110" {...lineStyle} />
+      <path d="M 280 51 L 280 75 L 350 75 L 350 110" {...lineStyle} strokeDasharray="4 4">
+        <animate attributeName="stroke-dashoffset" values="0;-8" dur="1.2s" repeatCount="indefinite" />
+      </path>
       {/* Root to var */}
-      <path d="M 280 51 L 280 75 L 480 75 L 480 110" {...lineStyle} />
+      <path d="M 280 51 L 280 75 L 480 75 L 480 110" {...lineStyle} strokeDasharray="4 4">
+        <animate attributeName="stroke-dashoffset" values="0;-8" dur="1.2s" repeatCount="indefinite" />
+      </path>
 
       {/* /bin node */}
       <rect x="30" y="110" width="100" height="45" {...nodeBg} />
@@ -1565,33 +1639,37 @@ function DiagramLinuxDir() {
       <text x="480" y="128" {...textStyle} textAnchor="middle">📁 /var</text>
       <text x="480" y="142" {...descStyle} textAnchor="middle">(ข้อมูลแปรผัน / Log)</text>
 
-      {/* Animated Flow Packets from Root (/) down the paths */}
-      <circle cx="280" cy="51" r="4" fill="var(--accent)" opacity="0.8">
+      {/* Animated Flow Packets from Root (/) down the paths with staggered delay offsets */}
+      <circle cx="0" cy="0" r="4.5" fill="var(--green)" opacity="0.9">
         <animateMotion 
           path="M 280 51 L 280 75 L 80 75 L 80 110" 
-          dur="3s" 
+          dur="3.2s" 
           repeatCount="indefinite" 
+          begin="0s"
         />
       </circle>
-      <circle cx="280" cy="51" r="4" fill="var(--accent)" opacity="0.8" begin="0.7s">
+      <circle cx="0" cy="0" r="4.5" fill="var(--green)" opacity="0.9">
         <animateMotion 
           path="M 280 51 L 280 75 L 210 75 L 210 110" 
-          dur="3s" 
+          dur="3.2s" 
           repeatCount="indefinite" 
+          begin="0.8s"
         />
       </circle>
-      <circle cx="280" cy="51" r="4" fill="var(--accent)" opacity="0.8" begin="1.4s">
+      <circle cx="0" cy="0" r="4.5" fill="var(--green)" opacity="0.9">
         <animateMotion 
           path="M 280 51 L 280 75 L 350 75 L 350 110" 
-          dur="3s" 
+          dur="3.2s" 
           repeatCount="indefinite" 
+          begin="1.6s"
         />
       </circle>
-      <circle cx="280" cy="51" r="4" fill="var(--accent)" opacity="0.8" begin="2.1s">
+      <circle cx="0" cy="0" r="4.5" fill="var(--green)" opacity="0.9">
         <animateMotion 
           path="M 280 51 L 280 75 L 480 75 L 480 110" 
-          dur="3s" 
+          dur="3.2s" 
           repeatCount="indefinite" 
+          begin="2.4s"
         />
       </circle>
 
