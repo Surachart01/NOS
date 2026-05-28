@@ -28,8 +28,8 @@
       {
         "id": "2b",
         "displayNum": "ศ.",
-        "title": "10 คำสั่งคอนโซล (Console) พื้นฐานสำหรับผู้เริ่มต้น",
-        "topic": "Linux CLI & Basic Commands"
+        "title": "ปฏิบัติการกำหนดค่าระบบหลังติดตั้งและการใช้งานคำสั่งควบคุมที่จำเป็น",
+        "topic": "System Post-Installation & Basic Commands"
       }
     ]
   }

@@ -52,8 +52,28 @@ function ContentSlide({ s }: { s: SlideData }) {
       <h2>{s.title}</h2>
       {s.body && <p style={{ fontSize: 'clamp(20px,2.5vw,32px)', color: 'var(--text-secondary)', marginBottom: 20 }}>{s.body}</p>}
       <div style={{ display: 'flex', gap: '30px', flex: 1 }}>
-        <div style={{ flex: s.image ? 1 : 'auto' }}>
-          <ul>{s.items?.map((item, i) => <li key={i}>{item}</li>)}</ul>
+        <div style={{ flex: s.image ? 1 : 'auto', width: '100%' }}>
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            {s.items?.map((item, i) => {
+              const isTerminal = item.trim().startsWith("student@ubuntu-server") || item.trim().startsWith("$") || item.trim().startsWith("#");
+              if (isTerminal) {
+                return (
+                  <li key={i} className="terminal-prompt-box" style={{ listStyleType: 'none', paddingLeft: 0, width: '100%' }}>
+                    <div className="terminal-header">
+                      <span className="terminal-dot red"></span>
+                      <span className="terminal-dot yellow"></span>
+                      <span className="terminal-dot green"></span>
+                      <span className="terminal-title">Terminal</span>
+                    </div>
+                    <pre className="terminal-body">
+                      <code>{item}</code>
+                    </pre>
+                  </li>
+                );
+              }
+              return <li key={i}>{item}</li>;
+            })}
+          </ul>
         </div>
         {s.image && (
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1773,6 +1793,140 @@ function DiagramSlide({ s }: { s: SlideData }) {
   );
 }
 
+function KahootSlide({ s }: { s: SlideData }) {
+  const [downloading, setDownloading] = useState(false);
+  const questions = [
+    { q: "คำสั่งใดใช้แสดงตำแหน่งโฟลเดอร์ปัจจุบันที่กำลังทำงานอยู่?", a: "pwd", options: ["ls", "cd", "pwd", "mkdir"] },
+    { q: "คำสั่ง ls -la ทำงานอย่างไร?", a: "แสดงไฟล์ทั้งหมดรวมไฟล์ซ่อน", options: ["ลบไฟล์ทั้งหมด", "แสดงไฟล์ทั้งหมดรวมไฟล์ซ่อน", "สร้างโฟลเดอร์ใหม่", "เปลี่ยนตำแหน่งทำงาน"] },
+    { q: "ข้อใดเป็นวิธีถอยกลับขึ้น 1 ระดับโฟลเดอร์ที่ถูกต้อง?", a: "cd ..", options: ["cd..", "cd ..", "cd/", "cd ~"] },
+    { q: "หากพิมพ์ mkdir project homework จะเกิดอะไรขึ้น?", a: "สร้าง 2 โฟลเดอร์แยกกัน", options: ["สร้าง 1 โฟลเดอร์ชื่อ project homework", "ระบบฟ้อง error", "สร้าง 2 โฟลเดอร์แยกกัน", "ลบโฟลเดอร์เดิม"] },
+    { q: "คำสั่ง touch สร้างอะไร?", a: "ไฟล์เปล่าขนาด 0 ไบต์", options: ["โฟลเดอร์เปล่า", "ไฟล์เปล่าขนาด 0 ไบต์", "สำเนาไฟล์", "ลิงก์ไฟล์"] },
+    { q: "ปุ่มลัดใดใช้บันทึกไฟล์ใน nano?", a: "Ctrl+O แล้ว Enter", options: ["Ctrl+S แล้ว Enter", "Ctrl+O แล้ว Enter", "Ctrl+X แล้ว Enter", "Ctrl+C แล้ว Enter"] },
+    { q: "คำสั่งใดใช้เปิดอ่านเนื้อหาในไฟล์โดยไม่เข้าสู่โหมดแก้ไข?", a: "cat", options: ["nano", "vim", "cat", "touch"] },
+    { q: "ข้อใดเป็นจริงเกี่ยวกับคำสั่ง rm บนลินุกซ์?", a: "ไฟล์จะถูกลบถาวรทันที", options: ["ไฟล์จะย้ายไปถังขยะก่อน", "ไฟล์จะถูกลบถาวรทันที", "ไฟล์จะถูกซ่อนไว้ 30 วัน", "ระบบจะขอยืนยันเสมอ"] },
+    { q: "คำสั่งใดใช้ตรวจสอบ IP Address ของเครื่อง?", a: "ip a", options: ["ping localhost", "ip a", "netstat -a", "ifconfig -v"] },
+    { q: "คำสั่งหรือปุ่มลัดใดใช้เคลียร์หน้าจอเทอร์มินัล?", a: "clear หรือ Ctrl+L", options: ["exit", "reset", "clear หรือ Ctrl+L", "rm -rf"] }
+  ];
+
+  const handleDownload = () => {
+    setDownloading(true);
+    const link = document.createElement("a");
+    link.href = "/data/week-2_kahoot_import.csv";
+    link.download = "week-2_kahoot_import.csv";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => setDownloading(false), 800);
+  };
+
+  return (
+    <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '3% 4%' }}>
+      <div className="slide-tag">{s.tag}</div>
+      <h2>{s.title}</h2>
+      {s.body && <p style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: 15 }}>{s.body}</p>}
+      
+      <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
+        {/* Left Side: Question Preview */}
+        <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)', padding: '16px', overflowY: 'auto' }}>
+          <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>📝</span> รายการคำถามในเทมเพลต (10 ข้อ)
+          </h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {questions.map((q, idx) => (
+              <div key={idx} style={{ background: 'var(--bg-surface)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '13px', color: 'var(--text-primary)', marginBottom: '6px' }}>
+                  {idx + 1}. {q.q}
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                  {q.options.map((opt, oIdx) => {
+                    const isCorrect = opt === q.a;
+                    return (
+                      <span key={oIdx} style={{ 
+                        fontSize: '11px', 
+                        padding: '4px 8px', 
+                        borderRadius: '4px', 
+                        background: isCorrect ? 'var(--accent-dim)' : 'var(--bg-elevated)', 
+                        border: isCorrect ? '1px solid var(--accent)' : '1px solid var(--border)',
+                        color: isCorrect ? 'var(--accent)' : 'var(--text-secondary)',
+                        fontWeight: isCorrect ? 'bold' : 'normal'
+                      }}>
+                        {isCorrect ? '✓ ' : '• '} {opt}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right Side: Action and Guides */}
+        <div style={{ flex: 0.8, display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Brand/Download Card */}
+          <div style={{ 
+            background: 'linear-gradient(135deg, #46178f 0%, #250b52 100%)', 
+            borderRadius: '12px', 
+            padding: '24px', 
+            color: '#ffffff', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            textAlign: 'center',
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 8px 32px rgba(70,23,143,0.2)'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>💜</div>
+            <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px', letterSpacing: '0.5px' }}>Kahoot! CSV Template</h3>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginBottom: '20px', maxWidth: '280px' }}>
+              พร้อมนำไปอัปโหลดเข้า Kahoot! ได้ทันทีตามขนาดข้อจำกัดอักขระ
+            </p>
+            <button 
+              onClick={handleDownload}
+              style={{
+                background: '#ffffff',
+                color: '#46178f',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '12px 24px',
+                fontSize: '14px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+              }}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; }}
+            >
+              <span>📥</span>
+              {downloading ? 'กำลังดาวน์โหลด...' : 'ดาวน์โหลด CSV Template'}
+            </button>
+          </div>
+
+          {/* Import Guide Card */}
+          <div style={{ background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)', padding: '16px', flex: 1, overflowY: 'auto' }}>
+            <h4 style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-primary)' }}>
+              📖 ขั้นตอนการนำเข้า (How to Import):
+            </h4>
+            <ol style={{ fontSize: '12px', color: 'var(--text-secondary)', paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '8px', lineHeight: '1.5' }}>
+              <li>คลิกปุ่ม <strong>ดาวน์โหลด CSV Template</strong> ด้านบนเพื่อรับไฟล์</li>
+              <li>เปิดเบราว์เซอร์เข้าสู่ระบบผู้สอนใน <a href="https://kahoot.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>Kahoot.com</a></li>
+              <li>คลิกปุ่ม <strong>Create (สร้าง)</strong> ➔ <strong>Kahoot (คาฮูท)</strong></li>
+              <li>กดปุ่ม <strong>Add question (เพิ่มคำถาม)</strong> ทางเมนูด้านซ้าย</li>
+              <li>เลือกคลิก <strong>Import spreadsheet (นำเข้าจากตาราง)</strong> ด้านล่างซ้าย</li>
+              <li>อัปโหลดไฟล์ <code>week-2_kahoot_import.csv</code> ที่โหลดไป</li>
+              <li>ตรวจสอบเฉลยและเวลา จากนั้นกด <strong>Save</strong> เพื่อเริ่มเกมได้เลย!</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SlideRenderer({ slide }: { slide: SlideData }) {
   switch (slide.type) {
     case "cover": return <CoverSlide s={slide} />;
@@ -1782,6 +1936,7 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "lab": return <LabSlide s={slide} />;
     case "summary": return <SummarySlide s={slide} />;
     case "diagram": return <DiagramSlide s={slide} />;
+    case "kahoot": return <KahootSlide s={slide} />;
     default: return <ContentSlide s={slide} />;
   }
 }
@@ -1795,6 +1950,925 @@ function downloadSlideJSON(weekData: WeekData) {
   a.download = `week-${String(weekData.week).padStart(2, "0")}.json`;
   a.click();
   URL.revokeObjectURL(url);
+}
+
+/* --- Dynamic Interactive Document component for Week 3a --- */
+function DockerGuideDocument() {
+  return (
+    <div style={{
+      flex: 1,
+      overflowY: 'auto',
+      padding: '40px 5%',
+      background: 'var(--bg-elevated)',
+      color: 'var(--text-primary)',
+      lineHeight: '1.7',
+      fontFamily: 'Inter, sans-serif'
+    }}>
+      {/* Document Header */}
+      <div style={{
+        borderBottom: '2px solid var(--border)',
+        paddingBottom: '24px',
+        marginBottom: '32px'
+      }}>
+        <span style={{
+          background: 'var(--accent-dim)',
+          color: 'var(--accent)',
+          padding: '6px 14px',
+          borderRadius: '99px',
+          fontSize: '12px',
+          fontWeight: '600',
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase'
+        }}>
+          คู่มือปฏิบัติการระบบเครือข่ายแม่ข่ายคอมพิวเตอร์ — ฉบับสมบูรณ์ (Hand-on Lab Manual)
+        </span>
+        <h1 style={{
+          fontSize: 'clamp(28px, 3.5vw, 44px)',
+          fontWeight: '800',
+          lineHeight: '1.2',
+          marginTop: '12px',
+          marginBottom: '8px',
+          background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent'
+        }}>
+          คู่มือปฏิบัติการติดตั้ง Ubuntu Server 26.04 LTS สำหรับ Web Application ด้วย Docker & Nginx
+        </h1>
+        <p style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>
+          เอกสารคู่มือแล็บฉบับเต็มโดยละเอียด แสดงทุกคำสั่งใน Terminal สำหรับระบบเครือข่าย LAN ผ่าน Switch, การตั้งค่าความปลอดภัย UFW Firewall, การเชื่อมทาง Nginx Reverse Proxy และการสร้าง Docker Container แบบ Step-by-Step.
+        </p>
+      </div>
+
+      {/* Overview Interactive Animation */}
+      <section style={{ marginBottom: '48px' }}>
+        <h2 style={{
+          fontSize: '22px',
+          fontWeight: '700',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <span>🎬</span> แผนผังจำลองการไหลของข้อมูลเสมือนจริง (Comprehensive Network Topology)
+        </h2>
+        <p style={{ marginBottom: '16px', color: 'var(--text-secondary)' }}>
+          ไดอะแกรมแสดงเส้นทางการรับส่งแพ็กเกจคำขอ (HTTP Request) จากเว็บเบราว์เซอร์ของ Client ผ่าน LAN Switch เข้าสู่พอร์ต 80 ของเซิร์ฟเวอร์ย่อยที่ให้บริการโดย Nginx Reverse Proxy จากนั้น Nginx จะทำการเชื่อมทางส่งต่อข้อมูล (Proxy Pass) ไปยังพอร์ต 3000 ของตู้คอนเทนเนอร์ Docker (ชื่อคอนเทนเนอร์: website) ที่รันอยู่เบื้องหลังอย่างเป็นระบบ.
+        </p>
+
+        {/* Dynamic Overview Flow SVG */}
+        <div style={{
+          background: '#090d16',
+          borderRadius: '12px',
+          border: '1px solid rgba(255,255,255,0.06)',
+          padding: '24px',
+          boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
+          overflow: 'hidden'
+        }}>
+          <svg className="docker-guide-svg" viewBox="0 0 800 340" style={{ width: '100%', height: 'auto' }}>
+            <defs>
+              <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#0ea5e9" />
+                <stop offset="100%" stopColor="#2563eb" />
+              </linearGradient>
+              <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#10b981" />
+                <stop offset="100%" stopColor="#059669" />
+              </linearGradient>
+              <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="#e11d48" stopOpacity="0.8" />
+              </linearGradient>
+              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="6" result="blur" />
+                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+              </filter>
+            </defs>
+
+            {/* Network Connections Lines */}
+            <path d="M 120 170 L 260 170" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+            <path d="M 380 170 L 500 120" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+            <path d="M 620 155 L 620 200" stroke="rgba(255,255,255,0.1)" strokeWidth="4" />
+
+            {/* Glowing Flow Paths for motion animation */}
+            <path id="reqFlow" d="M 100 170 L 320 170 L 620 120 L 620 230" fill="none" stroke="rgba(14,165,233,0.15)" strokeWidth="2" strokeDasharray="6,4" />
+            <path id="resFlow" d="M 620 230 L 620 120 L 320 170 L 100 170" fill="none" stroke="rgba(10,185,129,0.15)" strokeWidth="2" strokeDasharray="6,4" />
+
+            {/* Request Packet Pulse (Yellow/Orange) */}
+            <circle r="7" fill="#f59e0b" filter="url(#glow)">
+              <animateMotion dur="5s" repeatCount="indefinite" path="M 100 170 L 320 170 L 620 120 L 620 230" keyTimes="0; 0.3; 0.7; 1" />
+            </circle>
+
+            {/* Response Packet Pulse (Green) */}
+            <circle r="7" fill="#10b981" filter="url(#glow)">
+              <animateMotion dur="5s" begin="2.5s" repeatCount="indefinite" path="M 620 230 L 620 120 L 320 170 L 100 170" keyTimes="0; 0.3; 0.7; 1" />
+            </circle>
+
+            {/* Client PC Node */}
+            <rect className="node-client" x="40" y="130" width="120" height="80" rx="8" fill="#111827" stroke="#0ea5e9" strokeWidth="2" />
+            <text className="text-white" x="100" y="165" fill="#f8fafc" fontSize="13" fontWeight="bold" textAnchor="middle">💻 Client PC</text>
+            <text className="text-muted" x="100" y="185" fill="#94a3b8" fontSize="10" textAnchor="middle">192.168.1.100</text>
+            <text className="text-blue" x="100" y="197" fill="#38bdf8" fontSize="8" fontWeight="600" textAnchor="middle">ส่ง HTTP Request</text>
+
+            {/* Unmanaged Switch Node */}
+            <rect className="node-switch" x="260" y="130" width="120" height="80" rx="8" fill="#111827" stroke="#10b981" strokeWidth="2" />
+            <text className="text-white" x="320" y="165" fill="#f8fafc" fontSize="13" fontWeight="bold" textAnchor="middle">🎛️ LAN Switch</text>
+            <text className="text-muted" x="320" y="185" fill="#94a3b8" fontSize="9" textAnchor="middle">Unmanaged (L2)</text>
+            <text className="text-green" x="320" y="197" fill="#34d399" fontSize="8" fontWeight="600" textAnchor="middle">กระจายข้อมูลวงแลน</text>
+
+            {/* Host Server Box Container */}
+            <rect className="node-server" x="480" y="25" width="280" height="285" rx="12" fill="rgba(99, 102, 241, 0.04)" stroke="#6366f1" strokeWidth="2" />
+            <text className="text-purple" x="620" y="50" fill="#a5b4fc" fontSize="11" fontWeight="bold" textAnchor="middle">🖥️ HOST SERVER (Ubuntu 26.04)</text>
+            <text className="text-purple" x="620" y="65" fill="#6366f1" fontSize="9" fontWeight="600" textAnchor="middle">Static IP: 192.168.1.10</text>
+
+            {/* Nginx Service Inside Server */}
+            <rect className="node-nginx" x="500" y="85" width="240" height="70" rx="8" fill="#1f2937" stroke="#f43f5e" strokeWidth="1.5" />
+            <text className="text-white" x="620" y="112" fill="#f8fafc" fontSize="12" fontWeight="bold" textAnchor="middle">⚙️ Nginx Reverse Proxy</text>
+            <text className="text-red" x="620" y="130" fill="#fca5a5" fontSize="9" textAnchor="middle">รับ Request พอร์ต 80 (HTTP)</text>
+            <text className="text-rose-strong" x="620" y="142" fill="#f43f5e" fontSize="8" fontWeight="600" textAnchor="middle">ส่งต่อ ➔ http://localhost:3000</text>
+
+            {/* Docker Container website inside Server */}
+            <rect className="node-docker" x="500" y="200" width="240" height="80" rx="8" fill="#1f2937" stroke="#38bdf8" strokeWidth="1.5" />
+            <text className="text-white" x="620" y="228" fill="#f8fafc" fontSize="12" fontWeight="bold" textAnchor="middle">🐋 Docker Container</text>
+            <text className="text-purple" x="620" y="244" fill="#93c5fd" fontSize="9" textAnchor="middle">ชื่อ container: website</text>
+            <text className="text-blue" x="620" y="258" fill="#38bdf8" fontSize="8" fontWeight="600" textAnchor="middle">Next.js App (พอร์ต 3000)</text>
+          </svg>
+        </div>
+      </section>
+
+      {/* ขั้นตอนที่ 1: แผนการเชื่อมต่อและกำหนดไอพีเครือข่ายกายภาพ */}
+      <section style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        padding: '30px',
+        marginBottom: '40px'
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--accent)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span>🔌</span> ขั้นตอนที่ 1: การวางแผนโครงสร้างเครือข่ายและการเข้าสายแลน (Physical Topology)
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          การจัดทำระบบแม่ข่ายภายในสถาบันการศึกษา จะใช้สาย LAN ชนิด **Straight-through (สายตรง)** เข้าหัวต่อ **RJ-45** ตามมาตรฐาน **TIA/EIA 568B** ในการเชื่อมโยงการ์ดเครือข่ายจากคอมพิวเตอร์เข้าสู่พอร์ตของ Unmanaged Switch.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+          <div style={{ background: 'var(--bg-elevated)', padding: '20px', borderRadius: '8px', borderLeft: '4px solid var(--accent)' }}>
+            <strong style={{ fontSize: '15px', color: 'var(--text-primary)', display: 'block', marginBottom: '8px' }}>🌈 มาตรฐานลำดับสีการเข้าหัวสายตรง (TIA-568B)</strong>
+            <ol style={{ fontSize: '13px', color: 'var(--text-secondary)', paddingLeft: '20px', lineHeight: '1.6' }}>
+              <li>ขาวส้ม</li>
+              <li>ส้ม</li>
+              <li>ขาวเขียว</li>
+              <li>น้ำเงิน</li>
+              <li>ขาวน้ำเงิน</li>
+              <li>เขียว</li>
+              <li>ขาวน้ำตาล</li>
+              <li>น้ำตาล</li>
+            </ol>
+          </div>
+
+          <div style={{ background: 'var(--bg-elevated)', padding: '20px', borderRadius: '8px', borderLeft: '4px solid var(--green)' }}>
+            <strong style={{ fontSize: '15px', color: 'var(--text-primary)', display: 'block', marginBottom: '8px' }}>📋 ตารางระบุขอบเขตหมายเลขเครือข่าย (IP Allocation)</strong>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', color: 'var(--text-secondary)' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
+                  <th style={{ padding: '6px 0', color: 'var(--accent)' }}>อุปกรณ์</th>
+                  <th style={{ padding: '6px 0', color: 'var(--accent)' }}>หมายเลข IP</th>
+                  <th style={{ padding: '6px 0', color: 'var(--accent)' }}>บทบาท</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                  <td style={{ padding: '6px 0' }}>Router</td>
+                  <td style={{ padding: '6px 0' }}>`192.168.1.1`</td>
+                  <td style={{ padding: '6px 0' }}>Default Gateway</td>
+                </tr>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                  <td style={{ padding: '6px 0' }}>Ubuntu Server</td>
+                  <td style={{ padding: '6px 0' }}>`192.168.1.10`</td>
+                  <td style={{ padding: '6px 0' }}>Static Server (โฮสต์รับข้อมูล)</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: '6px 0' }}>Client PC</td>
+                  <td style={{ padding: '6px 0' }}>`192.168.1.100+`</td>
+                  <td style={{ padding: '6px 0' }}>เครื่องของนักศึกษา (เปิดทดสอบ)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>🛠️ คำสั่งตรวจสอบเครือข่ายฮาร์ดแวร์ก่อนเริ่มต้น:</strong>
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>1. ตรวจสอบรายชื่อการ์ดเครือข่ายฮาร์ดแวร์ที่ติดตั้งในตัวเครื่อง:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo lshw -C network
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* สังเกตข้อมูลการ์ดแลนและไดรเวอร์เครือข่ายเพื่อประกอบการระบุตำแหน่งอินเทอร์เฟซ.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>2. ตรวจสอบว่าสาย LAN เชื่อมต่อทางกายภาพกับ Switch แล้วหรือไม่ (Link detected):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ethtool enp3s0
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* หากรายงานบรรทัดสุดท้ายระบุ "Link detected: yes" แสดงว่าสาย LAN เชื่อมโยงปกติและมีการส่งสัญญาณไฟแลน.</span>
+          </div>
+        </div>
+      </section>
+
+      {/* ขั้นตอนที่ 2: การตรวจสอบการ์ดแลนและการกำหนด Static IP */}
+      <section style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        padding: '30px',
+        marginBottom: '40px'
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span>🛠️</span> ขั้นตอนที่ 2: การกำหนด Static IP บน Ubuntu ด้วย Netplan
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          ในการปฏิบัติงานจริง เซิร์ฟเวอร์จำเป็นต้องใช้หมายเลขไอพีคงที่เพื่อป้องกันบริการปลายทางเสียหายหลังจากเปิดใช้งานระบบใหม่ โดยในระบบ Ubuntu Server 26.04 จะจัดการเครือข่ายผ่าน **Netplan (YAML)**.
+        </p>
+
+        {/* Command instructions block */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>1. ตรวจสอบรายชื่อการ์ดจอเครือข่ายและสถานะ IP ปัจจุบัน:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              ip a
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* จดจำชื่อการ์ดจอเครือข่ายที่จะใส่ เช่น `enp3s0` หรือ `eth0`.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>2. สแกนตรวจสอบไฟล์ตั้งค่า Netplan ที่มีอยู่ในโฟลเดอร์ระบบ:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              ls -la /etc/netplan/
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>3. ตรวจสอบข้อมูลในไฟล์การตั้งค่า Netplan ที่เป็นของเดิมก่อนทำการแก้ไข:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              cat /etc/netplan/*.yaml
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>4. ทำการคัดลอกไฟล์สำรอง (Backup) ไว้ล่วงหน้า ป้องกันระบบเครือข่ายเสียหายจนเชื่อมไม่ได้:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo cp /etc/netplan/50-cloud-init.yaml /etc/netplan/50-cloud-init.yaml.bak
+            </code>
+          </div>
+
+          <div style={{ background: 'rgba(239, 68, 68, 0.04)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '16px', borderRadius: '8px' }}>
+            <strong style={{ color: '#ef4444', fontSize: '13px', display: 'block', marginBottom: '6px' }}>⚠️ กฎการใช้งานโปรแกรม Nano ในการเขียนไฟล์เครือข่าย YAML:</strong>
+            <ul style={{ fontSize: '12px', color: 'var(--text-secondary)', paddingLeft: '20px', margin: 0, lineHeight: '1.6' }}>
+              <li>ใช้ปุ่มลูกศร (Arrow Keys) บนคีย์บอร์ดเพื่อเลื่อนเคอร์เซอร์ซ้าย-ขวา-บน-ล่าง.</li>
+              <li>การจัดย่อหน้าเว้นวรรค ให้ใช้การกดเคาะปุ่ม Spacebar สองครั้งเท่านั้น ห้ามกดปุ่ม Tab บนคีย์บอร์ดเด็ดขาด เนื่องจากเป็นกฎโครงสร้างไวยากรณ์ YAML หากกด Tab ระบบจะรันเครือข่ายไม่ผ่าน.</li>
+              <li>เมื่อทำการเขียนเสร็จสิ้น: บันทึกข้อมูลด้วยการกด `Ctrl + O` ตามด้วยการกดปุ่ม `Enter` และสั่งออกจากโปรแกรม Nano ด้วยการกดปุ่ม `Ctrl + X`.</li>
+            </ul>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>5. สั่งเปิดโปรแกรม Nano เพื่อเข้าไปจัดการเขียนค่า Static IP:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo nano /etc/netplan/50-cloud-init.yaml
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>6. ลบข้อมูลเดิมออกทั้งหมด และทำการเคาะเว้นวรรคป้อนค่าเครือข่ายลงไปอย่างรอบคอบ:</span>
+            <div style={{
+              background: '#090d16',
+              borderRadius: '8px',
+              padding: '16px',
+              fontFamily: 'monospace',
+              fontSize: '13px',
+              color: '#e2e8f0',
+              border: '1px solid rgba(255,255,255,0.06)',
+              overflowX: 'auto',
+              marginTop: '6px'
+            }}>
+              <div><span style={{ color: '#facc15' }}>network:</span></div>
+              <div><span style={{ color: '#facc15' }}>  version:</span> 2</div>
+              <div><span style={{ color: '#facc15' }}>  renderer:</span> networkd</div>
+              <div><span style={{ color: '#facc15' }}>  ethernets:</span></div>
+              <div><span style={{ color: '#facc15' }}>    enp3s0:</span> <span style={{ color: '#8892a4' }}># แก้ไขชื่อตัวการ์ดแลนให้ตรงตามข้อมูลจาก 'ip a' ที่ตรวจสอบพบในเซิร์ฟเวอร์จริง</span></div>
+              <div><span style={{ color: '#facc15' }}>      dhcp4:</span> false</div>
+              <div><span style={{ color: '#facc15' }}>      addresses:</span></div>
+              <div>        - <span style={{ color: '#34d399' }}>192.168.1.10/24</span></div>
+              <div><span style={{ color: '#facc15' }}>      routes:</span></div>
+              <div>        - <span style={{ color: '#facc15' }}>to:</span> default</div>
+              <div>          <span style={{ color: '#facc15' }}>via:</span> <span style={{ color: '#34d399' }}>192.168.1.1</span> <span style={{ color: '#8892a4' }}># ชี้ไปเกตเวย์ของเราเตอร์หลัก</span></div>
+              <div><span style={{ color: '#facc15' }}>      nameservers:</span></div>
+              <div>        <span style={{ color: '#facc15' }}>addresses:</span></div>
+              <div>          - <span style={{ color: '#34d399' }}>192.168.1.1</span> <span style={{ color: '#8892a4' }}># ชี้ DNS ปลายทางวงแลน</span></div>
+              <div>          - <span style={{ color: '#34d399' }}>8.8.8.8</span> <span style={{ color: '#8892a4' }}># เพิ่ม DNS นอกระบบสำหรับค้นหาและเชื่อมต่อเว็บด้านนอก (Google)</span></div>
+            </div>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* ทำการบันทึกด้วย `Ctrl + O` ➔ `Enter` และกด `Ctrl + X` เพื่อออก.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>7. บังคับระดับความปลอดภัยสูงสุดของสิทธิ์ในการเข้าถึงและอ่านไฟล์ Netplan คอนฟิก:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo chmod 600 /etc/netplan/50-cloud-init.yaml
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>8. สั่งเกตประเมินโครงสร้างไวยากรณ์ (Syntax Evaluation) ก่อนทำการบังคับใช้ ป้องกันระบบเครือข่ายตัดการทำงานชั่วกัปชั่วกัลป์:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo netplan try
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* ระบบจะนับถอยหลัง 120 วินาที หากไม่มีการกด Enter ยืนยันการเปลี่ยนแปลงระบบจะทำการ Rollback กลับอัตโนมัติ.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>9. ยืนยันการเปลี่ยนแปลงเครือข่ายให้ทำงานอย่างเป็นทางการ:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo netplan apply
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>10. ตรวจสอบหมายเลขไอพีใหม่ว่าผูกเข้ากับการ์ดแลนสมบูรณ์หรือไม่:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              ip addr show enp3s0
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>11. ตรวจสอบตารางการจัดการส่งต่อแพ็กเกจข้อมูลเกตเวย์หลัก (Routing Table):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              ip route show
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>12. ตรวจสอบการผูกชื่อโดเมน DNS Server ปัจจุบันของเครื่องเซิร์ฟเวอร์:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              resolvectl status
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>13. คำสั่งทำการส่ง Ping ตรวจสัญญาณความเชื่อมโยงกับ Router ปลายทาง:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              ping -c 4 192.168.1.1
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>14. คำสั่งทดสอบการเข้าถึงเครือข่ายอินเทอร์เน็ตของโฮสต์โดยส่ง Ping ไปยังโฮสต์ภายนอกสากล:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              ping -c 4 google.com
+            </code>
+          </div>
+        </div>
+      </section>
+
+      {/* ขั้นตอนที่ 3: การติดตั้ง Nginx Web Server และการทำ Reverse Proxy */}
+      <section style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        padding: '30px',
+        marginBottom: '40px'
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span>🔗</span> ขั้นตอนที่ 3: การติดตั้ง Nginx Web Server และการผูกตัวชี้ทางข้อมูล (Reverse Proxy)
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          เมื่อจัดการเชื่อมต่อเครือข่ายเรียบร้อย ขั้นตอนต่อมาคือการติดตั้งและจัดแจง **Nginx Web Server** เพื่อใช้รับการเรียกคำขอของ Client (ที่พอร์ต 80) แล้วเชื่อมพาสทางเดิน (Reverse Proxy) ไปรออยู่ที่พอร์ต 3000 ของตัวแอปพลิเคชันที่จะนำมาเปิดการทำงานช่วงสุดท้าย.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>1. อัปเดตดัชนีแพ็กเกจระบบเพื่อให้ได้ระบบแอปเวอร์ชันล่าสุดจากคลังต้นฉบับ:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo apt update
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>2. อัปเกรดแอปพลิเคชันพื้นฐานทั้งหมดของตัวระบบปฏิบัติการเพื่อหลีกเลี่ยงข้อขัดข้องด้านไลบรารี:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo apt upgrade -y
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>3. สั่งดาวน์โหลดและติดตั้ง Nginx เข้ามาประจำการในเครื่องแม่ข่าย:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo apt install -y nginx
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>4. สั่งสั่งเริ่มต้นกระบวนการการทำงาน (Start Service) ของเซิร์ฟเวอร์ Nginx ทันที:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo systemctl start nginx
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>5. สั่งผูกล็อกอินให้ Nginx ทำงานโดยอัตโนมัติเมื่อเครื่องเริ่มต้นเปิดระบบใหม่ในอนาคต (Enable on Boot):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo systemctl enable nginx
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>6. ตรวจสอบสถานะการทำงานในหน่วยความจำของ Nginx ในกระบวนการทำงานหลัก:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo systemctl status nginx
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* หน้าจอรายงานจะต้องขึ้น "Active: active (running)" บรรทัดสีเขียวอย่างสวยงาม.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>7. สร้างไฟล์ตั้งค่าระบบสำหรับเว็บไซต์หลักในคลังเก็บต้นฉบับการแสดงผล (sites-available):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo nano /etc/nginx/sites-available/webapp
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>8. เขียนชุดคำสั่ง Nginx Server Block ลงไปในหน้าแก้ไขเพื่อจัดการ Reverse Proxy ชี้เข้าหาพอร์ต 3000:</span>
+            <div style={{
+              background: '#090d16',
+              borderRadius: '8px',
+              padding: '16px',
+              fontFamily: 'monospace',
+              fontSize: '13px',
+              color: '#e2e8f0',
+              border: '1px solid rgba(255,255,255,0.06)',
+              overflowX: 'auto',
+              marginTop: '6px'
+            }}>
+              <div><span style={{ color: '#fca5a5' }}>server</span> &#123;</div>
+              <div>  <span style={{ color: '#fca5a5' }}>listen</span> 80;</div>
+              <div>  <span style={{ color: '#fca5a5' }}>server_name</span> 192.168.1.10; <span style={{ color: '#8892a4' }}># ผูกหมายเลข Static IP ของโฮสต์เซิร์ฟเวอร์</span></div>
+              <br />
+              <div>  <span style={{ color: '#fca5a5' }}>location</span> / &#123;</div>
+              <div>    <span style={{ color: '#fca5a5' }}>proxy_pass</span> http://127.0.0.1:3000; <span style={{ color: '#8892a4' }}># ลิงก์เชื่อมโยงคำขอส่งต่อปลายทางไปยังพอร์ต 3000</span></div>
+              <div>    <span style={{ color: '#fca5a5' }}>proxy_http_version</span> 1.1;</div>
+              <div>    <span style={{ color: '#fca5a5' }}>proxy_set_header</span> Upgrade $http_upgrade;</div>
+              <div>    <span style={{ color: '#fca5a5' }}>proxy_set_header</span> Connection 'upgrade';</div>
+              <div>    <span style={{ color: '#fca5a5' }}>proxy_set_header</span> Host $host;</div>
+              <div>    <span style={{ color: '#fca5a5' }}>proxy_cache_bypass</span> $http_upgrade;</div>
+              <div>  &#125;</div>
+              <div>&#125;</div>
+            </div>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* ทำการบันทึกด้วย `Ctrl + O` ➔ `Enter` และกด `Ctrl + X` เพื่อปิดโปรแกรมแก้ไข Nano.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>9. ทำการสร้าง Symbolic Link ข้ามโฟลเดอร์เพื่อผูกเข้าห้องส่งข้อมูลทำงานจริง (sites-enabled):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ln -sf /etc/nginx/sites-available/webapp /etc/nginx/sites-enabled/
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>10. ตรวจสอบในห้องส่งข้อมูลจริงว่า Symbolic link ได้รับการสร้างเชื่อมโยงสมบูรณ์:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              ls -la /etc/nginx/sites-enabled/
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>11. ลบลิงก์หน้าเว็บต้อนรับดั้งเดิม of Nginx ออก เพื่อสลับคำขอให้มารับที่โครงสร้างบล็อกใหม่แทน:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo rm -f /etc/nginx/sites-enabled/default
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>12. ตรวจสอบไวยากรณ์และความปลอดภัยในการเขียนคอนฟิกทุกบรรทัดของ Nginx:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo nginx -t
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* ตรวจบันทึกในหน้าจอคอนโซลจะต้องแสดงผล "syntax is ok" และ "test is successful" จึงจะดำเนินงานต่อได้.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>13. สั่งให้ Nginx โหลดค่าการตั้งค่าใหม่โดยทันทีโดยไม่มีการปิดการทำงานชั่วคราว (Zero-Downtime Reload):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo systemctl reload nginx
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>14. ทดสอบเรียกใช้พอร์ต 80 ของเว็บเซิร์ฟเวอร์แบบโลคอลเพื่อตรวจสอบการตอบกลับ:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              curl -I http://localhost
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', background: 'rgba(56, 189, 248, 0.05)', padding: '8px', borderLeft: '3px solid var(--accent)', borderRadius: '4px', marginTop: '4px' }}>
+              💡 <strong>ความรู้แล็บปฏิบัติการ:</strong> ในสเต็ปนี้ นักเรียนจะได้รับการตอบรับกลับมาเป็นรหัสสถานะ <strong>HTTP/1.1 502 Bad Gateway</strong> ซึ่งถือว่าถูกต้องและเป็นปกติ เนื่องจาก Nginx ได้รับคำขอแล้วและพยายามส่งต่อไปที่พอร์ต 3000 ทว่าแอปพลิเคชันตู้ระบบคอนเทนเนอร์ยังไม่ได้รับการสร้างและเปิดทำงานในพอร์ต 3000 เลย.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ขั้นตอนที่ 4: การติดตั้ง Docker & Docker Compose */}
+      <section style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        padding: '30px',
+        marginBottom: '40px'
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span>🐋</span> ขั้นตอนที่ 4: การติดตั้งระบบคอนเทนเนอร์ Docker & Docker Compose
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          เมื่อจัดการโครงสร้างหลักของสถาปัตยกรรมทางเดินพอร์ตเสร็จเรียบร้อยแล้ว ในช่วงขั้นตอนสุดท้ายนี้เราจะเริ่มเตรียมการติดตั้งโปรแกรมจำลองตู้ระบบ **Docker Engine** และ **Docker Compose** เพื่อที่จะทำการ Deploy แอปพลิเคชันจริงขึ้นสู่การทำงาน.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>1. ล้างตระกูลโปรแกรม Docker รุ่นเก่าที่อาจมากับตัว OS เพื่อป้องกันสิทธิ์เข้าถึงทำงานขัดกัน:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo apt remove -y docker docker-engine docker.io containerd runc
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>2. ทำการสแกนอัปเดตระบบ และทำการดาวน์โหลดโปรแกรมตัวช่วยในด้านการดาวน์โหลด GPG Key คลังภายนอก:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo apt update && sudo apt install -y ca-certificates curl gnupg lsb-release
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>3. สั่งตั้งสร้างโฟลเดอร์สำหรับเก็บคีย์ความปลอดภัยอย่างถูกต้องเป็นสากลในลินุกซ์:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo install -m 0755 -d /etc/apt/keyrings
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>4. คำสั่งดึงคีย์ GPG ของ Docker เพื่อใช้ในการรับรองความปลอดภัยของแพ็กเกจภายนอก:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '12px' }}>
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>5. อนุญาตและตั้งระดับสิทธิ์การอ่านคีย์รักษาความปลอดภัยให้แก่ผู้ใช้งานทุกฝ่าย:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo chmod a+r /etc/apt/keyrings/docker.gpg
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>6. คำสั่งทำการบันทึกรายการ Repository แหล่งดาวน์โหลดหลักของ Docker ลงในไฟล์ระบบ Ubuntu 26.04:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '11px', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+              echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list &gt; /dev/null
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>7. สั่งรีเฟรชอัปเดตดัชนีแพ็กเกจของระบบเพื่อให้รับรู้แหล่งดาวน์โหลด Docker คลังใหม่ล่าสุด:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo apt update
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>8. ติดตั้งชุดเครื่องมือในการรันตู้ Docker และส่วนควบคุมบิวต์จัดระเบียบ Docker Compose ทั้งชุด:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '12px' }}>
+              sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>9. สั่งยืนยันบังคับให้เบื้องหลังบริการของ Docker เริ่มทำงานทันทีในหน่วยความจำเครื่อง:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo systemctl start docker
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>10. ตั้งค่าระบบให้เปิดโปรแกรมเบื้องหลัง Docker ทุกครั้งเมื่อมีสตาร์ตเครื่องโฮสต์ (Enable on Boot):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo systemctl enable docker
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>11. ตรวจสอบเวอร์ชันอย่างเป็นทางการของ Docker Engine ว่าสามารถใช้งานได้เรียบร้อย:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              docker --version
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>12. ตรวจสอบตรวจสอบรุ่นของชุดควบคุมบริการระบบ Compose:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              docker compose version
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>13. คำสั่งผูกล็อกบัญชีผู้ใช้ปัจจุบันกับสิทธิ์กลุ่มผู้ใช้งาน docker เพื่อที่จะป้อนรันระบบโดยไม่ต้องอาศัย sudo อีกต่อไป:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo usermod -aG docker $USER
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>14. สั่งบังคับการโหลดกลุ่มผู้ใช้ระบบใหม่ลงในเชลล์เซสชันนี้ในทันที โดยไม่ต้องทำการ Logout ออกระบบ:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              newgrp docker
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>15. รันตู้ทดลองเริ่มต้นต้นฉบับดึงจาก Docker Hub ยืนยันสิทธิ์และความปลอดภัย:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              docker run hello-world
+            </code>
+          </div>
+        </div>
+      </section>
+
+      {/* ขั้นตอนที่ 5: การสร้างไฟล์ Dockerfile และ docker-compose.yml */}
+      <section style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        padding: '30px',
+        marginBottom: '40px'
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span>🏗️</span> ขั้นตอนที่ 5: การเขียนคอนฟิก Dockerfile & Docker Compose และสั่งเริ่มรันระบบแอปพลิเคชัน
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          ในขั้นตอนนี้ เราจะนำแอปพลิเคชันที่ได้รับการพัฒนาเสร็จเป็นที่เรียบร้อย (Development Done) มาบรรจุลงในตู้ระบบ และใช้ระบบ **Docker Compose** เพื่อควบคุมการเปิดการทำงานของตู้อุปกรณ์ที่พอร์ต 3000.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>1. สร้างห้องทำงานสำหรับแอปพลิเคชันเครือข่าย และเปลี่ยนไดเรกทอรีเข้าไปด้านใน:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              mkdir -p ~/projects/website && cd ~/projects/website
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>2. ตรวจสอบโฟลเดอร์ปัจจุบันว่าเปลี่ยนไดเรกทอรีมาอยู่ในตำแหน่งที่ต้องการแน่นอนแล้ว:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              pwd
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>3. สั่งสร้างไฟล์ Dockerfile ในโปรแกรมแก้ข้อความ Nano:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              nano Dockerfile
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>4. คัดลอกคอนฟิกโครงสร้างไฟล์ Dockerfile สำหรับแอปพลิเคชัน (แบบ Node.js Production) วางในหน้าแก้ไข:</span>
+            <div style={{
+              background: '#090d16',
+              borderRadius: '8px',
+              padding: '16px',
+              fontFamily: 'monospace',
+              fontSize: '13px',
+              color: '#e2e8f0',
+              border: '1px solid rgba(255,255,255,0.06)',
+              overflowX: 'auto',
+              marginTop: '6px'
+            }}>
+              <div><span style={{ color: '#38bdf8' }}>FROM</span> node:20-alpine</div>
+              <div><span style={{ color: '#38bdf8' }}>WORKDIR</span> /app</div>
+              <div><span style={{ color: '#38bdf8' }}>COPY</span> package*.json ./</div>
+              <div><span style={{ color: '#38bdf8' }}>RUN</span> npm install --production <span style={{ color: '#8892a4' }}># ติดตั้ง Library เฉพาะตัวจำเป็นสำหรับรันจริง</span></div>
+              <div><span style={{ color: '#38bdf8' }}>COPY</span> . .</div>
+              <div><span style={{ color: '#38bdf8' }}>EXPOSE</span> 3000</div>
+              <div><span style={{ color: '#38bdf8' }}>CMD</span> ["npm", "start"]</div>
+            </div>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* บันทึกข้อมูลด้วยการกด `Ctrl + O` ➔ `Enter` และกด `Ctrl + X` เพื่อออก.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>5. สั่งสร้างไฟล์ docker-compose.yml ซึ่งใช้สำหรับจัดระดับควบคุมและจำกัดขอบเขตตู้ระบบ:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              nano docker-compose.yml
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>6. ป้อนโค้ดคอนฟิก docker-compose.yml เพื่อกำหนดโครงสร้างตู้ชื่อ container "website" และเปิดพอร์ต 3000:</span>
+            <div style={{
+              background: '#090d16',
+              borderRadius: '8px',
+              padding: '16px',
+              fontFamily: 'monospace',
+              fontSize: '13px',
+              color: '#e2e8f0',
+              border: '1px solid rgba(255,255,255,0.06)',
+              overflowX: 'auto',
+              marginTop: '6px'
+            }}>
+              <div><span style={{ color: '#38bdf8' }}>services:</span></div>
+              <div><span style={{ color: '#38bdf8' }}>  website:</span></div>
+              <div><span style={{ color: '#38bdf8' }}>    container_name:</span> <span style={{ color: '#34d399' }}>website</span></div>
+              <div><span style={{ color: '#38bdf8' }}>    build:</span></div>
+              <div><span style={{ color: '#38bdf8' }}>      context:</span> .</div>
+              <div><span style={{ color: '#38bdf8' }}>      dockerfile:</span> Dockerfile</div>
+              <div><span style={{ color: '#38bdf8' }}>    ports:</span></div>
+              <div>      - <span style={{ color: '#34d399' }}>"3000:3000"</span> <span style={{ color: '#8892a4' }}># เปิดให้บริการพอร์ต 3000 เข้าหาตู้แอป</span></div>
+              <div><span style={{ color: '#38bdf8' }}>    environment:</span></div>
+              <div>      - <span style={{ color: '#34d399' }}>NODE_ENV=production</span></div>
+              <div><span style={{ color: '#38bdf8' }}>    restart:</span> unless-stopped</div>
+            </div>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* บันทึกข้อมูลด้วยการกด `Ctrl + O` ➔ `Enter` และกด `Ctrl + X` เพื่อออก.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>7. เริ่มทำการสั่งสร้างภาพอิมเมจ และเริ่มการสั่งรันตู้คอนเทนเนอร์ในฉากหลังแบบเงียบเชียบ (Detached Mode):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              docker compose up -d --build
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>8. สั่งให้ Docker แสดงตู้คอนเทนเนอร์ปัจจุบันทั้งหมดที่เปิดใช้งานเรียบร้อยแล้ว:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              docker ps
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* ควรจะเห็นคอนเทนเนอร์ชื่อ website และสถานะ Up อย่างสวยงาม.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>9. สั่งตรวจสอบประวัติการรันและดูบันทึกประวัติการรันเว็บภายในคอนเทนเนอร์:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              docker logs website
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>10. ตรวจเช็คข้อมูลแรมและทรัพยากรการประมวลผลพื้นฐานของตู้คอนเทนเนอร์:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              docker stats --no-stream
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>11. ทดสอบยิงคำขอเพื่อติดต่อพอร์ต 3000 ของตู้คอนเทนเนอร์ภายในระบบแบบโลคอล:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              curl -I http://localhost:3000
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* ควรได้รับ HTTP response รหัส 200 OK หรือรหัสอื่นๆ ที่แสดงว่าแอปพลิเคชันทำงานได้.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>12. ทดสอบเรียกใช้พอร์ต 80 ของเซิร์ฟเวอร์ด่านหน้าอีกครั้ง (ผ่าน Nginx Reverse Proxy):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              curl -I http://localhost
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)', display: 'block', background: 'rgba(16, 185, 129, 0.05)', padding: '8px', borderLeft: '3px solid var(--green)', borderRadius: '4px', marginTop: '4px' }}>
+              🎉 <strong>ผลการเรียนรู้แล็บปฏิบัติการ:</strong> ในสเต็ปนี้ นักเรียนจะต้องได้รับรหัสสถานะ <strong>HTTP/1.1 200 OK</strong> อย่างสวยงามและไม่มีข้อผิดพลาด. เนื่องจากเซิร์ฟเวอร์ Nginx ได้รับความเรียกร้องเข้ามาในพอร์ต 80 แล้วทำหน้าที่ Reverse Proxy เชื่อมเส้นทางเดินแพ็กเกจส่งมอบเข้าหาพอร์ต 3000 ของตู้ระบบ Docker Container ที่เพิ่งเปิดขึ้นมาใหม่ได้รวดเร็วตามหลักสถาปัตยกรรมระบบ.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ขั้นตอนที่ 6: การตั้งค่า UFW Firewall และทดสอบระบบ */}
+      <section style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        padding: '30px',
+        marginBottom: '40px'
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span>🛡️</span> ขั้นตอนที่ 6: การตั้งค่าความปลอดภัยระบบเครือข่ายเซิร์ฟเวอร์ (UFW Firewall & Port Scanning)
+        </h2>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          ความปลอดภัยเป็นเรื่องสำคัญในระบบเครือข่าย ในขั้นตอนสุดท้ายนี้นักเรียนจะต้องทำการเปิดใช้งาน **UFW (Uncomplicated Firewall)** ของเซิร์ฟเวอร์ และทำการอนุญาตเฉพาะช่องการเข้าถึงระบบที่ปลอดภัยเท่านั้น.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>1. ตรวจสอบสถานะการทำงานของไฟร์วอลล์ระบบลินุกซ์ปัจจุบัน:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ufw status
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>2. กำหนดนโยบายความปลอดภัยพื้นฐาน: ไม่อนุญาตแพ็กเกจขาเข้าทุกรอยต่อ (Default Deny Incoming):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ufw default deny incoming
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>3. กำหนดนโยบายความปลอดภัยพื้นฐาน: อนุญาตแพ็กเกจเดินทางออกไปทุกทิศทาง (Default Allow Outgoing):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ufw default allow outgoing
+            </code>
+          </div>
+
+          <div style={{ background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '12px', borderRadius: '6px' }}>
+            <strong style={{ color: '#ef4444', fontSize: '13px', display: 'block', marginBottom: '4px' }}>🚨 จุดสำคัญที่สุดในการทำแล็บ (โปรดระมัดระวัง):</strong>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+              นักเรียนห้ามสั่งเปิดใช้งานไฟร์วอลล์เด็ดขาด หากยังไม่ได้ทำการอนุญาตพอร์ต OpenSSH (พอร์ต 22) มิฉะนั้น ระบบไฟร์วอลล์จะทำการบล็อกสิทธิ์และจะตัดการเชื่อมต่อระยะไกล (SSH) ในทันที ทำให้นักเรียนหลุดการรีโมตจากห้องแล็บ.
+            </span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>4. สั่งสั่งเปิดช่องทางให้อนุญาตบริการรับรีโมตผ่านพอร์ต SSH ปลอดภัย (พอร์ต 22):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ufw allow OpenSSH
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>5. สั่งอนุญาตพอร์ตหลักสำหรับการเชื่อมต่อภายนอกเข้าหาเว็บแอปพลิเคชัน (ครอบคลุมทั้ง HTTP และ HTTPS):</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ufw allow 'Nginx Full'
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>6. คำสั่งเปิดการใช้งานระบบ UFW Firewall ระบบรักษาความปลอดภัยเครือข่ายของเครื่องแม่ข่ายอย่างเป็นทางการ:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ufw enable
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* หากคอนโซลถามคำตอบ "Command may disrupt existing ssh connections. Proceed?" ให้พิมพ์คีย์บอร์ด `y` แล้วกด `Enter` เพื่อยืนยันสิทธิ์.</span>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>7. สั่งตรวจสอบตารางความปลอดภัยไฟร์วอลล์และสิทธิ์พอร์ตที่มีการเปิดใช้อย่างเป็นทางการ:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ufw status verbose
+            </code>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--accent)' }}>8. สแกนตรวจสอบระบบเครือข่ายเซิร์ฟเวอร์ว่าเปิดรับฟัง (Listening) หมายเลขพอร์ตใดในฮาร์ดแวร์บ้าง:</span>
+            <code style={{ display: 'block', background: '#090d16', padding: '10px', borderRadius: '6px', marginTop: '6px', color: '#e2e8f0', fontFamily: 'monospace', fontSize: '13px' }}>
+              sudo ss -tulpn
+            </code>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>* หน้าจอรายงานสแกนพอร์ตจะมีพอร์ต `80` (Nginx) และพอร์ต `3000` (Docker Container) เปิดสถานะการรับสัญญาณคำขออย่างถูกต้อง.</span>
+          </div>
+        </div>
+      </section>
+
+      {/* Lab Steps for Students */}
+      <section style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: '12px',
+        padding: '30px'
+      }}>
+        <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--green)', marginBottom: '20px', borderLeft: '4px solid var(--green)', paddingLeft: '12px' }}>
+          🏁 แผนปฏิบัติงานและเกณฑ์การทดสอบสำหรับนักศึกษา (Lab Steps & Evaluation Rubrics)
+        </h2>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '24px' }}>
+          <div style={{ background: 'var(--bg-elevated)', padding: '20px', borderRadius: '8px' }}>
+            <span style={{ fontSize: '20px' }}>🎯</span> <strong style={{ fontSize: '15px', display: 'block', margin: '8px 0 4px' }}>วัตถุประสงค์หลักแล็บ</strong>
+            <ul style={{ fontSize: '13px', color: 'var(--text-secondary)', paddingLeft: '20px' }}>
+              <li>ทำคู่มือและคำนวณตั้ง Static IP บนเครื่องเซิร์ฟเวอร์ระบบ Ubuntu 26.04 สำเร็จ.</li>
+              <li>ติดตั้งและตั้งค่า Nginx ทำหน้าที่เป็น Reverse Proxy ม้วนส่งพอร์ต 3000 เรียบร้อย.</li>
+              <li>ติดตั้งกลุ่มชุดระบบตู้คอนเทนเนอร์ Docker & Docker Compose สำเร็จเรียบร้อย.</li>
+              <li>Deploy แอปพลิเคชันจริงผ่านคำสั่ง docker compose up คอนเทนเนอร์ชื่อ website ได้สมบูรณ์.</li>
+            </ul>
+          </div>
+          
+          <div style={{ background: 'var(--bg-elevated)', padding: '20px', borderRadius: '8px' }}>
+            <span style={{ fontSize: '20px' }}>📋</span> <strong style={{ fontSize: '15px', display: 'block', margin: '8px 0 4px' }}>ขั้นตอนเช็คคะแนนสำหรับส่งงาน</strong>
+            <ul style={{ fontSize: '13px', color: 'var(--text-secondary)', paddingLeft: '20px' }}>
+              <li>Client PC สามารถส่ง Ping เข้าเซิร์ฟเวอร์โฮสต์ไอพี `192.168.1.10` ผ่านฉลุย.</li>
+              <li>Client PC เรียกดูหน้าเว็บ `http://192.168.1.10` ได้ทันทีแสดงเว็บแอปของเราไร้ที่ติ.</li>
+              <li>ตรวจสอบสถานะไฟล์ logs ของ Nginx ไม่แสดงข้อบกพร่องรหัส 502 หลังจากตู้ Docker รันปกติ.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style={{
+          background: 'var(--accent-dim)',
+          border: '1px solid var(--accent-glow)',
+          borderRadius: '8px',
+          padding: '16px',
+          fontSize: '13px',
+          textAlign: 'center'
+        }}>
+          💡 <strong>เมื่อนักเรียนเสร็จสิ้นแล็บ:</strong> ให้บันทึกรูปหน้าจอการเรียกใช้หน้าเว็บผ่าน Client PC แสดงลิงก์ URL เป็นหมายเลข Static IP ของโฮสต์เซิร์ฟเวอร์ พร้อมส่งอาจารย์ผ่านแพลตฟอร์มการจัดการเรียนการสอน.
+        </div>
+      </section>
+    </div>
+  );
 }
 
 /* ======================================= */
@@ -1936,63 +3010,119 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="sidebar-footer">
-          <div className="progress-info">
-            <span>สไลด์</span>
-            <span>{slideIdx + 1} / {totalSlides}</span>
-          </div>
-          <div className="progress-bar">
-            <div className="progress-fill" style={{ width: `${progressPct}%` }} />
-          </div>
+        {/* Pinned Docker Guide Button */}
+        <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+          <button
+            className={`pinned-docker-btn ${activeWeek === "3a" ? "active" : ""}`}
+            onClick={() => setActiveWeek("3a")}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '12px 14px',
+              borderRadius: '8px',
+              border: activeWeek === "3a" ? '1px solid var(--accent)' : '1px solid var(--border)',
+              background: activeWeek === "3a" ? 'var(--accent-dim)' : 'var(--bg-elevated)',
+              color: activeWeek === "3a" ? 'var(--accent)' : 'var(--text-primary)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'left'
+            }}
+          >
+            <span style={{ fontSize: '24px', flexShrink: 0 }}>🐳</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: '700', fontSize: '13px', lineHeight: '1.2' }}>คู่มือ Ubuntu & Docker</div>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>เอกสารติดตั้ง Web Server (LAN)</div>
+            </div>
+          </button>
+        </div>
+
+        <div className="sidebar-footer" style={{ flexShrink: 0 }}>
+          {activeWeek === "3a" ? (
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', padding: '4px 0' }}>
+              📖 กำลังอ่าน: โหมดเอกสารคู่มือฉบับเต็ม
+            </div>
+          ) : (
+            <>
+              <div className="progress-info">
+                <span>สไลด์</span>
+                <span>{slideIdx + 1} / {totalSlides}</span>
+              </div>
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width: `${progressPct}%` }} />
+              </div>
+            </>
+          )}
         </div>
       </aside>
 
       {/* Main */}
       <main className="main-area">
-        <header className="topbar">
-          <div className="topbar-left">
-            {!sidebarOpen && (
-              <button className="icon-btn mobile-toggle" style={{ display: "flex" }} onClick={() => setSidebarOpen(true)}>
-                <MenuIcon />
-              </button>
-            )}
-            <span className="topbar-chapter">
-              สัปดาห์ {activeWeek} — {weekData?.title || ""}
-            </span>
+        {activeWeek === "3a" ? (
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+            <header className="topbar" style={{ flexShrink: 0 }}>
+              <div className="topbar-left">
+                {!sidebarOpen && (
+                  <button className="icon-btn mobile-toggle" style={{ display: "flex" }} onClick={() => setSidebarOpen(true)}>
+                    <MenuIcon />
+                  </button>
+                )}
+                <span className="topbar-chapter" style={{ fontWeight: 'bold', color: 'var(--accent)' }}>
+                  📖 คู่มือติดตั้ง Ubuntu Server 26.04 LTS & Docker Web App
+                </span>
+              </div>
+            </header>
+            <DockerGuideDocument />
           </div>
-          <div className="topbar-right">
-            <span className="slide-counter">{slideIdx + 1} / {totalSlides}</span>
-            <button className="nav-btn" onClick={() => setSlideIdx(i => Math.max(i - 1, 0))} disabled={slideIdx === 0}><ChevLeft /></button>
-            <button className="nav-btn" onClick={() => setSlideIdx(i => Math.min(i + 1, totalSlides - 1))} disabled={slideIdx === totalSlides - 1}><ChevRight /></button>
-            <button className="nav-btn fullscreen-btn" onClick={() => setFullscreen(true)} title="เต็มจอ (F)"><MaxIcon /></button>
-            {weekData && (
-              <button className="nav-btn download-btn" onClick={() => downloadSlideJSON(weekData)} title="ดาวน์โหลด JSON"><DownloadIcon /></button>
-            )}
-          </div>
-        </header>
+        ) : (
+          <>
+            <header className="topbar">
+              <div className="topbar-left">
+                {!sidebarOpen && (
+                  <button className="icon-btn mobile-toggle" style={{ display: "flex" }} onClick={() => setSidebarOpen(true)}>
+                    <MenuIcon />
+                  </button>
+                )}
+                <span className="topbar-chapter">
+                  สัปดาห์ {activeWeek} — {weekData?.title || ""}
+                </span>
+              </div>
+              <div className="topbar-right">
+                <span className="slide-counter">{slideIdx + 1} / {totalSlides}</span>
+                <button className="nav-btn" onClick={() => setSlideIdx(i => Math.max(i - 1, 0))} disabled={slideIdx === 0}><ChevLeft /></button>
+                <button className="nav-btn" onClick={() => setSlideIdx(i => Math.min(i + 1, totalSlides - 1))} disabled={slideIdx === totalSlides - 1}><ChevRight /></button>
+                <button className="nav-btn fullscreen-btn" onClick={() => setFullscreen(true)} title="เต็มจอ (F)"><MaxIcon /></button>
+                {weekData && (
+                  <button className="nav-btn download-btn" onClick={() => downloadSlideJSON(weekData)} title="ดาวน์โหลด JSON"><DownloadIcon /></button>
+                )}
+              </div>
+            </header>
 
-        <div className="slide-stage">
-          {loading ? (
-            <div style={{ color: "var(--text-muted)", fontSize: 14 }}>กำลังโหลด...</div>
-          ) : currentSlide ? (
-            <div className="slide-container" key={`${activeWeek}-${slideIdx}`}>
-              <SlideRenderer slide={currentSlide} />
+            <div className="slide-stage">
+              {loading ? (
+                <div style={{ color: "var(--text-muted)", fontSize: 14 }}>กำลังโหลด...</div>
+              ) : currentSlide ? (
+                <div className="slide-container" key={`${activeWeek}-${slideIdx}`}>
+                  <SlideRenderer slide={currentSlide} />
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
 
-        {/* Notes */}
-        {currentSlide?.speakerNotes && (
-          <div className="notes-panel">
-            <div className="notes-header" onClick={() => setNotesVisible(v => !v)}>
-              <NoteIcon />
-              <span>บันทึกครูผู้สอน</span>
-              <button className="notes-toggle">{notesVisible ? "ซ่อน" : "แสดง"}</button>
-            </div>
-            <div className={`notes-body ${notesVisible ? "" : "hidden"}`}>
-              {currentSlide.speakerNotes}
-            </div>
-          </div>
+            {/* Notes */}
+            {currentSlide?.speakerNotes && (
+              <div className="notes-panel">
+                <div className="notes-header" onClick={() => setNotesVisible(v => !v)}>
+                  <NoteIcon />
+                  <span>บันทึกครูผู้สอน</span>
+                  <button className="notes-toggle">{notesVisible ? "ซ่อน" : "แสดง"}</button>
+                </div>
+                <div className={`notes-body ${notesVisible ? "" : "hidden"}`}>
+                  {currentSlide.speakerNotes}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </main>
     </div>

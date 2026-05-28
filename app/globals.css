@@ -78,6 +78,20 @@ html, body { height: 100%; background: var(--bg-base); color: var(--text-primary
 .week-label { flex: 1; line-height: 1.3; }
 .week-topic { display: block; font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 400; }
 
+/* Sidebar Pinned Button */
+.pinned-docker-btn {
+  transform: translateY(0);
+}
+.pinned-docker-btn:hover {
+  transform: translateY(-1px);
+}
+.pinned-docker-btn:active {
+  transform: translateY(1px);
+}
+.pinned-docker-btn:not(.active):hover {
+  background: var(--bg-hover) !important;
+}
+
 /* Sidebar Footer */
 .sidebar-footer { padding: 12px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
 .progress-info { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 6px; }
@@ -286,9 +300,9 @@ html, body { height: 100%; background: var(--bg-base); color: var(--text-primary
 }
 
 /* ===== SMART SVG TEXT & SHAPE COLOR OVERRIDES FOR LIGHT THEME ===== */
-svg text { fill: var(--text-primary) !important; }
-svg text[fill="#e8eaf0"] { fill: var(--text-primary) !important; }
-svg text[fill="#fff"], svg text[fill="#ffffff"] { fill: var(--bg-surface) !important; }
+svg:not(.docker-guide-svg) text { fill: var(--text-primary) !important; }
+svg:not(.docker-guide-svg) text[fill="#e8eaf0"] { fill: var(--text-primary) !important; }
+svg:not(.docker-guide-svg) text[fill="#fff"], svg:not(.docker-guide-svg) text[fill="#ffffff"] { fill: var(--bg-surface) !important; }
 svg rect[fill="#191d29"], svg rect[fill="#12151d"], svg circle[fill="#12151d"], svg ellipse[fill="#12151d"], svg polygon[fill="#191d29"] {
   fill: var(--bg-elevated) !important;
   stroke: var(--border) !important;
@@ -331,5 +345,92 @@ svg rect[fill="#f43f5e"] { fill: var(--red) !important; }
 }
 .terminal-cursor {
   animation: terminal-blink 1s step-end infinite !important;
+}
+
+/* Specific styling overrides for docker guide diagrams to ignore generic light theme overrides */
+.docker-guide-svg text {
+  fill: #f8fafc !important;
+}
+.docker-guide-svg text.text-white {
+  fill: #ffffff !important;
+}
+.docker-guide-svg text.text-muted {
+  fill: #94a3b8 !important;
+}
+.docker-guide-svg text.text-blue {
+  fill: #38bdf8 !important;
+}
+.docker-guide-svg text.text-green {
+  fill: #34d399 !important;
+}
+.docker-guide-svg text.text-red {
+  fill: #fca5a5 !important;
+}
+.docker-guide-svg text.text-purple {
+  fill: #a5b4fc !important;
+}
+.docker-guide-svg text.text-rose-strong {
+  fill: #f43f5e !important;
+}
+
+/* Shape Resets */
+.docker-guide-svg rect.node-client { fill: #111827 !important; stroke: #0ea5e9 !important; }
+.docker-guide-svg rect.node-switch { fill: #111827 !important; stroke: #10b981 !important; }
+.docker-guide-svg rect.node-server { fill: rgba(99, 102, 241, 0.04) !important; stroke: #6366f1 !important; }
+.docker-guide-svg rect.node-nginx { fill: #1f2937 !important; stroke: #f43f5e !important; }
+.docker-guide-svg rect.node-docker { fill: #1f2937 !important; stroke: #38bdf8 !important; }
+
+.docker-guide-svg rect.sym-available { fill: #1f2937 !important; stroke: #10b981 !important; }
+.docker-guide-svg rect.sym-enabled { fill: #1f2937 !important; stroke: #6366f1 !important; }
+.docker-guide-svg rect.sym-file-avail { fill: #065f46 !important; stroke: #34d399 !important; }
+.docker-guide-svg rect.sym-file-enab { fill: #312e81 !important; stroke: #818cf8 !important; }
+
+/* ===== TERMINAL PROMPT BOX FOR SLIDES ===== */
+.terminal-prompt-box {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace !important;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+  display: block !important;
+}
+.slide-content ul li.terminal-prompt-box::before {
+  display: none !important; /* Hide slide bullet ▸ */
+}
+.terminal-header {
+  background: #0f172a !important;
+  padding: 8px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border-bottom: 1px solid #1e293b !important;
+}
+.terminal-dot {
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+}
+.terminal-dot.red { background: #ef4444 !important; }
+.terminal-dot.yellow { background: #eab308 !important; }
+.terminal-dot.green { background: #22c55e !important; }
+.terminal-title {
+  color: #94a3b8 !important;
+  font-size: 11px !important;
+  margin-left: 6px !important;
+  font-family: sans-serif !important;
+}
+.terminal-body {
+  padding: 12px 16px !important;
+  margin: 0 !important;
+  overflow-x: auto !important;
+}
+.terminal-body code {
+  color: #38bdf8 !important;
+  font-size: clamp(16px, 1.8vw, 24px) !important;
+  white-space: pre-wrap !important;
 }
 

@@ -1,0 +1,137 @@
+{
+  "week": "3a",
+  "title": "คู่มือการติดตั้ง Ubuntu Server 26.04 LTS และการติดตั้งแอปพลิเคชันด้วย Docker",
+  "topic": "Ubuntu 26.04 & Docker Setup",
+  "description": "เรียนรู้วิธีการติดตั้งและตั้งค่า Ubuntu Server 26.04 LTS, การตั้งค่าเครือข่ายวง LAN ด้วย Static IP (Netplan), การทำ Nginx Reverse Proxy (Symbolic Link), และการติดตั้ง Docker & Docker Compose ในตอนท้าย",
+  "learningObjectives": [
+    "ตั้งค่า Static IP (Netplan) บน Ubuntu Server 26.04 ได้อย่างถูกต้อง",
+    "ตั้งค่า Nginx Reverse Proxy และทำ Symbolic Link เพื่อเปิดใช้งาน Site ได้",
+    "ติดตั้ง Docker Engine และ Docker Compose บน Ubuntu 26.04 ได้ในขั้นตอนการ Deploy ท้ายสุด",
+    "เขียนไฟล์ docker-compose.yml เพื่อรัน Web Application ได้สำเร็จ"
+  ],
+  "slides": [
+    {
+      "id": "w3a-s1",
+      "type": "cover",
+      "title": "UBUNTU SERVER & DOCKER DEPLOYMENT",
+      "subtitle": "คู่มือการติดตั้ง Ubuntu Server 26.04 LTS และการติดตั้งแอปพลิเคชันด้วย Docker",
+      "tag": "สัปดาห์ที่ 3 (วันอังคาร - 3 ชม.)",
+      "body": "คู่มือภาคปฏิบัติการตั้งค่าระบบแม่ข่ายสำหรับเว็บแอปพลิเคชันและการควบคุมเครือข่ายวง LAN ผ่าน Switch สำหรับแผนกเทคโนโลยีสารสนเทศ วิทยาลัยอาชีวศึกษานครปฐม",
+      "speakerNotes": "สวัสดีครับนักศึกษา ปวส.1 วันนี้เราจะเรียนรู้วิธีการเปลี่ยนโฮสต์ธรรมดาให้กลายเป็น Web Server โดยเน้นการตั้งค่าเครือข่ายและระบบ Nginx Proxy ก่อน จากนั้นเราจะทำการแพ็กและ Deploy แอปพลิเคชันที่พัฒนาเสร็จเรียบร้อยแล้วด้วย Docker ในตอนท้ายครับ"
+    },
+    {
+      "id": "w3a-s2",
+      "type": "content",
+      "title": "1. ภาพรวมระบบและ Network Topology",
+      "tag": "Network Topology",
+      "items": [
+        "🌐 Router (192.168.1.1): ทำหน้าที่แจก IP (DHCP), เชื่อมต่ออินเทอร์เน็ต และเป็น Default Gateway",
+        "🎛️ Unmanaged Switch: อุปกรณ์เชื่อมโยงสาย LAN ของคอมพิวเตอร์ทุกเครื่องในห้องปฏิบัติการให้อยู่ในวงเดียวกัน",
+        "🖥️ Ubuntu Server 26.04 (192.168.1.10): ต้องกำหนดเป็น Static IP (ไม่เปลี่ยนหลังบูต) เพื่อรองรับคำขอ",
+        "💻 Client PC (192.168.1.100+): เครื่องคอมพิวเตอร์ของนักเรียน สำหรับใช้เปิด Browser เข้ามาทดสอบระบบ"
+      ],
+      "speakerNotes": "ย้ำเสมอว่า Switch ทำงานบน Layer 2 หน้าที่ของมันคือทำให้ทุกเครื่องเชื่อมถึงกันในวงแลนเดียวกันครับ"
+    },
+    {
+      "id": "w3a-s3",
+      "type": "content",
+      "title": "2. การตั้งค่า Static IP ด้วย Netplan",
+      "tag": "Netplan Config",
+      "items": [
+        "🔍 ตรวจสอบการ์ดแลนปัจจุบัน: รันคำสั่ง `ip addr show` หรือ `ip a` เพื่อหาชื่อการ์ดแลน (เช่น enp3s0)",
+        "📂 แก้ไขไฟล์คอนฟิก Netplan: รันคำสั่ง `sudo nano /etc/netplan/50-cloud-init.yaml`",
+        "🔒 ตั้งค่าสิทธิ์ความปลอดภัย: Ubuntu 26.04 บังคับใช้ Permission `600` ด้วยคำสั่ง `sudo chmod 600 /etc/netplan/50-cloud-init.yaml`",
+        "⚡ คำสั่งเริ่มทำงานใหม่: รัน `sudo netplan apply` เพื่อให้ค่าเครือข่ายมีผลทันที"
+      ],
+      "speakerNotes": "ระวังเรื่องการย่อหน้า (Indentation) ในไฟล์ YAML นะครับ ต้องใช้เว้นวรรค (Space) ห้ามกด Tab เด็ดขาดไม่งั้นจะ Apply ไม่ผ่านครับ"
+    },
+    {
+      "id": "w3a-s4",
+      "type": "content",
+      "title": "3. การติดตั้ง Nginx Reverse Proxy และสถาปัตยกรรมลิงก์ไฟล์",
+      "tag": "Nginx & Symlink",
+      "items": [
+        "📦 ติดตั้ง Nginx เว็บเซิร์ฟเวอร์ด่านหน้า: รันคำสั่ง `sudo apt update && sudo apt install -y nginx` เพื่อใช้บริการด่านหน้าในการรับคำขอพอร์ต 80",
+        "📂 คลังเก็บค่า (sites-available): โฟลเดอร์เก็บไฟล์ตั้งค่าที่มีอยู่ทั้งหมดของระบบ เช่น `/etc/nginx/sites-available/webapp` ชี้ไปที่พอร์ต 3000",
+        "📂 ส่วนที่ทำงานจริง (sites-enabled): โฟลเดอร์ที่ Nginx จะใช้อ่านค่าทำงานจริง ซึ่งเราต้องทำ 'ตัวลิงก์เชื่อมทาง'",
+        "🔗 คำสั่งเชื่อมโยงลิงก์ (Symbolic Link): `sudo ln -sf /etc/nginx/sites-available/webapp /etc/nginx/sites-enabled/`",
+        "🧹 ปิดใช้งานระบบเก่าและทดสอบ: ลบ default config `sudo rm -f /etc/nginx/sites-enabled/default` ➔ ทดสอบ `sudo nginx -t` ➔ โหลดใหม่ `sudo systemctl reload nginx`"
+      ],
+      "speakerNotes": "การเตรียม Nginx Reverse Proxy ไว้ล่วงหน้าเปรียบเสมือนการจองคิวรับพอร์ต 80 เพื่อรอส่งต่อไปยังพอร์ต 3000 ซึ่งแอปพลิเคชันที่เราพัฒนาเสร็จจะรันขึ้นมาในภายหลังผ่าน Docker ครับ"
+    },
+    {
+      "id": "w3a-s5",
+      "type": "content",
+      "title": "4. การติดตั้ง Docker Engine & Docker Compose",
+      "tag": "Docker Install",
+      "items": [
+        "📦 ดาวน์โหลด Repository & Key: เพิ่มคีย์ GPG และรายการซอฟต์แวร์ต้นทางทางการของ Docker ลงในระบบ Ubuntu 26.04",
+        "🚀 คำสั่งติดตั้งม้วนเดียวจบ: `sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin`",
+        "🔑 จัดสิทธิ์ผู้ใช้โดยไม่ต้องพิมพ์ sudo: `sudo usermod -aG docker $USER` เพื่อให้นักเรียนควบคุม docker ได้อย่างสะดวก",
+        "💡 หมายเหตุสำคัญ: เมื่อเพิ่มกลุ่ม docker แล้ว ให้นักเรียนล็อกเอาท์ออกแล้วล็อกอินใหม่ หรือรัน `newgrp docker` เพื่อรับสิทธิ์"
+      ],
+      "speakerNotes": "เมื่อเตรียมระบบเครือข่ายและเว็บเซิร์ฟเวอร์เสร็จสิ้นแล้ว ในช่วงสุดท้ายนี้เราจะติดตั้งระบบคอนเทนเนอร์ Docker เพื่อนำเว็บแอปพลิเคชันที่เราเขียนเสร็จแล้วรันขึ้นมาใช้งานจริงบนระบบโปรดักชันครับ"
+    },
+    {
+      "id": "w3a-s6",
+      "type": "content",
+      "title": "5. การเขียนไฟล์ docker-compose.yml และเริ่มรันระบบ",
+      "tag": "Docker Compose",
+      "items": [
+        "📂 สร้างโฟลเดอร์สำหรับแอปพลิเคชัน: `mkdir -p ~/projects/webapp && cd ~/projects/webapp` และย้ายไฟล์แอปที่พัฒนาแล้วมาที่นี่",
+        "📝 สร้างไฟล์ docker-compose.yml: `nano docker-compose.yml` และระบุโครงสร้างการทำงาน",
+        "🏗️ กำหนดชื่อคอนเทนเนอร์เป็น website: ใช้คำสั่ง `container_name: website` เพื่อความง่ายในการระบุชื่อคอนเทนเนอร์",
+        "🔌 เปิดให้บริการพอร์ต 3000: แผนผังพอร์ตระบุ `- \"3000:3000\"` เพื่อส่งต่อข้อมูลจาก Nginx ไปยังแอปพลิเคชันภายในตู้คอนเทนเนอร์"
+      ],
+      "speakerNotes": "ไฟล์ docker-compose.yml จะควบคุมการสร้างคอนเทนเนอร์ Next.js รันที่พอร์ต 3000 อยู่ในเบื้องหลัง เพื่อให้ Nginx ที่เราตั้งค่าไว้ตอนแรกเชื่อมหาได้ทันที"
+    },
+    {
+      "id": "w3a-s7",
+      "type": "content",
+      "title": "6. การตั้งค่า UFW Firewall และทดสอบผ่าน Client",
+      "tag": "Security & Testing",
+      "items": [
+        "🛡️ ป้องกันระบบด้วย UFW: สั่ง `sudo ufw allow OpenSSH` และ `sudo ufw allow 'Nginx Full'` เพื่อเปิดพอร์ต 22, 80, 443",
+        "⚡ คำสั่งเปิดใช้งาน: `sudo ufw enable` จากนั้นตรวจสถานะผ่าน `sudo ufw status verbose`",
+        "💻 เปิดหน้าเว็บจากเครื่อง Client: ที่คอมพิวเตอร์วินโดวส์ของนักเรียน เปิดเบราว์เซอร์แล้วระบุ IP ของ Server: `http://192.168.1.10`",
+        "🎉 หน้าผลลัพธ์: จะเห็นหน้าเว็บไซต์ที่พัฒนาขึ้นรันเสร็จสมบูรณ์ผ่าน Docker Container พอร์ต 3000 และให้บริการผ่าน Nginx พอร์ต 80 ทันที!"
+      ],
+      "speakerNotes": "หากเรียกใช้ไอพีแล้วเข้าไม่ได้ ให้ลองปิงดู หรือตรวจสอบพอร์ตและสถานะไฟร์วอลล์ว่าเปิดให้ Nginx ผ่านหรือไม่ตามขั้นตอนวิเคราะห์ระบบเครือข่ายครับ"
+    },
+    {
+      "id": "w3a-s8",
+      "type": "lab",
+      "title": "Lab 03 — ติดตั้ง Ubuntu Server 26.04 & Deploy Web ด้วย Docker",
+      "tag": "Hands-on Lab",
+      "duration": "3 ชั่วโมง",
+      "objectives": [
+        "ติดตั้งระบบการ์ดเครือข่าย Static IP `192.168.1.10` ผ่านไฟล์ Netplan",
+        "สร้าง Nginx config และผูกเชื่อม Symbolic Link ไปยัง sites-enabled ให้เรียบร้อย",
+        "ติดตั้งโปรแกรมระบบคอนเทนเนอร์ Docker & Docker Compose สำเร็จในช่วงท้าย",
+        "Deploy Web Application ผ่านไฟล์ docker-compose.yml ไปยังพอร์ต 3000"
+      ],
+      "steps": [
+        "ตั้งค่าไฟล์เครือข่าย `/etc/netplan/50-cloud-init.yaml` ให้เป็น Static IP",
+        "สร้าง Nginx config ชี้ไปยัง `http://localhost:3000` เชื่อมต่อ Symlink และรัน `nginx -t` ผ่าน",
+        "ติดตั้ง Docker จากคำแนะนำ และจัดสิทธิ์ผู้ใช้ด้วยคำสั่ง `usermod` ในช่วงขั้นตอนถัดมา",
+        "โคลนหรือสร้างโปรเจกต์เว็บใน `~/projects/webapp` รันขึ้นระบบด้วย `docker compose up -d --build`",
+        "ทดสอบเรียกใช้งานจากเบราว์เซอร์เครื่อง Client โดยป้อน `http://192.168.1.10` ให้แสดงหน้าเว็บได้สำเร็จ"
+      ],
+      "speakerNotes": "ให้นักศึกษาส่งลิงก์ภาพผลการใช้งานแอปพลิเคชันจากหน้าเว็บของ Client และส่งรายการคำสั่งสำคัญที่ใช้จัดส่งระบบแม่ข่ายทั้งหมดครับ"
+    },
+    {
+      "id": "w3a-s9",
+      "type": "summary",
+      "title": "สรุปสัปดาห์ที่ 3",
+      "tag": "Week Summary",
+      "items": [
+        "✅ Static IP (Netplan): ป้องกันหมายเลข IP ของเครื่องเซิร์ฟเวอร์เปลี่ยนทิศทางในวงแลนหลังบูตเปิดใหม่",
+        "✅ Nginx Reverse Proxy (Symlink): เชื่อมคอนฟิก Sites-available ไปยัง Sites-enabled รับข้อมูลพอร์ต 80 รอส่งต่อไปยังแอปพอร์ต 3000",
+        "✅ Docker Container & Compose: คอนเทนเนอร์รัน Next.js/Web App (website) ที่พัฒนาเสร็จสิ้น นำมารันจริงอย่างเป็นระบบในตอนท้ายสุด",
+        "✅ LAN Verification: ทดสอบปิง เรียกหน้าเว็บ และเช็คการผ่านเข้าพอร์ตผ่านเกณฑ์ในวิชาปฏิบัติการเครือข่าย",
+        "📝 ส่ง Lab Report: ภาพถ่ายผลหน้าจอจากเครื่อง Client พร้อมบันทึกคำสั่งที่ทำสำเร็จส่งภายในวันถัดไป"
+      ],
+      "speakerNotes": "คำถามชวนคิดก่อนเลิกเรียน: หากเรามีเครื่อง Server ปลายทางแยกต่างหากในห้องแล็บ Nginx จะชี้ Reverse Proxy แตกต่างจาก localhost อย่างไร?"
+    }
+  ]
+}
