@@ -1,0 +1,11 @@
+﻿Question,Answer 1,Answer 2,Answer 3,Answer 4,Time limit (seconds),Correct answer(s),,
+DHCP ย่อมาจากคำว่าอะไร?,Dynamic Host Configuration Protocol,Domain Host Control Program,Data Host Connection Protocol,Dynamic Hosting Control Platform,20,1,,
+DHCP Server ทำหน้าที่สำคัญอะไรในเครือข่าย?,แปลงชื่อโดเมนเป็น IP Address,แจกจ่าย IP Address และค่าเครือข่ายอัตโนมัติ,รับส่งจดหมายอีเมลของโดเมน,จัดเก็บไฟล์ของหน้าเว็บไซต์,20,2,,
+ทำไมเครื่องคอมพิวเตอร์ลูกข่าย (Client) จึงต้องมีระยะเวลาเช่าใช้งาน IP Address (Lease Time)?,เพื่อช่วยเร่งความเร็วในการเชื่อมต่อ Wi-Fi,เพื่อหมุนเวียนนำ IP Address กลับมาแจกจ่ายใหม่เมื่ออุปกรณ์อื่นไม่ได้เชื่อมต่อแล้ว,เพื่อจำกัดเวลาเรียนของนักศึกษาในห้องเรียน,เพื่อป้องกันการติดตั้งโปรแกรมแปลกปลอมในคอมพิวเตอร์,20,2,,
+ในกระบวนการ DORA ของ DHCP ขั้นตอนแรกสุดที่ Client จะทำการ Broadcast เครือข่ายเพื่อค้นหา DHCP Server คืออะไร?,DHCP Offer,DHCP Request,DHCP Discover,DHCP Acknowledgment,20,3,,
+เพราะเหตุใดในวงแลน (LAN) เดียวกันจึงควรมี DHCP Server เพียงตัวเดียว?,เพื่อประหยัดพลังงานเครื่องแม่ข่าย,เพื่อควบคุมสิทธิ์ความปลอดภัยของผู้ใช้อินเทอร์เน็ต,เพื่อป้องกันปัญหาการชนกันหรือแจกจ่าย IP Address ซ้ำซ้อน (IP Conflict),เพื่อเพิ่มความเร็วในการโอนถ่ายข้อมูลภายในระบบ,20,3,,
+การตั้งค่า DHCP ในข้อใดเป็นตัวกำหนดว่าช่วงหมายเลข IP Address ใดที่จะถูกนำมาแจกจ่ายแก่ Client?,Scope,Lease Time,Reservations,Default Gateway,20,1,,
+หากต้องการล็อกหมายเลข IP เดิมให้เครื่องพิมพ์ (Printer) ในเครือข่ายตลอดเวลา ควรใช้ฟังก์ชันใดใน DHCP?,Scope Expansion,Lease Time Extension,Reservations (การจอง IP จาก MAC Address),DHCP Relay,20,3,,
+DNS ย่อมาจากคำว่าอะไร?,Domain Name System,Dynamic Name Service,Data Network System,Digital Name Server,20,1,,
+ข้อใดคือจุดประสงค์หลักของการมีระบบ DNS (Domain Name System) ในเครือข่ายคอมพิวเตอร์?,เพื่อสแกนไวรัสในการรับส่งข้อมูลผ่านอีเมล,เพื่อแปลงชื่อโดเมนที่มนุษย์เข้าใจง่ายเป็น IP Address ที่อุปกรณ์คอมพิวเตอร์เข้าใจ,เพื่อเพิ่มความปลอดภัยจากการถูกแฮกรหัสผ่าน,เพื่อป้องกันไม่ให้แอปพลิเคชันอื่นเข้าใช้งานเน็ตเวิร์ก,20,2,,
+DNS Server ประเภทใดทำหน้าที่รับคำร้องขอสืบค้นจากผู้ใช้ แล้วออกไปค้นหาคำตอบจาก Root, TLD, และ Authoritative แทนเราจนได้ IP Address?,Authoritative DNS Server,Recursive DNS Server,Secondary DNS Server,Master DNS Server,20,2

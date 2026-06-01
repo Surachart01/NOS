@@ -32,5 +32,16 @@
         "topic": "System Post-Installation & Basic Commands"
       }
     ]
+  },
+  {
+    "weekLabel": "สัปดาห์ที่ 3: บริการเครือข่ายพื้นฐาน DNS & DHCP",
+    "sessions": [
+      {
+        "id": "3a",
+        "displayNum": "อ.",
+        "title": "ระบบ DNS และ DHCP บริการเครือข่ายพื้นฐานที่ต้องรู้",
+        "topic": "DNS & DHCP Services"
+      }
+    ]
   }
 ]

@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 /* --- Types --- */
 interface SlideData {
@@ -14,6 +14,7 @@ interface SlideData {
   duration?: string;
   objectives?: string[];
   steps?: string[];
+  csvPath?: string;
 }
 interface WeekData {
   week: string; title: string; topic: string; description: string;
@@ -97,6 +98,1592 @@ function TwoColSlide({ s }: { s: SlideData }) {
             <ul>{col.items.map((item, j) => <li key={j}>{item}</li>)}</ul>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function DhcpHotelAnimation({ s }: { s: SlideData }) {
+  // State for hotel simulation
+  const [rooms, setRooms] = useState([
+    { id: 101, ip: '192.168.1.101', occupiedBy: null as string | null },
+    { id: 102, ip: '192.168.1.102', occupiedBy: null as string | null },
+    { id: 103, ip: '192.168.1.103', occupiedBy: null as string | null },
+    { id: 104, ip: '192.168.1.104', occupiedBy: null as string | null },
+  ]);
+
+  const [queue, setQueue] = useState([
+    { name: 'โทรศัพท์มือถือ', icon: '📱' },
+    { name: 'โน้ตบุ๊ก', icon: '💻' },
+    { name: 'แท็บเล็ต', icon: '📟' },
+  ]);
+
+  const [checkedIn, setCheckedIn] = useState<{ name: string; icon: string; room: number; ip: string }[]>([]);
+  const [activeStep, setActiveStep] = useState<'D' | 'O' | 'R' | 'A' | null>(null);
+  const [currentDevice, setCurrentDevice] = useState<{ name: string; icon: string } | null>(null);
+  const [currentRoom, setCurrentRoom] = useState<{ id: number; ip: string; occupiedBy: string | null } | null>(null);
+
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [stepIndex, setStepIndex] = useState(0);
+
+  const resetSimulation = () => {
+    setRooms([
+      { id: 101, ip: '192.168.1.101', occupiedBy: null as string | null },
+      { id: 102, ip: '192.168.1.102', occupiedBy: null as string | null },
+      { id: 103, ip: '192.168.1.103', occupiedBy: null as string | null },
+      { id: 104, ip: '192.168.1.104', occupiedBy: null as string | null },
+    ]);
+    setQueue([
+      { name: 'โทรศัพท์มือถือ', icon: '📱' },
+      { name: 'โน้ตบุ๊ก', icon: '💻' },
+      { name: 'แท็บเล็ต', icon: '📟' },
+    ]);
+    setCheckedIn([]);
+    setActiveStep(null);
+    setCurrentDevice(null);
+    setCurrentRoom(null);
+    setStepIndex(0);
+  };
+
+  const handleNextStep = useCallback(() => {
+    // If no devices left and not in an active step, reset after a delay
+    if (queue.length === 0 && !activeStep && stepIndex === 0) {
+      resetSimulation();
+      return;
+    }
+
+    if (stepIndex === 0) {
+      // D - Discover: Pick next device
+      if (queue.length > 0) {
+        const nextDev = queue[0];
+        setCurrentDevice(nextDev);
+        setQueue(queue.slice(1));
+        
+        const freeRoomIndex = rooms.findIndex(r => r.occupiedBy === null);
+        if (freeRoomIndex === -1) {
+          setIsPlaying(false);
+          alert("ขออภัยค่ะ IP Address เต็มคลังแล้ว!");
+          return;
+        }
+        const room = rooms[freeRoomIndex];
+        setCurrentRoom(room);
+        setActiveStep('D');
+        setStepIndex(1);
+      }
+    } else if (stepIndex === 1) {
+      // O - Offer
+      setActiveStep('O');
+      setStepIndex(2);
+    } else if (stepIndex === 2) {
+      // R - Request
+      setActiveStep('R');
+      setStepIndex(3);
+    } else if (stepIndex === 3) {
+      // A - ACK
+      setActiveStep('A');
+      setStepIndex(4);
+    } else if (stepIndex === 4) {
+      // Finalize ACK
+      if (currentRoom && currentDevice) {
+        setRooms(prevRooms => prevRooms.map(r => r.id === currentRoom.id ? { ...r, occupiedBy: currentDevice.name } : r));
+        setCheckedIn(prevChecked => [...prevChecked, { ...currentDevice, room: currentRoom.id, ip: currentRoom.ip }]);
+      }
+      setActiveStep(null);
+      setCurrentDevice(null);
+      setCurrentRoom(null);
+      setStepIndex(0);
+    }
+  }, [queue, activeStep, stepIndex, rooms, currentRoom, currentDevice]);
+
+  // Effect for Auto-play
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    // Use 2.5 seconds interval for easy visual reading
+    const interval = setTimeout(() => {
+      handleNextStep();
+    }, 2500);
+
+    return () => clearTimeout(interval);
+  }, [isPlaying, handleNextStep]);
+
+  // CSS animations
+  const packetAnimation = activeStep === 'D' || activeStep === 'R' 
+    ? 'travel-to-server-anim 2s infinite ease-in-out'
+    : activeStep === 'O' || activeStep === 'A'
+    ? 'travel-to-client-anim 2s infinite ease-in-out'
+    : 'none';
+
+  const packetEmoji = activeStep === 'D' ? '📣' 
+    : activeStep === 'O' ? '🛌' 
+    : activeStep === 'R' ? '✉️' 
+    : activeStep === 'A' ? '🔑' 
+    : '';
+
+  return (
+    <div className="slide slide-content slide-dhcp-hotel" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes pulse-box {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.02); }
+          100% { transform: scale(1); }
+        }
+        @keyframes fade-in-box {
+          from { opacity: 0; transform: translateY(3px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes travel-to-server-anim {
+          0% { transform: translateX(0); opacity: 0; }
+          15% { opacity: 1; }
+          85% { opacity: 1; }
+          100% { transform: translateX(110px); opacity: 0; }
+        }
+        @keyframes travel-to-client-anim {
+          0% { transform: translateX(110px); opacity: 0; }
+          15% { opacity: 1; }
+          85% { opacity: 1; }
+          100% { transform: translateX(0); opacity: 0; }
+        }
+        .animate-pulse-box {
+          animation: pulse-box 1.5s infinite;
+        }
+        .animate-fade-in-box {
+          animation: fade-in-box 0.3s ease-out;
+        }
+      `}} />
+      <div className="slide-tag">{s.tag}</div>
+      <h2>{s.title}</h2>
+      
+      <div style={{ display: 'flex', gap: '25px', flex: 1, overflow: 'visible', marginTop: '5px', minHeight: '0' }}>
+        {/* Left Column: Theory Text & DORA active pipeline */}
+        <div style={{ flex: 0.9, minWidth: '340px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflowY: 'auto', maxHeight: '100%', paddingRight: '5px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+            {s.items?.map((item, i) => {
+              const isSubItem = item.trim().startsWith("-");
+              return (
+                <div key={i} style={{ 
+                  lineHeight: '1.4',
+                  paddingLeft: isSubItem ? '15px' : '0',
+                  color: isSubItem ? 'var(--text-secondary)' : 'var(--text-primary)',
+                  fontWeight: isSubItem ? 'normal' : 'bold'
+                }}>
+                  {item}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* DORA Pipeline visualizer */}
+          <div style={{ 
+            background: 'var(--bg-card)', 
+            padding: '12px', 
+            borderRadius: '8px', 
+            border: '1px solid var(--border)',
+            marginTop: '10px'
+          }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              ขั้นตอน DORA ที่กำลังทำงาน
+            </div>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
+              <div style={{ 
+                flex: 1, 
+                padding: '6px 4px', 
+                borderRadius: '4px', 
+                textAlign: 'center', 
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease',
+                background: activeStep === 'D' ? 'var(--accent)' : 'var(--bg-elevated)',
+                color: activeStep === 'D' ? 'white' : 'var(--text-secondary)',
+                boxShadow: activeStep === 'D' ? '0 0 10px var(--accent-dim)' : 'none',
+                transform: activeStep === 'D' ? 'scale(1.05)' : 'scale(1)'
+              }}>
+                1. Discover
+              </div>
+              <span style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>➔</span>
+              <div style={{ 
+                flex: 1, 
+                padding: '6px 4px', 
+                borderRadius: '4px', 
+                textAlign: 'center', 
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease',
+                background: activeStep === 'O' ? 'var(--accent)' : 'var(--bg-elevated)',
+                color: activeStep === 'O' ? 'white' : 'var(--text-secondary)',
+                boxShadow: activeStep === 'O' ? '0 0 10px var(--accent-dim)' : 'none',
+                transform: activeStep === 'O' ? 'scale(1.05)' : 'scale(1)'
+              }}>
+                2. Offer
+              </div>
+              <span style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>➔</span>
+              <div style={{ 
+                flex: 1, 
+                padding: '6px 4px', 
+                borderRadius: '4px', 
+                textAlign: 'center', 
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease',
+                background: activeStep === 'R' ? 'var(--accent)' : 'var(--bg-elevated)',
+                color: activeStep === 'R' ? 'white' : 'var(--text-secondary)',
+                boxShadow: activeStep === 'R' ? '0 0 10px var(--accent-dim)' : 'none',
+                transform: activeStep === 'R' ? 'scale(1.05)' : 'scale(1)'
+              }}>
+                3. Request
+              </div>
+              <span style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>➔</span>
+              <div style={{ 
+                flex: 1, 
+                padding: '6px 4px', 
+                borderRadius: '4px', 
+                textAlign: 'center', 
+                fontWeight: 'bold',
+                transition: 'all 0.3s ease',
+                background: activeStep === 'A' ? 'var(--accent)' : 'var(--bg-elevated)',
+                color: activeStep === 'A' ? 'white' : 'var(--text-secondary)',
+                boxShadow: activeStep === 'A' ? '0 0 10px var(--accent-dim)' : 'none',
+                transform: activeStep === 'A' ? 'scale(1.05)' : 'scale(1)'
+              }}>
+                4. ACK
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Visual Hotel Simulation */}
+        <div style={{
+          flex: 1.3,
+          background: 'var(--bg-elevated)',
+          borderRadius: '12px',
+          padding: '18px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          border: '1px solid var(--border)',
+          position: 'relative',
+          minHeight: '400px'
+        }}>
+          {/* Simulation Header with Auto-play Controls */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontWeight: 'bold', color: 'var(--accent)', fontSize: '15px' }}>แอนิเมชันจำลองโรงแรม DHCP</span>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button 
+                onClick={() => setIsPlaying(!isPlaying)}
+                style={{
+                  background: isPlaying ? '#ef4444' : '#22c55e',
+                  color: 'white',
+                  border: 'none',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '13px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+                }}
+              >
+                {isPlaying ? (
+                  <>
+                    <span style={{ fontSize: '10px' }}>❚❚</span> หยุดชั่วคราว
+                  </>
+                ) : (
+                  <>
+                    <span style={{ fontSize: '10px' }}>▶</span> เล่นอัตโนมัติ
+                  </>
+                )}
+              </button>
+              
+              {!isPlaying && (
+                <button 
+                  onClick={handleNextStep}
+                  disabled={queue.length === 0 && !activeStep}
+                  style={{
+                    background: 'var(--accent)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    fontSize: '13px',
+                    opacity: (queue.length === 0 && !activeStep) ? 0.5 : 1
+                  }}
+                >
+                  สเต็ปถัดไป
+                </button>
+              )}
+
+              <button 
+                onClick={resetSimulation}
+                style={{
+                  background: 'var(--bg-card)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  padding: '5px 12px',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold',
+                  fontSize: '13px'
+                }}
+              >
+                รีเซ็ต
+              </button>
+            </div>
+          </div>
+
+          {/* Hotel Grid Area */}
+          <div style={{ display: 'flex', flex: 1, gap: '10px', alignItems: 'stretch', margin: '5px 0', position: 'relative' }}>
+            
+            {/* Left side of simulation: Client devices queue */}
+            <div style={{ flex: 1.1, display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'center', zIndex: 2 }}>
+              
+              {/* Active check-in device */}
+              {currentDevice ? (
+                <div className="animate-pulse-box" style={{
+                  background: 'var(--accent-dim)',
+                  border: '2px solid var(--accent)',
+                  borderRadius: '8px',
+                  padding: '8px',
+                  textAlign: 'center',
+                  position: 'relative'
+                }}>
+                  <div style={{ fontSize: '28px', marginBottom: '2px' }}>{currentDevice.icon}</div>
+                  <div style={{ fontWeight: 'bold', fontSize: '12px' }}>{currentDevice.name}</div>
+                  <div style={{ fontSize: '10px', color: 'var(--accent)', marginTop: '2px', fontWeight: 'bold' }}>
+                    {activeStep === 'D' ? 'กำลังส่งคำขอ...' : activeStep === 'R' ? 'กำลังตอบกลับ...' : 'กำลังคุย...'}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ height: '80px', border: '1px dashed var(--border)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                  ไม่มีอุปกรณ์กำลังเช็คอิน
+                </div>
+              )}
+
+              {/* Waiting Queue */}
+              {queue.length > 0 && (
+                <div style={{ background: 'var(--bg-card)', padding: '8px', borderRadius: '8px', border: '1px dashed var(--border)' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '4px', textAlign: 'center' }}>คิวอุปกรณ์ถัดไป</div>
+                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                    {queue.map((q, idx) => (
+                      <div key={idx} style={{ 
+                        background: 'var(--bg-elevated)', 
+                        padding: '4px 8px', 
+                        borderRadius: '6px',
+                        border: '1px solid var(--border)',
+                        textAlign: 'center'
+                      }}>
+                        <span style={{ fontSize: '16px' }}>{q.icon}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Checked-In Devices */}
+              {checkedIn.length > 0 && (
+                <div style={{ background: 'var(--bg-card)', padding: '8px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                  <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '4px', textAlign: 'center', fontWeight: 'bold' }}>ต่อ Wi-Fi สำเร็จแล้ว</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {checkedIn.map((item, idx) => (
+                      <div key={idx} style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        fontSize: '10px',
+                        background: 'var(--bg-elevated)',
+                        padding: '3px 6px',
+                        borderRadius: '4px',
+                        border: '1px solid var(--border)'
+                      }}>
+                        <span>{item.icon}</span>
+                        <span style={{ fontWeight: 'bold', flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.name}</span>
+                        <span style={{ background: '#22c55e', color: 'white', padding: '1px 3px', borderRadius: '3px', transform: 'scale(0.85)', transformOrigin: 'right' }}>
+                          IP: {item.ip.split('.').slice(-2).join('.')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Middle side: The receptionist / DHCP Server & Traveling packet */}
+            <div style={{ 
+              flex: 0.9, 
+              display: 'flex', 
+              flexDirection: 'column', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              borderLeft: '1px dashed var(--border)',
+              borderRight: '1px dashed var(--border)',
+              padding: '0 5px',
+              position: 'relative'
+            }}>
+              {/* Traveling Packet Animation */}
+              {activeStep && (
+                <div style={{
+                  position: 'absolute',
+                  top: '30%',
+                  fontSize: '24px',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  animation: packetAnimation,
+                  pointerEvents: 'none',
+                  zIndex: 10
+                }}>
+                  {packetEmoji}
+                </div>
+              )}
+
+              <div style={{
+                width: '52px',
+                height: '52px',
+                borderRadius: '50%',
+                background: 'var(--accent)',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '24px',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                zIndex: 2
+              }}>
+                👩‍💼
+              </div>
+              <div style={{ fontWeight: 'bold', fontSize: '12px', marginTop: '4px', textAlign: 'center', zIndex: 2 }}>
+                พนักงานต้อนรับ
+              </div>
+              <div style={{ fontSize: '9px', color: 'var(--text-secondary)', textAlign: 'center', zIndex: 2 }}>
+                (DHCP Server)
+              </div>
+
+              {/* Message Bubble Overlay */}
+              {activeStep && currentDevice && currentRoom && (
+                <div className="animate-fade-in-box" style={{
+                  marginTop: '10px',
+                  background: 'var(--accent-dim)',
+                  border: '1px solid var(--accent)',
+                  borderRadius: '6px',
+                  padding: '6px',
+                  fontSize: '10px',
+                  textAlign: 'center',
+                  width: '100%',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+                  zIndex: 2
+                }}>
+                  {activeStep === 'D' && (
+                    <>
+                      <strong>Discover (D)</strong><br />
+                      ส่งกระจายขอ IP
+                    </>
+                  )}
+                  {activeStep === 'O' && (
+                    <>
+                      <strong>Offer (O)</strong><br />
+                      เสนอห้อง {currentRoom.id}
+                    </>
+                  )}
+                  {activeStep === 'R' && (
+                    <>
+                      <strong>Request (R)</strong><br />
+                      ขอยืนยันห้อง {currentRoom.id}
+                    </>
+                  )}
+                  {activeStep === 'A' && (
+                    <>
+                      <strong>Acknowledge (A)</strong><br />
+                      เช็คอินห้องสำเร็จ!
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Right side of simulation: Hotel Room slots */}
+            <div style={{ flex: 1.1, display: 'flex', flexDirection: 'column', gap: '6px', justifyContent: 'center', zIndex: 2 }}>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', fontWeight: 'bold' }}>
+                ห้องพักและ IP Address
+              </div>
+              {rooms.map(room => {
+                const isTarget = currentRoom && currentRoom.id === room.id && activeStep;
+                return (
+                  <div key={room.id} style={{
+                    background: room.occupiedBy ? 'rgba(239, 68, 68, 0.08)' : isTarget ? 'rgba(59, 130, 246, 0.08)' : 'rgba(34, 197, 94, 0.08)',
+                    border: room.occupiedBy ? '1px solid #ef4444' : isTarget ? '2px solid var(--accent)' : '1px solid #22c55e',
+                    borderRadius: '6px',
+                    padding: '4px 8px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    fontSize: '10px',
+                    transition: 'all 0.3s ease'
+                  }}>
+                    <div>
+                      <div style={{ fontWeight: 'bold' }}>ห้อง {room.id}</div>
+                      <div style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>{room.ip.split('.').slice(-2).join('.')}</div>
+                    </div>
+                    <div style={{
+                      fontWeight: 'bold',
+                      color: room.occupiedBy ? '#ef4444' : '#22c55e',
+                      fontSize: '9px'
+                    }}>
+                      {room.occupiedBy ? `เต็ม (${room.occupiedBy.substring(0, 3)})` : isTarget ? 'เสนอ...' : 'ว่าง'}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          
+          {/* Step description helper */}
+          {activeStep ? (
+            <div style={{ 
+              background: 'var(--bg-card)', 
+              padding: '6px 10px', 
+              borderRadius: '6px', 
+              fontSize: '11px',
+              border: '1px solid var(--border)',
+              textAlign: 'center',
+              lineHeight: '1.3'
+            }}>
+              {activeStep === 'D' && <span><strong>ขั้นตอนที่ 1 (Discover):</strong> Client ตะโกนถาม 📣 หา DHCP Server</span>}
+              {activeStep === 'O' && <span><strong>ขั้นตอนที่ 2 (Offer):</strong> DHCP Server เสนอจัดหา 🛌 IP Address ว่างให้</span>}
+              {activeStep === 'R' && <span><strong>ขั้นตอนที่ 3 (Request):</strong> Client ส่งเอกสาร ✉️ ยืนยันที่จะตกลงรับ IP นี้</span>}
+              {activeStep === 'A' && <span><strong>ขั้นตอนที่ 4 (Acknowledge):</strong> Server ส่งมอบกุญแจ 🔑 มอบ IP ให้ไปใช้เชื่อมต่อเน็ต</span>}
+            </div>
+          ) : (
+            <div style={{ 
+              background: 'var(--bg-card)', 
+              padding: '6px 10px', 
+              borderRadius: '6px', 
+              fontSize: '11px',
+              border: '1px solid var(--border)',
+              textAlign: 'center',
+              color: 'var(--text-secondary)'
+            }}>
+              {queue.length === 0 ? 'เชื่อมต่ออุปกรณ์ครบหมดแล้ว! แอนิเมชันจะวนรอบรีเซ็ตใหม่ในครู่เดียว...' : 'ระบบกำลังจำลองการทำงานของ DHCP คลื่น DORA อัตโนมัติ...'}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InteractiveActivitySlide({ s }: { s: SlideData }) {
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [act2Order, setAct2Order] = useState<number[]>([]);
+  const [revealedAct3, setRevealedAct3] = useState<boolean>(false);
+  const [act5QuestionIdx, setAct5QuestionIdx] = useState<number>(0);
+  const [selectedOptionAct5, setSelectedOptionAct5] = useState<string | null>(null);
+  const [act6Answers, setAct6Answers] = useState<{[key: number]: boolean}>({});
+
+  // Reset states when slide changes
+  useEffect(() => {
+    setSelectedOption(null);
+    setAct2Order([]);
+    setRevealedAct3(false);
+    setAct5QuestionIdx(0);
+    setSelectedOptionAct5(null);
+    setAct6Answers({});
+  }, [s.id]);
+
+  const handleAct2Click = (num: number) => {
+    if (act2Order.includes(num)) {
+      setAct2Order(act2Order.filter(n => n !== num));
+    } else {
+      if (act2Order.length < 4) {
+        setAct2Order([...act2Order, num]);
+      }
+    }
+  };
+
+  const renderAct1 = () => {
+    // กิจกรรม 1: วิเคราะห์เหตุการณ์ IP Address ชนกัน
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+        {/* Top visual graphic of the clash */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '40px',
+          background: 'rgba(239, 68, 68, 0.03)',
+          padding: '20px',
+          borderRadius: '12px',
+          border: '2px dashed #ef4444',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
+          {/* Computer A */}
+          <div style={{ textAlign: 'center' }}>
+            <span style={{ fontSize: '42px' }}>💻</span>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)', marginTop: '4px' }}>เครื่องคอมพิวเตอร์ A</div>
+            <div style={{ background: '#ef4444', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', marginTop: '4px', fontWeight: 'bold' }}>
+              IP: 192.168.1.10
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '24px' }}>🎛️</span>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Switch</div>
+            <div style={{ fontSize: '18px', animation: 'pulse-box 1s infinite', color: '#ef4444', fontWeight: 'bold', textShadow: '0 0 8px rgba(239,68,68,0.3)' }}>
+              💥 IP Conflict! 💥
+            </div>
+          </div>
+
+          {/* Computer B */}
+          <div style={{ textAlign: 'center' }}>
+            <span style={{ fontSize: '42px' }}>💻</span>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)', marginTop: '4px' }}>เครื่องคอมพิวเตอร์ B</div>
+            <div style={{ background: '#ef4444', color: 'white', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', marginTop: '4px', fontWeight: 'bold' }}>
+              IP: 192.168.1.10
+            </div>
+          </div>
+        </div>
+
+        {/* Question */}
+        <div style={{ fontSize: '16px', fontWeight: 'bold', textAlign: 'center', color: 'var(--text-primary)', lineHeight: '1.4' }}>
+          หากเครื่องคอมพิวเตอร์ 2 เครื่องในวงแลนเดียวกัน ได้รับการตั้งหมายเลข IP Address เดียวกัน (เช่น 192.168.1.10) พร้อมกัน จะเกิดอะไรขึ้น?
+        </div>
+
+        {/* Options */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {[
+            { key: 'A', text: 'ก) คอมพิวเตอร์ทั้งสองเครื่องสามารถใช้งานและแชร์ข้อมูลกันได้ตามปกติ', isCorrect: false },
+            { key: 'B', text: 'ข) เกิดปัญหา IP Address ชนกัน (IP Conflict) ทำให้ไม่สามารถสื่อสารในเครือข่ายได้', isCorrect: true },
+            { key: 'C', text: 'ค) ระบบเครือข่ายจะปิดเครื่องคอมพิวเตอร์เครื่องที่สองโดยอัตโนมัติ', isCorrect: false }
+          ].map(opt => {
+            const isSelected = selectedOption === opt.key;
+            return (
+              <button
+                key={opt.key}
+                onClick={() => setSelectedOption(opt.key)}
+                style={{
+                  background: isSelected ? (opt.isCorrect ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)') : 'var(--bg-elevated)',
+                  border: isSelected ? (opt.isCorrect ? '2px solid #22c55e' : '2px solid #ef4444') : '1px solid var(--border)',
+                  borderRadius: '10px',
+                  padding: '14px 20px',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  fontWeight: isSelected ? 'bold' : 'normal',
+                  color: 'var(--text-primary)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
+                }}
+              >
+                {opt.text}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Feedback Panel */}
+        {selectedOption && (
+          <div className="animate-fade-in-box" style={{
+            background: selectedOption === 'B' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            border: selectedOption === 'B' ? '1px solid #22c55e' : '1px solid #ef4444',
+            padding: '12px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            textAlign: 'center',
+            fontWeight: 'bold'
+          }}>
+            {selectedOption === 'B' ? (
+              <span style={{ color: '#22c55e' }}>ถูกต้อง! 🎉 เมื่อ IP Address ชนกัน (IP Conflict) จะทำให้อุปกรณ์สับสน ส่งข้อมูลไม่ถูกเครื่อง และไม่สามารถเชื่อมต่อสื่อสารในเครือข่ายได้!</span>
+            ) : (
+              <span style={{ color: '#ef4444' }}>ยังไม่ถูกใจครับ! ลองพิจารณาผลกระทบด้านความขัดแย้งของหมายเลขที่ระบุปลายทางดูอีกทีนะ</span>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderAct2 = () => {
+    // กิจกรรม 2: เรียงลำดับ DORA Challenge
+    const items = [
+      { id: 1, name: 'Request (ขอยืนยันใช้ IP)' },
+      { id: 2, name: 'Discover (ค้นหาเซิร์ฟเวอร์)' },
+      { id: 3, name: 'Acknowledge (อนุมัติส่งมอบ)' },
+      { id: 4, name: 'Offer (เสนอหมายเลข IP)' }
+    ];
+
+    const isCorrectOrder = act2Order.length === 4 && act2Order[0] === 2 && act2Order[1] === 4 && act2Order[2] === 1 && act2Order[3] === 3;
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+        <div style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center' }}>
+          เรียงลำดับกระบวนการ DORA ของ DHCP ให้ถูกต้อง!
+        </div>
+
+        {/* The block buttons */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+          {items.map(item => {
+            const index = act2Order.indexOf(item.id);
+            const isSelected = index !== -1;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleAct2Click(item.id)}
+                style={{
+                  background: isSelected ? 'var(--accent)' : 'var(--bg-elevated)',
+                  border: isSelected ? '2px solid var(--accent)' : '1px solid var(--border)',
+                  color: isSelected ? 'white' : 'var(--text-primary)',
+                  padding: '14px',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <span>{item.name}</span>
+                {isSelected && (
+                  <span style={{
+                    background: 'white',
+                    color: 'var(--accent)',
+                    width: '20px',
+                    height: '20px',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px'
+                  }}>
+                    {index + 1}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Order Display */}
+        <div style={{
+          background: 'var(--bg-elevated)',
+          padding: '15px',
+          borderRadius: '12px',
+          border: '1px dashed var(--border)',
+          minHeight: '60px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          flexWrap: 'wrap'
+        }}>
+          {act2Order.length === 0 ? (
+            <span style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>คลิกเลือกบล็อกด้านบนตามลำดับ...</span>
+          ) : (
+            act2Order.map((id, idx) => {
+              const item = items.find(it => it.id === id);
+              return (
+                <React.Fragment key={id}>
+                  {idx > 0 && <span style={{ color: 'var(--text-secondary)' }}>➔</span>}
+                  <span style={{
+                    background: 'var(--accent-dim)',
+                    border: '1px solid var(--accent)',
+                    color: 'var(--accent)',
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: 'bold'
+                  }}>
+                    {item?.name.split(' ')[0]}
+                  </span>
+                </React.Fragment>
+              );
+            })
+          )}
+        </div>
+
+        {/* Controls and Feedback */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button
+            onClick={() => setAct2Order([])}
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              padding: '6px 16px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: 'bold'
+            }}
+          >
+            ล้างลำดับ
+          </button>
+          
+          <button
+            onClick={() => setAct2Order([2, 4, 1, 3])}
+            style={{
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-secondary)',
+              padding: '6px 16px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: 'bold'
+            }}
+          >
+            เฉลยลำดับ
+          </button>
+        </div>
+
+        {act2Order.length === 4 && (
+          <div className="animate-fade-in-box" style={{
+            background: isCorrectOrder ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+            border: isCorrectOrder ? '1px solid #22c55e' : '1px solid #ef4444',
+            padding: '10px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            textAlign: 'center',
+            fontWeight: 'bold'
+          }}>
+            {isCorrectOrder ? (
+              <span style={{ color: '#22c55e' }}>ถูกต้อง! 🎉 ลำดับ D-O-R-A: Discover ➔ Offer ➔ Request ➔ Acknowledge</span>
+            ) : (
+              <span style={{ color: '#ef4444' }}>ลำดับยังไม่ถูกต้องครับ! ลองสะกดเป็นคำว่า D-O-R-A นะครับ</span>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderAct3 = () => {
+    // กิจกรรม 3: จับคู่คำศัพท์การตั้งค่า DHCP
+    const pairs = [
+      { num: 1, desc: '1. ระยะเวลาที่เครื่อง Client ได้รับสิทธิ์อนุญาตให้ครอบครองและใช้งาน IP Address นั้นๆ', term: 'Lease Time (อายุสัญญาเช่า)', color: '#3b82f6' },
+      { num: 2, desc: '2. การจับคู่ผูกหมายเลข IP Address ไว้กับ MAC Address ของอุปกรณ์เป็นการถาวร', term: 'Reservations (การจอง IP ถาวร)', color: '#10b981' },
+      { num: 3, desc: '3. ขอบเขตช่วงหมายเลข IP Address (IP Range) ทั้งหมดที่เซิร์ฟเวอร์มีสิทธิ์แจกจ่ายได้', term: 'Scope (ช่วงของ IP ที่แจกได้)', color: '#f59e0b' }
+    ];
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+        <div style={{ fontSize: '16px', fontWeight: 'bold', textAlign: 'center', color: 'var(--text-primary)', lineHeight: '1.4' }}>
+          วิเคราะห์คำจำกัดความเชิงระบบและจับคู่กับการตั้งค่า DHCP ที่ถูกต้อง
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {pairs.map(p => (
+            <div key={p.num} style={{
+              background: 'var(--bg-elevated)',
+              border: '1px solid var(--border)',
+              borderRadius: '10px',
+              padding: '14px 18px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '8px',
+              transition: 'all 0.3s ease'
+            }}>
+              <div style={{ fontSize: '13px', fontWeight: 'bold', lineHeight: '1.4', color: 'var(--text-primary)' }}>{p.desc}</div>
+              {revealedAct3 ? (
+                <div className="animate-fade-in-box" style={{
+                  background: 'rgba(59, 130, 246, 0.05)',
+                  borderLeft: `4px solid ${p.color}`,
+                  padding: '6px 12px',
+                  borderRadius: '4px',
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  color: p.color
+                }}>
+                  ➔ คำเฉลย: {p.term}
+                </div>
+              ) : (
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
+                  (รอเปิดเฉลยด้านล่าง)
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div style={{ textAlign: 'center' }}>
+          <button
+            onClick={() => setRevealedAct3(!revealedAct3)}
+            style={{
+              background: 'var(--accent)',
+              color: 'white',
+              border: 'none',
+              padding: '8px 20px',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              fontSize: '14px',
+              boxShadow: '0 2px 8px var(--accent-dim)'
+            }}
+          >
+            {revealedAct3 ? 'ซ่อนเฉลยจับคู่' : 'เปิดดูเฉลยจับคู่'}
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const renderAct4 = () => {
+    // กิจกรรม 4: ความท้าทายไร้สมุดรายชื่อ
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', width: '100%' }}>
+        {/* Visual Vintage Phone Card */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '20px',
+          background: 'var(--bg-elevated)',
+          padding: '18px',
+          borderRadius: '12px',
+          border: '1px solid var(--border)',
+          textAlign: 'center'
+        }}>
+          <span style={{ fontSize: '48px', animation: 'pulse-box 1.5s infinite' }}>📞</span>
+          <div style={{ textAlign: 'left' }}>
+            <div style={{ fontWeight: 'bold', fontSize: '14px' }}>สมุดเบอร์โทรศัพท์มือถือหายเกลี้ยง!</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>คุณต้องโทรหาเพื่อน 5 คนแบบจำเบอร์ไม่ได้</div>
+          </div>
+        </div>
+
+        <div style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center' }}>
+          ถ้านักศึกษาต้องกดเบอร์เพื่อน 5 คนโดยไม่มีระบบช่วยบันทึก จะกดถูกในครั้งแรกหรือไม่?
+        </div>
+
+        <div style={{ display: 'flex', gap: '15px' }}>
+          <button
+            onClick={() => setSelectedOption('A')}
+            style={{
+              flex: 1,
+              background: selectedOption === 'A' ? 'rgba(239, 68, 68, 0.15)' : 'var(--bg-elevated)',
+              border: selectedOption === 'A' ? '2px solid #ef4444' : '1px solid var(--border)',
+              borderRadius: '10px',
+              padding: '15px',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            ก) จำได้และกดถูกหมดแน่นอน
+          </button>
+          <button
+            onClick={() => setSelectedOption('B')}
+            style={{
+              flex: 1,
+              background: selectedOption === 'B' ? 'rgba(34, 197, 94, 0.15)' : 'var(--bg-elevated)',
+              border: selectedOption === 'B' ? '2px solid #22c55e' : '1px solid var(--border)',
+              borderRadius: '10px',
+              padding: '15px',
+              fontSize: '14px',
+              fontWeight: 'bold',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            ข) จำไม่ได้เลย หรือสับสนสลับเบอร์
+          </button>
+        </div>
+
+        {selectedOption && (
+          <div className="animate-fade-in-box" style={{
+            background: 'var(--bg-elevated)',
+            borderLeft: '4px solid var(--accent)',
+            padding: '12px',
+            borderRadius: '6px',
+            fontSize: '13px',
+            lineHeight: '1.4'
+          }}>
+            {selectedOption === 'B' ? (
+              <span><strong>ถูกต้องครับ! 🎉</strong> มนุษย์ไม่ถนัดจำตัวเลขยาวๆ จึงเป็นเหตุผลที่ระบบอินเทอร์เน็ตต้องการ <strong>DNS</strong> เพื่อแปลงชื่อโดเมนจำง่าย (สมุดโทรศัพท์) ไปเป็น IP Address (เบอร์โทร) นั่นเองครับ!</span>
+            ) : (
+              <span><strong>คุณอาจจะมีความจำที่เก่งมาก! 🧠</strong> แต่ในระบบส่วนใหญ่ นักเรียนจะพบว่า ข) คือความจริง นี่คือความสำคัญอันยิ่งใหญ่ของระบบ DNS ครับ!</span>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderAct5 = () => {
+    // กิจกรรม 5: วิเคราะห์ประเภทของ DNS Server (ตอบทีละข้อ)
+    const questions = [
+      {
+        id: 1,
+        title: 'คำถามข้อที่ 1: ผู้สืบค้นข้อมูลแทนเครื่อง Client',
+        q: 'เครื่อง DNS Server ใดที่คอยให้บริการเครื่องลูกข่าย (Client) โดยทำหน้าที่วิ่งออกไปสืบค้นหาคำตอบจากลำดับชั้นของ DNS ต่างๆ แทนเครื่องคอมพิวเตอร์ของเราจนสำเร็จ?',
+        options: [
+          { key: 'A', text: 'ก) Authoritative DNS Server', isCorrect: false },
+          { key: 'B', text: 'ข) Recursive DNS Server (ผู้สืบค้นแทน)', isCorrect: true }
+        ],
+        explCorrect: 'ถูกต้อง! 🎉 Recursive DNS Server (เช่น 8.8.8.8) จะรับหน้าที่เป็นตัวกลางในการวิ่งไล่ถามโฮสต์ตามระดับชั้นต่างๆ แทนเครื่อง Client จนกว่าจะได้ IP ส่งกลับมา!',
+        explWrong: 'ยังไม่ถูกต้องครับ! ลองพิจารณาบทบาทการเป็นผู้สืบค้นข้อมูลแทน (เหมือนคนวิ่งค้นหาหนังสือในห้องสมุดให้เรา) อีกครั้งนะ'
+      },
+      {
+        id: 2,
+        title: 'คำถามข้อที่ 2: ผู้ถือเอกสารข้อมูลต้นฉบับจริง',
+        q: 'เครื่อง DNS Server ใดทำหน้าที่จัดเก็บระเบียนข้อมูลจริง (DNS Records) ของชื่อโดเมนนั้นๆ และเป็นผู้มีสิทธิ์ขาดในการให้คำตอบของ IP Address ปลายทางตัวจริงอย่างเป็นทางการ?',
+        options: [
+          { key: 'A', text: 'ก) Authoritative DNS Server (ผู้ถือสิทธิ์ข้อมูลหลัก)', isCorrect: true },
+          { key: 'B', text: 'ข) Recursive DNS Server', isCorrect: false }
+        ],
+        explCorrect: 'ถูกต้อง! 🎉 Authoritative DNS Server เป็นเซิร์ฟเวอร์ที่เก็บฐานข้อมูลจริงของชื่อโดเมนตัวจริง (เช่น Name Server ของโฮสติ้ง) และมีสิทธิ์ขาดในการตอบ IP ปลายทาง!',
+        explWrong: 'ยังไม่ถูกต้องครับ! ลองพิจารณาบทบาทการเป็นผู้ถือครองสิทธิ์และเป็นเจ้าของทะเบียนต้นฉบับข้อมูลจริงดูอีกครั้งนะ'
+      }
+    ];
+
+    const currentQ = questions[act5QuestionIdx];
+    const isAnswered = selectedOptionAct5 !== null;
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+        {/* Quiz Progress header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-card)', padding: '8px 15px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+          <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--accent)' }}>
+            ⚡ บทเรียนทีละข้อ: ประเภท DNS Server
+          </span>
+          <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>
+            ข้อที่ {act5QuestionIdx + 1} / 2
+          </span>
+        </div>
+
+        {/* Question Panel */}
+        <div style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: '10px', padding: '16px' }}>
+          <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '6px', textTransform: 'uppercase' }}>
+            {currentQ.title}
+          </div>
+          <div style={{ fontSize: '15px', fontWeight: 'bold', lineHeight: '1.4', color: 'var(--text-primary)' }}>
+            {currentQ.q}
+          </div>
+        </div>
+
+        {/* Options */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {currentQ.options.map(opt => {
+            const isSelected = selectedOptionAct5 === opt.key;
+            return (
+              <button
+                key={opt.key}
+                onClick={() => {
+                  if (!isAnswered) setSelectedOptionAct5(opt.key);
+                }}
+                disabled={isAnswered}
+                style={{
+                  background: isSelected ? (opt.isCorrect ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)') : 'var(--bg-elevated)',
+                  border: isSelected ? (opt.isCorrect ? '2px solid #22c55e' : '2px solid #ef4444') : '1px solid var(--border)',
+                  borderRadius: '8px',
+                  padding: '12px 18px',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  fontWeight: isSelected ? 'bold' : 'normal',
+                  color: 'var(--text-primary)',
+                  cursor: isAnswered ? 'default' : 'pointer',
+                  opacity: (isAnswered && !isSelected) ? 0.6 : 1,
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {opt.text}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Feedback Panel */}
+        {isAnswered && (
+          <div className="animate-fade-in-box" style={{
+            background: currentQ.options.find(o => o.key === selectedOptionAct5)?.isCorrect ? 'rgba(34, 197, 94, 0.08)' : 'rgba(239, 68, 68, 0.08)',
+            border: currentQ.options.find(o => o.key === selectedOptionAct5)?.isCorrect ? '1px solid #22c55e' : '1px solid #ef4444',
+            padding: '12px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            lineHeight: '1.4',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            color: currentQ.options.find(o => o.key === selectedOptionAct5)?.isCorrect ? '#22c55e' : '#ef4444'
+          }}>
+            {currentQ.options.find(o => o.key === selectedOptionAct5)?.isCorrect ? currentQ.explCorrect : currentQ.explWrong}
+          </div>
+        )}
+
+        {/* Navigation Footer */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
+          <button
+            onClick={() => {
+              setSelectedOptionAct5(null);
+            }}
+            disabled={!isAnswered}
+            style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              color: 'var(--text-primary)',
+              padding: '6px 14px',
+              borderRadius: '6px',
+              cursor: isAnswered ? 'pointer' : 'default',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              opacity: isAnswered ? 1 : 0.5
+            }}
+          >
+            ทำใหม่ในข้อนี้
+          </button>
+
+          {isAnswered && act5QuestionIdx === 0 && (
+            <button
+              onClick={() => {
+                setAct5QuestionIdx(1);
+                setSelectedOptionAct5(null);
+              }}
+              style={{
+                background: 'var(--accent)',
+                color: 'white',
+                border: 'none',
+                padding: '6px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                boxShadow: '0 2px 6px var(--accent-dim)'
+              }}
+            >
+              ทำคำถามข้อที่ 2 ➔
+            </button>
+          )}
+
+          {act5QuestionIdx === 1 && (
+            <button
+              onClick={() => {
+                setAct5QuestionIdx(0);
+                setSelectedOptionAct5(null);
+              }}
+              style={{
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-secondary)',
+                padding: '6px 16px',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: 'bold'
+              }}
+            >
+              ⬅ ย้อนกลับไปข้อที่ 1
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const renderAct6 = () => {
+    // กิจกรรม 6: จริงหรือเท็จ True or False
+    const questions = [
+      { id: 1, text: '1. ในวงแลนเดียวกัน ควรมี DHCP Server เปิดพร้อมกันหลายตัว', answer: false, expl: 'ผิด: ควรมีตัวเดียวเลี่ยงปัญหา IP ชนกัน (IP Conflict)' },
+      { id: 2, text: '2. DHCP แจกเฉพาะหมายเลข IP Address เท่านั้น ไม่บอกอย่างอื่น', answer: false, expl: 'ผิด: แจกข้อมูลคู่มาเป็นชุด เช่น Subnet, Gateway, DNS Server' },
+      { id: 3, text: '3. CNAME Record ใช้สำหรับสร้างชื่อเล่นหรือชี้โดเมนไปยังอีกโดเมน', answer: true, expl: 'ถูก: ใช้สร้าง alias เช่น ชี้ www.google.com ไปที่ google.com' },
+      { id: 4, text: '4. หาก DNS Server ล่ม เรายังคงพิมพ์เลข IP ตรงๆ เพื่อเข้าเว็บได้', answer: true, expl: 'ถูก: สายสัญญาณไม่ขาด สื่อสาร IP ยังได้ แค่แปลงชื่อเว็บไม่ได้' }
+    ];
+
+    const handleAct6Click = (id: number, val: boolean) => {
+      setAct6Answers({ ...act6Answers, [id]: val });
+    };
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%', height: '100%' }}>
+        <div style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center' }}>
+          วิเคราะห์คำถาม ถูก-ผิด (True or False Challenge)
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, overflowY: 'auto' }}>
+          {questions.map(q => {
+            const userAns = act6Answers[q.id];
+            const hasAns = userAns !== undefined;
+            const isCorrect = hasAns && userAns === q.answer;
+
+            return (
+              <div key={q.id} style={{
+                background: 'var(--bg-elevated)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 'bold', lineHeight: '1.3' }}>{q.text}</span>
+                  <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                    <button
+                      onClick={() => handleAct6Click(q.id, true)}
+                      style={{
+                        background: userAns === true ? '#22c55e' : 'var(--bg-card)',
+                        border: '1px solid var(--border)',
+                        color: userAns === true ? 'white' : 'var(--text-primary)',
+                        padding: '3px 10px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ถูก
+                    </button>
+                    <button
+                      onClick={() => handleAct6Click(q.id, false)}
+                      style={{
+                        background: userAns === false ? '#ef4444' : 'var(--bg-card)',
+                        border: '1px solid var(--border)',
+                        color: userAns === false ? 'white' : 'var(--text-primary)',
+                        padding: '3px 10px',
+                        borderRadius: '4px',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      ผิด
+                    </button>
+                  </div>
+                </div>
+
+                {hasAns && (
+                  <div className="animate-fade-in-box" style={{
+                    background: isCorrect ? 'rgba(34, 197, 94, 0.06)' : 'rgba(239, 68, 68, 0.06)',
+                    color: isCorrect ? '#22c55e' : '#ef4444',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    padding: '4px 8px',
+                    borderRadius: '4px'
+                  }}>
+                    {isCorrect ? `🎯 ถูกต้องครับ! ${q.expl}` : `❌ ยังไม่ถูกใจครับ! ${q.expl}`}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="slide slide-content slide-interactive-act" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+      <div className="slide-tag">{s.tag}</div>
+      <h2>{s.title}</h2>
+      
+      <div style={{ display: 'flex', gap: '30px', flex: 1, overflow: 'visible', marginTop: '10px', minHeight: '0' }}>
+        {/* Left Column: Speaker Instruction / Notes */}
+        <div style={{ flex: 0.8, minWidth: '280px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflowY: 'auto', maxHeight: '100%' }}>
+          <div style={{
+            background: 'var(--bg-card)',
+            padding: '15px',
+            borderRadius: '10px',
+            borderLeft: '4px solid var(--accent)',
+            fontSize: '13px',
+            lineHeight: '1.5'
+          }}>
+            <strong style={{ color: 'var(--accent)', display: 'block', marginBottom: '8px', fontSize: '14px' }}>💡 คำแนะนำสำหรับผู้สอน:</strong>
+            <div style={{ color: 'var(--text-primary)', marginBottom: '8px' }}>
+              สไลด์หน้านี้เป็นระบบกราฟิกแบบโต้ตอบออนไลน์ คุณครูสามารถใช้ประกอบกิจกรรมการเรียนการสอนสดได้ดังนี้:
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>•</span>
+                <span>ให้นักเรียนส่งคำตอบเข้ามาในช่องแชทออนไลน์</span>
+              </div>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>•</span>
+                <span>ผู้สอนกดแสดงผลแผงวงจรคำเฉลย/คลิกโต้ตอบบนหน้าจอพร้อมกันสดๆ</span>
+              </div>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-start' }}>
+                <span style={{ color: 'var(--accent)', fontWeight: 'bold' }}>•</span>
+                <span>อภิปรายและอธิบายเหตุผลหลักการเบื้องหลังเพื่อเช็คความรู้</span>
+              </div>
+            </div>
+          </div>
+          
+          <div style={{
+            fontSize: '11px',
+            color: 'var(--text-secondary)',
+            textAlign: 'center',
+            opacity: 0.6,
+            marginTop: '12px'
+          }}>
+            ระบบโต้ตอบกราฟิก | วิชา ระบบปฏิบัติการเครื่องแม่ข่าย
+          </div>
+        </div>
+
+        {/* Right Column: Dynamic Graphic Activity Board */}
+        <div style={{
+          flex: 1.2,
+          background: 'var(--bg-elevated)',
+          borderRadius: '12px',
+          padding: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
+          alignItems: 'stretch',
+          border: '1px solid var(--border)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.05)',
+          overflowY: 'auto',
+          maxHeight: '100%'
+        }}>
+          {s.id === 'w3a-act1' && renderAct1()}
+          {s.id === 'w3a-act2' && renderAct2()}
+          {s.id === 'w3a-act3' && renderAct3()}
+          {s.id === 'w3a-act4' && renderAct4()}
+          {s.id === 'w3a-act5' && renderAct5()}
+          {s.id === 'w3a-act6' && renderAct6()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HomeworkSlide({ s }: { s: SlideData }) {
+  return (
+    <div className="slide slide-content slide-homework" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+      <div className="slide-tag" style={{ color: 'var(--accent)', background: 'var(--accent-dim)' }}>
+        {s.tag || 'การบ้านท้ายบทเรียน'}
+      </div>
+      <h2>{s.title || 'การบ้านเดี่ยว: เขียนอธิบายการทำงานเครือข่าย'}</h2>
+
+      {/* Grid container */}
+      <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: '0', marginTop: '10px', flexWrap: 'wrap' }}>
+        {/* Left Column: Metadata & Scenario */}
+        <div style={{ flex: 1, minWidth: '320px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+          {/* Metadata Card */}
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '10px',
+            padding: '15px',
+            borderLeft: '4px solid var(--accent)',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '10px'
+          }}>
+            <div>
+              <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>วิชาเรียน</div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>ระบบปฏิบัติการเครื่องแม่ข่าย (ปวส.1)</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>คะแนนเต็ม</div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#22c55e' }}>10 คะแนน</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>กำหนดส่ง</div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>ก่อนเข้าเรียนคาบถัดไป</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>ช่องทางการส่ง</div>
+              <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--accent)' }}>Google Classroom</div>
+            </div>
+          </div>
+
+          {/* Scenario Card */}
+          <div style={{
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border)',
+            borderRadius: '10px',
+            padding: '15px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              🏠 สถานการณ์จำลองในโจทย์
+            </span>
+            <div style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-primary)' }}>
+              ให้นักเรียนสมมติว่าตนเอง <strong>"กลับถึงบ้าน หยิบสมาร์ทโฟน/คอมพิวเตอร์มาเชื่อมต่อ Wi-Fi ที่บ้าน จากนั้นพิมพ์เปิดเว็บไซต์ www.google.com"</strong> เพื่อสืบค้นสื่อการสอน
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'var(--bg-card)',
+              padding: '8px',
+              borderRadius: '6px',
+              border: '1px dashed var(--border)',
+              marginTop: '4px',
+              fontSize: '11px',
+              color: 'var(--text-secondary)'
+            }}>
+              <span>🔌 เชื่อมต่อ Wi-Fi (DHCP)</span>
+              <span>➔</span>
+              <span>🔍 พิมพ์คำว่า google.com</span>
+              <span>➔</span>
+              <span>🌐 เปิดเว็บสำเร็จ (DNS)</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Assignment Tasks List */}
+        <div style={{ flex: 1.2, minWidth: '360px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '2px' }}>
+            📋 ภารกิจคำถามที่ต้องตอบเขียนสรุป (กรุณาตอบให้ครบทั้ง 4 ข้อ):
+          </div>
+
+          {/* Task 1 */}
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '12px 15px',
+            display: 'flex',
+            gap: '12px'
+          }}>
+            <div style={{
+              background: 'var(--accent-dim)',
+              color: 'var(--accent)',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              flexShrink: 0
+            }}>1</div>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>วิเคราะห์การเชื่อมต่อ DHCP & ขั้นตอน DORA</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
+                เครื่องคอมพิวเตอร์หรืออุปกรณ์พกพาได้รับหมายเลข IP Address มาได้อย่างไร? อธิบายพร้อมสรุปขั้นตอนการคุยสัญญาณแบบย่อ 4 ลำดับ DORA ด้วยภาษาและความเข้าใจของตนเอง
+              </div>
+            </div>
+          </div>
+
+          {/* Task 2 */}
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '12px 15px',
+            display: 'flex',
+            gap: '12px'
+          }}>
+            <div style={{
+              background: 'var(--accent-dim)',
+              color: 'var(--accent)',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              flexShrink: 0
+            }}>2</div>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>ระบุชุดข้อมูลเครือข่ายนอกเหนือจาก IP</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
+                ให้ระบุว่านอกจากหมายเลข IP Address หลักแล้ว เราเตอร์ (DHCP Server) ตอบส่งข้อมูลเครือข่ายส่วนสำคัญอะไรมาให้เครื่องของเราอีกบ้างเพื่อช่วยให้ใช้อินเทอร์เน็ตได้? (ระบุ 3 ข้อมูลเครือข่ายสำคัญ)
+              </div>
+            </div>
+          </div>
+
+          {/* Task 3 */}
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '12px 15px',
+            display: 'flex',
+            gap: '12px'
+          }}>
+            <div style={{
+              background: 'var(--accent-dim)',
+              color: 'var(--accent)',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              flexShrink: 0
+            }}>3</div>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>กลไกการสืบค้นแคชและการแปลงชื่อ (DNS Process)</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
+                หลังจากเครื่องของเราได้เลขไอพีแล้ว ระบบทำการติดต่อและแปลงชื่อเว็บไซต์ www.google.com ให้เป็น IP Address ปลายทางของทางกูเกิลผ่าน DNS Server ได้อย่างไร? (อธิบายลำดับการค้นหาข้อมูล)
+              </div>
+            </div>
+          </div>
+
+          {/* Task 4 */}
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '12px 15px',
+            display: 'flex',
+            gap: '12px'
+          }}>
+            <div style={{
+              background: 'var(--accent-dim)',
+              color: 'var(--accent)',
+              width: '24px',
+              height: '24px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              flexShrink: 0
+            }}>4</div>
+            <div>
+              <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>ประเภทและการใช้งานของ DNS Records</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
+                หากหน่วยงานต้องการเปิดใช้งานเว็บไซต์หลักและระบบเซิร์ฟเวอร์รับส่งอีเมลเป็นของตนเอง จะต้องเข้าไปทำการตั้งค่า DNS Records ประเภทใดบ้าง? ให้เขียนระบุความหมายและการยกตัวอย่างระเบียนหลักทั้ง 4 ชนิด (A, CNAME, MX, TXT Record)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Submission Card Footer */}
+      <div style={{
+        marginTop: '15px',
+        background: 'rgba(34, 197, 94, 0.05)',
+        border: '1px solid rgba(34, 197, 94, 0.2)',
+        borderRadius: '8px',
+        padding: '12px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        fontSize: '12px',
+        flexWrap: 'wrap',
+        gap: '10px'
+      }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <span style={{ fontSize: '16px' }}>📝</span>
+          <span style={{ color: 'var(--text-primary)', lineHeight: '1.4' }}>
+            <strong>คำชี้แจงเพิ่มเติม:</strong> เขียนสรุปความเข้าใจด้วยลายมือตนเองลงในสมุดจดบันทึกเรียน (แล้วใช้มือถือถ่ายรูปส่ง) หรือจะพิมพ์ลงใน Google Docs ก็ได้
+          </span>
+        </div>
+        <span style={{
+          background: '#22c55e',
+          color: 'white',
+          padding: '4px 10px',
+          borderRadius: '4px',
+          fontWeight: 'bold',
+          fontSize: '11px'
+        }}>
+          ห้ามลอกเลียนผลงานกันโดยเด็ดขาด 
+        </span>
       </div>
     </div>
   );
@@ -1793,9 +3380,10 @@ function DiagramSlide({ s }: { s: SlideData }) {
   );
 }
 
-function KahootSlide({ s }: { s: SlideData }) {
+function WaygroundSlide({ s }: { s: SlideData }) {
   const [downloading, setDownloading] = useState(false);
-  const questions = [
+
+  const w2Questions = [
     { q: "คำสั่งใดใช้แสดงตำแหน่งโฟลเดอร์ปัจจุบันที่กำลังทำงานอยู่?", a: "pwd", options: ["ls", "cd", "pwd", "mkdir"] },
     { q: "คำสั่ง ls -la ทำงานอย่างไร?", a: "แสดงไฟล์ทั้งหมดรวมไฟล์ซ่อน", options: ["ลบไฟล์ทั้งหมด", "แสดงไฟล์ทั้งหมดรวมไฟล์ซ่อน", "สร้างโฟลเดอร์ใหม่", "เปลี่ยนตำแหน่งทำงาน"] },
     { q: "ข้อใดเป็นวิธีถอยกลับขึ้น 1 ระดับโฟลเดอร์ที่ถูกต้อง?", a: "cd ..", options: ["cd..", "cd ..", "cd/", "cd ~"] },
@@ -1808,11 +3396,28 @@ function KahootSlide({ s }: { s: SlideData }) {
     { q: "คำสั่งหรือปุ่มลัดใดใช้เคลียร์หน้าจอเทอร์มินัล?", a: "clear หรือ Ctrl+L", options: ["exit", "reset", "clear หรือ Ctrl+L", "rm -rf"] }
   ];
 
+  const w3Questions = [
+    { q: "DHCP ย่อมาจากคำว่าอะไร?", a: "Dynamic Host Configuration Protocol", options: ["Dynamic Host Configuration Protocol", "Domain Host Control Program", "Data Host Connection Protocol", "Dynamic Hosting Control Platform"] },
+    { q: "DHCP Server ทำหน้าที่สำคัญอะไรในเครือข่าย?", a: "แจกจ่าย IP Address และค่าเครือข่ายอัตโนมัติ", options: ["แปลงชื่อโดเมนเป็น IP Address", "แจกจ่าย IP Address และค่าเครือข่ายอัตโนมัติ", "รับส่งจดหมายอีเมลของโดเมน", "จัดเก็บไฟล์ของหน้าเว็บไซต์"] },
+    { q: "ทำไมเครื่องคอมพิวเตอร์ลูกข่าย (Client) จึงต้องมีระยะเวลาเช่าใช้งาน IP Address (Lease Time)?", a: "เพื่อหมุนเวียนนำ IP Address กลับมาแจกจ่ายใหม่เมื่ออุปกรณ์อื่นไม่ได้เชื่อมต่อแล้ว", options: ["เพื่อช่วยเร่งความเร็วในการเชื่อมต่อ Wi-Fi", "เพื่อหมุนเวียนนำ IP Address กลับมาแจกจ่ายใหม่เมื่ออุปกรณ์อื่นไม่ได้เชื่อมต่อแล้ว", "เพื่อจำกัดเวลาเรียนของนักศึกษาในห้องเรียน", "เพื่อป้องกันการติดตั้งโปรแกรมแปลกปลอมในคอมพิวเตอร์"] },
+    { q: "ในกระบวนการ DORA ของ DHCP ขั้นตอนแรกสุดที่ Client จะทำการ Broadcast เครือข่ายเพื่อค้นหา DHCP Server คืออะไร?", a: "DHCP Discover", options: ["DHCP Offer", "DHCP Request", "DHCP Discover", "DHCP Acknowledgment"] },
+    { q: "เพราะเหตุใดในวงแลน (LAN) เดียวกันจึงควรมี DHCP Server เพียงตัวเดียว?", a: "เพื่อป้องกันปัญหาการชนกันหรือแจกจ่าย IP Address ซ้ำซ้อน (IP Conflict)", options: ["เพื่อประหยัดพลังงานเครื่องแม่ข่าย", "เพื่อควบคุมสิทธิ์ความปลอดภัยของผู้ใช้อินเทอร์เน็ต", "เพื่อป้องกันปัญหาการชนกันหรือแจกจ่าย IP Address ซ้ำซ้อน (IP Conflict)", "เพื่อเพิ่มความเร็วในการโอนถ่ายข้อมูลภายในระบบ"] },
+    { q: "การตั้งค่า DHCP ในข้อใดเป็นตัวกำหนดว่าช่วงหมายเลข IP Address ใดที่จะถูกนำมาแจกจ่ายแก่ Client?", a: "Scope", options: ["Scope", "Lease Time", "Reservations", "Default Gateway"] },
+    { q: "หากต้องการล็อกหมายเลข IP เดิมให้เครื่องพิมพ์ (Printer) ในเครือข่ายตลอดเวลา ควรใช้ฟังก์ชันใดใน DHCP?", a: "Reservations (การจอง IP จาก MAC Address)", options: ["Scope Expansion", "Lease Time Extension", "Reservations (การจอง IP จาก MAC Address)", "DHCP Relay"] },
+    { q: "DNS ย่อมาจากคำว่าอะไร?", a: "Domain Name System", options: ["Domain Name System", "Dynamic Name Service", "Data Network System", "Digital Name Server"] },
+    { q: "ข้อใดคือจุดประสงค์หลักของการมีระบบ DNS (Domain Name System) ในเครือข่ายคอมพิวเตอร์?", a: "เพื่อแปลงชื่อโดเมนที่มนุษย์เข้าใจง่ายเป็น IP Address ที่อุปกรณ์คอมพิวเตอร์เข้าใจ", options: ["เพื่อสแกนไวรัสในการรับส่งข้อมูลผ่านอีเมล", "เพื่อแปลงชื่อโดเมนที่มนุษย์เข้าใจง่ายเป็น IP Address ที่อุปกรณ์คอมพิวเตอร์เข้าใจ", "เพื่อเพิ่มความปลอดภัยจากการถูกแฮกรหัสผ่าน", "เพื่อป้องกันไม่ให้แอปพลิเคชันอื่นเข้าใช้งานเน็ตเวิร์ก"] },
+    { q: "DNS Server ประเภทใดทำหน้าที่รับคำร้องขอสืบค้นจากผู้ใช้ แล้วออกไปค้นหาคำตอบจาก Root, TLD, และ Authoritative แทนเราจนได้ IP Address?", a: "Recursive DNS Server", options: ["Authoritative DNS Server", "Recursive DNS Server", "Secondary DNS Server", "Master DNS Server"] }
+  ];
+
+  const questions = s.id.startsWith("w3") ? w3Questions : w2Questions;
+  const downloadPath = s.csvPath || "/data/week-2_wayground_import.xlsx";
+  const downloadName = downloadPath.split("/").pop() || "wayground_import.xlsx";
+
   const handleDownload = () => {
     setDownloading(true);
     const link = document.createElement("a");
-    link.href = "/data/week-2_kahoot_import.csv";
-    link.download = "week-2_kahoot_import.csv";
+    link.href = downloadPath;
+    link.download = downloadName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -1864,7 +3469,7 @@ function KahootSlide({ s }: { s: SlideData }) {
         <div style={{ flex: 0.8, display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Brand/Download Card */}
           <div style={{ 
-            background: 'linear-gradient(135deg, #46178f 0%, #250b52 100%)', 
+            background: 'linear-gradient(135deg, #090d16 0%, #111a2e 50%, #1e1b4b 100%)', 
             borderRadius: '12px', 
             padding: '24px', 
             color: '#ffffff', 
@@ -1873,36 +3478,36 @@ function KahootSlide({ s }: { s: SlideData }) {
             alignItems: 'center', 
             justifyContent: 'center',
             textAlign: 'center',
-            border: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '0 8px 32px rgba(70,23,143,0.2)'
+            border: '1px solid rgba(99, 102, 241, 0.2)',
+            boxShadow: '0 8px 32px rgba(99,102,241,0.15)'
           }}>
-            <div style={{ fontSize: '32px', marginBottom: '8px' }}>💜</div>
-            <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px', letterSpacing: '0.5px' }}>Kahoot! CSV Template</h3>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎮</div>
+            <h3 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', letterSpacing: '0.5px', color: '#818cf8' }}>Wayground Quiz Template</h3>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginBottom: '20px', maxWidth: '280px' }}>
-              พร้อมนำไปอัปโหลดเข้า Kahoot! ได้ทันทีตามขนาดข้อจำกัดอักขระ
+              พร้อมนำไปอัปโหลดเข้าคลังข้อสอบใน Wayground ได้ทันทีเพื่อประเมินผลผู้เรียน
             </p>
             <button 
               onClick={handleDownload}
               style={{
-                background: '#ffffff',
-                color: '#46178f',
+                background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                color: '#ffffff',
                 border: 'none',
                 borderRadius: '8px',
-                padding: '12px 24px',
-                fontSize: '14px',
+                padding: '12px 20px',
+                fontSize: '13px',
                 fontWeight: 'bold',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
                 transition: 'all 0.2s ease',
-                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                boxShadow: '0 4px 12px rgba(99,102,241,0.3)'
               }}
-              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)'; }}
-              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)'; }}
+              onMouseOver={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 6px 16px rgba(99,102,241,0.4)'; }}
+              onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(99,102,241,0.3)'; }}
             >
               <span>📥</span>
-              {downloading ? 'กำลังดาวน์โหลด...' : 'ดาวน์โหลด CSV Template'}
+              {downloading ? 'กำลังดาวน์โหลด...' : 'ดาวน์โหลด Excel Template'}
             </button>
           </div>
 
@@ -1912,13 +3517,12 @@ function KahootSlide({ s }: { s: SlideData }) {
               📖 ขั้นตอนการนำเข้า (How to Import):
             </h4>
             <ol style={{ fontSize: '12px', color: 'var(--text-secondary)', paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '8px', lineHeight: '1.5' }}>
-              <li>คลิกปุ่ม <strong>ดาวน์โหลด CSV Template</strong> ด้านบนเพื่อรับไฟล์</li>
-              <li>เปิดเบราว์เซอร์เข้าสู่ระบบผู้สอนใน <a href="https://kahoot.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>Kahoot.com</a></li>
-              <li>คลิกปุ่ม <strong>Create (สร้าง)</strong> ➔ <strong>Kahoot (คาฮูท)</strong></li>
-              <li>กดปุ่ม <strong>Add question (เพิ่มคำถาม)</strong> ทางเมนูด้านซ้าย</li>
-              <li>เลือกคลิก <strong>Import spreadsheet (นำเข้าจากตาราง)</strong> ด้านล่างซ้าย</li>
-              <li>อัปโหลดไฟล์ <code>week-2_kahoot_import.csv</code> ที่โหลดไป</li>
-              <li>ตรวจสอบเฉลยและเวลา จากนั้นกด <strong>Save</strong> เพื่อเริ่มเกมได้เลย!</li>
+              <li>คลิกปุ่ม <strong>ดาวน์โหลด Excel Template</strong> ด้านบนเพื่อรับไฟล์</li>
+              <li>เปิดเบราว์เซอร์เข้าสู่ระบบผู้สอนที่ <a href="https://wayground.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>Wayground.com</a></li>
+              <li>ไปที่เมนู <strong>คลังข้อสอบ (Quiz Library)</strong> แล้วกดสร้างเกมใหม่</li>
+              <li>เลือกนำเข้าข้อมูลทางฝั่ง <strong>Import Spreadsheet (Excel/XLSX)</strong></li>
+              <li>อัปโหลดไฟล์ <code>{downloadName}</code> ที่โหลดไปเข้าระบบ</li>
+              <li>ตรวจสอบเฉลยและกำหนดเวลา จากนั้นกด <strong>บันทึกเกม (Save)</strong> เพื่อเริ่มประลองความรู้ได้เลย!</li>
             </ol>
           </div>
         </div>
@@ -1936,7 +3540,10 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "lab": return <LabSlide s={slide} />;
     case "summary": return <SummarySlide s={slide} />;
     case "diagram": return <DiagramSlide s={slide} />;
-    case "kahoot": return <KahootSlide s={slide} />;
+    case "wayground": return <WaygroundSlide s={slide} />;
+    case "dhcp-hotel": return <DhcpHotelAnimation s={slide} />;
+    case "interactive-act": return <InteractiveActivitySlide s={slide} />;
+    case "homework": return <HomeworkSlide s={slide} />;
     default: return <ContentSlide s={slide} />;
   }
 }
@@ -3013,8 +4620,8 @@ export default function Home() {
         {/* Pinned Docker Guide Button */}
         <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
           <button
-            className={`pinned-docker-btn ${activeWeek === "3a" ? "active" : ""}`}
-            onClick={() => setActiveWeek("3a")}
+            className={`pinned-docker-btn ${activeWeek === "docker-guide" ? "active" : ""}`}
+            onClick={() => setActiveWeek("docker-guide")}
             style={{
               width: '100%',
               display: 'flex',
@@ -3022,9 +4629,9 @@ export default function Home() {
               gap: '12px',
               padding: '12px 14px',
               borderRadius: '8px',
-              border: activeWeek === "3a" ? '1px solid var(--accent)' : '1px solid var(--border)',
-              background: activeWeek === "3a" ? 'var(--accent-dim)' : 'var(--bg-elevated)',
-              color: activeWeek === "3a" ? 'var(--accent)' : 'var(--text-primary)',
+              border: activeWeek === "docker-guide" ? '1px solid var(--accent)' : '1px solid var(--border)',
+              background: activeWeek === "docker-guide" ? 'var(--accent-dim)' : 'var(--bg-elevated)',
+              color: activeWeek === "docker-guide" ? 'var(--accent)' : 'var(--text-primary)',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               textAlign: 'left'
@@ -3039,7 +4646,7 @@ export default function Home() {
         </div>
 
         <div className="sidebar-footer" style={{ flexShrink: 0 }}>
-          {activeWeek === "3a" ? (
+          {activeWeek === "docker-guide" ? (
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', padding: '4px 0' }}>
               📖 กำลังอ่าน: โหมดเอกสารคู่มือฉบับเต็ม
             </div>
@@ -3059,7 +4666,7 @@ export default function Home() {
 
       {/* Main */}
       <main className="main-area">
-        {activeWeek === "3a" ? (
+        {activeWeek === "docker-guide" ? (
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
             <header className="topbar" style={{ flexShrink: 0 }}>
               <div className="topbar-left">
