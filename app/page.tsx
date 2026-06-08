@@ -15,6 +15,10 @@ interface SlideData {
   objectives?: string[];
   steps?: string[];
   csvPath?: string;
+  question?: string;
+  options?: string[];
+  answer?: string;
+  explanation?: string;
 }
 interface WeekData {
   week: string; title: string; topic: string; description: string;
@@ -681,6 +685,13 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
   const [selectedOptionAct5, setSelectedOptionAct5] = useState<string | null>(null);
   const [act6Answers, setAct6Answers] = useState<{[key: number]: boolean}>({});
 
+  // New Week 3b States
+  const [w3bAct1Path, setW3bAct1Path] = useState<string>("/home/student");
+  const [w3bAct1Error, setW3bAct1Error] = useState<string | null>(null);
+  const [w3bAct2Matches, setW3bAct2Matches] = useState<{[key: string]: string}>({});
+  const [w3bAct2SelectedLeft, setW3bAct2SelectedLeft] = useState<string | null>(null);
+  const [w3bAct3Tab, setW3bAct3Tab] = useState<number>(1);
+
   // Reset states when slide changes
   useEffect(() => {
     setSelectedOption(null);
@@ -689,6 +700,13 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
     setAct5QuestionIdx(0);
     setSelectedOptionAct5(null);
     setAct6Answers({});
+    
+    // Reset Week 3b States
+    setW3bAct1Path("/home/student");
+    setW3bAct1Error(null);
+    setW3bAct2Matches({});
+    setW3bAct2SelectedLeft(null);
+    setW3bAct3Tab(1);
   }, [s.id]);
 
   const handleAct2Click = (num: number) => {
@@ -1374,6 +1392,534 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
     );
   };
 
+  const renderW3bAct1 = () => {
+    const handleW3bAct1Cmd = (cmd: string) => {
+      setW3bAct1Error(null);
+      if (cmd === "cd /var/log") {
+        setW3bAct1Path("/var/log");
+      } else if (cmd === "cd /") {
+        setW3bAct1Path("/");
+      } else if (cmd === "cd ..") {
+        if (w3bAct1Path === "/home/student") {
+          setW3bAct1Path("/home");
+        } else if (w3bAct1Path === "/home") {
+          setW3bAct1Path("/");
+        } else if (w3bAct1Path === "/var/log") {
+          setW3bAct1Path("/var");
+        } else if (w3bAct1Path === "/var") {
+          setW3bAct1Path("/");
+        }
+      } else if (cmd === "cd home") {
+        if (w3bAct1Path === "/") {
+          setW3bAct1Path("/home");
+        } else {
+          setW3bAct1Error("bash: cd: home: No such file or directory");
+        }
+      } else if (cmd === "cd student") {
+        if (w3bAct1Path === "/home") {
+          setW3bAct1Path("/home/student");
+        } else {
+          setW3bAct1Error("bash: cd: student: No such file or directory");
+        }
+      } else if (cmd === "cd var") {
+        if (w3bAct1Path === "/") {
+          setW3bAct1Path("/var");
+        } else {
+          setW3bAct1Error("bash: cd: var: No such file or directory");
+        }
+      } else if (cmd === "cd log") {
+        if (w3bAct1Path === "/var") {
+          setW3bAct1Path("/var/log");
+        } else {
+          setW3bAct1Error("bash: cd: log: No such file or directory");
+        }
+      }
+    };
+
+    const isSuccess = w3bAct1Path === "/var/log";
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+        <div style={{ fontSize: '15px', fontWeight: 'bold', textAlign: 'center', color: 'var(--text-primary)' }}>
+          ภารกิจ: ย้ายตำแหน่งจาก <span style={{ color: 'var(--accent)' }}>/home/student</span> ไปยังเป้าหมาย <span style={{ color: '#22c55e' }}>/var/log</span>
+        </div>
+
+        <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
+          {/* Terminal Simulator */}
+          <div style={{
+            flex: 1.2,
+            minWidth: '280px',
+            background: '#0c1017',
+            border: '1px solid #30363d',
+            borderRadius: '10px',
+            fontFamily: 'monospace',
+            fontSize: '12px',
+            color: '#e6edf3',
+            overflow: 'hidden',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.2)'
+          }}>
+            {/* Header bar */}
+            <div style={{ background: '#161b22', padding: '8px 12px', borderBottom: '1px solid #30363d', display: 'flex', gap: '6px' }}>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ff5f56' }}></span>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ffbd2e' }}></span>
+              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#27c93f' }}></span>
+              <span style={{ marginLeft: '10px', color: '#8b949e', fontSize: '10px' }}>Terminal - student@ubuntu-server</span>
+            </div>
+            {/* Content area */}
+            <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '8px', minHeight: '140px' }}>
+              <div>student@ubuntu-server:~$ pwd</div>
+              <div style={{ color: '#8b949e' }}>/home/student</div>
+              
+              {w3bAct1Path !== "/home/student" && (
+                <>
+                  <div>student@ubuntu-server:~$ cd ...</div>
+                  <div>student@ubuntu-server:~$ pwd</div>
+                  <div style={{ color: '#58a6ff', fontWeight: 'bold' }}>{w3bAct1Path}</div>
+                </>
+              )}
+
+              {w3bAct1Error && (
+                <div style={{ color: '#f85149' }}>{w3bAct1Error}</div>
+              )}
+
+              {isSuccess ? (
+                <div style={{ color: '#3fb950', marginTop: '8px', borderTop: '1px dashed #30363d', paddingTop: '8px' }}>
+                  🎯 ยอดเยี่ยม! ย้ายตำแหน่งไปถึง /var/log สำเร็จแล้ว
+                </div>
+              ) : (
+                <div style={{ color: '#8b949e', borderTop: '1px dashed #30363d', paddingTop: '8px', animation: 'pulse-box 1.5s infinite' }}>
+                  พิมพ์คำสั่ง cd เพื่อเดินทาง... (ตำแหน่งปัจจุบัน: {w3bAct1Path})
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Directory Map */}
+          <div style={{
+            flex: 0.8,
+            minWidth: '180px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '10px',
+            padding: '15px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>แผนผังต้นไม้ (Directory Tree)</div>
+            <div style={{ fontFamily: 'monospace', fontSize: '12px', lineHeight: '1.6', color: 'var(--text-primary)' }}>
+              <div>/ (root)</div>
+              <div>├── home/</div>
+              <div style={{ color: w3bAct1Path === '/home/student' ? 'var(--accent)' : 'inherit', fontWeight: w3bAct1Path === '/home/student' ? 'bold' : 'normal' }}>
+                │   └── student/ {w3bAct1Path === '/home/student' && '◀'}
+              </div>
+              <div>├── var/</div>
+              <div style={{ color: w3bAct1Path === '/var/log' ? '#22c55e' : 'inherit', fontWeight: w3bAct1Path === '/var/log' ? 'bold' : 'normal' }}>
+                │   └── log/ 🎯 {w3bAct1Path === '/var/log' && '◀'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Buttons selection */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '5px' }}>
+          <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)' }}>เลือกคำสั่งเพื่อเดินทาง:</div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            {[
+              { label: 'cd .. (ขึ้น 1 ระดับ)', cmd: 'cd ..' },
+              { label: 'cd / (กลับ root)', cmd: 'cd /' },
+              { label: 'cd home (เข้า home)', cmd: 'cd home' },
+              { label: 'cd student (เข้า student)', cmd: 'cd student' },
+              { label: 'cd var (เข้า var)', cmd: 'cd var' },
+              { label: 'cd log (เข้า log)', cmd: 'cd log' },
+              { label: 'cd /var/log (พิกัดสมบูรณ์)', cmd: 'cd /var/log' }
+            ].map((opt, i) => (
+              <button
+                key={i}
+                disabled={isSuccess}
+                onClick={() => handleW3bAct1Cmd(opt.cmd)}
+                style={{
+                  background: isSuccess ? 'var(--bg-elevated)' : 'var(--bg-surface)',
+                  border: '1px solid var(--border)',
+                  color: isSuccess ? 'var(--text-secondary)' : 'var(--text-primary)',
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  cursor: isSuccess ? 'not-allowed' : 'pointer',
+                  fontWeight: 'bold',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {isSuccess && (
+          <div className="animate-fade-in-box" style={{
+            background: 'rgba(34, 197, 94, 0.08)',
+            border: '1px solid rgba(34, 197, 94, 0.2)',
+            padding: '12px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            color: 'var(--text-primary)',
+            lineHeight: '1.4'
+          }}>
+            <strong>คำอธิบายสรุป:</strong> คุณสามารถย้ายไดเรกทอรีได้ 2 วิธี คือ 
+            (1) <strong>Absolute Path (พิกัดสมบูรณ์):</strong> ใช้ <code>cd /var/log</code> เพื่อข้ามไปยังจุดหมายทันที 
+            หรือ (2) <strong>Relative Path (พิกัดสัมพัทธ์):</strong> ถอยกลับไปยัง root ก่อนด้วย <code>cd ..</code> และ <code>cd ..</code> จากนั้นค่อยเดินต่อไปยัง <code>cd var</code> และ <code>cd log</code> ครับ
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderW3bAct2 = () => {
+    const leftOptions = [
+      { key: "la", text: "-la (ตัวเลือกใน ls)" },
+      { key: "r", text: "-r (ตัวเลือกใน rm)" },
+      { key: "ctrlO", text: "Ctrl+O (ใน nano)" },
+      { key: "ctrlX", text: "Ctrl+X (ใน nano)" }
+    ];
+
+    const rightOptions = [
+      { key: "r_desc", text: "ลบไดเรกทอรีและไฟล์ย่อยทั้งหมดแบบเรียกซ้ำ (Recursive)" },
+      { key: "la_desc", text: "แสดงรายละเอียดสิทธิ์ ขนาด วันที่ และแสดงไฟล์ที่ซ่อนอยู่" },
+      { key: "ctrlX_desc", text: "ออกจากหน้าต่างโปรแกรมแก้ไขข้อความ nano" },
+      { key: "ctrlO_desc", text: "บันทึกข้อมูล/เขียนข้อความลงไฟล์ใน nano" }
+    ];
+
+    const matchesMap: {[key: string]: string} = {
+      "la": "la_desc",
+      "r": "r_desc",
+      "ctrlO": "ctrlO_desc",
+      "ctrlX": "ctrlX_desc"
+    };
+
+    const handleLeftClick = (key: string) => {
+      if (w3bAct2Matches[key]) return;
+      setW3bAct2SelectedLeft(key);
+    };
+
+    const handleRightClick = (rightKey: string) => {
+      if (!w3bAct2SelectedLeft) return;
+      const expectedRight = matchesMap[w3bAct2SelectedLeft];
+      if (expectedRight === rightKey) {
+        setW3bAct2Matches({
+          ...w3bAct2Matches,
+          [w3bAct2SelectedLeft]: rightKey
+        });
+        setW3bAct2SelectedLeft(null);
+      } else {
+        setW3bAct2SelectedLeft(null);
+      }
+    };
+
+    const totalMatches = Object.keys(w3bAct2Matches).length;
+    const isCompleted = totalMatches === 4;
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+        <div style={{ fontSize: '15px', fontWeight: 'bold', textAlign: 'center' }}>
+          จับคู่ตัวเลือกเสริม (Options) และปุ่มลัดควบคุมให้ตรงกับหน้างานปฏิบัติ
+        </div>
+
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+          {/* Left Columns - Keys */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '4px' }}>ตัวเลือกเสริม / ปุ่มลัด:</div>
+            {leftOptions.map(opt => {
+              const isMatched = !!w3bAct2Matches[opt.key];
+              const isSelected = w3bAct2SelectedLeft === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  disabled={isMatched}
+                  onClick={() => handleLeftClick(opt.key)}
+                  style={{
+                    background: isMatched ? 'rgba(34, 197, 94, 0.08)' : (isSelected ? 'var(--accent-dim)' : 'var(--bg-card)'),
+                    border: isMatched ? '2px solid #22c55e' : (isSelected ? '2px solid var(--accent)' : '1px solid var(--border)'),
+                    borderRadius: '8px',
+                    padding: '12px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    color: isMatched ? '#22c55e' : 'var(--text-primary)',
+                    cursor: isMatched ? 'default' : 'pointer',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {isMatched ? '✓ ' : ''}{opt.text}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right Columns - Descriptions */}
+          <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '4px' }}>หน้าที่การทำงาน:</div>
+            {rightOptions.map(opt => {
+              const matchedKey = Object.keys(w3bAct2Matches).find(k => w3bAct2Matches[k] === opt.key);
+              const isMatched = !!matchedKey;
+              const canClick = !!w3bAct2SelectedLeft;
+              return (
+                <button
+                  key={opt.key}
+                  disabled={isMatched || !canClick}
+                  onClick={() => handleRightClick(opt.key)}
+                  style={{
+                    background: isMatched ? 'rgba(34, 197, 94, 0.08)' : 'var(--bg-card)',
+                    border: isMatched ? '2px solid #22c55e' : (canClick ? '1px dashed var(--accent)' : '1px solid var(--border)'),
+                    borderRadius: '8px',
+                    padding: '12px',
+                    fontSize: '12px',
+                    color: isMatched ? '#22c55e' : 'var(--text-primary)',
+                    cursor: isMatched ? 'default' : (canClick ? 'pointer' : 'not-allowed'),
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {isMatched ? '✓ ' : ''}{opt.text}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {isCompleted && (
+          <div className="animate-fade-in-box" style={{
+            background: 'rgba(34, 197, 94, 0.08)',
+            border: '1px solid rgba(34, 197, 94, 0.2)',
+            padding: '12px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            textAlign: 'center',
+            color: '#22c55e',
+            fontWeight: 'bold'
+          }}>
+            🎉 ยอดเยี่ยม! ทบทวนเรื่องตัวเลือกเสริมของคำสั่งจัดการไฟล์และปุ่มควบคุม nano สำเร็จ
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderW3bAct3 = () => {
+    const tabs = [
+      { id: 1, title: '1. ปัญหาคำสั่ง cd..' },
+      { id: 2, title: '2. ปัญหาโฟลเดอร์เว้นวรรก' },
+      { id: 3, title: '3. ปัญหาการลบ rm' }
+    ];
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+        <div style={{ fontSize: '15px', fontWeight: 'bold', textAlign: 'center' }}>
+          คลินิกแก้ไขจุดผิดพลาดลินุกซ์ที่พบบ่อย (CLI Troubleshooting Clinic)
+        </div>
+
+        <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--border)', paddingBottom: '8px' }}>
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setW3bAct3Tab(tab.id)}
+              style={{
+                flex: 1,
+                background: w3bAct3Tab === tab.id ? 'var(--accent-dim)' : 'transparent',
+                border: 'none',
+                borderBottom: w3bAct3Tab === tab.id ? '2px solid var(--accent)' : 'none',
+                color: w3bAct3Tab === tab.id ? 'var(--accent)' : 'var(--text-secondary)',
+                padding: '8px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
+            >
+              {tab.title}
+            </button>
+          ))}
+        </div>
+
+        {w3bAct3Tab === 1 && (
+          <div className="animate-fade-in-box" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ff5f56' }}>สถานการณ์ข้อผิดพลาด: พิมพ์ cd.. แล้วไม่ทำงาน</div>
+            
+            <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
+              <div>student@ubuntu-server:~$ cd..</div>
+              <div style={{ color: '#f85149' }}>-bash: cd..: command not found</div>
+            </div>
+
+            <div style={{ fontSize: '12px', lineHeight: '1.5' }}>
+              <strong>สาเหตุของปัญหา:</strong> ลินุกซ์ต้องการการแยกวิเคราะห์คำสั่งด้วย 
+              <strong>เครื่องหมายเว้นวรรค (Space)</strong> อย่างเคร่งครัด ระบบจะมองคำว่า <code>cd..</code> เป็นชื่อคำสั่งใหม่ทั้งหมด 
+              ซึ่งไม่มีคำสั่งชื่อนี้ในระบบปฏิบัติการ (แตกต่างจาก Windows ที่อนุโลมให้พิมพ์ติดกันได้)
+            </div>
+
+            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#27c93f', marginTop: '5px' }}>วิธีพิมพ์ที่ถูกต้อง:</div>
+            
+            <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
+              <div>student@ubuntu-server:~$ cd ..</div>
+              <div>student@ubuntu-server:/home$ </div>
+            </div>
+          </div>
+        )}
+
+        {w3bAct3Tab === 2 && (
+          <div className="animate-fade-in-box" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ff5f56' }}>สถานการณ์ข้อผิดพลาด: ตั้งชื่อโฟลเดอร์เว้นวรรคแล้วได้โฟลเดอร์แยกกัน</div>
+            
+            <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
+              <div>student@ubuntu-server:~$ mkdir my labs</div>
+              <div>student@ubuntu-server:~$ ls</div>
+              <div style={{ color: '#58a6ff', fontWeight: 'bold' }}>labs  my</div>
+            </div>
+
+            <div style={{ fontSize: '12px', lineHeight: '1.5' }}>
+              <strong>สาเหตุของปัญหา:</strong> คำสั่ง <code>mkdir</code> มองช่องว่างเว้นวรรคเป็นตัวแบ่งตัวแปรเป้าหมาย (Arguments) 
+              ทำให้ระบุเป้าหมายกลายเป็นสร้าง 2 โฟลเดอร์แยกขาดจากกัน (คือ โฟลเดอร์ชื่อ my และ โฟลเดอร์ชื่อ labs)
+            </div>
+
+            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#27c93f', marginTop: '5px' }}>วิธีพิมพ์ที่ถูกต้อง (ครอบด้วยอัญประกาศหรือใช้ขีดล่าง):</div>
+            
+            <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
+              <div>student@ubuntu-server:~$ mkdir "my labs"</div>
+              <div># หรือใช้ขีดล่าง: mkdir my_labs</div>
+            </div>
+          </div>
+        )}
+
+        {w3bAct3Tab === 3 && (
+          <div className="animate-fade-in-box" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ff5f56' }}>สถานการณ์ข้อผิดพลาด: สั่งลบโฟลเดอร์แต่ขึ้นเตือนว่า Is a directory</div>
+            
+            <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
+              <div>student@ubuntu-server:~$ rm my_labs</div>
+              <div style={{ color: '#f85149' }}>rm: cannot remove 'my_labs': Is a directory</div>
+            </div>
+
+            <div style={{ fontSize: '12px', lineHeight: '1.5' }}>
+              <strong>สาเหตุของปัญหา:</strong> คำสั่ง <code>rm</code> ตัวปกติใช้สำหรับทำลายไฟล์เดี่ยวๆ เท่านั้น 
+              และเพื่อความปลอดภัยระดับแกนระบบ ลินุกซ์จะไม่ยอมให้ลบโฟลเดอร์/ไดเรกทอรีแบบลอยๆ เพราะอาจมีโครงสร้างไฟล์ซับซ้อนด้านใน
+            </div>
+
+            <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#27c93f', marginTop: '5px' }}>วิธีพิมพ์ที่ถูกต้อง (ใช้ออปชัน -r ย่อมาจาก recursive เพื่อสั่งลบซ้ำลึกเข้าไปข้างใน):</div>
+            
+            <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
+              <div>student@ubuntu-server:~$ rm -r my_labs</div>
+              <div>student@ubuntu-server:~$ </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderW3bCommandQuiz = () => {
+    if (!s.question || !s.options) return null;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
+        <div style={{
+          background: 'var(--bg-card)',
+          border: '1px solid var(--border)',
+          borderRadius: '12px',
+          padding: '20px',
+          borderLeft: '4px solid var(--accent)',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.02)'
+        }}>
+          <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--text-primary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>❓ คำถามประเมินความเข้าใจ</span>
+          </h3>
+          <p style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-primary)', margin: 0 }}>
+            {s.question}
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {s.options.map((opt, i) => {
+            const isSelected = selectedOption === opt;
+            const isCorrect = opt === s.answer;
+            let optStyle: React.CSSProperties = {
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              padding: '12px 16px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              transition: 'all 0.2s ease',
+              fontSize: '13px'
+            };
+
+            if (selectedOption !== null) {
+              if (isCorrect) {
+                optStyle = {
+                  ...optStyle,
+                  background: 'rgba(34, 197, 94, 0.08)',
+                  border: '1px solid #22c55e',
+                  color: '#22c55e',
+                  fontWeight: 'bold'
+                };
+              } else if (isSelected) {
+                optStyle = {
+                  ...optStyle,
+                  background: 'rgba(239, 68, 68, 0.08)',
+                  border: '1px solid #ef4444',
+                  color: '#ef4444',
+                  fontWeight: 'bold'
+                };
+              } else {
+                optStyle = {
+                  ...optStyle,
+                  opacity: 0.5
+                };
+              }
+            }
+
+            return (
+              <div 
+                key={i} 
+                style={optStyle}
+                onClick={() => {
+                  if (selectedOption === null) {
+                    setSelectedOption(opt);
+                  }
+                }}
+              >
+                <span>{opt}</span>
+                {selectedOption !== null && (
+                  isCorrect ? (
+                    <span style={{ color: '#22c55e', fontSize: '12px', fontWeight: 'bold' }}>✓ ถูกต้อง</span>
+                  ) : isSelected ? (
+                    <span style={{ color: '#ef4444', fontSize: '12px', fontWeight: 'bold' }}>✗ ผิดพลาด</span>
+                  ) : null
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {selectedOption !== null && s.explanation && (
+          <div style={{
+            background: 'var(--bg-elevated)',
+            border: '1px solid var(--border)',
+            borderRadius: '10px',
+            padding: '14px 16px',
+            marginTop: '8px',
+            animation: 'fadeIn 0.3s ease'
+          }}>
+            <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '4px' }}>
+              💡 คำอธิบายเพิ่มเติม
+            </span>
+            <div style={{ fontSize: '12px', lineHeight: '1.5', color: 'var(--text-secondary)' }}>
+              {s.explanation}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="slide slide-content slide-interactive-act" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
       <div className="slide-tag">{s.tag}</div>
@@ -1442,6 +1988,10 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
           {s.id === 'w3a-act4' && renderAct4()}
           {s.id === 'w3a-act5' && renderAct5()}
           {s.id === 'w3a-act6' && renderAct6()}
+          {s.id === 'w3b-act1' && renderW3bAct1()}
+          {s.id === 'w3b-act2' && renderW3bAct2()}
+          {s.id === 'w3b-act3' && renderW3bAct3()}
+          {s.id?.startsWith('w3b-cmd-') && renderW3bCommandQuiz()}
         </div>
       </div>
     </div>
@@ -1449,6 +1999,71 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
 }
 
 function HomeworkSlide({ s }: { s: SlideData }) {
+  const isW3b = s.id?.startsWith('w3b');
+
+  const scenarioTitle = isW3b ? '🏠 สถานการณ์จำลองในการฝึกปฏิบัติ' : '🏠 สถานการณ์จำลองในโจทย์';
+  const scenarioDesc = isW3b
+    ? 'นักเรียนล็อกอินเข้าระบบ Linux Server และต้องการเตรียมความพร้อมสร้างสภาพแวดล้อมไดเรกทอรีทำงาน พร้อมทดสอบความเข้าใจเกี่ยวกับการจัดการไฟล์และการนำทาง'
+    : 'ให้นักเรียนสมมติว่าตนเอง "กลับถึงบ้าน หยิบสมาร์ทโฟน/คอมพิวเตอร์มาเชื่อมต่อ Wi-Fi ที่บ้าน จากนั้นพิมพ์เปิดเว็บไซต์ www.google.com" เพื่อสืบค้นสื่อการสอน';
+
+  const scenarioSteps = isW3b ? (
+    <>
+      <span>📁 ย้ายไปยัง /home/student</span>
+      <span>➔</span>
+      <span>📝 สร้างและเขียน config.txt</span>
+      <span>➔</span>
+      <span>🔍 ตรวจสอบและอ่านไฟล์</span>
+    </>
+  ) : (
+    <>
+      <span>🔌 เชื่อมต่อ Wi-Fi (DHCP)</span>
+      <span>➔</span>
+      <span>🔍 พิมพ์ google.com</span>
+      <span>➔</span>
+      <span>🌐 เปิดเว็บสำเร็จ (DNS)</span>
+    </>
+  );
+
+  const tasksHeader = isW3b
+    ? '📋 ภารกิจปฏิบัติการที่ต้องเขียนอธิบาย (กรุณาตอบให้ครบทั้ง 4 ข้อ):'
+    : '📋 ภารกิจคำถามที่ต้องตอบเขียนสรุป (กรุณาตอบให้ครบทั้ง 4 ข้อ):';
+
+  const tasks = isW3b ? [
+    {
+      title: 'การเดินทางและสร้างไดเรกทอรีทำงาน',
+      desc: 'เขียนลำดับคำสั่งที่ถูกต้องเพื่อเดินทางไปยังโฟลเดอร์ home ของ student แล้วสร้างโฟลเดอร์ย่อยใหม่ชื่อ lab-dhcp'
+    },
+    {
+      title: 'การจัดการไฟล์และการเขียนข้อมูลด้วย nano',
+      desc: 'หากต้องการย้ายตำแหน่งเข้าไปในโฟลเดอร์ lab-dhcp แล้วเขียนสร้างไฟล์ข้อความชื่อ config.txt พร้อมบันทึกข้อความภายในไฟล์ด้วย nano ต้องพิมพ์สั่งงานอย่างไร'
+    },
+    {
+      title: 'การตรวจสอบไฟล์และแสดงเนื้อหาเบื้องต้น',
+      desc: 'ระบุคำสั่งในการตรวจสอบรายชื่อไฟล์เพื่อดูว่ามีไฟล์ config.txt อยู่จริง แสดงรายละเอียดสิทธิ์และขนาด และแสดงเนื้อความข้างในโดยไม่ต้องเปิดโปรแกรมแก้ไขข้อความ nano'
+    },
+    {
+      title: 'การเช็คหมายเลขไอพีและการแก้ไวยากรณ์ผิดพลาด',
+      desc: 'บอกวิธีการตรวจสอบหมายเลข IP ของเซิร์ฟเวอร์ และระบุสาเหตุข้อผิดพลาดพร้อมตัวอย่างวิธีพิมพ์แก้ที่ถูกต้องเมื่อพบปัญหา cd.. หรือการใช้คำสั่ง rm เพื่อลบโฟลเดอร์แล้วระบบแสดงข้อความปฏิเสธ'
+    }
+  ] : [
+    {
+      title: 'วิเคราะห์การเชื่อมต่อ DHCP & ขั้นตอน DORA',
+      desc: 'เครื่องคอมพิวเตอร์หรืออุปกรณ์พกพาได้รับหมายเลข IP Address มาได้อย่างไร? อธิบายพร้อมสรุปขั้นตอนการคุยสัญญาณแบบย่อ 4 ลำดับ DORA ด้วยภาษาและความเข้าใจของตนเอง'
+    },
+    {
+      title: 'ระบุชุดข้อมูลเครือข่ายนอกเหนือจาก IP',
+      desc: 'ให้ระบุว่านอกจากหมายเลข IP Address หลักแล้ว เราเตอร์ (DHCP Server) ตอบส่งข้อมูลเครือข่ายส่วนสำคัญอะไรมาให้เครื่องของเราอีกบ้างเพื่อช่วยให้ใช้อินเทอร์เน็ตได้? (ระบุ 3 ข้อมูลเครือข่ายสำคัญ)'
+    },
+    {
+      title: 'กลไกการสืบค้นแคชและการแปลงชื่อ (DNS Process)',
+      desc: 'หลังจากเครื่องของเราได้เลขไอพีแล้ว ระบบทำการติดต่อและแปลงชื่อเว็บไซต์ www.google.com ให้เป็น IP Address ปลายทางของทางกูเกิลผ่าน DNS Server ได้อย่างไร? (อธิบายลำดับการค้นหาข้อมูล)'
+    },
+    {
+      title: 'ประเภทและการใช้งานของ DNS Records',
+      desc: 'หากหน่วยงานต้องการเปิดใช้งานเว็บไซต์หลักและระบบเซิร์ฟเวอร์รับส่งอีเมลเป็นของตนเอง จะต้องเข้าไปทำการตั้งค่า DNS Records ประเภทใดบ้าง? ให้เขียนระบุความหมายและการยกตัวอย่างระเบียนหลักทั้ง 4 ชนิด (A, CNAME, MX, TXT Record)'
+    }
+  ];
+
   return (
     <div className="slide slide-content slide-homework" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
       <div className="slide-tag" style={{ color: 'var(--accent)', background: 'var(--accent-dim)' }}>
@@ -1457,19 +2072,19 @@ function HomeworkSlide({ s }: { s: SlideData }) {
       <h2>{s.title || 'การบ้านเดี่ยว: เขียนอธิบายการทำงานเครือข่าย'}</h2>
 
       {/* Grid container */}
-      <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: '0', marginTop: '10px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: '0', marginTop: '8px' }}>
         {/* Left Column: Metadata & Scenario */}
-        <div style={{ flex: 1, minWidth: '320px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+        <div style={{ flex: 1, minWidth: '320px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Metadata Card */}
           <div style={{
             background: 'var(--bg-card)',
             border: '1px solid var(--border)',
             borderRadius: '10px',
-            padding: '15px',
+            padding: '10px 12px',
             borderLeft: '4px solid var(--accent)',
             display: 'grid',
             gridTemplateColumns: '1fr 1fr',
-            gap: '10px'
+            gap: '8px'
           }}>
             <div>
               <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>วิชาเรียน</div>
@@ -1494,182 +2109,98 @@ function HomeworkSlide({ s }: { s: SlideData }) {
             background: 'var(--bg-elevated)',
             border: '1px solid var(--border)',
             borderRadius: '10px',
-            padding: '15px',
+            padding: '10px 12px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px'
+            gap: '6px'
           }}>
-            <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              🏠 สถานการณ์จำลองในโจทย์
+            <span style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              {scenarioTitle}
             </span>
-            <div style={{ fontSize: '13px', lineHeight: '1.5', color: 'var(--text-primary)' }}>
-              ให้นักเรียนสมมติว่าตนเอง <strong>"กลับถึงบ้าน หยิบสมาร์ทโฟน/คอมพิวเตอร์มาเชื่อมต่อ Wi-Fi ที่บ้าน จากนั้นพิมพ์เปิดเว็บไซต์ www.google.com"</strong> เพื่อสืบค้นสื่อการสอน
+            <div style={{ fontSize: '12px', lineHeight: '1.4', color: 'var(--text-primary)' }}>
+              {scenarioDesc}
             </div>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               background: 'var(--bg-card)',
-              padding: '8px',
+              padding: '6px 8px',
               borderRadius: '6px',
               border: '1px dashed var(--border)',
               marginTop: '4px',
-              fontSize: '11px',
+              fontSize: '10px',
               color: 'var(--text-secondary)'
             }}>
-              <span>🔌 เชื่อมต่อ Wi-Fi (DHCP)</span>
-              <span>➔</span>
-              <span>🔍 พิมพ์คำว่า google.com</span>
-              <span>➔</span>
-              <span>🌐 เปิดเว็บสำเร็จ (DNS)</span>
+              {scenarioSteps}
             </div>
           </div>
         </div>
 
         {/* Right Column: Assignment Tasks List */}
-        <div style={{ flex: 1.2, minWidth: '360px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ 
+          flex: 1.2, 
+          minWidth: '360px', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '8px', 
+          overflowY: 'auto', 
+          maxHeight: '330px', 
+          paddingRight: '5px' 
+        }}>
           <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '2px' }}>
-            📋 ภารกิจคำถามที่ต้องตอบเขียนสรุป (กรุณาตอบให้ครบทั้ง 4 ข้อ):
+            {tasksHeader}
           </div>
 
-          {/* Task 1 */}
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: '8px',
-            padding: '12px 15px',
-            display: 'flex',
-            gap: '12px'
-          }}>
-            <div style={{
-              background: 'var(--accent-dim)',
-              color: 'var(--accent)',
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
+          {tasks.map((task, index) => (
+            <div key={index} style={{
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              padding: '8px 12px',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              flexShrink: 0
-            }}>1</div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>วิเคราะห์การเชื่อมต่อ DHCP & ขั้นตอน DORA</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
-                เครื่องคอมพิวเตอร์หรืออุปกรณ์พกพาได้รับหมายเลข IP Address มาได้อย่างไร? อธิบายพร้อมสรุปขั้นตอนการคุยสัญญาณแบบย่อ 4 ลำดับ DORA ด้วยภาษาและความเข้าใจของตนเอง
+              gap: '10px'
+            }}>
+              <div style={{
+                background: 'var(--accent-dim)',
+                color: 'var(--accent)',
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '11px',
+                fontWeight: 'bold',
+                flexShrink: 0
+              }}>{index + 1}</div>
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{task.title}</div>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
+                  {task.desc}
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Task 2 */}
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: '8px',
-            padding: '12px 15px',
-            display: 'flex',
-            gap: '12px'
-          }}>
-            <div style={{
-              background: 'var(--accent-dim)',
-              color: 'var(--accent)',
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              flexShrink: 0
-            }}>2</div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>ระบุชุดข้อมูลเครือข่ายนอกเหนือจาก IP</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
-                ให้ระบุว่านอกจากหมายเลข IP Address หลักแล้ว เราเตอร์ (DHCP Server) ตอบส่งข้อมูลเครือข่ายส่วนสำคัญอะไรมาให้เครื่องของเราอีกบ้างเพื่อช่วยให้ใช้อินเทอร์เน็ตได้? (ระบุ 3 ข้อมูลเครือข่ายสำคัญ)
-              </div>
-            </div>
-          </div>
-
-          {/* Task 3 */}
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: '8px',
-            padding: '12px 15px',
-            display: 'flex',
-            gap: '12px'
-          }}>
-            <div style={{
-              background: 'var(--accent-dim)',
-              color: 'var(--accent)',
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              flexShrink: 0
-            }}>3</div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>กลไกการสืบค้นแคชและการแปลงชื่อ (DNS Process)</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
-                หลังจากเครื่องของเราได้เลขไอพีแล้ว ระบบทำการติดต่อและแปลงชื่อเว็บไซต์ www.google.com ให้เป็น IP Address ปลายทางของทางกูเกิลผ่าน DNS Server ได้อย่างไร? (อธิบายลำดับการค้นหาข้อมูล)
-              </div>
-            </div>
-          </div>
-
-          {/* Task 4 */}
-          <div style={{
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: '8px',
-            padding: '12px 15px',
-            display: 'flex',
-            gap: '12px'
-          }}>
-            <div style={{
-              background: 'var(--accent-dim)',
-              color: 'var(--accent)',
-              width: '24px',
-              height: '24px',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              flexShrink: 0
-            }}>4</div>
-            <div>
-              <div style={{ fontSize: '13px', fontWeight: 'bold', color: 'var(--text-primary)' }}>ประเภทและการใช้งานของ DNS Records</div>
-              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
-                หากหน่วยงานต้องการเปิดใช้งานเว็บไซต์หลักและระบบเซิร์ฟเวอร์รับส่งอีเมลเป็นของตนเอง จะต้องเข้าไปทำการตั้งค่า DNS Records ประเภทใดบ้าง? ให้เขียนระบุความหมายและการยกตัวอย่างระเบียนหลักทั้ง 4 ชนิด (A, CNAME, MX, TXT Record)
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
       {/* Submission Card Footer */}
       <div style={{
-        marginTop: '15px',
+        marginTop: '10px',
         background: 'rgba(34, 197, 94, 0.05)',
         border: '1px solid rgba(34, 197, 94, 0.2)',
         borderRadius: '8px',
-        padding: '12px',
+        padding: '10px 12px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        fontSize: '12px',
+        fontSize: '11px',
         flexWrap: 'wrap',
         gap: '10px'
       }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span style={{ fontSize: '16px' }}>📝</span>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          <span style={{ fontSize: '14px' }}>📝</span>
           <span style={{ color: 'var(--text-primary)', lineHeight: '1.4' }}>
             <strong>คำชี้แจงเพิ่มเติม:</strong> เขียนสรุปความเข้าใจด้วยลายมือตนเองลงในสมุดจดบันทึกเรียน (แล้วใช้มือถือถ่ายรูปส่ง) หรือจะพิมพ์ลงใน Google Docs ก็ได้
           </span>
@@ -1677,10 +2208,10 @@ function HomeworkSlide({ s }: { s: SlideData }) {
         <span style={{
           background: '#22c55e',
           color: 'white',
-          padding: '4px 10px',
+          padding: '4px 8px',
           borderRadius: '4px',
           fontWeight: 'bold',
-          fontSize: '11px'
+          fontSize: '10px'
         }}>
           ห้ามลอกเลียนผลงานกันโดยเด็ดขาด 
         </span>
@@ -3409,7 +3940,56 @@ function WaygroundSlide({ s }: { s: SlideData }) {
     { q: "DNS Server ประเภทใดทำหน้าที่รับคำร้องขอสืบค้นจากผู้ใช้ แล้วออกไปค้นหาคำตอบจาก Root, TLD, และ Authoritative แทนเราจนได้ IP Address?", a: "Recursive DNS Server", options: ["Authoritative DNS Server", "Recursive DNS Server", "Secondary DNS Server", "Master DNS Server"] }
   ];
 
-  const questions = s.id.startsWith("w3") ? w3Questions : w2Questions;
+  const w3bQuestions = [
+    { q: "คำสั่ง pwd ย่อมาจากคำว่าอะไร และทำหน้าที่อะไรในระบบลินุกซ์?", a: "Print Working Directory - แสดงเส้นทางพิกัดปัจจุบันที่เรากำลังอยู่", options: ["Path Word Directory - กำหนดรหัสผ่านของโฟลเดอร์", "Print Working Directory - แสดงเส้นทางพิกัดปัจจุบันที่เรากำลังอยู่", "Process Windows Driver - ตรวจสอบไดรเวอร์ของระบบ", "Public Web Directory - ค้นหาเว็บไซต์ภายนอกเครือข่าย"] },
+    { q: "หากอยู่ที่ /home/student และต้องการย้ายเข้าไปในโฟลเดอร์ย่อยชื่อ labs ข้อใดเป็นคำสั่งที่ถูกต้อง?", a: "cd labs", options: ["cd labs", "ls labs", "pwd labs", "mkdir labs"] },
+    { q: "หากต้องการสั่งย้อนกลับขึ้นไป 1 ระดับชั้นของไดเรกทอรี ต้องพิมพ์คำสั่งข้อใดที่ถูกต้อง?", a: "cd ..", options: ["cd..", "cd", "cd /", "cd .."] },
+    { q: "การพิมพ์คำสั่ง mkdir folder1 folder2 บนเทอร์มินัล จะส่งผลอย่างไรต่อระบบไฟล์?", a: "สร้างโฟลเดอร์ใหม่แยกกัน 2 โฟลเดอร์ คือ folder1 และ folder2", options: ["สร้างโฟลเดอร์เดียวชื่อ folder1 folder2", "สร้างโฟลเดอร์ย่อย folder2 อยู่ด้านใน folder1", "สร้างโฟลเดอร์ใหม่แยกกัน 2 โฟลเดอร์ คือ folder1 และ folder2", "ระบบฟ้องข้อผิดพลาด (Syntax Error) เนื่องจากห้ามเว้นวรรค"] },
+    { q: "คำสั่ง touch ในระบบปฏิบัติการลินุกซ์ มีวัตถุประสงค์หลักเพื่อทำสิ่งใด?", a: "สร้างไฟล์เปล่าขนาด 0 ไบต์ หรือใช้สำหรับอัปเดตข้อมูลเวลาของไฟล์", options: ["ลบไฟล์ที่ไม่มีการใช้งานออกจากเซิร์ฟเวอร์", "สร้างไฟล์เปล่าขนาด 0 ไบต์ หรือใช้สำหรับอัปเดตข้อมูลเวลาของไฟล์", "ย้ายตำแหน่งไฟล์ไปยังโฟลเดอร์รูท", "แก้ไขข้อความภายในไฟล์อย่างเร่งด่วน"] },
+    { q: "วิธีการบันทึกข้อมูลและออกจากโปรแกรมแก้ไขข้อความ nano คือกดปุ่มลัดข้อใดตามลำดับ?", a: "Ctrl+O แล้ว Enter จากนั้น Ctrl+X", options: ["Ctrl+S แล้ว Enter จากนั้น Ctrl+Q", "Ctrl+W แล้ว Enter จากนั้น Ctrl+E", "Ctrl+O แล้ว Enter จากนั้น Ctrl+X", "Ctrl+C แล้ว Enter จากนั้น Ctrl+Z"] },
+    { q: "คำสั่งใดใช้แสดงเนื้อหาข้อความทั้งหมดในไฟล์ออกหน้าจอคอนโซลทันที โดยไม่มีการเปิดโปรแกรมแก้ไข?", a: "cat", options: ["nano", "cat", "ls", "touch"] },
+    { q: "หากพิมพ์คำสั่ง rm myfolder บนลินุกซ์เพื่อลบโฟลเดอร์ จะส่งผลอย่างไร?", a: "ระบบปฏิเสธการลบและแจ้ง error เนื่องจาก myfolder เป็นไดเรกทอรี (Directory)", options: ["โฟลเดอร์ถูกลบออกไปและเข้าไปเก็บในถังขยะชั่วคราว", "ระบบปฏิเสธการลบและแจ้ง error เนื่องจาก myfolder เป็นไดเรกทอรี (Directory)", "ลบเฉพาะโฟลเดอร์เปล่าทันที แต่หากมีไฟล์ข้างในระบบจะลบไม่ได้", "ลบโฟลเดอร์และไฟล์ทั้งหมดด้านในออกไปอย่างถาวรทันที"] },
+    { q: "การใช้ตัวเลือกเสริม (Options) -la ในคำสั่ง ls -la จะส่งผลอย่างไรต่อการแสดงรายการไฟล์?", a: "แสดงรายละเอียดขนาด สิทธิ์ วันที่แก้ไข และแสดงไฟล์ที่ซ่อนอยู่ทั้งหมด", options: ["แสดงผลไฟล์เรียงตามลำดับความยาวของตัวอักษร", "แสดงรายละเอียดขนาด สิทธิ์ วันที่แก้ไข และแสดงไฟล์ที่ซ่อนอยู่ทั้งหมด", "คัดลอกไฟล์ทั้งหมดในโฟลเดอร์ปัจจุบันไปที่สำรองข้อมูล", "ล้างหน้าจอแสดงผลคำสั่งทั้งหมดให้สะอาด"] },
+    { q: "คำสั่งใดใช้ตรวจสอบหมายเลข IP Address ของการ์ดอินเทอร์เฟสเครือข่ายบนลินุกซ์เซิร์ฟเวอร์?", a: "ip a", options: ["ip a", "ping localhost", "clear", "cat /etc/hosts"] }
+  ];
+
+  const w4aQuestions = [
+    { q: "เทคโนโลยี Virtualization ในระบบเครือข่ายคอมพิวเตอร์มีจุดประสงค์หลักเพื่อทำสิ่งใด?", a: "จำลองแบ่งฮาร์ดแวร์เพื่อรันเครื่องคอมพิวเตอร์เสมือนหลายเครื่องพร้อมกัน", options: ["ป้องกันระบบจากการบุกรุกของแฮกเกอร์", "จำลองแบ่งฮาร์ดแวร์เพื่อรันเครื่องคอมพิวเตอร์เสมือนหลายเครื่องพร้อมกัน", "เพิ่มความเร็วการเชื่อมต่ออินเทอร์เน็ตของเครื่องลูกข่าย", "บีบอัดขนาดไฟล์ข้อมูลระบบทั้งหมดให้มีขนาดเล็กลง"] },
+    { q: "Hypervisor ประเภทใดที่ถูกติดตั้งลงบนฮาร์ดแวร์ของเครื่องเซิร์ฟเวอร์โดยตรง (Bare-metal)?", a: "Type 1 Hypervisor", options: ["Type 1 Hypervisor", "Type 2 Hypervisor", "Type 3 Hypervisor", "Hosted Hypervisor"] },
+    { q: "ข้อใดจัดเป็นตัวอย่างของ Type 1 (Bare-metal) Hypervisor ที่ใช้งานบนเซิร์ฟเวอร์?", a: "Proxmox VE", options: ["VirtualBox", "VMware Workstation", "Proxmox VE", "Parallels Desktop"] },
+    { q: "ซอฟต์แวร์จำลองเครื่องเสมือนประเภทใดที่มีความเบาหวิว (Lightweight) และแบ่งปันการใช้งานระบบ Kernel ร่วมกับระบบหลัก?", a: "LXC (Linux Containers)", options: ["KVM (Kernel-based Virtual Machine)", "LXC (Linux Containers)", "Windows Server VM", "Hyper-V VM"] },
+    { q: "โดเมนของหน้าจอควบคุมระบบ Web UI ของ Proxmox VE ทำงานอยู่ภายใต้พอร์ตหลักหมายเลขใด?", a: "HTTPS พอร์ต 8006", options: ["HTTP พอร์ต 80", "HTTPS พอร์ต 443", "HTTPS พอร์ต 8006", "HTTP พอร์ต 8006"] },
+    { q: "หากต้องการติดตั้งเซิร์ฟเวอร์จริงขึ้นมาเป็น Proxmox VE สิ่งใดเป็นเงื่อนไขสำคัญที่ต้องเข้าไปเปิดใช้งานในหน้าจอ BIOS?", a: "เปิดใช้งานเทคโนโลยีระบบเสมือน (VT-x หรือ AMD-V)", options: ["เปิดใช้ระบบ DHCP Server", "เปิดใช้งานเทคโนโลยีระบบเสมือน (VT-x หรือ AMD-V)", "เปิดใช้สิทธิ์การ์ดอินเทอร์เฟส Wi-Fi", "เปิดการทำ RAID 0 เสมอ"] },
+    { q: "ในหน้าจอติดตั้งระบบช่วง Network Configuration ตัวแปร IP Address จะต้องกำหนดในรูปแบบใด?", a: "กำหนด IP แบบคงที่ (Static IP) พร้อมรหัส CIDR เช่น 192.168.10.50/24", options: ["กำหนด IP แบบสุ่มโดยใช้ DHCP", "กำหนด IP แบบคงที่ (Static IP) พร้อมรหัส CIDR เช่น 192.168.10.50/24", "กรอกเฉพาะไอพีโดยไม่ต้องใส่ Mask เช่น 192.168.10.50", "ใช้หมายเลข IP เดียวกันกับเครื่องเราเตอร์หลัก"] },
+    { q: "หลังการบูตติดตั้ง Proxmox VE สำเร็จและเครื่องทำการ Reboot ตัวเอง สิ่งแรกที่ควรดำเนินการคือข้อใด?", a: "ถอดแฟลชไดรฟ์ USB บูตออกเพื่อไม่ให้ระบบวนกลับไปหน้าต่างติดตั้งใหม่", options: ["กดสวิตช์ปิดหน้าจอทันทีเพื่อรอสัญญาณเชื่อมต่อ", "ถอดแฟลชไดรฟ์ USB บูตออกเพื่อไม่ให้ระบบวนกลับไปหน้าต่างติดตั้งใหม่", "สั่งปิดพอร์ต 8006 บนเราเตอร์ของสถาบัน", "พิมพ์รหัสผ่าน root ซ้ำๆ บนหน้าจอบูตเพื่อเข้ารหัส"] },
+    { q: "ข้อความเตือนความปลอดภัย \"Not Secure\" เมื่อเปิดเบราว์เซอร์เข้าลิงก์ Proxmox เกิดขึ้นจากสาเหตุใด?", a: "ระบบใช้ใบรับรองความปลอดภัยแบบลงนามเอง (Self-signed Certificate) ซึ่งเป็นเรื่องปกติของเครื่องภายในแลน", options: ["ระบบเซิร์ฟเวอร์โดนแฮกข้อมูลและไม่ปลอดภัย", "ระบบใช้ใบรับรองความปลอดภัยแบบลงนามเอง (Self-signed Certificate) ซึ่งเป็นเรื่องปกติของเครื่องภายในแลน", "สัญญาณสายแลนของเครื่องนักเรียนไม่แน่น", "รหัสผ่านผู้ใช้งาน root มีการพิมพ์ผิดพลาด"] },
+    { q: "ระบบปฏิบัติการหลัก (Base OS) ของตัวควบคุม Proxmox VE มีฐานข้อมูลรันอยู่บน Linux ค่ายใด?", a: "Debian", options: ["CentOS", "Alpine Linux", "Red Hat Enterprise", "Debian"] }
+  ];
+
+  const w4bQuestions = [
+    { q: "หน้าที่หลักของซอฟต์แวร์ Web Server เช่น Nginx ในระบบเครือข่ายคือข้อใด?", a: "รับส่งแพ็กเกจ HTTP Request และคืนผลลัพธ์เป็นหน้าเว็บเพจ (HTTP Response)", options: ["เชื่อมต่อสายไฟอินเทอร์เน็ตเข้ามายังอาคาร", "รับส่งแพ็กเกจ HTTP Request และคืนผลลัพธ์เป็นหน้าเว็บเพจ (HTTP Response)", "แจกจ่ายหมายเลข IP Address ให้แก่เครื่องลูกข่ายโดยอัตโนมัติ", "ล้างหน้าจอระบบเพื่อลบประวัติการควบคุมระบบทั้งหมด"] },
+    { q: "ช่องทางพอร์ตมาตรฐานในการรับส่งข้อมูลบริการเว็บไซต์ธรรมดา (HTTP) และเว็บแบบปลอดภัย (HTTPS) คืออะไร?", a: "พอร์ต 80 และ พอร์ต 443", options: ["พอร์ต 22 และ พอร์ต 80", "พอร์ต 80 และ พอร์ต 443", "พอร์ต 443 และ พอร์ต 8006", "พอร์ต 80 และ พอร์ต 8080"] },
+    { q: "โปรโตคอล SSH (Secure Shell) ซึ่งใช้ควบคุมเซิร์ฟเวอร์ระยะไกล ทำงานอยู่บนพอร์ตมาตรฐานใด?", a: "พอร์ต 22", options: ["พอร์ต 80", "พอร์ต 443", "พอร์ต 22", "พอร์ต 8006"] },
+    { q: "หากต้องการเชื่อมต่อ SSH เข้าสู่ตู้เสมือนด้วยสิทธิ์ root บนไอพี 192.168.10.150 ควรป้อนคำสั่งอย่างไร?", a: "ssh root@192.168.10.150", options: ["ssh 192.168.10.150 -root", "ssh root@192.168.10.150", "connect ssh root to 192.168.10.150", "ssh root:192.168.10.150"] },
+    { q: "ก่อนทำคำสั่งติดตั้ง Nginx บนระบบลินุกซ์ด้วยคำสั่ง sudo apt install nginx ควรทำสิ่งใดก่อน?", a: "รันคำสั่ง sudo apt update เพื่ออัปเดตรายการดัชนีแอปพลิเคชันล่าสุด", options: ["สั่งปิดพอร์ต 22 เพื่อรักษาความปลอดภัย", "รันคำสั่ง sudo apt update เพื่ออัปเดตรายการดัชนีแอปพลิเคชันล่าสุด", "สั่งลบโฟลเดอร์ผู้ใช้อื่นออกจากไดเรกทอรี /home", "ทำการเปลี่ยนชื่อ Hostname เป็น nginx.local"] },
+    { q: "คำสั่งใดใช้เพื่อเริ่มการทำงานใหม่ของ Nginx แบบล้างโปรเซสทำงานเก่าหลังแก้ไขคอนฟิก?", a: "sudo systemctl restart nginx", options: ["sudo systemctl status nginx", "sudo systemctl stop nginx", "sudo systemctl restart nginx", "sudo systemctl enable nginx"] },
+    { q: "พิกัดไดเรกทอรีมาตรฐาน (Default Document Root) ที่ Nginx ใช้เก็บไฟล์หน้าเว็บ index.html คือพิกัดใด?", a: "/var/www/html/", options: ["/etc/nginx/html/", "/var/www/html/", "/home/student/html/", "/usr/share/nginx/"] },
+    { q: "เหตุใดการเขียนหรือลบไฟล์ index.html ในโฟลเดอร์ /var/www/html/ จึงต้องใส่ sudo นำหน้า?", a: "เพราะโฟลเดอร์นี้ถูกรันด้วยสิทธิ์ความปลอดภัยสูงสุดและจำกัดสิทธิ์เฉพาะ root", options: ["เพราะโฟลเดอร์นี้ถูกรันด้วยสิทธิ์ความปลอดภัยสูงสุดและจำกัดสิทธิ์เฉพาะ root", "เพื่อทำให้หน้าเว็บเปิดแสดงผลกราฟิกสีสันได้รวดเร็วยิ่งขึ้น", "เพื่อหลีกเลี่ยงข้อจำกัดการเชื่อมต่อพอร์ต 8006", "เป็นกฎบังคับของการใช้บราวเซอร์ Google Chrome เสมอ"] },
+    { q: "กฎเหล็กในการตรวจสอบความถูกต้องของไวยากรณ์ไฟล์ตั้งค่า Nginx ก่อนรันระบบใหม่คืออะไร?", a: "sudo nginx -t", options: ["sudo systemctl test nginx", "sudo nginx -t", "check -nginx config", "verify nginx.conf"] },
+    { q: "หากสั่งแก้ไขไฟล์คอนฟิกของ Nginx ผิดไวยากรณ์ไป 1 ตัวอักษร แล้วรันคำสั่ง restart ผลลัพธ์จะเป็นอย่างไร?", a: "บริการ Nginx จะล้มเหลวในการเปิดตัวและหยุดการทำงานลงทันที (เว็บล่ม)", options: ["ระบบจะข้ามข้อความที่สะกดผิดไปรันค่าเดิมอัตโนมัติ", "บริการ Nginx จะล้มเหลวในการเปิดตัวและหยุดการทำงานลงทันที (เว็บล่ม)", "การ์ดเครือข่ายของเซิร์ฟเวอร์จะปิดตัวและยกเลิกรับค่า IP Address", "หน้าจอเทอร์มินัลจะสั่งลบไฟล์เก็บข้อมูลเว็บทิ้งถาวร"] }
+  ];
+
+  let questions = w2Questions;
+  if (s.id.startsWith("w4a")) {
+    questions = w4aQuestions;
+  } else if (s.id.startsWith("w4b")) {
+    questions = w4bQuestions;
+  } else if (s.id.startsWith("w3b")) {
+    questions = w3bQuestions;
+  } else if (s.id.startsWith("w3")) {
+    questions = w3Questions;
+  }
+
   const downloadPath = s.csvPath || "/data/week-2_wayground_import.xlsx";
   const downloadName = downloadPath.split("/").pop() || "wayground_import.xlsx";
 
@@ -3527,6 +4107,1836 @@ function WaygroundSlide({ s }: { s: SlideData }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* --- Dynamic Interactive Document component for Proxmox VE --- */
+interface ContainerType {
+  id: string;
+  name: string;
+  ip: string;
+  status: "running" | "stopped";
+  isNginxInstalled: boolean;
+  isNginxRunning: boolean;
+  htmlContent: string;
+}
+
+function ProxmoxGuideDocument() {
+  const [step, setStep] = useState(0);
+  const [selectedDisk, setSelectedDisk] = useState("/dev/sda - SSD 250GB");
+  const [timezone, setTimezone] = useState("Asia/Bangkok");
+  const [rootPass, setRootPass] = useState("RootAdmin@123");
+  const [mgmtIP, setMgmtIP] = useState("192.168.10.50/24");
+  const [installProgress, setInstallProgress] = useState(0);
+  
+  // Containers state for Web UI simulator
+  const [containers, setContainers] = useState<ContainerType[]>([
+    {
+      id: "101",
+      name: "std01-nginx",
+      ip: "192.168.10.101",
+      status: "running",
+      isNginxInstalled: true,
+      isNginxRunning: true,
+      htmlContent: "<h1>ยินดีต้อนรับสู่เว็บเซิร์ฟเวอร์ของ นายสมชาย (std01)</h1>\n<p>สาขาวิชาเทคโนโลยีสารสนเทศ ปวส.1</p>\n<div style='color: #0284c7; font-weight: bold; margin-top: 15px; border-top: 2px dashed #0284c7; padding-top: 10px;'>Status: Nginx is working successfully on Port 80!</div>"
+    },
+    {
+      id: "102",
+      name: "std02-nginx",
+      ip: "192.168.10.102",
+      status: "stopped",
+      isNginxInstalled: false,
+      isNginxRunning: false,
+      htmlContent: "<h1>ยินดีต้อนรับสู่เว็บไซต์ของ std02</h1>\n<p>กำลังอยู่ในระหว่างการพัฒนาเซ็ตอัป...</p>"
+    }
+  ]);
+  const [newContainerName, setNewContainerName] = useState("student-labs");
+  const [selectedContainerId, setSelectedContainerId] = useState<string>("101");
+  const [activeTab, setActiveTab] = useState<"summary" | "console" | "browser">("summary");
+  const [terminalLogs, setTerminalLogs] = useState<string[]>(["root@std01-nginx:~# "]);
+  const [showNanoEditor, setShowNanoEditor] = useState(false);
+  const [nanoText, setNanoText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [selectedHost, setSelectedHost] = useState(true);
+  
+  // Interactive Network Topology state
+  const [topoMode, setTopoMode] = useState<"overview" | "ssh" | "web">("overview");
+  const [sshTerminalStep, setSshTerminalStep] = useState(0); // 0: idle, 1: typing, 2: ready
+  const [sshLogs, setSshLogs] = useState<string[]>([]);
+  const [sshTyping, setSshTyping] = useState(false);
+
+  // Auto-progress installer loading bar
+  useEffect(() => {
+    if (step === 7) {
+      setInstallProgress(0);
+      const interval = setInterval(() => {
+        setInstallProgress(p => {
+          if (p >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+              setStep(8);
+            }, 600);
+            return 100;
+          }
+          return p + 4;
+        });
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [step]);
+
+  // Synchronize terminal logs and state when selecting container
+  useEffect(() => {
+    const container = containers.find(c => c.id === selectedContainerId);
+    if (container) {
+      setTerminalLogs([`root@${container.name}:~# `]);
+      setShowNanoEditor(false);
+    }
+  }, [selectedContainerId, containers]);
+
+  const handleAddContainer = () => {
+    if (!newContainerName) return;
+    const num = containers.length + 1;
+    const padNum = String(num).padStart(2, "0");
+    const containerId = String(100 + num);
+    const newIp = `192.168.10.1${padNum}`;
+    
+    setContainers([
+      ...containers,
+      {
+        id: containerId,
+        name: `std${padNum}-${newContainerName}`,
+        ip: newIp,
+        status: "running",
+        isNginxInstalled: false,
+        isNginxRunning: false,
+        htmlContent: `<h1>เว็บไซต์ทดสอบของตู้จำลอง ID ${containerId}</h1>\n<p>ยินดีต้อนรับเข้าสู่ระบบเว็บเซิร์ฟเวอร์จำลองจากการปฏิบัติการ!</p>`
+      }
+    ]);
+    setSelectedContainerId(containerId);
+    setSelectedHost(false);
+    setNewContainerName("student-labs");
+  };
+
+  const handleRunCommand = (cmd: "update" | "install" | "start" | "nano") => {
+    if (isTyping) return;
+    const container = containers.find(c => c.id === selectedContainerId);
+    if (!container) return;
+    if (container.status === "stopped") {
+      setTerminalLogs(prev => [...prev, "Error: Container is offline! Please start it first.", `root@${container.name}:~# `]);
+      return;
+    }
+
+    setIsTyping(true);
+    let logs = [...terminalLogs];
+    
+    if (cmd === "update") {
+      logs.push(`apt update`);
+      setTerminalLogs(logs);
+      setTimeout(() => {
+        setTerminalLogs(prev => [
+          ...prev,
+          "Get:1 http://archive.ubuntu.com/ubuntu noble InRelease [256 kB]",
+          "Get:2 http://security.ubuntu.com/ubuntu noble-security InRelease [126 kB]",
+          "Get:3 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]",
+          "Fetched 508 kB in 0.8s (635 kB/s)",
+          "Reading package lists... Done",
+          "All packages are up to date.",
+          `root@${container.name}:~# `
+        ]);
+        setIsTyping(false);
+      }, 1000);
+    } else if (cmd === "install") {
+      logs.push(`apt install nginx -y`);
+      setTerminalLogs(logs);
+      setTimeout(() => {
+        setTerminalLogs(prev => [
+          ...prev,
+          "Reading package lists... Done",
+          "Building dependency tree... Done",
+          "The following NEW packages will be installed:",
+          "  nginx nginx-common nginx-core libpcre3",
+          "Need to get 1,024 kB of archives.",
+          "Unpacking nginx (1.24.0-1) ...",
+          "Setting up nginx (1.24.0-1) ...",
+          "Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service.",
+          `root@${container.name}:~# `
+        ]);
+        setContainers(prev => prev.map(c => c.id === container.id ? { ...c, isNginxInstalled: true } : c));
+        setIsTyping(false);
+      }, 1200);
+    } else if (cmd === "start") {
+      logs.push(`systemctl start nginx && systemctl status nginx`);
+      setTerminalLogs(logs);
+      setTimeout(() => {
+        setTerminalLogs(prev => [
+          ...prev,
+          "● nginx.service - A high performance web server",
+          "     Loaded: loaded (/lib/systemd/system/nginx.service; enabled; vendor preset: enabled)",
+          "     Active: active (running) since Tue 2026-06-07 16:40:00 UTC",
+          "   Main PID: 7421 (nginx)",
+          `root@${container.name}:~# `
+        ]);
+        setContainers(prev => prev.map(c => c.id === container.id ? { ...c, isNginxRunning: true } : c));
+        setIsTyping(false);
+      }, 800);
+    } else if (cmd === "nano") {
+      logs.push(`nano /var/www/html/index.html`);
+      setTerminalLogs(logs);
+      setTimeout(() => {
+        setNanoText(container.htmlContent);
+        setShowNanoEditor(true);
+        setIsTyping(false);
+      }, 500);
+    }
+  };
+
+  const handleSaveNano = () => {
+    setContainers(prev => prev.map(c => c.id === selectedContainerId ? { ...c, htmlContent: nanoText } : c));
+    setShowNanoEditor(false);
+    const container = containers.find(c => c.id === selectedContainerId);
+    setTerminalLogs(prev => [
+      ...prev,
+      "[ File '/var/www/html/index.html' written successfully ]",
+      `root@${container?.name || "container"}:~# `
+    ]);
+  };
+
+  // SSH simulation inside Topology Section
+  const handleTriggerSshSim = () => {
+    if (sshTyping) return;
+    setSshTyping(true);
+    setSshTerminalStep(1);
+    setSshLogs(["$ ssh root@192.168.10.101"]);
+    
+    setTimeout(() => {
+      setSshLogs(prev => [
+        ...prev,
+        "Connecting to 192.168.10.101:22...",
+        "The authenticity of host '192.168.10.101' can't be established.",
+        "ECDSA key fingerprint is SHA256:7mP4e2gX9fD/K+vR3wJ2Y1b5x.",
+        "Are you sure you want to continue connecting (yes/no)?"
+      ]);
+      setSshTerminalStep(2);
+      
+      setTimeout(() => {
+        setSshLogs(prev => [
+          ...prev,
+          "yes",
+          "Warning: Permanently added '192.168.10.101' to the list of known hosts.",
+          "root@192.168.10.101's password: *********"
+        ]);
+        
+        setTimeout(() => {
+          setSshLogs(prev => [
+            ...prev,
+            "Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-pve)",
+            " * Documentation:  https://help.ubuntu.com",
+            "",
+            "Last login: Sun Jun  7 23:45:12 2026 from 192.168.10.12",
+            "root@std01-nginx:~# "
+          ]);
+          setSshTerminalStep(3);
+          setSshTyping(false);
+        }, 1000);
+      }, 1200);
+    }, 1000);
+  };
+
+  const handleToggleContainerPower = (action: "start" | "stop" | "restart") => {
+    setContainers(prev => prev.map(c => {
+      if (c.id === selectedContainerId) {
+        if (action === "start") {
+          return { ...c, status: "running" };
+        } else if (action === "stop") {
+          return { ...c, status: "stopped", isNginxRunning: false };
+        } else {
+          return { ...c, status: "running", isNginxRunning: c.isNginxInstalled };
+        }
+      }
+      return c;
+    }));
+  };
+
+  return (
+    <div style={{
+      flex: 1,
+      overflowY: 'auto',
+      padding: '30px 4%',
+      background: 'var(--bg-elevated)',
+      color: 'var(--text-primary)',
+      lineHeight: '1.7',
+      fontFamily: 'Inter, sans-serif'
+    }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes packetFlowDash {
+          from { stroke-dashoffset: 24; }
+          to { stroke-dashoffset: 0; }
+        }
+        .animate-packet-flow {
+          stroke-dasharray: 8, 4;
+          animation: packetFlowDash 1.2s linear infinite;
+        }
+        @keyframes pulseGlowRing {
+          0% { r: 6; opacity: 0.8; }
+          100% { r: 18; opacity: 0; }
+        }
+        .animate-pulse-ring {
+          animation: pulseGlowRing 2s infinite ease-out;
+        }
+        .pve-window {
+          box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+          border: 1px solid rgba(255,255,255,0.08);
+          overflow: hidden;
+        }
+        .installer-nav-btn {
+          padding: 8px 18px;
+          border-radius: 4px;
+          font-weight: 700;
+          font-size: 13px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .installer-nav-btn:hover:not(:disabled) {
+          transform: translateY(-1px);
+          filter: brightness(1.1);
+        }
+        .installer-nav-btn:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+        .installer-sidebar-item {
+          padding: 10px 14px;
+          font-size: 11px;
+          border-left: 3px solid transparent;
+          color: #94a3b8;
+          transition: all 0.2s;
+        }
+        .installer-sidebar-item.active {
+          border-left-color: #f97316;
+          color: #ffffff;
+          background: rgba(249,115,22,0.1);
+          font-weight: 700;
+        }
+        .quick-action-btn {
+          background: rgba(2,132,199,0.1);
+          border: 1px solid rgba(2,132,199,0.3);
+          color: #38bdf8;
+          padding: 6px 12px;
+          border-radius: 4px;
+          font-size: 11px;
+          cursor: pointer;
+          transition: all 0.2s;
+          font-weight: 600;
+        }
+        .quick-action-btn:hover:not(:disabled) {
+          background: #0284c7;
+          color: #ffffff;
+          border-color: #0284c7;
+        }
+        .quick-action-btn:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+        @keyframes cursorBlink {
+          50% { opacity: 0; }
+        }
+        .term-cursor {
+          display: inline-block;
+          width: 8px;
+          height: 14px;
+          background: #38bdf8;
+          margin-left: 4px;
+          animation: cursorBlink 1s infinite;
+          vertical-align: middle;
+        }
+      `}} />
+
+      {/* Header */}
+      <div style={{
+        borderBottom: '2px solid var(--border)',
+        paddingBottom: '20px',
+        marginBottom: '28px'
+      }}>
+        <span style={{
+          background: 'var(--accent-dim)',
+          color: 'var(--accent)',
+          padding: '6px 14px',
+          borderRadius: '99px',
+          fontSize: '12px',
+          fontWeight: '600',
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase'
+        }}>
+          เอกสารประกอบห้องปฏิบัติการ — ครูผู้สอน (Instructor Deployment Manual)
+        </span>
+        <h1 style={{
+          fontSize: 'clamp(26px, 3.2vw, 40px)',
+          fontWeight: '800',
+          lineHeight: '1.2',
+          marginTop: '12px',
+          marginBottom: '8px',
+          background: 'linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent'
+        }}>
+          คู่มือปฏิบัติการติดตั้งเซิร์ฟเวอร์เสมือน Proxmox VE & Nginx Web Server
+        </h1>
+        <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+          คู่มือแนะนำการออกแบบเครือข่ายจำลอง แอนิเมชันแสดงสถาปัตยกรรม LAN, ตัวโปรแกรมจำลองการติดตั้งระบบปฏิบัติการเสมือน (Bare-metal Hypervisor) และระบบบอร์ดบริหารจัดการ LXC Containers สำหรับนักศึกษา
+        </p>
+      </div>
+
+      {/* Section 1: Animated Network Topology */}
+      <section style={{ marginBottom: '40px' }}>
+        <h2 style={{
+          fontSize: '18px',
+          fontWeight: '700',
+          marginBottom: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <span style={{ fontSize: '22px' }}>🎬</span> แผนผังจำลองสถาปัตยกรรมแล็บบนเครื่องแม่ข่าย (Interactive Topology & Data Flow)
+        </h2>
+        <p style={{ marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '13.5px' }}>
+          เลือกแท็บจำลองด้านล่างเพื่อแสดงการรับส่งข้อมูลและการทำงานของพอร์ตเครือข่ายแล็บเสมือน (SSH พอร์ต 22 และ Web HTTP พอร์ต 80)
+        </p>
+
+        {/* Mode Selector Tabs */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          <button
+            onClick={() => setTopoMode("overview")}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              border: '1px solid',
+              borderColor: topoMode === "overview" ? 'var(--accent)' : 'var(--border)',
+              background: topoMode === "overview" ? 'var(--accent)' : 'var(--bg-surface)',
+              color: topoMode === "overview" ? '#ffffff' : 'var(--text-primary)',
+              transition: 'all 0.2s'
+            }}
+          >
+            🌐 1. ภาพรวมเครือข่าย LAN
+          </button>
+          <button
+            onClick={() => {
+              setTopoMode("ssh");
+              setSshTerminalStep(0);
+              setSshLogs([]);
+            }}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              border: '1px solid',
+              borderColor: topoMode === "ssh" ? '#0ea5e9' : 'var(--border)',
+              background: topoMode === "ssh" ? '#0ea5e9' : 'var(--bg-surface)',
+              color: topoMode === "ssh" ? '#ffffff' : 'var(--text-primary)',
+              transition: 'all 0.2s'
+            }}
+          >
+            🔑 2. จำลอง SSH (Port 22)
+          </button>
+          <button
+            onClick={() => setTopoMode("web")}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+              border: '1px solid',
+              borderColor: topoMode === "web" ? '#10b981' : 'var(--border)',
+              background: topoMode === "web" ? '#10b981' : 'var(--bg-surface)',
+              color: topoMode === "web" ? '#ffffff' : 'var(--text-primary)',
+              transition: 'all 0.2s'
+            }}
+          >
+            📰 3. จำลองหน้าเว็บ HTTP (Port 80)
+          </button>
+        </div>
+
+        {/* SVG Diagram and Interactive Details Split Row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '20px', minHeight: '340px' }}>
+          
+          {/* SVG Container */}
+          <div style={{
+            background: '#040815',
+            borderRadius: '12px',
+            border: '1px solid rgba(255,255,255,0.06)',
+            padding: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 8px 25px rgba(0,0,0,0.15)',
+            position: 'relative'
+          }}>
+            <svg className="docker-guide-svg" viewBox="0 0 540 280" style={{ width: '100%', height: 'auto' }}>
+              <defs>
+                <linearGradient id="serverGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#1e3a8a" />
+                  <stop offset="100%" stopColor="#0b1329" />
+                </linearGradient>
+                <linearGradient id="pveLayerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f97316" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#f97316" stopOpacity="0.05" />
+                </linearGradient>
+              </defs>
+
+              {/* PC นักเรียน (Left) */}
+              <g transform="translate(60, 140)">
+                <rect x="-40" y="-30" width="80" height="50" rx="6" fill="#1e293b" stroke="#334155" strokeWidth="2" />
+                <rect x="-30" y="20" width="60" height="6" rx="2" fill="#475569" />
+                <text x="0" y="2" textAnchor="middle" fill="#f8fafc" fontSize="10px" fontWeight="bold">💻 PC นักเรียน</text>
+                <text x="0" y="14" textAnchor="middle" fill="#94a3b8" fontSize="8px">IP: 192.168.10.12</text>
+                
+                {/* Active node glow */}
+                {(topoMode === "ssh" || topoMode === "web") && (
+                  <>
+                    <circle cx="0" cy="-30" r="5" fill={topoMode === "ssh" ? "#0ea5e9" : "#10b981"} />
+                    <circle cx="0" cy="-30" r="5" fill={topoMode === "ssh" ? "#0ea5e9" : "#10b981"} className="animate-pulse-ring" />
+                  </>
+                )}
+              </g>
+
+              {/* LAN Switch (Middle) */}
+              <g transform="translate(210, 140)">
+                <rect x="-35" y="-25" width="70" height="50" rx="6" fill="#0f172a" stroke="#38bdf8" strokeWidth="2" />
+                <line x1="-25" y1="5" x2="25" y2="5" stroke="rgba(56,189,248,0.2)" strokeWidth="3" />
+                <circle cx="-20" cy="-10" r="3" fill="#22c55e" />
+                <circle cx="-5" cy="-10" r="3" fill="#22c55e" />
+                <circle cx="10" cy="-10" r="3" fill="#22c55e" />
+                <circle cx="20" cy="-10" r="3" fill="#38bdf8" />
+                <text x="0" y="18" textAnchor="middle" fill="#38bdf8" fontSize="9px" fontWeight="bold">⚡ Switch</text>
+              </g>
+
+              {/* Physical Server Box (Right) */}
+              <g transform="translate(420, 140)">
+                {/* Hardware */}
+                <rect x="-95" y="-105" width="190" height="210" rx="8" fill="url(#serverGrad)" stroke="#1d4ed8" strokeWidth="2" />
+                <rect x="-85" y="-95" width="170" height="26" rx="4" fill="#1e40af" />
+                <text x="0" y="-78" textAnchor="middle" fill="#ffffff" fontSize="10px" fontWeight="bold">🛡️ PHYSICAL SERVER (แม่ข่าย)</text>
+                
+                {/* Proxmox Hypervisor Layer */}
+                <rect x="-85" y="-60" width="170" height="42" rx="4" fill="url(#pveLayerGrad)" stroke="#ea580c" strokeWidth="1.5" />
+                <text x="0" y="-44" textAnchor="middle" fill="#f97316" fontSize="9px" fontWeight="bold">💿 Proxmox VE (Type-1)</text>
+                <text x="0" y="-30" textAnchor="middle" fill="#fdba74" fontSize="7px">Web Manager HTTPS Port: 8006</text>
+
+                {/* LXC Containers Box */}
+                <rect x="-85" y="-8" width="170" height="85" rx="5" fill="#030712" stroke="#10b981" strokeWidth="1.5" strokeDasharray="3,2" />
+                <text x="0" y="8" textAnchor="middle" fill="#10b981" fontSize="9px" fontWeight="bold">📦 isolated LXC Containers</text>
+                
+                {/* Container 101 */}
+                <g transform="translate(-40, 42)">
+                  <rect x="-35" y="-20" width="70" height="32" rx="4" fill={topoMode === "ssh" ? "#1e3a5f" : topoMode === "web" ? "#064e3b" : "#111827"} stroke={topoMode === "ssh" ? "#0ea5e9" : topoMode === "web" ? "#10b981" : "#374151"} strokeWidth="1.5" />
+                  <text x="0" y="-8" textAnchor="middle" fill="#ffffff" fontSize="7px" fontWeight="bold">std01-nginx</text>
+                  <text x="0" y="3" textAnchor="middle" fill="#94a3b8" fontSize="6px">192.168.10.101</text>
+                  <text x="0" y="9" textAnchor="middle" fill={topoMode === "ssh" ? "#38bdf8" : topoMode === "web" ? "#34d399" : "#64748b"} fontSize="6px" fontWeight="bold">
+                    {topoMode === "ssh" ? "Port 22 (SSH)" : topoMode === "web" ? "Port 80 (HTTP)" : "Active"}
+                  </text>
+                </g>
+
+                {/* Container 102 */}
+                <g transform="translate(40, 42)">
+                  <rect x="-35" y="-20" width="70" height="32" rx="4" fill="#111827" stroke="#374151" strokeWidth="1" />
+                  <text x="0" y="-8" textAnchor="middle" fill="#64748b" fontSize="7px">std02-nginx</text>
+                  <text x="0" y="3" textAnchor="middle" fill="#64748b" fontSize="6px">192.168.10.102</text>
+                  <text x="0" y="9" textAnchor="middle" fill="#f43f5e" fontSize="6.5px">Offline</text>
+                </g>
+              </g>
+
+              {/* Cables & Connection Lines */}
+              {/* PC to Switch */}
+              <path d="M 100 140 L 175 140" fill="none" stroke="#334155" strokeWidth="2" />
+              {/* Switch to Server */}
+              <path d="M 245 140 L 325 140" fill="none" stroke="#334155" strokeWidth="2" />
+              
+              {/* Animated Flows */}
+              {topoMode === "ssh" && (
+                <>
+                  <path d="M 100 140 L 175 140" fill="none" stroke="#0ea5e9" strokeWidth="2" className="animate-packet-flow" />
+                  <path d="M 245 140 L 325 140 M 325 140 L 380 182" fill="none" stroke="#0ea5e9" strokeWidth="2" className="animate-packet-flow" />
+                  <circle cx="100" cy="140" r="4" fill="#0ea5e9">
+                    <animateMotion dur="2s" repeatCount="indefinite" path="M 0 0 L 75 0 M 145 0 L 225 0 L 280 42" />
+                  </circle>
+                </>
+              )}
+
+              {topoMode === "web" && (
+                <>
+                  <path d="M 100 140 L 175 140" fill="none" stroke="#10b981" strokeWidth="2" className="animate-packet-flow" />
+                  <path d="M 245 140 L 325 140 M 325 140 L 380 182" fill="none" stroke="#10b981" strokeWidth="2" className="animate-packet-flow" />
+                  <circle cx="100" cy="140" r="4" fill="#10b981">
+                    <animateMotion dur="2.5s" repeatCount="indefinite" path="M 0 0 L 75 0 M 145 0 L 225 0 L 280 42" />
+                  </circle>
+                </>
+              )}
+            </svg>
+          </div>
+
+          {/* Interactive details sidebar */}
+          <div style={{
+            background: 'var(--bg-surface)',
+            borderRadius: '12px',
+            border: '1px solid var(--border)',
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between',
+            boxShadow: '0 4px 15px var(--border)'
+          }}>
+            {topoMode === "overview" && (
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: 'var(--accent)', marginBottom: '8px' }}>
+                  ⚙️ โครงสร้างเครื่องแม่ข่ายเครือข่ายแล็บเสมือน
+                </h3>
+                <ul style={{ fontSize: '12.5px', color: 'var(--text-secondary)', paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <li><strong>Physical Server:</strong> เครื่องคอมพิวเตอร์หลักที่ห้องเรียน ถูกติดตั้งด้วยระบบ Proxmox VE</li>
+                  <li><strong>Type-1 Hypervisor:</strong> ควบคุมฮาร์ดแวร์โดยตรง ไม่มี OS หลักขวางกั้น ทำให้ความเร็วการรัน VM/Container เร็วสูงสุดเทียบเท่าเครื่องจริง</li>
+                  <li><strong>isolated Containers (LXC):</strong> ตู้จำลองระบบไฟล์ลินุกซ์ที่ครูผู้สอนโคลนเตรียมไว้ให้นักศึกษาแต่ละคนเป็นส่วนตัว เพื่อลงโปรแกรมทดลองได้อย่างอิสระโดยไม่กวนกัน</li>
+                </ul>
+              </div>
+            )}
+
+            {topoMode === "ssh" && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', height: '100%' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#0ea5e9' }}>
+                  🔑 ปฏิบัติการเชื่อมต่อ SSH (Secure Shell)
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                  นักเรียนใช้คำสั่ง <code>ssh [user]@[IP_LXC]</code> เพื่อเชื่อมต่อเข้ารหัสผ่านพอร์ต 22 เพื่อควบคุมสั่งการตู้เสมือนของตนเองผ่านสายแลน
+                </p>
+
+                {/* Simulated SSH Terminal Panel */}
+                <div style={{
+                  background: '#090d16',
+                  borderRadius: '6px',
+                  padding: '10px 12px',
+                  fontFamily: 'Courier New, monospace',
+                  fontSize: '11px',
+                  color: '#e2e8f0',
+                  flexGrow: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  border: '1px solid #1e293b'
+                }}>
+                  <div style={{ overflowY: 'auto', maxHeight: '140px' }}>
+                    {sshLogs.map((log, i) => (
+                      <div key={i} style={{ whiteSpace: 'pre-wrap', marginBottom: '4px' }}>{log}</div>
+                    ))}
+                    {sshTyping && <span className="term-cursor" />}
+                  </div>
+
+                  {sshTerminalStep === 0 && (
+                    <button
+                      onClick={handleTriggerSshSim}
+                      style={{
+                        background: '#0ea5e9',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '6px 12px',
+                        fontSize: '11px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        marginTop: '8px',
+                        width: '100%'
+                      }}
+                    >
+                      🚀 เริ่มจำลองการเชื่อมต่อ SSH
+                    </button>
+                  )}
+                  {sshTerminalStep === 3 && (
+                    <span style={{ color: '#22c55e', fontSize: '10px', fontWeight: 'bold', textAlign: 'center', display: 'block', marginTop: '6px' }}>
+                      ✓ เชื่อมต่อสำเร็จ! เข้าสู่หน้าควบคุมตู้ std01
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {topoMode === "web" && (
+              <div>
+                <h3 style={{ fontSize: '15px', fontWeight: 'bold', color: '#10b981', marginBottom: '8px' }}>
+                  🌐 ปฏิบัติการรันเว็บ HTTP (Nginx Web Server)
+                </h3>
+                <p style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
+                  เมื่อติดตั้ง Nginx และรันบริการสำเร็จ พอร์ต 80 ของตู้ Container จะเปิดรอรับคำขอ (HTTP Request) เมื่อผู้ใช้นำหมายเลข IP ไปเข้าผ่าน Browser จะดึงข้อมูลจากไฟล์ไปแสดงผลทันที
+                </p>
+
+                {/* HTTP Request simulator details */}
+                <div style={{
+                  background: 'var(--bg-elevated)',
+                  borderRadius: '6px',
+                  border: '1px solid var(--border)',
+                  padding: '10px 12px',
+                  fontSize: '11.5px',
+                  fontFamily: 'Courier New, monospace'
+                }}>
+                  <div style={{ color: '#f59e0b', fontWeight: 'bold', marginBottom: '4px' }}>[HTTP GET REQUEST]</div>
+                  <div style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                    Request URL: http://192.168.10.101/<br />
+                    Request Method: GET (Port 80)<br />
+                    Status Code: <span style={{ color: '#10b981', fontWeight: 'bold' }}>200 OK</span>
+                  </div>
+                  <div style={{ color: '#10b981', fontWeight: 'bold', marginBottom: '4px' }}>[HTTP RESPONSE - HTML]</div>
+                  <div style={{
+                    background: '#0f172a',
+                    color: '#e2e8f0',
+                    padding: '6px',
+                    borderRadius: '4px',
+                    fontSize: '10px',
+                    overflowX: 'auto',
+                    whiteSpace: 'pre'
+                  }}>
+                    {containers[0].htmlContent.slice(0, 100) + "..."}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Section 2: Proxmox VE Setup Wizard / Web UI Dashboard Simulator */}
+      {step < 9 ? (
+        <section style={{ marginBottom: '40px' }}>
+          <h2 style={{
+            fontSize: '18px',
+            fontWeight: '700',
+            marginBottom: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <span style={{ fontSize: '22px' }}>🎮</span> ตัวจำลองการติดตั้งระบบควบคุมคอมพิวเตอร์เสมือน (Proxmox VE Installer Simulator)
+          </h2>
+          <p style={{ marginBottom: '18px', color: 'var(--text-secondary)', fontSize: '13.5px' }}>
+            จำลองหน้าจอขั้นตอนการป้อนข้อมูลและกำหนดตัวเลือกของตัวติดตั้ง Proxmox VE 8.x เพื่อให้จดจำพารามิเตอร์ระบบเครือข่าย IP/Gateway ได้อย่างแม่นยำก่อนปฏิบัติการจริง
+          </p>
+
+          {/* High Fidelity PVE Installation Window */}
+          <div className="pve-window" style={{
+            borderRadius: '10px',
+            border: '2px solid #ea580c',
+            background: '#111827',
+            color: '#f1f5f9',
+            minHeight: '380px',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            
+            {/* Top Installer Header */}
+            <div style={{
+              background: '#ea580c',
+              padding: '10px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              color: '#ffffff',
+              fontSize: '12.5px',
+              fontWeight: 'bold',
+              letterSpacing: '0.5px'
+            }}>
+              <span>🟠 PROXMOX VIRTUAL ENVIRONMENT INSTALLER (GUI WIZARD)</span>
+              <span>ขั้นตอนที่ {step + 1} / 9</span>
+            </div>
+
+            {/* Split Content: Left Info Column, Right Form Config Column */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr', flexGrow: 1, minHeight: '280px' }}>
+              
+              {/* Left Column (Installer Help Panel) */}
+              <div style={{
+                background: '#1f2937',
+                borderRight: '1px solid rgba(255,255,255,0.06)',
+                padding: '16px',
+                fontSize: '12px',
+                color: '#cbd5e1',
+                lineHeight: '1.6'
+              }}>
+                <h4 style={{ color: '#fdba74', fontWeight: 'bold', fontSize: '13px', marginBottom: '10px' }}>
+                  ℹ️ คำอธิบายขั้นตอนช่วยจำ
+                </h4>
+                {step === 0 && (
+                  <div>
+                    <p><strong>ยินดีต้อนรับสู่ Proxmox VE</strong></p>
+                    <p style={{ marginTop: '6px' }}>เลือกหัวข้อแรกสุด 'Install Proxmox VE (Graphical)' เพื่อรันติดตั้งแบบกราฟิกอินเตอร์เฟสผ่านเมาส์ ซึ่งเป็นโหมดหลักที่สะดวก รวดเร็ว และตั้งค่าได้ครอบคลุมที่สุด</p>
+                  </div>
+                )}
+                {step === 1 && (
+                  <div>
+                    <p><strong>สัญญาข้อตกลงการใช้งาน (EULA)</strong></p>
+                    <p style={{ marginTop: '6px' }}>สัญญาระบุสิทธิ์การใช้งานซอฟต์แวร์เสรีภายใต้ข้อกำหนดสัญญา GNU AGPLv3 แนะนำให้นักศึกษาทำความเข้าใจเงื่อนไขของ Open Source ก่อนยอมรับเงื่อนไขติดตั้ง</p>
+                  </div>
+                )}
+                {step === 2 && (
+                  <div>
+                    <p><strong>การตั้งค่า Target Harddisk</strong></p>
+                    <p style={{ marginTop: '6px' }}>ระบุไดรฟ์ดิสก์หลักที่จะใช้ลงระบบปฏิบัติการหลัก:
+                    <br />- แนะนำ SSD สำหรับระบบ PVE
+                    <br />- ข้อมูลในดิสก์ที่ถูกเลือกจะโดนล้างฟอร์แมตเขียนทับระบบไฟล์ทั้งหมด</p>
+                  </div>
+                )}
+                {step === 3 && (
+                  <div>
+                    <p><strong>Location & Time Zone</strong></p>
+                    <p style={{ marginTop: '6px' }}>ระบุที่ตั้งเพื่อซิงค์เวลาของเครื่องเซิร์ฟเวอร์กับเครือข่ายอินเทอร์เน็ต (NTP):
+                    <br />- Country: Thailand
+                    <br />- Timezone: Asia/Bangkok
+                    <br />- การตั้งเวลาที่ถูกต้องจำเป็นสำหรับเวลาของ LOG เหตุการณ์ความผิดปกติ</p>
+                  </div>
+                )}
+                {step === 4 && (
+                  <div>
+                    <p><strong>รหัสผ่าน root แอดมินหลัก</strong></p>
+                    <p style={{ marginTop: '6px' }}>ตั้งรหัสผ่านสำหรับผู้ใช้ <code>root</code> ซึ่งเป็นบัญชีสูงสุดในระบบ:
+                    <br />- ใช้สำหรับการล็อกอินผ่าน SSH, SFTP
+                    <br />- ใช้ควบคุมหน้าจัดการเว็บเบราว์เซอร์ PVE Web Console
+                    <br />- ห้ามทำหายหรือตั้งรหัสผ่านเดาได้ง่ายเกินไป</p>
+                  </div>
+                )}
+                {step === 5 && (
+                  <div>
+                    <p><strong>Management Network</strong></p>
+                    <p style={{ marginTop: '6px' }}>ตั้งค่าการเชื่อมต่อไอพีและช่องสื่อสารหลัก:
+                    <br />- IP Address: ต้องใช้ Static IP คงที่ ห้ามใช้ไอพีแบบสุ่ม (DHCP) เพื่อไม่ให้หมายเลขควบคุมระบบหลุดเปลี่ยนระหว่างใช้งาน
+                    <br />- Hostname: ตั้งเป็นรูปแบบ FQDN เช่น <code>pve-server.local</code></p>
+                  </div>
+                )}
+                {step === 6 && (
+                  <div>
+                    <p><strong>ตรวจสอบ Summary สุดท้าย</strong></p>
+                    <p style={{ marginTop: '6px' }}>ตรวจดูรายละเอียดทุกช่องพารามิเตอร์ว่าถูกต้องตามแผนผังเครือข่ายก่อนเขียนดิสก์จริง เมื่อกดยืนยันแล้วระบบจะเริ่มเขียนข้อมูลดิสก์และฟอร์แมตดิสก์ทันที</p>
+                  </div>
+                )}
+                {step === 7 && (
+                  <div>
+                    <p><strong>กำลังเขียนข้อมูลระบบ...</strong></p>
+                    <p style={{ marginTop: '6px' }}>ระบบปฏิบัติการจะแบ่งพื้นที่ดิสก์ ทำการสร้างพาร์ติชันสำหรับ LVM/ZFS, คัดลอก Linux Kernel ของ Debian, และเซ็ตอัปแพ็กเกจช่วยรันของ Proxmox VE</p>
+                  </div>
+                )}
+                {step === 8 && (
+                  <div>
+                    <p><strong>ติดตั้งเสร็จสมบูรณ์!</strong></p>
+                    <p style={{ marginTop: '6px' }}>คอมพิวเตอร์สั่ง Reboot เรียบร้อย หน้าจอแสดง URL หมายเลขไอพีควบคุมทางไกลผ่านพอร์ต 8006:
+                    <br />- <code>https://192.168.10.50:8006/</code>
+                    <br />- สังเกตสัญลักษณ์ความปลอดภัยแบบ HTTPS และหมายเลขพอร์ต 8006 เสมอ</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column (Actual Form Visual / Interactive Simulator) */}
+              <div style={{
+                background: '#0f172a',
+                padding: '24px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center'
+              }}>
+                {step === 0 && (
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '13px', color: '#60a5fa', fontFamily: 'Courier New, monospace', marginBottom: '24px' }}>
+                      Proxmox Virtual Environment 8.2<br />
+                      GNU/Linux Kernel-based Hypervisor Boot Menu
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px',
+                      maxWidth: '280px',
+                      margin: '0 auto',
+                      textAlign: 'left'
+                    }}>
+                      <div style={{ background: '#2563eb', color: '#ffffff', padding: '10px 14px', borderRadius: '4px', border: '1px solid #3b82f6', fontWeight: 'bold', fontSize: '13px', cursor: 'pointer' }} onClick={() => setStep(1)}>
+                        👉 Install Proxmox VE (Graphical)
+                      </div>
+                      <div style={{ background: '#1e293b', color: '#94a3b8', padding: '10px 14px', borderRadius: '4px', border: '1px solid #334155', fontSize: '13px', opacity: 0.5 }}>
+                        Install Proxmox VE (Console Mode)
+                      </div>
+                      <div style={{ background: '#1e293b', color: '#94a3b8', padding: '10px 14px', borderRadius: '4px', border: '1px solid #334155', fontSize: '13px', opacity: 0.5 }}>
+                        Advanced Options / Rescue System
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '10px', color: '#64748b', display: 'block', marginTop: '20px' }}>
+                      (แนะนำคลิกหัวข้อบนสุดเพื่อรันโหมดช่วยเหลือตัวช่วยแบบกราฟิก)
+                    </span>
+                  </div>
+                )}
+
+                {step === 1 && (
+                  <div>
+                    <h4 style={{ fontSize: '14px', color: '#f97316', marginBottom: '8px', fontWeight: 'bold' }}>
+                      End User License Agreement (EULA)
+                    </h4>
+                    <div style={{
+                      background: '#020617',
+                      border: '1px solid #1e293b',
+                      borderRadius: '6px',
+                      padding: '10px',
+                      height: '130px',
+                      overflowY: 'scroll',
+                      fontSize: '11px',
+                      color: '#94a3b8',
+                      lineHeight: '1.4',
+                      marginBottom: '16px'
+                    }}>
+                      PROXMOX VIRTUAL ENVIRONMENT END USER LICENSE AGREEMENT.<br /><br />
+                      * LICENSE GRANT: Proxmox Server Solutions GmbH grants you a non-exclusive license to use the Proxmox VE compiled software for internal host management.<br /><br />
+                      * AGPL LICENSING: The source code is licensed under GNU Affero General Public License Version 3. You may view and contribute to the package.<br /><br />
+                      * NO WARRANTY: The software is provided 'as is' without warranty of any kind. Use at your own risk.
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <button
+                        onClick={() => setStep(2)}
+                        style={{
+                          background: '#f97316',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '4px',
+                          padding: '8px 18px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        I Agree (ตกลงและยินยอม)
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {step === 2 && (
+                  <div>
+                    <h4 style={{ fontSize: '14px', color: '#f97316', marginBottom: '12px', fontWeight: 'bold' }}>
+                      Target Harddisk Selection (ระบุดิสก์ลงระบบ)
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        background: '#1e293b',
+                        padding: '10px 14px',
+                        borderRadius: '6px'
+                      }}>
+                        <span style={{ fontSize: '12px', color: '#cbd5e1', width: '100px' }}>Target Disk:</span>
+                        <select
+                          value={selectedDisk}
+                          onChange={(e) => setSelectedDisk(e.target.value)}
+                          style={{
+                            flexGrow: 1,
+                            background: '#0f172a',
+                            color: '#ffffff',
+                            border: '1px solid #475569',
+                            borderRadius: '4px',
+                            padding: '6px 10px',
+                            fontSize: '12px'
+                          }}
+                        >
+                          <option value="/dev/sda - SSD 250GB">/dev/sda - SSD 250GB (แนะนำ สำหรับระบบหลัก)</option>
+                          <option value="/dev/sdb - HDD 2TB">/dev/sdb - HDD 2TB (ดิสก์สำรองเก็บข้อมูล)</option>
+                        </select>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#f43f5e', padding: '4px' }}>
+                        ⚠️ ข้อควรระวัง: ข้อมูลดิสก์ที่เลือกจะโดนล้างฟอร์แมตเขียนระบบใหม่ทั้งหมด กรุณาตรวจสอบและตั้งสติก่อนดำเนินการ
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {step === 3 && (
+                  <div>
+                    <h4 style={{ fontSize: '14px', color: '#f97316', marginBottom: '12px', fontWeight: 'bold' }}>
+                      Location and Time Zone Selection (ตั้งเขตเวลา)
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#1e293b', padding: '14px', borderRadius: '6px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>Country:</span>
+                        <input type="text" readOnly value="Thailand" style={{ background: '#0f172a', color: '#94a3b8', border: '1px solid #334155', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }} />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>Time Zone:</span>
+                        <select
+                          value={timezone}
+                          onChange={(e) => setTimezone(e.target.value)}
+                          style={{ background: '#0f172a', color: '#ffffff', border: '1px solid #475569', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }}
+                        >
+                          <option value="Asia/Bangkok">Asia/Bangkok (GMT+7)</option>
+                          <option value="Asia/Singapore">Asia/Singapore (GMT+8)</option>
+                        </select>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>Keyboard:</span>
+                        <input type="text" readOnly value="English (US)" style={{ background: '#0f172a', color: '#94a3b8', border: '1px solid #334155', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {step === 4 && (
+                  <div>
+                    <h4 style={{ fontSize: '14px', color: '#f97316', marginBottom: '12px', fontWeight: 'bold' }}>
+                      Password and Email (รหัสแอดมิน root)
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#1e293b', padding: '14px', borderRadius: '6px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>Password:</span>
+                        <input
+                          type="text"
+                          value={rootPass}
+                          onChange={(e) => setRootPass(e.target.value)}
+                          style={{ background: '#0f172a', color: '#ffffff', border: '1px solid #475569', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }}
+                        />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>Confirm Pass:</span>
+                        <input type="password" value={rootPass} readOnly style={{ background: '#0f172a', color: '#64748b', border: '1px solid #334155', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }} />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>Email Address:</span>
+                        <input type="text" readOnly value="admin-alert@yourdomain.com" style={{ background: '#0f172a', color: '#64748b', border: '1px solid #334155', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {step === 5 && (
+                  <div>
+                    <h4 style={{ fontSize: '14px', color: '#f97316', marginBottom: '12px', fontWeight: 'bold' }}>
+                      Management Network Config (เครือข่ายควบคุม)
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: '#1e293b', padding: '14px', borderRadius: '6px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>Management Interface:</span>
+                        <input type="text" readOnly value="eno1 (Physical NIC)" style={{ background: '#0f172a', color: '#64748b', border: '1px solid #334155', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }} />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>Hostname (FQDN):</span>
+                        <input type="text" readOnly value="pve-server.local" style={{ background: '#0f172a', color: '#64748b', border: '1px solid #334155', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }} />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>IP Address / CIDR:</span>
+                        <input
+                          type="text"
+                          value={mgmtIP}
+                          onChange={(e) => setMgmtIP(e.target.value)}
+                          style={{ background: '#0f172a', color: '#ffffff', border: '1px solid #475569', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }}
+                        />
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '10px', alignItems: 'center' }}>
+                        <span style={{ fontSize: '11.5px', color: '#cbd5e1' }}>Gateway IP:</span>
+                        <input type="text" readOnly value="192.168.10.1" style={{ background: '#0f172a', color: '#64748b', border: '1px solid #334155', borderRadius: '4px', padding: '4px 8px', fontSize: '11.5px' }} />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {step === 6 && (
+                  <div>
+                    <h4 style={{ fontSize: '14px', color: '#f97316', marginBottom: '10px', fontWeight: 'bold' }}>
+                      Summary (สรุปผลข้อมูลทั้งหมดก่อนตกลงเขียนดิสก์)
+                    </h4>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '8px',
+                      background: '#1e293b',
+                      padding: '12px',
+                      borderRadius: '6px',
+                      fontSize: '11px',
+                      lineHeight: '1.5',
+                      marginBottom: '12px'
+                    }}>
+                      <div>Target Disk: <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{selectedDisk}</span></div>
+                      <div>Timezone: <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{timezone}</span></div>
+                      <div>IP Address: <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{mgmtIP}</span></div>
+                      <div>Gateway: <span style={{ color: '#22c55e', fontWeight: 'bold' }}>192.168.10.1</span></div>
+                      <div>DNS Server: <span style={{ color: '#22c55e', fontWeight: 'bold' }}>8.8.8.8</span></div>
+                      <div>Hostname: <span style={{ color: '#22c55e', fontWeight: 'bold' }}>pve-server.local</span></div>
+                    </div>
+                    <div style={{ textAlign: 'center', fontSize: '10.5px', color: '#f59e0b' }}>
+                      ⚠️ ข้อมูลเดิมในไดรฟ์เป้าหมายปลายทางจะสูญหายถาวรเมื่อกดยืนยันการติดตั้ง
+                    </div>
+                  </div>
+                )}
+
+                {step === 7 && (
+                  <div style={{ textAlign: 'center' }}>
+                    <h4 style={{ fontSize: '14px', color: '#f97316', marginBottom: '14px', fontWeight: 'bold' }}>
+                      กำลังคัดลอกไฟล์และตั้งค่า Kernel...
+                    </h4>
+                    <div style={{
+                      background: '#1e293b',
+                      height: '18px',
+                      borderRadius: '9px',
+                      overflow: 'hidden',
+                      border: '1px solid #475569',
+                      marginBottom: '10px'
+                    }}>
+                      <div style={{
+                        background: 'linear-gradient(90deg, #ea580c 0%, #f97316 100%)',
+                        height: '100%',
+                        width: `${installProgress}%`,
+                        transition: 'width 0.1s ease-out'
+                      }} />
+                    </div>
+                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                      กำลังจัดส่งแพ็คเกจ Debian & Proxmox... {installProgress}%
+                    </span>
+                  </div>
+                )}
+
+                {step === 8 && (
+                  <div style={{ background: '#020617', padding: '14px', borderRadius: '6px', border: '1px solid #1e293b', minHeight: '140px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div style={{ fontFamily: 'Courier New, monospace', fontSize: '11px', color: '#22c55e', lineHeight: '1.4' }}>
+                      Debian GNU/Linux 12 pve-server tty1<br /><br />
+                      Welcome to the Proxmox Virtual Environment Web Manager.<br />
+                      Please use your web browser to configure the host at:<br />
+                      <span style={{ color: '#f97316', fontWeight: 'bold', fontSize: '12px' }}>https://192.168.10.50:8006/</span>
+                    </div>
+                    <button
+                      onClick={() => setStep(9)}
+                      style={{
+                        background: '#2563eb',
+                        color: '#ffffff',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '8px 14px',
+                        cursor: 'pointer',
+                        fontSize: '11.5px',
+                        fontWeight: 'bold',
+                        marginTop: '12px',
+                        alignSelf: 'flex-end'
+                      }}
+                    >
+                      🌐 ล็อกอินเข้า Web UI Dashboard (พอร์ต 8006)
+                    </button>
+                  </div>
+                )}
+
+              </div>
+            </div>
+
+            {/* Bottom Navigation Buttons */}
+            <div style={{
+              background: '#1e293b',
+              borderTop: '1px solid rgba(255,255,255,0.06)',
+              padding: '12px 18px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <button
+                className="installer-nav-btn"
+                disabled={step === 0 || step >= 7}
+                onClick={() => setStep(step - 1)}
+                style={{
+                  background: '#475569',
+                  color: '#ffffff',
+                  border: 'none'
+                }}
+              >
+                ◀ ย้อนกลับ (Back)
+              </button>
+
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {step < 6 ? (
+                  <button
+                    className="installer-nav-btn"
+                    onClick={() => setStep(step + 1)}
+                    style={{
+                      background: '#ea580c',
+                      color: '#ffffff',
+                      border: 'none'
+                    }}
+                  >
+                    ถัดไป (Next) ▶
+                  </button>
+                ) : step === 6 ? (
+                  <button
+                    className="installer-nav-btn"
+                    onClick={() => setStep(7)}
+                    style={{
+                      background: '#10b981',
+                      color: '#ffffff',
+                      border: 'none'
+                    }}
+                  >
+                    💾 ยืนยันการติดตั้ง (Install)
+                  </button>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        /* Section 3: Advanced Proxmox Web UI & LXC Simulator */
+        <section style={{ marginBottom: '40px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <h2 style={{
+              fontSize: '18px',
+              fontWeight: '700',
+              margin: 0,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px'
+            }}>
+              <span style={{ fontSize: '22px' }}>⚙️</span> ระบบจำลองการจัดการเครื่องเสมือน (Advanced Proxmox Web UI & Practice Lab)
+            </h2>
+            <button
+              onClick={() => {
+                setStep(0);
+                setContainers(prev => prev.map((c, i) => i === 0 ? {
+                  ...c,
+                  status: 'running',
+                  isNginxInstalled: true,
+                  isNginxRunning: true,
+                  htmlContent: "<h1>ยินดีต้อนรับสู่เว็บเซิร์ฟเวอร์ของ นายสมชาย (std01)</h1>\n<p>สาขาวิชาเทคโนโลยีสารสนเทศ ปวส.1</p>\n<div style='color: #0284c7; font-weight: bold; margin-top: 15px; border-top: 2px dashed #0284c7; padding-top: 10px;'>Status: Nginx is working successfully on Port 80!</div>"
+                } : {
+                  ...c,
+                  status: 'stopped',
+                  isNginxInstalled: false,
+                  isNginxRunning: false,
+                  htmlContent: "<h1>ยินดีต้อนรับสู่เว็บไซต์ของ std02</h1>\n<p>กำลังอยู่ในระหว่างการพัฒนาเซ็ตอัป...</p>"
+                }));
+              }}
+              style={{
+                background: '#f43f5e',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '6px 12px',
+                fontSize: '11.5px',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
+            >
+              🔄 รีเซ็ตโปรแกรมจำลองทั้งหมด
+            </button>
+          </div>
+          <p style={{ marginBottom: '16px', color: 'var(--text-secondary)', fontSize: '13.5px' }}>
+            ฝึกปฏิบัติการสร้างตู้คอนเทนเนอร์ LXC ส่วนตัว, ควบคุมการเปิด-ปิด (Power Settings), รันชุดคำสั่งคอนโซลลินุกซ์ และปรับปรุงหน้าเว็บไฟล์ HTML เพื่อทดลองเสมือนจริงในบอร์ดควบคุมหน้าจอด้านล่างนี้
+          </p>
+
+          {/* Proxmox VE Web UI Workspace Container */}
+          <div style={{
+            display: 'flex',
+            height: '420px',
+            background: '#0f172a',
+            borderRadius: '10px',
+            border: '2px solid #ea580c',
+            overflow: 'hidden',
+            fontFamily: 'sans-serif',
+            color: '#e2e8f0'
+          }}>
+            
+            {/* Tree Sidebar Menu */}
+            <div style={{
+              width: '180px',
+              background: '#020617',
+              borderRight: '1px solid #1e293b',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              fontSize: '11.5px',
+              padding: '10px'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div
+                  onClick={() => setSelectedHost(true)}
+                  style={{
+                    fontWeight: 'bold',
+                    color: selectedHost ? '#f97316' : '#818cf8',
+                    cursor: 'pointer',
+                    padding: '4px 6px',
+                    borderRadius: '4px',
+                    background: selectedHost ? 'rgba(249,115,22,0.1)' : 'transparent',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px'
+                  }}
+                >
+                  <span>🌐</span> Datacenter
+                </div>
+                
+                <div style={{ paddingLeft: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <div
+                    onClick={() => setSelectedHost(true)}
+                    style={{
+                      color: selectedHost ? '#ffffff' : '#cbd5e1',
+                      cursor: 'pointer',
+                      padding: '4px 6px',
+                      borderRadius: '3px',
+                      fontWeight: selectedHost ? 'bold' : 'normal',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <span>🖥️</span> pve-server
+                  </div>
+                  
+                  {/* Container nodes list */}
+                  <div style={{ paddingLeft: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    {containers.map(c => {
+                      const isActive = !selectedHost && selectedContainerId === c.id;
+                      return (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            setSelectedHost(false);
+                            setSelectedContainerId(c.id);
+                          }}
+                          style={{
+                            color: isActive ? '#f97316' : c.status === "running" ? '#10b981' : '#94a3b8',
+                            fontWeight: isActive ? 'bold' : 'normal',
+                            cursor: 'pointer',
+                            padding: '3px 6px',
+                            borderRadius: '3px',
+                            background: isActive ? 'rgba(249,115,22,0.15)' : 'transparent',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                          }}
+                        >
+                          <span>📦</span> {c.id} ({c.name})
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Sidebar bottom Creator Form */}
+              <div style={{
+                borderTop: '1px solid #1e293b',
+                paddingTop: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}>
+                <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 'bold' }}>⚡ เมนูด่วนสร้างตู้ LXC:</span>
+                <input
+                  type="text"
+                  placeholder="ชื่อตู้ (เช่น std03)"
+                  value={newContainerName}
+                  onChange={(e) => setNewContainerName(e.target.value)}
+                  style={{
+                    background: '#090d16',
+                    border: '1px solid #334155',
+                    borderRadius: '4px',
+                    padding: '4px 8px',
+                    fontSize: '10px',
+                    color: '#ffffff'
+                  }}
+                />
+                <button
+                  onClick={handleAddContainer}
+                  style={{
+                    background: '#f97316',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '4px',
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer'
+                  }}
+                >
+                  + สร้าง LXC Container
+                </button>
+              </div>
+            </div>
+
+            {/* Right Dashboard panel */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#090d16', overflow: 'hidden' }}>
+              
+              {/* Header inside Panel */}
+              <div style={{
+                background: '#1e293b',
+                padding: '10px 16px',
+                borderBottom: '1px solid #2d3748',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                fontSize: '12.5px'
+              }}>
+                <span style={{ fontWeight: 'bold', color: '#f97316' }}>
+                  {selectedHost ? "🖥️ Node: pve-server (Physical Main Host)" : `📦 Container ID: ${selectedContainerId}`}
+                </span>
+                <span style={{ fontSize: '10px', color: '#10b981', fontWeight: 'bold' }}>● Logged: root@pam</span>
+              </div>
+
+              {/* Content Panel Body */}
+              <div style={{ flexGrow: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                {selectedHost ? (
+                  /* HOST VIEW SCREEN */
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+                      <div style={{ background: '#020617', border: '1px solid #1e293b', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '10px', color: '#94a3b8' }}>CPU Usage</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#10b981', marginTop: '4px' }}>12.4%</div>
+                        <div style={{ fontSize: '9px', color: '#64748b' }}>4 Cores (Intel Xeon)</div>
+                      </div>
+                      <div style={{ background: '#020617', border: '1px solid #1e293b', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '10px', color: '#94a3b8' }}>RAM Allocation</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#f59e0b', marginTop: '4px' }}>4.8 GB / 16.0 GB</div>
+                        <div style={{ fontSize: '9px', color: '#64748b' }}>ระบบใช้ควบคุมเสถียรภาพ</div>
+                      </div>
+                      <div style={{ background: '#020617', border: '1px solid #1e293b', padding: '10px', borderRadius: '6px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '10px', color: '#94a3b8' }}>LXC Containers</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#38bdf8', marginTop: '4px' }}>{containers.length} เครื่องเสมือน</div>
+                        <div style={{ fontSize: '9px', color: '#64748b' }}>รันปกติ {containers.filter(c => c.status === "running").length} / ปิดอยู่ {containers.filter(c => c.status === "stopped").length}</div>
+                      </div>
+                    </div>
+
+                    <div style={{ background: '#020617', border: '1px solid #1e293b', padding: '12px', borderRadius: '6px' }}>
+                      <h4 style={{ fontSize: '12px', color: '#cbd5e1', fontWeight: 'bold', marginBottom: '8px' }}>
+                        📊 ตารางข้อมูลการบริหารจัดการเครือข่ายแล็บในเครื่องหลัก (Host IP: 192.168.10.50)
+                      </h4>
+                      <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse', textAlign: 'left' }}>
+                        <thead>
+                          <tr style={{ color: '#94a3b8', borderBottom: '1px solid #1e293b' }}>
+                            <th style={{ padding: '6px 4px' }}>ID / ชื่อตู้</th>
+                            <th style={{ padding: '6px 4px' }}>หมายเลข IP</th>
+                            <th style={{ padding: '6px 4px' }}>สถานะทำงาน</th>
+                            <th style={{ padding: '6px 4px' }}>บริการเว็บ (Port 80)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {containers.map(c => (
+                            <tr key={c.id} style={{ borderBottom: '1px solid #1e293b' }}>
+                              <td style={{ padding: '6px 4px' }}>{c.id} - {c.name}</td>
+                              <td style={{ padding: '6px 4px', fontFamily: 'monospace' }}>{c.ip}</td>
+                              <td style={{ padding: '6px 4px' }}>
+                                <span style={{
+                                  padding: '2px 6px',
+                                  borderRadius: '99px',
+                                  fontSize: '9px',
+                                  fontWeight: 'bold',
+                                  background: c.status === "running" ? 'rgba(34,197,94,0.15)' : 'rgba(244,63,94,0.15)',
+                                  color: c.status === "running" ? '#22c55e' : '#f43f5e'
+                                }}>
+                                  {c.status === "running" ? "Online" : "Offline"}
+                                </span>
+                              </td>
+                              <td style={{ padding: '6px 4px' }}>
+                                <span style={{ color: c.isNginxRunning ? '#22c55e' : '#94a3b8' }}>
+                                  {c.isNginxRunning ? "✓ Nginx Active" : "✗ Not Working"}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ) : (
+                  /* CONTAINER VIEW SCREEN */
+                  <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
+                    {/* Power Controls row */}
+                    <div style={{
+                      display: 'flex',
+                      gap: '8px',
+                      marginBottom: '12px',
+                      background: '#020617',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #1e293b',
+                      alignItems: 'center'
+                    }}>
+                      <span style={{ fontSize: '11px', color: '#cbd5e1' }}>ควบคุมสิทธิ์ไฟฟ้า:</span>
+                      <button
+                        onClick={() => handleToggleContainerPower("start")}
+                        style={{
+                          background: '#16a34a',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '3px',
+                          padding: '4px 10px',
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ▶ Start
+                      </button>
+                      <button
+                        onClick={() => handleToggleContainerPower("stop")}
+                        style={{
+                          background: '#dc2626',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '3px',
+                          padding: '4px 10px',
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ■ Stop
+                      </button>
+                      <button
+                        onClick={() => handleToggleContainerPower("restart")}
+                        style={{
+                          background: '#d97706',
+                          color: '#ffffff',
+                          border: 'none',
+                          borderRadius: '3px',
+                          padding: '4px 10px',
+                          fontSize: '10px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🔄 Restart
+                      </button>
+
+                      <div style={{ marginLeft: 'auto', fontSize: '10px', color: '#cbd5e1' }}>
+                        สถานะเครื่อง: <span style={{
+                          fontWeight: 'bold',
+                          color: containers.find(c => c.id === selectedContainerId)?.status === "running" ? '#22c55e' : '#f43f5e'
+                        }}>
+                          {containers.find(c => c.id === selectedContainerId)?.status === "running" ? "รันอยู่ (Running)" : "ปิดเครื่องอยู่ (Stopped)"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Sub tabs selector inside Container View */}
+                    <div style={{ display: 'flex', borderBottom: '1px solid #1e293b', marginBottom: '10px' }}>
+                      <button
+                        onClick={() => setActiveTab("summary")}
+                        style={{
+                          padding: '6px 12px',
+                          border: 'none',
+                          background: activeTab === "summary" ? '#1e293b' : 'transparent',
+                          color: activeTab === "summary" ? '#ffffff' : '#94a3b8',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          fontWeight: activeTab === "summary" ? 'bold' : 'normal',
+                          borderRadius: '4px 4px 0 0'
+                        }}
+                      >
+                        📋 รายละเอียดตู้ (Summary)
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("console")}
+                        style={{
+                          padding: '6px 12px',
+                          border: 'none',
+                          background: activeTab === "console" ? '#1e293b' : 'transparent',
+                          color: activeTab === "console" ? '#ffffff' : '#94a3b8',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          fontWeight: activeTab === "console" ? 'bold' : 'normal',
+                          borderRadius: '4px 4px 0 0'
+                        }}
+                      >
+                        💻 เทอร์มินัลแล็บ (Console CLI)
+                      </button>
+                      <button
+                        onClick={() => setActiveTab("browser")}
+                        style={{
+                          padding: '6px 12px',
+                          border: 'none',
+                          background: activeTab === "browser" ? '#1e293b' : 'transparent',
+                          color: activeTab === "browser" ? '#ffffff' : '#94a3b8',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          fontWeight: activeTab === "browser" ? 'bold' : 'normal',
+                          borderRadius: '4px 4px 0 0'
+                        }}
+                      >
+                        🌐 ทดสอบเปิดเว็บ (Web Browser)
+                      </button>
+                    </div>
+
+                    {/* Tab panels details switcher */}
+                    <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+                      
+                      {/* Summary Tab */}
+                      {activeTab === "summary" && (
+                        <div style={{ background: '#020617', border: '1px solid #1e293b', padding: '12px', borderRadius: '6px', fontSize: '11.5px', lineHeight: '1.6' }}>
+                          <h4 style={{ color: '#f97316', fontWeight: 'bold', fontSize: '12px', marginBottom: '8px' }}>
+                            ข้อมูลทางเทคนิคของตู้ LXC
+                          </h4>
+                          <div>ID ตู้จำลองเสมือน: <strong style={{ color: '#ffffff' }}>{selectedContainerId}</strong></div>
+                          <div>ชื่อบริการเครือข่าย: <strong style={{ color: '#ffffff' }}>{containers.find(c => c.id === selectedContainerId)?.name}</strong></div>
+                          <div>พิกัด IP Address: <strong style={{ color: '#38bdf8', fontFamily: 'monospace' }}>{containers.find(c => c.id === selectedContainerId)?.ip}/24</strong></div>
+                          <div>OS template: <strong style={{ color: '#ffffff' }}>ubuntu-24.04-standard (Linux)</strong></div>
+                          <div>ขนาดพื้นที่จัดเก็บ: <strong style={{ color: '#ffffff' }}>8 GB (LVM shared pool)</strong></div>
+                          <div style={{ marginTop: '10px', borderTop: '1px solid #1e293b', paddingTop: '8px' }}>
+                            ตัวเลือกแอปพลิเคชันติดตั้งภายในตู้:
+                            <br />- Nginx installed status: <span style={{ color: containers.find(c => c.id === selectedContainerId)?.isNginxInstalled ? '#22c55e' : '#cbd5e1', fontWeight: 'bold' }}>{containers.find(c => c.id === selectedContainerId)?.isNginxInstalled ? "ติดตั้งสำเร็จ (Installed)" : "ยังไม่ได้ติดตั้ง (Not Installed)"}</span>
+                            <br />- Nginx service active: <span style={{ color: containers.find(c => c.id === selectedContainerId)?.isNginxRunning ? '#22c55e' : '#cbd5e1', fontWeight: 'bold' }}>{containers.find(c => c.id === selectedContainerId)?.isNginxRunning ? "กำลังรันบริการ (Active / Running)" : "ปิดบริการอยู่ (Stopped)"}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Console Tab */}
+                      {activeTab === "console" && (
+                        <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
+                          
+                          {/* Nano Text Editor Popup inside Console Container */}
+                          {showNanoEditor ? (
+                            <div style={{
+                              flexGrow: 1,
+                              background: '#000000',
+                              color: '#ffffff',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '6px',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              fontFamily: 'monospace',
+                              padding: '6px'
+                            }}>
+                              <div style={{ background: '#ffffff', color: '#000000', padding: '2px 8px', fontSize: '9px', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
+                                <span>GNU nano 7.2</span>
+                                <span>/var/www/html/index.html</span>
+                              </div>
+                              <textarea
+                                value={nanoText}
+                                onChange={(e) => setNanoText(e.target.value)}
+                                style={{
+                                  flexGrow: 1,
+                                  background: '#000000',
+                                  color: '#22c55e',
+                                  border: 'none',
+                                  outline: 'none',
+                                  padding: '8px',
+                                  fontFamily: 'monospace',
+                                  fontSize: '11px',
+                                  resize: 'none'
+                                }}
+                              />
+                              <div style={{ background: '#1e293b', padding: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '9px', color: '#94a3b8' }}>คำใบ้: ลองพิมพ์แก้ไขหัวข้อ HTML เช่น Hello My Server ให้เป็นชื่อตัวเอง</span>
+                                <button
+                                  onClick={handleSaveNano}
+                                  style={{
+                                    background: '#16a34a',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '3px',
+                                    padding: '4px 10px',
+                                    fontSize: '10px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  💾 เซฟงานและปิดตัวแก้ไข (Ctrl+O & Ctrl+X)
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            /* Linux Standard Terminal Box */
+                            <div style={{
+                              flexGrow: 1,
+                              background: '#020617',
+                              border: '1px solid #1e293b',
+                              borderRadius: '6px',
+                              padding: '10px',
+                              fontFamily: 'Courier New, monospace',
+                              fontSize: '11px',
+                              color: '#cbd5e1',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              justifyContent: 'space-between',
+                              minHeight: '180px'
+                            }}>
+                              <div style={{ overflowY: 'auto', flexGrow: 1, maxHeight: '160px' }}>
+                                {containers.find(c => c.id === selectedContainerId)?.status === "stopped" ? (
+                                  <div style={{ color: '#ef4444', textAlign: 'center', marginTop: '40px', fontWeight: 'bold' }}>
+                                    Offline Console: ตู้จำลองปิดการใช้งานอยู่ กรุณากดปุ่ม Start ด้านบนเพื่อเปิดใช้งานเครื่อง
+                                  </div>
+                                ) : (
+                                  <>
+                                    {terminalLogs.map((log, i) => (
+                                      <div key={i} style={{ whiteSpace: 'pre-wrap', marginBottom: '3px' }}>{log}</div>
+                                    ))}
+                                    {isTyping && <span className="term-cursor" />}
+                                  </>
+                                )}
+                              </div>
+
+                              {/* Interactive Command helper triggers */}
+                              {containers.find(c => c.id === selectedContainerId)?.status === "running" && (
+                                <div style={{
+                                  borderTop: '1px solid #1e293b',
+                                  paddingTop: '8px',
+                                  marginTop: '6px',
+                                  display: 'flex',
+                                  flexWrap: 'wrap',
+                                  gap: '6px'
+                                }}>
+                                  <button
+                                    disabled={isTyping}
+                                    onClick={() => handleRunCommand("update")}
+                                    className="quick-action-btn"
+                                  >
+                                    1. อัปเดตแพ็คเกจ (apt update)
+                                  </button>
+                                  <button
+                                    disabled={isTyping || !containers.find(c => c.id === selectedContainerId)?.status}
+                                    onClick={() => handleRunCommand("install")}
+                                    className="quick-action-btn"
+                                  >
+                                    2. ติดตั้ง Nginx (apt install nginx)
+                                  </button>
+                                  <button
+                                    disabled={isTyping || !containers.find(c => c.id === selectedContainerId)?.isNginxInstalled}
+                                    onClick={() => handleRunCommand("start")}
+                                    className="quick-action-btn"
+                                  >
+                                    3. เปิดใช้งาน (systemctl start nginx)
+                                  </button>
+                                  <button
+                                    disabled={isTyping || !containers.find(c => c.id === selectedContainerId)?.isNginxInstalled}
+                                    onClick={() => handleRunCommand("nano")}
+                                    className="quick-action-btn"
+                                    style={{ borderColor: '#eab308', color: '#eab308' }}
+                                  >
+                                    ✍ 4. เขียนเว็บไฟล์ (nano index.html)
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Web Browser Preview Tab */}
+                      {activeTab === "browser" && (
+                        <div style={{
+                          flexGrow: 1,
+                          background: '#ffffff',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          color: '#000000',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          minHeight: '200px'
+                        }}>
+                          
+                          {/* Browser address bar */}
+                          <div style={{
+                            background: '#f1f5f9',
+                            borderBottom: '1px solid #cbd5e1',
+                            padding: '6px 12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            fontSize: '11px'
+                          }}>
+                            <span style={{ color: '#94a3b8' }}>🔒 Secure</span>
+                            <div style={{
+                              flexGrow: 1,
+                              background: '#ffffff',
+                              border: '1px solid #cbd5e1',
+                              borderRadius: '4px',
+                              padding: '2px 8px',
+                              color: '#475569',
+                              fontFamily: 'monospace'
+                            }}>
+                              http://{containers.find(c => c.id === selectedContainerId)?.ip}/
+                            </div>
+                            <span style={{ cursor: 'pointer', fontWeight: 'bold' }}>🔄</span>
+                          </div>
+
+                          {/* Browser main display rendering HTML */}
+                          <div style={{ flexGrow: 1, padding: '14px', overflowY: 'auto' }}>
+                            {(!containers.find(c => c.id === selectedContainerId)?.isNginxInstalled ||
+                              !containers.find(c => c.id === selectedContainerId)?.isNginxRunning ||
+                              containers.find(c => c.id === selectedContainerId)?.status === "stopped") ? (
+                              <div style={{ textAlign: 'center', marginTop: '40px', color: '#94a3b8' }}>
+                                <div style={{ fontSize: '26px' }}>🚫</div>
+                                <h4 style={{ fontSize: '13px', fontWeight: 'bold', color: '#475569', marginTop: '6px' }}>
+                                  ERR_CONNECTION_REFUSED
+                                </h4>
+                                <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                                  ไม่สามารถเข้าชมเว็บไซต์ได้เนื่องจากยังไม่ได้ติดตั้งหรือยังไม่เริ่มรัน Nginx ที่พอร์ต 80 ในตู้นี้
+                                </p>
+                              </div>
+                            ) : (
+                              <div
+                                dangerouslySetInnerHTML={{ __html: containers.find(c => c.id === selectedContainerId)?.htmlContent || "" }}
+                                style={{ fontSize: '13px', color: '#0f172a' }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Section 4: Detailed Step-by-Step CLI Instructions */}
+      <section style={{ marginBottom: '20px' }}>
+        <h2 style={{
+          fontSize: '18px',
+          fontWeight: '700',
+          marginBottom: '14px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <span style={{ fontSize: '22px' }}>📖</span> สรุปขั้นตอนปฏิบัติการอย่างละเอียดตามข้อความอ้างอิง (Official text references)
+        </h2>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '16px',
+            fontSize: '12.5px',
+            color: 'var(--text-secondary)'
+          }}>
+            <h4 style={{ color: 'var(--accent)', fontWeight: 'bold', fontSize: '13px', marginBottom: '8.5px', display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <span>🖥️</span> 1. สรุปติดตั้ง Proxmox VE (วันอังคาร)
+            </h4>
+            <ol style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '6.5px' }}>
+              <li><strong>บูตผ่านแฟลชไดรฟ์:</strong> เสียบสื่อเขียน ISO เลือกบูต UEFI/BIOS ไปที่หน้า boot menu แล้วเลือก Install Proxmox VE (Graphical)</li>
+              <li><strong>EULA & Harddisk:</strong> กดยอมรับสัญญาการใช้งาน เลือกดิสก์ความเร็วสูง SSD (เช่น <code>/dev/sda</code>) สำหรับลงตัวนำ Hypervisor</li>
+              <li><strong>พิกัดและรหัสผ่าน:</strong> กำหนด Country: Thailand, Timezone: Asia/Bangkok และกรอกรหัสผ่าน root สำหรับใช้ดูแลระบบ</li>
+              <li><strong>สถิติเน็ตเวิร์กคงที่ (Static IP):</strong> ตั้งค่า Hostname: <code>pve-server.local</code> และระบุหมายเลขไอพีเฉพาะ <code>192.168.10.50/24</code></li>
+              <li><strong>เข้าควบคุมหน้าเว็บ:</strong> หลังบูตเสร็จ ระบบจะแสดงหน้าต่างดำระบุลิงก์ ให้พิมพ์ <code>https://192.168.10.50:8006/</code> เพื่อเข้าแดชบอร์ดหลัก</li>
+            </ol>
+          </div>
+
+          <div style={{
+            background: 'var(--bg-surface)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '16px',
+            fontSize: '12.5px',
+            color: 'var(--text-secondary)'
+          }}>
+            <h4 style={{ color: '#10b981', fontWeight: 'bold', fontSize: '13px', marginBottom: '8.5px', display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <span>📦</span> 2. สรุปติดตั้ง Nginx Web Server (วันศุกร์)
+            </h4>
+            <ol style={{ paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '6.5px' }}>
+              <li><strong>เชื่อมต่อ SSH พอร์ต 22:</strong> นักศึกษาเชื่อมต่อเข้าตู้ LXC ของตนเองผ่าน Terminal: <code>ssh root@192.168.10.101</code></li>
+              <li><strong>อัปเดตและสั่งติดตั้ง:</strong> สั่งรันคำสั่ง <code>sudo apt update</code> ตามด้วย <code>sudo apt install nginx -y</code> เพื่อดึงและติดตั้งแพ็คเกจ</li>
+              <li><strong>ดูแลควบคุมบริการ:</strong> สั่งรันบริการเช็คสถานะด้วย <code>sudo systemctl status nginx</code> หรือสั่งเริ่มใหม่ด้วย <code>sudo systemctl restart nginx</code></li>
+              <li><strong>ปรับแต่งหน้าหลัก:</strong> เขียนทับหน้าแรกของเว็บที่ <code>/var/www/html/index.html</code> โดยใช้โปรแกรม <code>sudo nano</code> เขียนแต่งโค้ด HTML ประจำตัว</li>
+              <li><strong>ตรวจสอบและทดสอบ:</strong> รันตรวจความถูกต้องของไวยากรณ์ก่อนรีสตาร์ทบริการทุกครั้งด้วย <code>sudo nginx -t</code> เพื่อลดความเสี่ยงเว็บล่ม</li>
+            </ol>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
@@ -4617,8 +7027,8 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Pinned Docker Guide Button */}
-        <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+        {/* Pinned Docker & Proxmox Guide Buttons */}
+        <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border)', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
             className={`pinned-docker-btn ${activeWeek === "docker-guide" ? "active" : ""}`}
             onClick={() => setActiveWeek("docker-guide")}
@@ -4627,7 +7037,7 @@ export default function Home() {
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              padding: '12px 14px',
+              padding: '10px 14px',
               borderRadius: '8px',
               border: activeWeek === "docker-guide" ? '1px solid var(--accent)' : '1px solid var(--border)',
               background: activeWeek === "docker-guide" ? 'var(--accent-dim)' : 'var(--bg-elevated)',
@@ -4637,16 +7047,41 @@ export default function Home() {
               textAlign: 'left'
             }}
           >
-            <span style={{ fontSize: '24px', flexShrink: 0 }}>🐳</span>
+            <span style={{ fontSize: '20px', flexShrink: 0 }}>🐳</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: '700', fontSize: '13px', lineHeight: '1.2' }}>คู่มือ Ubuntu & Docker</div>
+              <div style={{ fontWeight: '700', fontSize: '12px', lineHeight: '1.2' }}>คู่มือ Ubuntu & Docker</div>
               <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>เอกสารติดตั้ง Web Server (LAN)</div>
+            </div>
+          </button>
+
+          <button
+            className={`pinned-proxmox-btn ${activeWeek === "proxmox-guide" ? "active" : ""}`}
+            onClick={() => setActiveWeek("proxmox-guide")}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: activeWeek === "proxmox-guide" ? '1px solid var(--accent)' : '1px solid var(--border)',
+              background: activeWeek === "proxmox-guide" ? 'var(--accent-dim)' : 'var(--bg-elevated)',
+              color: activeWeek === "proxmox-guide" ? 'var(--accent)' : 'var(--text-primary)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'left'
+            }}
+          >
+            <span style={{ fontSize: '20px', flexShrink: 0 }}>🖥️</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: '700', fontSize: '12px', lineHeight: '1.2' }}>คู่มือติดตั้ง Proxmox VE</div>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>วิธีการลง Hypervisor แบบละเอียด</div>
             </div>
           </button>
         </div>
 
         <div className="sidebar-footer" style={{ flexShrink: 0 }}>
-          {activeWeek === "docker-guide" ? (
+          {(activeWeek === "docker-guide" || activeWeek === "proxmox-guide") ? (
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', padding: '4px 0' }}>
               📖 กำลังอ่าน: โหมดเอกสารคู่มือฉบับเต็ม
             </div>
@@ -4681,6 +7116,22 @@ export default function Home() {
               </div>
             </header>
             <DockerGuideDocument />
+          </div>
+        ) : activeWeek === "proxmox-guide" ? (
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+            <header className="topbar" style={{ flexShrink: 0 }}>
+              <div className="topbar-left">
+                {!sidebarOpen && (
+                  <button className="icon-btn mobile-toggle" style={{ display: "flex" }} onClick={() => setSidebarOpen(true)}>
+                    <MenuIcon />
+                  </button>
+                )}
+                <span className="topbar-chapter" style={{ fontWeight: 'bold', color: 'var(--accent)' }}>
+                  📖 คู่มือติดตั้งและทดสอบ Proxmox VE (Type-1 Hypervisor)
+                </span>
+              </div>
+            </header>
+            <ProxmoxGuideDocument />
           </div>
         ) : (
           <>

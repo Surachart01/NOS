@@ -41,6 +41,29 @@
         "displayNum": "อ.",
         "title": "ระบบ DNS และ DHCP บริการเครือข่ายพื้นฐานที่ต้องรู้",
         "topic": "DNS & DHCP Services"
+      },
+      {
+        "id": "3b",
+        "displayNum": "ศ.",
+        "title": "ปฏิบัติการทบทวนคำสั่งควบคุมลินุกซ์พื้นฐาน (Linux CLI Commands Review)",
+        "topic": "Linux CLI Review"
+      }
+    ]
+  },
+  {
+    "weekLabel": "สัปดาห์ที่ 4: การทำระบบจำลองและการติดตั้ง Nginx",
+    "sessions": [
+      {
+        "id": "4a",
+        "displayNum": "อ.",
+        "title": "ส่วนประกอบเครื่องเซิร์ฟเวอร์และการติดตั้ง Proxmox VE",
+        "topic": "Server Components & Proxmox VE Setup"
+      },
+      {
+        "id": "4b",
+        "displayNum": "ศ.",
+        "title": "ปฏิบัติการติดตั้ง Nginx Web Server บนตู้เสมือนส่วนตัว",
+        "topic": "Nginx Web Server on LXC"
       }
     ]
   }
