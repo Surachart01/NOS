@@ -677,6 +677,623 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
   );
 }
 
+function StackInstallerAnimation({ s }: { s: SlideData }) {
+  const [activeItem, setActiveItem] = useState<"nginx" | "mariadb" | "nodejs" | "git">("nginx");
+  const [installed, setInstalled] = useState<Record<string, boolean>>({
+    nginx: false,
+    mariadb: false,
+    nodejs: false,
+    git: false
+  });
+  const [verified, setVerified] = useState<Record<string, boolean>>({
+    nginx: false,
+    mariadb: false,
+    nodejs: false,
+    git: false
+  });
+  
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([
+    "student@lxc-container-std01:~$ "
+  ]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
+  const [testResult, setTestResult] = useState<string | null>(null);
+  const [showTestWindow, setShowTestWindow] = useState(false);
+
+  const consoleEndRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (consoleEndRef.current) {
+      consoleEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [terminalLogs]);
+
+  const itemsInfo = {
+    nginx: {
+      name: "Nginx (Web Server)",
+      icon: "🌐",
+      port: "Port 80 (HTTP)",
+      desc: "ทำหน้าที่รับ HTTP Request จากเบราว์เซอร์ และส่งกลับหน้าเว็บ HTML/CSS/JS หรือทำหน้าที่เป็น Reverse Proxy ส่งต่อคำขอไปหา Node.js",
+      installCmd: "sudo apt update && sudo apt install nginx -y",
+      checkCmd: "sudo systemctl status nginx",
+      checkOutput: [
+        "● nginx.service - A high performance web server and a reverse proxy server",
+        "     Loaded: loaded (/lib/systemd/system/nginx.service; enabled; preset: enabled)",
+        "     Active: active (running) since Mon 2026-06-08 23:59:00 UTC; 12s ago",
+        "     Docs: man:nginx(8)",
+        "   Main PID: 4215 (nginx)",
+        "      Tasks: 2 (limit: 9508)",
+        "     Memory: 8.2M",
+        "        CPU: 15ms",
+        "     CGroup: /system.slice/nginx.service",
+        "             ├─4215 \"nginx: master process /usr/sbin/nginx -g daemon on;\"",
+        "             └─4216 \"nginx: worker process\""
+      ],
+      installLogs: [
+        "Hit:1 http://archive.ubuntu.com/ubuntu noble InRelease",
+        "Get:2 http://archive.ubuntu.com/ubuntu noble-updates InRelease [126 kB]",
+        "Fetched 126 kB in 0.5s (252 kB/s)",
+        "Reading package lists... Done",
+        "Building dependency tree... Done",
+        "Reading state information... Done",
+        "The following NEW packages will be installed:",
+        "  nginx nginx-common nginx-core",
+        "0 upgraded, 3 newly installed, 0 to remove.",
+        "Need to get 508 kB of archives.",
+        "Unpacking nginx (1.24.0-1ubuntu1)...",
+        "Setting up nginx (1.24.0-1ubuntu1)...",
+        "Systemd service started automatically.",
+        "Processing triggers for systemd (255.4-2ubuntu3)..."
+      ]
+    },
+    mariadb: {
+      name: "MariaDB (Database)",
+      icon: "🗄️",
+      port: "Port 3306",
+      desc: "ระบบจัดการฐานข้อมูลแบบ Relational Database (SQL) สำหรับเก็บข้อมูลบัญชีผู้ใช้ คะแนน สถิติ หรือเนื้อหาเว็บที่ Node.js ต้องการสืบค้น",
+      installCmd: "sudo apt install mariadb-server -y",
+      checkCmd: "sudo systemctl status mariadb",
+      checkOutput: [
+        "● mariadb.service - MariaDB 10.11 database server",
+        "     Loaded: loaded (/lib/systemd/system/mariadb.service; enabled; preset: enabled)",
+        "     Active: active (running) since Mon 2026-06-08 23:59:10 UTC; 8s ago",
+        "     Docs: man:mariadbd(8)",
+        "           https://mariadb.com/kb/en/library/",
+        "   Main PID: 5104 (mariadbd)",
+        "     Status: \"Taking requests\"",
+        "      Tasks: 70 (limit: 9508)",
+        "     Memory: 78.4M",
+        "     CGroup: /system.slice/mariadb.service",
+        "             └─5104 /usr/sbin/mariadbd"
+      ],
+      installLogs: [
+        "Reading package lists... Done",
+        "Building dependency tree... Done",
+        "The following NEW packages will be installed:",
+        "  mariadb-server mariadb-server-10.11 mariadb-client",
+        "Need to get 18.2 MB of archives.",
+        "Unpacking mariadb-server (1:10.11.8)...",
+        "Setting up mariadb-server (1:10.11.8)...",
+        "Creating database tables... Done",
+        "Setting up root password authentication...",
+        "Starting MariaDB database server... Done"
+      ]
+    },
+    nodejs: {
+      name: "Node.js (Backend)",
+      icon: "🟢",
+      port: "Port 3000",
+      desc: "สภาพแวดล้อมรัน JavaScript ฝั่งเซิร์ฟเวอร์ ใช้สำหรับรันโค้ดเขียนแอปพลิเคชันระบบหลังบ้าน ติดต่อฐานข้อมูล และประมวลผลคำขอต่างๆ",
+      installCmd: "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash - && sudo apt install nodejs -y",
+      checkCmd: "node -v && npm -v",
+      checkOutput: [
+        "v20.11.0",
+        "10.2.4"
+      ],
+      installLogs: [
+        "## Installing the NodeSource Node.js 20.x repo...",
+        "## Populating apt source list file...",
+        "## Running apt update...",
+        "Get:1 http://deb.nodesource.com/node_20.x noble InRelease [4582 B]",
+        "Reading package lists... Done",
+        "The following NEW packages will be installed:",
+        "  nodejs",
+        "Need to get 32.4 MB of archives.",
+        "Unpacking nodejs (20.11.0-1nodesource1)...",
+        "Setting up nodejs (20.11.0-1nodesource1)...",
+        "Node.js successfully installed."
+      ]
+    },
+    git: {
+      name: "Git (Version Control)",
+      icon: "🐙",
+      port: "N/A",
+      desc: "เครื่องมือควบคุมรุ่นซอฟต์แวร์ สำหรับดึงโค้ดโปรเจกต์จากคลังเก็บ (GitHub) ลงมารันบนเครื่องเซิร์ฟเวอร์จริง หรืออัปเดตเวอร์ชันโปรแกรม",
+      installCmd: "sudo apt install git -y",
+      checkCmd: "git --version",
+      checkOutput: [
+        "git version 2.43.0"
+      ],
+      installLogs: [
+        "Reading package lists... Done",
+        "Building dependency tree... Done",
+        "The following NEW packages will be installed:",
+        "  git git-man liberror-perl",
+        "Need to get 6204 kB of archives.",
+        "Unpacking git (1:2.43.0-1ubuntu1)...",
+        "Setting up git (1:2.43.0-1ubuntu1)...",
+        "Git version 2.43.0 installed successfully."
+      ]
+    }
+  };
+
+  const handleInstall = () => {
+    if (isRunning) return;
+    setIsRunning(true);
+    const item = itemsInfo[activeItem];
+    
+    // Add command to log
+    setTerminalLogs(prev => [...prev, `${item.installCmd}`]);
+    setProgress(0);
+
+    let currentLogIdx = 0;
+    const interval = setInterval(() => {
+      if (currentLogIdx < item.installLogs.length) {
+        const nextLog = item.installLogs[currentLogIdx];
+        setTerminalLogs(prev => [...prev, nextLog]);
+        setProgress(Math.floor((currentLogIdx / item.installLogs.length) * 100));
+        currentLogIdx++;
+      } else {
+        clearInterval(interval);
+        setProgress(100);
+        setTimeout(() => {
+          setInstalled(prev => ({ ...prev, [activeItem]: true }));
+          setTerminalLogs(prev => [...prev, "student@lxc-container-std01:~$ "]);
+          setIsRunning(false);
+          setProgress(null);
+        }, 500);
+      }
+    }, 200);
+  };
+
+  const handleVerify = () => {
+    if (isRunning) return;
+    setIsRunning(true);
+    const item = itemsInfo[activeItem];
+    
+    setTerminalLogs(prev => [...prev, `${item.checkCmd}`]);
+    
+    setTimeout(() => {
+      if (!installed[activeItem]) {
+        setTerminalLogs(prev => [
+          ...prev, 
+          `bash: ${item.checkCmd.split(' ')[0]}: command not found`,
+          "student@lxc-container-std01:~$ "
+        ]);
+        setIsRunning(false);
+        return;
+      }
+
+      setTerminalLogs(prev => [
+        ...prev,
+        ...item.checkOutput,
+        "student@lxc-container-std01:~$ "
+      ]);
+      setVerified(prev => ({ ...prev, [activeItem]: true }));
+      setIsRunning(false);
+    }, 800);
+  };
+
+  const handleTestRequest = () => {
+    if (!installed[activeItem] || !verified[activeItem]) {
+      alert("กรุณาติดตั้งและตรวจเช็คสถานะซอฟต์แวร์ให้เสร็จสิ้นก่อนส่งคำขอทดสอบ!");
+      return;
+    }
+    
+    setTestResult("requesting");
+    setShowTestWindow(true);
+
+    setTimeout(() => {
+      setTestResult("success");
+    }, 1500);
+  };
+
+  const activeInfo = itemsInfo[activeItem];
+
+  return (
+    <div className="slide slide-content slide-stack-installer" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes flow-left-right {
+          0% { stroke-dashoffset: 20; opacity: 0.3; }
+          50% { opacity: 1; }
+          100% { stroke-dashoffset: 0; opacity: 0.3; }
+        }
+        .flow-line {
+          stroke-dasharray: 5, 5;
+          animation: flow-left-right 1.5s linear infinite;
+        }
+        .glowing-node {
+          filter: drop-shadow(0 0 8px var(--glow-color));
+          transition: all 0.3s ease;
+        }
+      `}} />
+      <div className="slide-tag">{s.tag}</div>
+      <h2>{s.title}</h2>
+      
+      <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: '0', marginTop: '10px' }}>
+        
+        {/* Left Column: Stack Selector & Info */}
+        <div style={{ width: '30%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {(Object.keys(itemsInfo) as Array<keyof typeof itemsInfo>).map(key => (
+              <button
+                key={key}
+                onClick={() => {
+                  if (!isRunning) {
+                    setActiveItem(key);
+                    setShowTestWindow(false);
+                  }
+                }}
+                disabled={isRunning}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  background: activeItem === key ? 'var(--accent-dim)' : 'var(--bg-card)',
+                  border: activeItem === key ? '1px solid var(--accent)' : '1px solid var(--border)',
+                  color: activeItem === key ? 'var(--accent)' : 'var(--text-primary)',
+                  cursor: isRunning ? 'not-allowed' : 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                  fontWeight: 'bold',
+                  width: '100%'
+                }}
+              >
+                <span style={{ fontSize: '20px' }}>{itemsInfo[key].icon}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px' }}>{itemsInfo[key].name}</div>
+                  <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{itemsInfo[key].port}</div>
+                </div>
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {installed[key] ? (
+                    <span style={{ fontSize: '11px', color: '#10b981' }} title="Installed">💿</span>
+                  ) : (
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', opacity: 0.5 }}>⚪</span>
+                  )}
+                  {verified[key] ? (
+                    <span style={{ fontSize: '11px', color: '#10b981' }} title="Active">🟢</span>
+                  ) : (
+                    <span style={{ fontSize: '11px', color: 'var(--text-muted)', opacity: 0.5 }}>🔴</span>
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          <div style={{
+            background: 'rgba(255,255,255,0.02)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '12px',
+            fontSize: '12px',
+            color: 'var(--text-secondary)',
+            flex: 1,
+            overflowY: 'auto'
+          }}>
+            <h4 style={{ color: 'var(--text-primary)', marginBottom: '6px', fontWeight: 'bold' }}>คำอธิบายและหน้าที่:</h4>
+            <p style={{ lineHeight: '1.5' }}>{activeInfo.desc}</p>
+          </div>
+        </div>
+
+        {/* Middle Column: Terminal Sim */}
+        <div style={{ width: '40%', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{
+            background: '#090d16',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+            fontFamily: 'monospace',
+            boxShadow: 'inset 0 0 10px rgba(0,0,0,0.8)'
+          }}>
+            {/* Terminal Header */}
+            <div style={{
+              background: '#151f32',
+              padding: '6px 12px',
+              borderBottom: '1px solid var(--border)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              fontSize: '11px',
+              color: 'var(--text-secondary)'
+            }}>
+              <span>💻 student@std01-container: ~</span>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444' }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#eab308' }} />
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }} />
+              </div>
+            </div>
+
+            {/* Terminal Body */}
+            <div style={{
+              flex: 1,
+              padding: '12px',
+              fontSize: '11.5px',
+              color: '#38bdf8',
+              overflowY: 'auto',
+              lineHeight: '1.4',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '4px'
+            }}>
+              {terminalLogs.map((log, idx) => {
+                const isCmd = log.startsWith("sudo ") || log.startsWith("curl ") || log.includes("apt ") || log.includes("-v");
+                return (
+                  <div key={idx} style={{ 
+                    color: isCmd ? '#f43f5e' : log.includes("active (running)") ? '#4ade80' : log.includes("student@lxc-container") ? '#a855f7' : '#94a3b8',
+                    whiteSpace: 'pre-wrap'
+                  }}>
+                    {log.includes("student@lxc-container") ? "" : isCmd ? "$ " : ""}{log}
+                  </div>
+                );
+              })}
+              {progress !== null && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '4px 0', color: '#eab308' }}>
+                  <span>กำลังดาวน์โหลดและติดตั้ง:</span>
+                  <div style={{ width: '100px', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div style={{ width: `${progress}%`, height: '100%', background: '#eab308' }} />
+                  </div>
+                  <span>{progress}%</span>
+                </div>
+              )}
+              <div ref={consoleEndRef} />
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={handleInstall}
+              disabled={isRunning || installed[activeItem]}
+              style={{
+                flex: 1,
+                padding: '10px',
+                borderRadius: '6px',
+                background: installed[activeItem] ? '#10b98122' : 'var(--accent)',
+                border: installed[activeItem] ? '1px solid #10b981' : '1px solid var(--accent)',
+                color: installed[activeItem] ? '#10b981' : 'white',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                cursor: (isRunning || installed[activeItem]) ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {installed[activeItem] ? "✅ ติดตั้งสำเร็จแล้ว" : "🚀 รันคำสั่งติดตั้ง (Install)"}
+            </button>
+            <button
+              onClick={handleVerify}
+              disabled={isRunning}
+              style={{
+                flex: 1,
+                padding: '10px',
+                borderRadius: '6px',
+                background: 'var(--bg-card)',
+                border: verified[activeItem] ? '1px solid #10b981' : '1px solid var(--border)',
+                color: verified[activeItem] ? '#10b981' : 'var(--text-primary)',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                cursor: isRunning ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {verified[activeItem] ? "🟢 เช็คสถานะ: ทำงานปกติ" : "🔍 รันคำสั่งเช็ค (Verify)"}
+            </button>
+          </div>
+        </div>
+
+        {/* Right Column: Visual Container Topology & Live Test */}
+        <div style={{ width: '30%', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            padding: '12px',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative'
+          }}>
+            {/* Visual LXC Container */}
+            <div style={{
+              width: '100%',
+              height: '180px',
+              border: '2px solid #a855f7',
+              borderRadius: '12px',
+              background: 'rgba(168, 85, 247, 0.03)',
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '12px'
+            }}>
+              <span style={{
+                position: 'absolute',
+                top: '-10px',
+                background: '#a855f7',
+                color: 'white',
+                padding: '2px 10px',
+                borderRadius: '99px',
+                fontSize: '10px',
+                fontWeight: 'bold'
+              }}>
+                📦 LXC Container (std01)
+              </span>
+
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '5px' }}>
+                IP: <code style={{ color: '#a855f7', fontWeight: 'bold' }}>192.168.10.101</code>
+              </div>
+
+              {/* Stack items icons inside container */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', margin: 'auto' }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  opacity: installed.nginx ? 1 : 0.2,
+                  filter: installed.nginx ? 'drop-shadow(0 0 6px #38bdf8)' : 'none',
+                  transition: 'all 0.5s ease'
+                }}>
+                  <span style={{ fontSize: '28px' }}>🌐</span>
+                  <span style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>Nginx (Port 80)</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  opacity: installed.mariadb ? 1 : 0.2,
+                  filter: installed.mariadb ? 'drop-shadow(0 0 6px #ef4444)' : 'none',
+                  transition: 'all 0.5s ease'
+                }}>
+                  <span style={{ fontSize: '28px' }}>🗄️</span>
+                  <span style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>MariaDB (3306)</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  opacity: installed.nodejs ? 1 : 0.2,
+                  filter: installed.nodejs ? 'drop-shadow(0 0 6px #22c55e)' : 'none',
+                  transition: 'all 0.5s ease'
+                }}>
+                  <span style={{ fontSize: '28px' }}>🟢</span>
+                  <span style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>Node.js (3000)</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  opacity: installed.git ? 1 : 0.2,
+                  filter: installed.git ? 'drop-shadow(0 0 6px #f97316)' : 'none',
+                  transition: 'all 0.5s ease'
+                }}>
+                  <span style={{ fontSize: '28px' }}>🐙</span>
+                  <span style={{ fontSize: '9px', color: 'var(--text-secondary)' }}>Git</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Test Request trigger */}
+            <button
+              onClick={handleTestRequest}
+              style={{
+                width: '100%',
+                padding: '10px',
+                marginTop: '12px',
+                borderRadius: '6px',
+                background: '#a855f7',
+                border: 'none',
+                color: 'white',
+                fontWeight: 'bold',
+                fontSize: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 10px rgba(168, 85, 247, 0.3)'
+              }}
+            >
+              ⚡ ส่งคำขอทดสอบเว็บ/บริการ (Test Request)
+            </button>
+          </div>
+
+          {/* Simulated Browser or connection feedback */}
+          {showTestWindow && (
+            <div style={{
+              height: '140px',
+              border: '1px solid var(--border)',
+              borderRadius: '8px',
+              background: '#090d16',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}>
+              {/* Window Header */}
+              <div style={{
+                background: '#1e293b',
+                padding: '4px 8px',
+                fontSize: '9.5px',
+                color: 'var(--text-secondary)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span style={{ display: 'flex', gap: '3px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ef4444' }} />
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#eab308' }} />
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#22c55e' }} />
+                </span>
+                <span style={{ background: '#0f172a', padding: '1px 8px', borderRadius: '4px', flex: 1, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                  {activeItem === 'nginx' ? 'http://192.168.10.101/' : activeItem === 'nodejs' ? 'http://192.168.10.101:3000/' : activeItem === 'mariadb' ? 'mariadb-connection://192.168.10.101:3306/' : 'git-repo://'}
+                </span>
+              </div>
+
+              {/* Window Body */}
+              <div style={{ flex: 1, padding: '8px', fontSize: '10px', overflowY: 'auto' }}>
+                {testResult === "requesting" ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '6px', color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '20px' }}>⏳</span>
+                    <span>กำลังยิงสัญญาณทดสอบระบบเครือข่าย...</span>
+                  </div>
+                ) : activeItem === 'nginx' ? (
+                  <div style={{ background: 'white', color: '#334155', padding: '8px', borderRadius: '4px', height: '100%', fontFamily: 'sans-serif' }}>
+                    <h1 style={{ fontSize: '12px', color: '#0f172a', margin: '0 0 4px 0' }}>Welcome to nginx!</h1>
+                    <p style={{ fontSize: '8px', margin: '0 0 6px 0' }}>If you see this page, the nginx web server is successfully installed and working in container <strong>std01-nginx</strong>.</p>
+                    <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '0 0 6px 0' }} />
+                    <div style={{ fontSize: '7px', color: '#64748b' }}><em>Thank you for using nginx.</em></div>
+                  </div>
+                ) : activeItem === 'nodejs' ? (
+                  <div style={{ color: '#22c55e', fontFamily: 'monospace', fontSize: '9px' }}>
+                    {"{"}<br />
+                    {"  \"status\": \"success\","}<br />
+                    {"  \"message\": \"Hello from Express API inside LXC Container!\","}<br />
+                    {"  \"port\": 3000,"}<br />
+                    {"  \"runtime\": \"Node.js v20.11.0\""}<br />
+                    {"}"}
+                  </div>
+                ) : activeItem === 'mariadb' ? (
+                  <div style={{ color: '#e2e8f0', fontFamily: 'monospace', fontSize: '9.5px' }}>
+                    <span style={{ color: '#eab308' }}>MariaDB [(none)]&gt;</span> show databases;<br />
+                    +--------------------+<br />
+                    | Database           |<br />
+                    +--------------------+<br />
+                    | information_schema |<br />
+                    | mysql              |<br />
+                    | performance_schema |<br />
+                    | sys                |<br />
+                    +--------------------+<br />
+                    4 rows in set (0.001 sec)
+                  </div>
+                ) : (
+                  <div style={{ color: '#94a3b8', fontFamily: 'monospace', fontSize: '9.5px' }}>
+                    $ git status<br />
+                    On branch main<br />
+                    Your branch is up to date with &apos;origin/main&apos;.<br />
+                    nothing to commit, working tree clean
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function InteractiveActivitySlide({ s }: { s: SlideData }) {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [act2Order, setAct2Order] = useState<number[]>([]);
@@ -5954,6 +6571,7 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "dhcp-hotel": return <DhcpHotelAnimation s={slide} />;
     case "interactive-act": return <InteractiveActivitySlide s={slide} />;
     case "homework": return <HomeworkSlide s={slide} />;
+    case "stack-installer-anim": return <StackInstallerAnimation s={slide} />;
     default: return <ContentSlide s={slide} />;
   }
 }
