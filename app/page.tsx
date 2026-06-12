@@ -51,6 +51,71 @@ function CoverSlide({ s }: { s: SlideData }) {
 }
 
 function ContentSlide({ s }: { s: SlideData }) {
+  // Detect if a line is a terminal/command line
+  const isCmd = (line: string) => {
+    const t = line.trim();
+    return (
+      t.startsWith('student@') ||
+      t.startsWith('$ ') || t === '$' ||
+      t.startsWith('# ') || t === '#' ||
+      t.startsWith('MariaDB>') ||
+      t.startsWith('MariaDB [(') ||
+      t.startsWith('node@') ||
+      /^\s{1,}(MariaDB|mysql|node|npm)\b/.test(line) ||
+      /^\s{2,}[a-z$#]/.test(line)   // indented lines inside a command block
+    );
+  };
+
+  // Group items: consecutive cmd lines → one terminal block
+  type Group = { type: 'text'; text: string } | { type: 'cmd'; lines: string[] };
+  const groups: Group[] = [];
+  s.items?.forEach((item) => {
+    if (isCmd(item)) {
+      const last = groups[groups.length - 1];
+      if (last && last.type === 'cmd') {
+        last.lines.push(item);
+      } else {
+        groups.push({ type: 'cmd', lines: [item] });
+      }
+    } else {
+      groups.push({ type: 'text', text: item });
+    }
+  });
+
+  // Colour SQL & shell keywords inside a command line
+  const colourCmd = (line: string) => {
+    const sqlKw = /\b(SELECT|INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|SHOW|USE|GRANT|FLUSH|TABLE|DATABASE|DATABASES|FROM|WHERE|INTO|VALUES|PRIMARY|KEY|AUTO_INCREMENT|VARCHAR|INT|ALL|PRIVILEGES|ON|TO|BY|IDENTIFIED)\b/g;
+    const mariaPrompt = /^(MariaDB\s*\[.*?\]>|MariaDB>|mysql>)\s*/;
+    const shellPrompt = /^(student@[^\$]*\$|#|\$)\s*/;
+    const trimmed = line.trim();
+
+    if (mariaPrompt.test(trimmed)) {
+      const match = trimmed.match(mariaPrompt)!;
+      const prompt = match[0];
+      const rest = trimmed.slice(prompt.length);
+      const coloured = rest.replace(sqlKw, '<span style="color:#ff7b72;font-weight:bold">$1</span>');
+      return (
+        <span>
+          <span style={{ color: '#8b949e' }}>{prompt}</span>
+          <span dangerouslySetInnerHTML={{ __html: coloured }} />
+        </span>
+      );
+    }
+    if (shellPrompt.test(trimmed)) {
+      const match = trimmed.match(shellPrompt)!;
+      const prompt = match[0];
+      const rest = trimmed.slice(prompt.length);
+      return (
+        <span>
+          <span style={{ color: '#79c0ff' }}>{prompt}</span>
+          <span style={{ color: '#7ee787' }}>{rest}</span>
+        </span>
+      );
+    }
+    // indented continuation line
+    return <span style={{ color: '#e6edf3', paddingLeft: '1.5em' }}>{trimmed}</span>;
+  };
+
   return (
     <div className="slide slide-content">
       <div className="slide-tag">{s.tag}</div>
@@ -58,25 +123,43 @@ function ContentSlide({ s }: { s: SlideData }) {
       {s.body && <p style={{ fontSize: 'clamp(20px,2.5vw,32px)', color: 'var(--text-secondary)', marginBottom: 20 }}>{s.body}</p>}
       <div style={{ display: 'flex', gap: '30px', flex: 1 }}>
         <div style={{ flex: s.image ? 1 : 'auto', width: '100%' }}>
-          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {s.items?.map((item, i) => {
-              const isTerminal = item.trim().startsWith("student@ubuntu-server") || item.trim().startsWith("$") || item.trim().startsWith("#");
-              if (isTerminal) {
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {groups.map((g, gi) => {
+              if (g.type === 'text') {
+                const isSubItem = g.text.trim().startsWith('-') || g.text.trim().startsWith('✅') || g.text.trim().startsWith('⚠') || g.text.trim().startsWith('📌');
                 return (
-                  <li key={i} className="terminal-prompt-box" style={{ listStyleType: 'none', paddingLeft: 0, width: '100%' }}>
-                    <div className="terminal-header">
-                      <span className="terminal-dot red"></span>
-                      <span className="terminal-dot yellow"></span>
-                      <span className="terminal-dot green"></span>
-                      <span className="terminal-title">Terminal</span>
-                    </div>
-                    <pre className="terminal-body">
-                      <code>{item}</code>
-                    </pre>
+                  <li key={gi} style={{
+                    fontSize: isSubItem ? '90%' : undefined,
+                    paddingLeft: isSubItem ? '16px' : undefined,
+                    color: isSubItem ? 'var(--text-secondary)' : 'var(--text-primary)',
+                    lineHeight: 1.5
+                  }}>
+                    {g.text}
                   </li>
                 );
               }
-              return <li key={i}>{item}</li>;
+              // Terminal block
+              return (
+                <li key={gi} style={{ listStyleType: 'none', paddingLeft: 0, width: '100%' }}>
+                  <div style={{ background: '#0d1117', borderRadius: '10px', overflow: 'hidden', border: '1px solid #30363d', boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }}>
+                    {/* Terminal titlebar */}
+                    <div style={{ background: '#161b22', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #30363d' }}>
+                      <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }} />
+                      <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }} />
+                      <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#27c93f', display: 'inline-block' }} />
+                      <span style={{ fontSize: '11px', color: '#8b949e', marginLeft: '8px', fontFamily: 'monospace' }}>
+                        {g.lines[0].trim().startsWith('MariaDB') ? 'MariaDB Monitor' : 'Terminal'}
+                      </span>
+                    </div>
+                    {/* Command lines */}
+                    <div style={{ padding: '12px 16px', fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace", fontSize: '13px', lineHeight: '1.9', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                      {g.lines.map((line, li) => (
+                        <div key={li}>{colourCmd(line)}</div>
+                      ))}
+                    </div>
+                  </div>
+                </li>
+              );
             })}
           </ul>
         </div>
@@ -90,6 +173,7 @@ function ContentSlide({ s }: { s: SlideData }) {
   );
 }
 
+
 function TwoColSlide({ s }: { s: SlideData }) {
   return (
     <div className="slide slide-content slide-two-col">
@@ -102,6 +186,486 @@ function TwoColSlide({ s }: { s: SlideData }) {
             <ul>{col.items.map((item, j) => <li key={j}>{item}</li>)}</ul>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   NGINX FLOW ANIMATION
+   ============================================================ */
+function NginxFlowAnimation({ s }: { s: SlideData }) {
+  const [step, setStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  const steps = [
+    { label: '① ผู้ใช้พิมพ์ URL', desc: 'Browser ส่ง HTTP GET Request ไปยัง IP ของเซิร์ฟเวอร์ที่พอร์ต 80', from: 'browser', to: 'nginx', color: '#60a5fa', icon: '🌐', cmd: 'GET / HTTP/1.1\nHost: 192.168.10.101' },
+    { label: '② Nginx รับ Request', desc: 'Nginx ตรวจสอบคำขอ — อ่านไฟล์ HTML จาก /var/www/html/ เพื่อส่งกลับ', from: 'nginx', to: 'disk', color: '#34d399', icon: '⚡', cmd: 'Reading /var/www/html/index.html' },
+    { label: '③ Nginx ส่ง Response', desc: 'Nginx ส่งไฟล์ HTML กลับไปให้ Browser พร้อม HTTP Status 200 OK', from: 'nginx', to: 'browser', color: '#f59e0b', icon: '📄', cmd: 'HTTP/1.1 200 OK\nContent-Type: text/html' },
+    { label: '④ Browser แสดงผล', desc: 'Browser รับ HTML แล้ว render เป็นหน้าเว็บให้ผู้ใช้มองเห็น', from: 'browser', to: 'screen', color: '#a78bfa', icon: '✅', cmd: 'Page rendered: index.html' },
+  ];
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const timer = setTimeout(() => {
+      setStep(prev => (prev + 1) % steps.length);
+    }, 2200);
+    return () => clearTimeout(timer);
+  }, [step, isPlaying]);
+
+  const current = steps[step];
+
+  const nodes = [
+    { id: 'browser', label: 'Browser', icon: '💻', sub: 'Client PC', color: '#3b82f6' },
+    { id: 'nginx',   label: 'Nginx',   icon: '🌐', sub: 'Port 80',  color: '#10b981' },
+    { id: 'disk',    label: 'Files',   icon: '📁', sub: '/var/www/html', color: '#8b5cf6' },
+  ];
+
+  return (
+    <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes nginx-packet {
+          0%   { transform: translateX(0)   translateY(0)   scale(1);   opacity: 0; }
+          10%  { opacity: 1; }
+          90%  { opacity: 1; }
+          100% { transform: translateX(var(--nx,0)) translateY(var(--ny,0)) scale(0.8); opacity: 0; }
+        }
+        @keyframes nginx-glow {
+          0%, 100% { box-shadow: 0 0 8px 2px rgba(99,179,237,0.3); }
+          50%       { box-shadow: 0 0 18px 6px rgba(99,179,237,0.7); }
+        }
+        @keyframes nginx-slide-in {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .nginx-node-active { animation: nginx-glow 1.2s ease-in-out infinite; }
+        .nginx-step-in     { animation: nginx-slide-in 0.35s ease-out both; }
+      `}} />
+      <div className="slide-tag">{s.tag}</div>
+      <h2>{s.title}</h2>
+
+      <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0, marginTop: '12px' }}>
+
+        {/* Left: Node diagram */}
+        <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Step progress bar */}
+          <div style={{ display: 'flex', gap: '6px' }}>
+            {steps.map((st, i) => (
+              <button key={i} onClick={() => { setStep(i); setIsPlaying(false); }} style={{
+                flex: 1, padding: '6px 4px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', transition: 'all 0.25s',
+                background: step === i ? current.color : 'var(--bg-card)',
+                color: step === i ? 'white' : 'var(--text-secondary)',
+                boxShadow: step === i ? `0 0 10px ${current.color}55` : 'none'
+              }}>{i + 1}</button>
+            ))}
+          </div>
+
+          {/* Flow diagram */}
+          <div style={{ flex: 1, background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-around', position: 'relative' }}>
+            {/* Nodes row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: '10px', position: 'relative' }}>
+              {nodes.map((node) => {
+                const isActive = current.from === node.id || current.to === node.id;
+                return (
+                  <div key={node.id} className={isActive ? 'nginx-node-active' : ''} style={{
+                    background: isActive ? `${node.color}22` : 'var(--bg-card)',
+                    border: `2px solid ${isActive ? node.color : 'var(--border)'}`,
+                    borderRadius: '12px', padding: '14px 10px', textAlign: 'center', minWidth: '90px',
+                    transition: 'all 0.3s ease', cursor: 'default'
+                  }}>
+                    <div style={{ fontSize: '28px' }}>{node.icon}</div>
+                    <div style={{ fontWeight: 'bold', fontSize: '13px', marginTop: '4px', color: isActive ? node.color : 'var(--text-primary)' }}>{node.label}</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginTop: '2px' }}>{node.sub}</div>
+                  </div>
+                );
+              })}
+              {/* Animated arrow SVG */}
+              <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }} viewBox="0 0 300 80">
+                <defs>
+                  <marker id="arrowhead" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                    <polygon points="0 0, 6 3, 0 6" fill={current.color} />
+                  </marker>
+                </defs>
+                {step === 0 && <line x1="60" y1="40" x2="155" y2="40" stroke={current.color} strokeWidth="2.5" strokeDasharray="6,3" markerEnd="url(#arrowhead)" style={{ animation: 'none' }} />}
+                {step === 1 && <line x1="165" y1="40" x2="245" y2="40" stroke={current.color} strokeWidth="2.5" strokeDasharray="6,3" markerEnd="url(#arrowhead)" />}
+                {step === 2 && <line x1="155" y1="40" x2="60" y2="40" stroke={current.color} strokeWidth="2.5" strokeDasharray="6,3" markerEnd="url(#arrowhead)" />}
+                {step === 3 && <circle cx="50" cy="40" r="20" fill="none" stroke={current.color} strokeWidth="2" strokeDasharray="4,2" />}
+              </svg>
+            </div>
+
+            {/* Terminal command display */}
+            <div style={{ background: '#0d1117', borderRadius: '8px', padding: '12px 16px', fontFamily: 'monospace', fontSize: '12px', color: '#58a6ff', marginTop: '12px', minHeight: '52px', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+              <span style={{ color: '#7c3aed', marginRight: '8px' }}>$</span>{current.cmd}
+            </div>
+          </div>
+
+          {/* Controls */}
+          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+            <button onClick={() => setIsPlaying(p => !p)} style={{
+              padding: '7px 18px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px',
+              background: isPlaying ? '#ef4444' : '#22c55e', color: 'white'
+            }}>{isPlaying ? '❚❚ หยุด' : '▶ เล่น'}</button>
+            <button onClick={() => setStep(p => (p + 1) % steps.length)} style={{
+              padding: '7px 18px', borderRadius: '8px', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px',
+              background: 'var(--bg-card)', color: 'var(--text-primary)'
+            }}>ขั้นตอนถัดไป ▶</button>
+          </div>
+        </div>
+
+        {/* Right: Step explanation */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div key={step} className="nginx-step-in" style={{
+            background: `${current.color}15`, border: `2px solid ${current.color}`,
+            borderRadius: '12px', padding: '20px', flex: 1
+          }}>
+            <div style={{ fontSize: '28px', marginBottom: '8px' }}>{current.icon}</div>
+            <div style={{ fontWeight: 'bold', fontSize: '16px', color: current.color, marginBottom: '8px' }}>{current.label}</div>
+            <div style={{ fontSize: '14px', color: 'var(--text-primary)', lineHeight: 1.6 }}>{current.desc}</div>
+          </div>
+
+          {/* All steps list */}
+          <div style={{ background: 'var(--bg-card)', borderRadius: '10px', border: '1px solid var(--border)', padding: '12px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>ขั้นตอนทั้งหมด</div>
+            {steps.map((st, i) => (
+              <div key={i} onClick={() => { setStep(i); setIsPlaying(false); }} style={{
+                display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', cursor: 'pointer', marginBottom: '4px', transition: 'all 0.2s',
+                background: step === i ? `${st.color}22` : 'transparent',
+                border: step === i ? `1px solid ${st.color}` : '1px solid transparent'
+              }}>
+                <span style={{ fontSize: '16px' }}>{st.icon}</span>
+                <span style={{ fontSize: '12px', fontWeight: step === i ? 'bold' : 'normal', color: step === i ? st.color : 'var(--text-primary)' }}>{st.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   MARIADB QUERY ANIMATION
+   ============================================================ */
+function MariaDBQueryAnimation({ s }: { s: SlideData }) {
+  const [activeQuery, setActiveQuery] = useState(0);
+  const [queryRunning, setQueryRunning] = useState(false);
+  const [resultRows, setResultRows] = useState<string[][]>([]);
+  const [queryLog, setQueryLog] = useState<string[]>(['MariaDB [(none)]> ']);
+
+  const queries = [
+    {
+      label: 'SHOW DATABASES', icon: '📂', color: '#60a5fa',
+      cmd: 'SHOW DATABASES;',
+      desc: 'แสดงรายการฐานข้อมูลทั้งหมดในระบบ',
+      headers: ['Database'],
+      rows: [['information_schema'], ['mywebdb'], ['mysql'], ['performance_schema']],
+      delay: 120,
+    },
+    {
+      label: 'CREATE TABLE', icon: '🏗️', color: '#34d399',
+      cmd: 'CREATE TABLE students (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  name VARCHAR(100),\n  email VARCHAR(100)\n);',
+      desc: 'สร้างตาราง students ที่มี id, name, email',
+      headers: ['Result'],
+      rows: [['Query OK, 0 rows affected']],
+      delay: 200,
+    },
+    {
+      label: 'INSERT', icon: '➕', color: '#f59e0b',
+      cmd: "INSERT INTO students (name, email)\nVALUES ('สมชาย', 'somchai@school.com');",
+      desc: 'เพิ่มข้อมูลนักเรียนเข้าตาราง',
+      headers: ['Result'],
+      rows: [['Query OK, 1 row affected']],
+      delay: 150,
+    },
+    {
+      label: 'SELECT *', icon: '🔍', color: '#a78bfa',
+      cmd: 'SELECT * FROM students;',
+      desc: 'ดึงข้อมูลทั้งหมดจากตาราง students',
+      headers: ['id', 'name', 'email'],
+      rows: [['1', 'สมชาย', 'somchai@school.com'], ['2', 'สมหญิง', 'somying@school.com']],
+      delay: 100,
+    },
+  ];
+
+  const runQuery = (idx: number) => {
+    if (queryRunning) return;
+    setActiveQuery(idx);
+    setQueryRunning(true);
+    setResultRows([]);
+    const q = queries[idx];
+    setQueryLog(prev => [...prev, q.cmd, '']);
+    let i = 0;
+    const iv = setInterval(() => {
+      if (i < q.rows.length) {
+        const rowData = q.rows[i];  // capture before i is incremented
+        setResultRows(prev => [...prev, rowData]);
+        i++;
+      } else {
+        clearInterval(iv);
+        setQueryRunning(false);
+        setQueryLog(prev => [...prev, `${q.rows.length} row(s) in set`, 'MariaDB [mywebdb]> ']);
+      }
+    }, q.delay);
+  };
+
+  const current = queries[activeQuery];
+
+  return (
+    <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes db-row-in {
+          from { opacity: 0; transform: translateX(-12px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes db-pulse {
+          0%, 100% { opacity: 1; } 50% { opacity: 0.3; }
+        }
+        .db-row-in  { animation: db-row-in 0.2s ease-out both; }
+        .db-cursor  { animation: db-pulse 0.9s step-end infinite; display: inline-block; }
+      `}} />
+      <div className="slide-tag">{s.tag}</div>
+      <h2>{s.title}</h2>
+
+      <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0, marginTop: '12px' }}>
+
+        {/* Left: query picker */}
+        <div style={{ width: '210px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>คำสั่ง SQL</div>
+          {queries.map((q, i) => (
+            <button key={i} onClick={() => runQuery(i)} disabled={queryRunning} style={{
+              display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', borderRadius: '8px',
+              border: `2px solid ${activeQuery === i ? q.color : 'var(--border)'}`,
+              background: activeQuery === i ? `${q.color}18` : 'var(--bg-card)',
+              color: 'var(--text-primary)', cursor: queryRunning ? 'not-allowed' : 'pointer',
+              textAlign: 'left', fontWeight: 'bold', fontSize: '13px', transition: 'all 0.2s',
+              opacity: queryRunning && activeQuery !== i ? 0.5 : 1
+            }}>
+              <span style={{ fontSize: '20px' }}>{q.icon}</span>
+              <div>
+                <div style={{ color: activeQuery === i ? q.color : 'var(--text-primary)', fontWeight: 'bold' }}>{q.label}</div>
+                <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'normal', marginTop: '2px' }}>{q.desc}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Middle: SQL terminal */}
+        <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* SQL editor */}
+          <div style={{ background: '#0d1117', borderRadius: '10px', padding: '14px 18px', fontFamily: 'monospace', fontSize: '13px', color: '#c9d1d9', lineHeight: 1.7, minHeight: '110px', border: '1px solid #30363d' }}>
+            <div style={{ color: '#8b949e', marginBottom: '6px', fontSize: '11px' }}>-- คำสั่ง SQL ที่จะรัน</div>
+            <span style={{ color: '#ff7b72' }}>{current.cmd.split(' ')[0]}</span>
+            {' '}
+            <span style={{ color: '#79c0ff' }}>{current.cmd.split('\n').join('\n').replace(/^\S+\s*/, '')}</span>
+            {queryRunning && <span className="db-cursor" style={{ color: '#58a6ff' }}>█</span>}
+          </div>
+
+          {/* Result table */}
+          <div style={{ flex: 1, background: '#0d1117', borderRadius: '10px', padding: '14px', fontFamily: 'monospace', fontSize: '12px', color: '#c9d1d9', overflow: 'auto', border: '1px solid #30363d' }}>
+            {/* Header */}
+            <div style={{ display: 'flex', gap: '0', borderBottom: '1px solid #30363d', paddingBottom: '6px', marginBottom: '6px' }}>
+              {current.headers.map((h, i) => (
+                <div key={i} style={{ flex: 1, color: '#79c0ff', fontWeight: 'bold', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</div>
+              ))}
+            </div>
+            {/* Rows */}
+            {resultRows.map((row, ri) =>
+              Array.isArray(row) ? (
+                <div key={ri} className="db-row-in" style={{ display: 'flex', gap: '0', padding: '4px 0', borderBottom: '1px solid #21262d' }}>
+                  {row.map((cell, ci) => (
+                    <div key={ci} style={{ flex: 1, color: '#7ee787' }}>{cell}</div>
+                  ))}
+                </div>
+              ) : null
+            )}
+            {!queryRunning && resultRows.length === 0 && (
+              <div style={{ color: '#8b949e', marginTop: '8px' }}>กด คำสั่ง SQL ทางซ้ายเพื่อรัน...</div>
+            )}
+          </div>
+        </div>
+
+        {/* Right: info panel */}
+        <div style={{ width: '190px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ background: `${current.color}18`, border: `1px solid ${current.color}`, borderRadius: '10px', padding: '14px' }}>
+            <div style={{ fontSize: '24px', marginBottom: '6px' }}>{current.icon}</div>
+            <div style={{ fontWeight: 'bold', color: current.color, fontSize: '14px', marginBottom: '6px' }}>{current.label}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>{current.desc}</div>
+          </div>
+
+          {/* Port info */}
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '8px' }}>ข้อมูล MariaDB</div>
+            <div style={{ fontSize: '12px', lineHeight: 1.8 }}>
+              <div>🔌 พอร์ต: <strong style={{ color: '#34d399' }}>3306</strong></div>
+              <div>🗂️ ภาษา: <strong>SQL</strong></div>
+              <div>🔐 User: <strong>root / webuser</strong></div>
+              <div>📁 Data: <strong>/var/lib/mysql</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   NODE.JS REQUEST ANIMATION
+   ============================================================ */
+function NodeJSRequestAnimation({ s }: { s: SlideData }) {
+  const [step, setStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [serverLogs, setServerLogs] = useState<string[]>([
+    'Server running at http://0.0.0.0:3000/',
+    'Waiting for requests...',
+  ]);
+
+  const steps = [
+    { label: 'Browser ส่ง Request', icon: '📤', color: '#60a5fa', from: 'browser', to: 'nodejs', desc: 'Browser ส่ง HTTP GET ไปที่พอร์ต 3000 ของ Node.js', log: 'Incoming GET / from 192.168.10.1' },
+    { label: 'Node.js ประมวลผล', icon: '⚙️', color: '#f59e0b', from: 'nodejs', to: 'mariadb', desc: 'Node.js รับ Request และสืบค้นข้อมูลจาก MariaDB (พอร์ต 3306)', log: 'Querying MariaDB: SELECT * FROM students;' },
+    { label: 'MariaDB ส่งข้อมูล', icon: '🗄️', color: '#34d399', from: 'mariadb', to: 'nodejs', desc: 'MariaDB ส่งผลลัพธ์ rows กลับมาให้ Node.js', log: 'DB result: 2 rows returned' },
+    { label: 'Node.js ส่ง Response', icon: '📥', color: '#a78bfa', from: 'nodejs', to: 'browser', desc: 'Node.js ประกอบ JSON Response แล้วส่งกลับผ่าน HTTP 200', log: 'Response sent: 200 OK ({"status":"ok","data":[...]})' },
+  ];
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const t = setTimeout(() => {
+      const next = (step + 1) % steps.length;
+      setStep(next);
+      setServerLogs(prev => [...prev.slice(-6), `[${new Date().toLocaleTimeString()}] ${steps[next].log}`]);
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [step, isPlaying]);
+
+  const current = steps[step];
+  const nodesDef = [
+    { id: 'browser', label: 'Browser', icon: '💻', color: '#3b82f6', sub: 'Client' },
+    { id: 'nodejs',  label: 'Node.js', icon: '🟢', color: '#f59e0b', sub: 'Port 3000' },
+    { id: 'mariadb', label: 'MariaDB', icon: '🗄️', color: '#10b981', sub: 'Port 3306' },
+  ];
+
+  const arrowFromTo: Record<string, { x1: number; y1: number; x2: number; y2: number }> = {
+    'browser->nodejs':  { x1: 55,  y1: 40, x2: 155, y2: 40 },
+    'nodejs->mariadb':  { x1: 165, y1: 40, x2: 255, y2: 40 },
+    'mariadb->nodejs':  { x1: 255, y1: 45, x2: 165, y2: 45 },
+    'nodejs->browser':  { x1: 155, y1: 45, x2: 55,  y2: 45 },
+  };
+  const arrowKey = `${current.from}->${current.to}`;
+  const arrow = arrowFromTo[arrowKey];
+
+  return (
+    <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes nj-log-in {
+          from { opacity: 0; transform: translateY(5px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes nj-pulse-node {
+          0%, 100% { box-shadow: 0 0 8px 1px rgba(245,158,11,0.3); }
+          50%       { box-shadow: 0 0 18px 4px rgba(245,158,11,0.7); }
+        }
+        @keyframes nj-arrow {
+          0%   { stroke-dashoffset: 40; opacity: 0.5; }
+          100% { stroke-dashoffset: 0;  opacity: 1; }
+        }
+        .nj-log-in    { animation: nj-log-in 0.3s ease-out both; }
+        .nj-active    { animation: nj-pulse-node 1s ease-in-out infinite; }
+        .nj-arrow     { stroke-dasharray: 8,4; animation: nj-arrow 0.8s linear infinite; }
+      `}} />
+      <div className="slide-tag">{s.tag}</div>
+      <h2>{s.title}</h2>
+
+      <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0, marginTop: '12px' }}>
+
+        {/* Left: flow diagram */}
+        <div style={{ flex: 1.3, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {/* Step tabs */}
+          <div style={{ display: 'flex', gap: '6px' }}>
+            {steps.map((st, i) => (
+              <button key={i} onClick={() => { setStep(i); setIsPlaying(false); }} style={{
+                flex: 1, padding: '7px 4px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 'bold', transition: 'all 0.25s',
+                background: step === i ? st.color : 'var(--bg-card)',
+                color: step === i ? 'white' : 'var(--text-secondary)',
+                boxShadow: step === i ? `0 0 12px ${st.color}55` : 'none'
+              }}>{i + 1}</button>
+            ))}
+          </div>
+
+          {/* Node diagram */}
+          <div style={{ background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)', padding: '20px 12px', position: 'relative', minHeight: '130px', display: 'flex', alignItems: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', width: '100%', position: 'relative' }}>
+              {nodesDef.map(nd => {
+                const isActive = nd.id === current.from || nd.id === current.to;
+                return (
+                  <div key={nd.id} className={nd.id === current.from ? 'nj-active' : ''} style={{
+                    background: isActive ? `${nd.color}22` : 'var(--bg-card)',
+                    border: `2px solid ${isActive ? nd.color : 'var(--border)'}`,
+                    borderRadius: '12px', padding: '12px 10px', textAlign: 'center', minWidth: '85px', transition: 'all 0.3s'
+                  }}>
+                    <div style={{ fontSize: '26px' }}>{nd.icon}</div>
+                    <div style={{ fontWeight: 'bold', fontSize: '12px', color: isActive ? nd.color : 'var(--text-primary)', marginTop: '3px' }}>{nd.label}</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{nd.sub}</div>
+                  </div>
+                );
+              })}
+              {/* Arrow SVG */}
+              {arrow && (
+                <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }} viewBox="0 0 310 80">
+                  <defs>
+                    <marker id="nj-arrow-head" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+                      <polygon points="0 0, 6 3, 0 6" fill={current.color} />
+                    </marker>
+                  </defs>
+                  <line x1={arrow.x1} y1={arrow.y1} x2={arrow.x2} y2={arrow.y2}
+                    stroke={current.color} strokeWidth="2.5"
+                    className="nj-arrow"
+                    markerEnd="url(#nj-arrow-head)" />
+                </svg>
+              )}
+            </div>
+          </div>
+
+          {/* Server console log */}
+          <div style={{ flex: 1, background: '#0d1117', borderRadius: '10px', padding: '14px', fontFamily: 'monospace', fontSize: '11.5px', color: '#58a6ff', overflow: 'auto', border: '1px solid #30363d', lineHeight: 1.7 }}>
+            <div style={{ color: '#8b949e', marginBottom: '6px', fontSize: '10px' }}>▶ Node.js Server Console</div>
+            {serverLogs.map((log, i) => (
+              <div key={i} className={i === serverLogs.length - 1 ? 'nj-log-in' : ''} style={{ color: i === serverLogs.length - 1 ? '#7ee787' : '#8b949e' }}>{log}</div>
+            ))}
+          </div>
+
+          {/* Controls */}
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button onClick={() => setIsPlaying(p => !p)} style={{
+              flex: 1, padding: '7px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px',
+              background: isPlaying ? '#ef4444' : '#22c55e', color: 'white'
+            }}>{isPlaying ? '❚❚ หยุด' : '▶ เล่น'}</button>
+            <button onClick={() => { const n = (step+1)%steps.length; setStep(n); setIsPlaying(false); setServerLogs(prev=>[...prev.slice(-6),`[${new Date().toLocaleTimeString()}] ${steps[n].log}`]); }} style={{
+              flex: 1, padding: '7px', borderRadius: '8px', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px',
+              background: 'var(--bg-card)', color: 'var(--text-primary)'
+            }}>ขั้นตอนถัดไป ▶</button>
+          </div>
+        </div>
+
+        {/* Right: step detail */}
+        <div style={{ width: '220px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div key={step} className="nj-log-in" style={{
+            background: `${current.color}18`, border: `2px solid ${current.color}`,
+            borderRadius: '12px', padding: '18px', flex: 1
+          }}>
+            <div style={{ fontSize: '30px', marginBottom: '8px' }}>{current.icon}</div>
+            <div style={{ fontWeight: 'bold', fontSize: '15px', color: current.color, marginBottom: '8px' }}>{current.label}</div>
+            <div style={{ fontSize: '13px', color: 'var(--text-primary)', lineHeight: 1.6 }}>{current.desc}</div>
+          </div>
+
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '10px', padding: '12px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '8px' }}>Node.js Info</div>
+            <div style={{ fontSize: '12px', lineHeight: 1.8 }}>
+              <div>🔌 พอร์ต: <strong style={{ color: '#f59e0b' }}>3000</strong></div>
+              <div>📦 ภาษา: <strong>JavaScript</strong></div>
+              <div>🛠️ ไฟล์: <strong>server.js</strong></div>
+              <div>🔄 รัน: <strong>node server.js</strong></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -2537,6 +3101,67 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
     );
   };
 
+  const renderGenericQuiz = () => {
+    if (!s.question || !s.options) return null;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
+        <div style={{
+          background: 'var(--bg-card)', border: '1px solid var(--border)',
+          borderRadius: '12px', padding: '20px', borderLeft: '4px solid var(--accent)',
+        }}>
+          <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '10px' }}>
+            ❓ คำถามประเมินความเข้าใจ
+          </div>
+          <p style={{ fontSize: '14px', lineHeight: '1.7', color: 'var(--text-primary)', margin: 0, fontWeight: 500 }}>
+            {s.question}
+          </p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {s.options.map((opt: string, i: number) => {
+            const isSelected = selectedOption === opt;
+            const isCorrect = opt === s.answer;
+            const hasAnswered = selectedOption !== null;
+            const letters = ['ก', 'ข', 'ค', 'ง', 'จ'];
+            let bg = 'var(--bg-card)', border = '1px solid var(--border)', color = 'var(--text-primary)';
+            let suffix: React.ReactNode = null;
+            if (hasAnswered) {
+              if (isCorrect) { bg = 'rgba(34,197,94,0.10)'; border = '2px solid #22c55e'; color = '#22c55e'; suffix = <span style={{ color:'#22c55e', fontSize:'12px', fontWeight:'bold' }}>✓ ถูกต้อง</span>; }
+              else if (isSelected) { bg = 'rgba(239,68,68,0.10)'; border = '2px solid #ef4444'; color = '#ef4444'; suffix = <span style={{ color:'#ef4444', fontSize:'12px', fontWeight:'bold' }}>✗ ผิด</span>; }
+            }
+            return (
+              <div key={i} onClick={() => { if (!hasAnswered) setSelectedOption(opt); }} style={{
+                background: bg, border, borderRadius: '10px', padding: '13px 18px',
+                cursor: hasAnswered ? 'default' : 'pointer', display: 'flex', alignItems: 'center',
+                justifyContent: 'space-between', transition: 'all 0.2s ease', fontSize: '13px', color,
+                fontWeight: (hasAnswered && (isCorrect || isSelected)) ? 'bold' : 'normal'
+              }}>
+                <span><span style={{ fontWeight: 'bold', marginRight: '8px', opacity: 0.5 }}>{letters[i]})</span>{opt}</span>
+                {suffix}
+              </div>
+            );
+          })}
+        </div>
+        {selectedOption !== null && s.explanation && (
+          <div style={{
+            background: selectedOption === s.answer ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.06)',
+            border: `1px solid ${selectedOption === s.answer ? '#22c55e' : '#ef4444'}`,
+            borderRadius: '10px', padding: '14px 18px',
+          }}>
+            <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>💡 คำอธิบาย</div>
+            <div style={{ fontSize: '13px', lineHeight: '1.6', color: 'var(--text-primary)' }}>{s.explanation}</div>
+          </div>
+        )}
+        {selectedOption !== null && selectedOption !== s.answer && (
+          <button onClick={() => setSelectedOption(null)} style={{
+            alignSelf: 'flex-start', padding: '8px 16px', borderRadius: '8px',
+            border: '1px solid var(--border)', background: 'var(--bg-card)',
+            color: 'var(--text-primary)', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold'
+          }}>🔄 ลองใหม่</button>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="slide slide-content slide-interactive-act" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
       <div className="slide-tag">{s.tag}</div>
@@ -2609,6 +3234,10 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
           {s.id === 'w3b-act2' && renderW3bAct2()}
           {s.id === 'w3b-act3' && renderW3bAct3()}
           {s.id?.startsWith('w3b-cmd-') && renderW3bCommandQuiz()}
+          {/* Generic quiz renderer for all other weeks */}
+          {!['w3a-act1','w3a-act2','w3a-act3','w3a-act4','w3a-act5','w3a-act6','w3b-act1','w3b-act2','w3b-act3'].includes(s.id ?? '') &&
+           !s.id?.startsWith('w3b-cmd-') &&
+           s.question && s.options && renderGenericQuiz()}
         </div>
       </div>
     </div>
@@ -6571,7 +7200,10 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "dhcp-hotel": return <DhcpHotelAnimation s={slide} />;
     case "interactive-act": return <InteractiveActivitySlide s={slide} />;
     case "homework": return <HomeworkSlide s={slide} />;
-    case "stack-installer-anim": return <StackInstallerAnimation s={slide} />;
+    case "stack-installer-anim":  return <StackInstallerAnimation s={slide} />;
+    case "nginx-flow-anim":        return <NginxFlowAnimation s={slide} />;
+    case "mariadb-query-anim":     return <MariaDBQueryAnimation s={slide} />;
+    case "nodejs-request-anim":    return <NodeJSRequestAnimation s={slide} />;
     default: return <ContentSlide s={slide} />;
   }
 }

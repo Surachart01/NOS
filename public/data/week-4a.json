@@ -1,487 +1,693 @@
 {
   "week": "4a",
-  "title": "ส่วนประกอบเครื่องเซิร์ฟเวอร์และการติดตั้ง Proxmox VE",
-  "topic": "Server Components & Proxmox VE Setup",
-  "description": "เรียนรู้สถาปัตยกรรมระบบเสมือน (Virtualization), ประเภทของ Hypervisor, ศึกษาขั้นตอนการจัดเตรียมเซิร์ฟเวอร์จัดการระบบจำลอง Proxmox VE และปฏิบัติการใช้งานตู้จำลองของตนเองในการรันระบบเว็บ",
+  "title": "ติดตั้ง Nginx, MariaDB และ Node.js บนเซิร์ฟเวอร์เสมือน",
+  "topic": "Nginx · MariaDB · Node.js Server Stack",
+  "description": "เรียนรู้และฝึกปฏิบัติการติดตั้ง Web Server (Nginx), ระบบฐานข้อมูล (MariaDB) และ Backend Runtime (Node.js) บนตู้คอนเทนเนอร์ LXC ส่วนตัวของแต่ละคนอย่างละเอียด พร้อมตรวจสอบความถูกต้องทุกขั้นตอน",
   "learningObjectives": [
-    "อธิบายส่วนประกอบของเซิร์ฟเวอร์สมัยใหม่ (Nginx, MariaDB, Node.js, Docker, GitHub) และบทบาทหน้าที่ได้",
-    "อธิบายแนวคิดเทคโนโลยี Virtualization และความแตกต่างของ Hypervisor ได้",
-    "อธิบายระบบและการเข้าเชื่อมต่อใช้งานตู้จำลองของ Proxmox VE ได้",
-    "เข้าใช้งานและปฏิบัติการติดตั้ง Nginx Web Server บนตู้เสมือนของตนเองได้สำเร็จ"
+    "ติดตั้งและตั้งค่า Nginx Web Server พร้อมแก้ไขหน้าเว็บ HTML ได้สำเร็จ",
+    "ติดตั้ง MariaDB สร้างฐานข้อมูล ผู้ใช้งาน และตาราง พร้อมใช้คำสั่ง SQL เบื้องต้นได้",
+    "ติดตั้ง Node.js เขียน HTTP Server เบื้องต้น และรันโปรแกรมบนเซิร์ฟเวอร์ได้",
+    "เข้าใจบทบาทและความสัมพันธ์ระหว่าง Nginx, MariaDB และ Node.js ใน Server Stack"
   ],
   "slides": [
     {
       "id": "w4a-cover",
       "type": "cover",
-      "title": "ส่วนประกอบเครื่องเซิร์ฟเวอร์และการติดตั้ง Proxmox VE",
-      "subtitle": "Server Components & Proxmox VE Setup",
+      "title": "ติดตั้ง Nginx, MariaDB & Node.js",
+      "subtitle": "Server Stack Setup · สัปดาห์ที่ 4 วันอังคาร",
       "tag": "สัปดาห์ที่ 4 (วันอังคาร - 3 ชม.)",
-      "body": "ทำความรู้จักส่วนประกอบหลักในการสร้างคอมพิวเตอร์เซิร์ฟเวอร์ แนวคิดเทคโนโลยีระบบเสมือน และทำความเข้าใจการเชื่อมต่อใช้งานตู้ทดสอบของตนเอง",
-      "speakerNotes": "สวัสดีนักศึกษาทุกคนครับ วันนี้เราจะใช้เวลาชั่วโมงแรกในการศึกษาทฤษฎีส่วนประกอบของเซิร์ฟเวอร์สมัยใหม่ทั้งหมดที่เราจะต้องเรียนรู้ในวิชานี้ จากนั้นชั่วโมงถัดไปเราจะมาดูหลักการทำงานของ Proxmox VE และลงมือทำปฏิบัติการติดตั้งเว็บเซิร์ฟเวอร์ Nginx บนตู้จำลองครับ"
+      "body": "วันนี้เราจะลงมือติดตั้งซอฟต์แวร์หลัก 3 ตัวบนตู้คอนเทนเนอร์ LXC ส่วนตัวของแต่ละคน — Web Server · Database · Backend Runtime",
+      "speakerNotes": "สวัสดีนักศึกษาทุกคนครับ วันนี้เป็นคาบสำคัญมากครับ เราจะเริ่มจากทฤษฎีสั้นๆ ว่าแต่ละโปรแกรมทำอะไร จากนั้นลงมือปฏิบัติการติดตั้งบนตู้เสมือนของตัวเองเลยทันที ใครที่ยัง SSH ไม่เข้าให้แจ้งครูก่อนเริ่มครับ"
     },
     {
       "id": "w4a-objectives",
       "type": "content",
-      "title": "เป้าหมายการเรียนรู้ในวันนี้",
+      "title": "เป้าหมายการเรียนรู้วันนี้",
       "tag": "วัตถุประสงค์",
       "items": [
-        "ศึกษาและจำแนกหน้าที่ส่วนประกอบหลักของเซิร์ฟเวอร์ (Web, Database, App, Container, Git)",
-        "ทำความเข้าใจแนวคิดหลักการจำลองระบบคอมพิวเตอร์เสมือน (Virtualization)",
-        "ศึกษาความแตกต่างระหว่าง Type 1 Hypervisor และ Type 2 Hypervisor",
-        "วิเคราะห์สถาปัตยกรรมระดับแกนของ Proxmox VE และระบบคอนเทนเนอร์ LXC",
-        "ลงมือปฏิบัติการล็อกอิน SSH และติดตั้ง Nginx Web Server บนตู้ Container ส่วนตัว"
+        "🌐 ส่วนที่ 1 — Nginx Web Server: เข้าใจหลักการ Web Server และติดตั้งให้หน้าเว็บขึ้นมาได้จริง",
+        "🗄️ ส่วนที่ 2 — MariaDB Database: ติดตั้งฐานข้อมูล สร้าง DB, User, Table และใช้คำสั่ง SQL ได้",
+        "⚡ ส่วนที่ 3 — Node.js Runtime: ติดตั้ง Node.js และรัน HTTP Server ผ่านพอร์ต 3000 ได้สำเร็จ",
+        "🔗 ภาพรวม — เข้าใจว่าทั้ง 3 โปรแกรมทำงานร่วมกันอย่างไรในระบบเซิร์ฟเวอร์จริง"
       ],
-      "speakerNotes": "วันนี้เรามีเป้าหมายใหญ่สองส่วน คือเข้าใจโครงสร้าง Stack เซิร์ฟเวอร์ และลงมือทำแล็บต่อคอมพิวเตอร์ผ่านเครือข่ายเพื่อสั่งรัน Nginx ด้วยตัวเองครับ"
+      "speakerNotes": "เราจะใช้เวลา 3 ชั่วโมงวันนี้แบ่งเป็น 3 ส่วนเท่าๆ กัน ส่วนแรก Nginx ส่วนที่สอง MariaDB และส่วนที่สาม Node.js ทุกคนจะได้ลงมือทำบนเครื่องตัวเองครับ"
     },
     {
-      "id": "w4a-server-stack-intro",
+      "id": "w4a-ssh-connect",
       "type": "content",
-      "title": "ส่วนประกอบของการทำเซิร์ฟเวอร์สมัยใหม่ (Modern Server Stack)",
-      "tag": "ทฤษฎีเซิร์ฟเวอร์ - ภาพรวม",
+      "title": "เริ่มต้น: เชื่อมต่อตู้เสมือนของตนเองผ่าน SSH",
+      "tag": "เตรียมพร้อมก่อนเริ่ม",
       "items": [
-        "แนวคิด: ในการให้บริการแอปพลิเคชันหรือหน้าเว็บไซต์ระดับใช้งานจริง เครื่องเซิร์ฟเวอร์เพียง 1 เครื่องมักจะต้องติดตั้งโปรแกรมย่อยหลายตัวเพื่อประสานงานกัน",
-        "ส่วนประกอบสำคัญ 5 ประการที่เราจะต้องทำความรู้จักและใช้งานในวิชานี้ ได้แก่:",
-        "  - 1. Web Server / Reverse Proxy (ใช้ Nginx)",
-        "  - 2. Database Management System (ใช้ MariaDB)",
-        "  - 3. Backend runtime (ใช้ Node.js / JavaScript)",
-        "  - 4. Container Platform (ใช้ Docker)",
-        "  - 5. Source Code Control & Cloud Repository (ใช้ GitHub)"
+        "ขั้นตอนแรก: เปิด Terminal (macOS/Linux) หรือ PowerShell / VS Code Terminal (Windows)",
+        "คำสั่งเชื่อมต่อ SSH:",
+        "  - รูปแบบ: ssh root@[IP Address ของตู้จำลองของคุณ]",
+        "  - ตัวอย่าง: ssh root@192.168.10.101",
+        "หากระบบถาม 'Are you sure you want to continue connecting?' ให้พิมพ์: yes แล้วกด Enter",
+        "จากนั้นพิมพ์รหัสผ่านที่ได้รับจากครู (ตัวอักษรจะไม่แสดงบนจอ — เป็นเรื่องปกติ)",
+        "✅ สัญญาณความสำเร็จ: prompt เปลี่ยนเป็น root@[hostname]:~#"
       ],
-      "speakerNotes": "อธิบายให้นักศึกษาฟังว่า เครื่องคอมพิวเตอร์ที่จะมาทำเซิร์ฟเวอร์ ไม่ใช่แค่ลงวินโดวส์แล้วจบ แต่ต้องมีการติดตั้งระบบย่อยต่างๆ เข้ามาทำงานร่วมกันเปรียบเหมือนแผนกงานในบริษัทครับ"
+      "speakerNotes": "ให้นักเรียนทุกคนลอง SSH เข้าตู้ตนเองก่อนเลย ใครเข้าไม่ได้ให้รีบแจ้งครูทันทีก่อนเริ่มบทเรียนครับ ตรวจสอบ IP ของแต่ละคนจากบอร์ดหน้าห้องเรียน"
+    },
+    {
+      "id": "w4a-stack-overview",
+      "type": "content",
+      "title": "ภาพรวม: Nginx + MariaDB + Node.js ทำงานร่วมกันอย่างไร?",
+      "tag": "สถาปัตยกรรม Server Stack",
+      "items": [
+        "เส้นทางการไหลของข้อมูล (Request Flow) เมื่อผู้ใช้เปิดเบราว์เซอร์:",
+        "  ① Browser ส่ง HTTP Request ➜ Nginx รับที่พอร์ต 80",
+        "  ② Nginx ส่งต่อ (Proxy Pass) ไปยัง Node.js ที่พอร์ต 3000",
+        "  ③ Node.js สืบค้นข้อมูลจาก MariaDB ที่พอร์ต 3306",
+        "  ④ ข้อมูลไหลย้อนกลับ MariaDB ➜ Node.js ➜ Nginx ➜ Browser",
+        "บทบาทหลักของแต่ละโปรแกรม:",
+        "  - Nginx  : ด่านหน้า รับ-ส่งคำขอ (เหมือนพนักงานต้อนรับ)",
+        "  - MariaDB: ตู้เซฟข้อมูล เก็บทุกอย่างอย่างปลอดภัย (เหมือนคลังข้อมูล)",
+        "  - Node.js: เครื่องยนต์ประมวลผลหลังบ้าน (เหมือนพ่อครัวในครัว)"
+      ],
+      "speakerNotes": "ให้นักเรียนมองภาพรวมก่อนว่า 3 โปรแกรมนี้ไม่ได้แยกกันทำงาน แต่ต้องทำงานร่วมกันเป็นระบบ Nginx คือประตูรับแขก Node.js คือคนทำงาน MariaDB คือคลังเก็บข้อมูลครับ"
+    },
+    {
+      "id": "w4a-nginx-divider",
+      "type": "cover",
+      "title": "ส่วนที่ 1: Nginx Web Server",
+      "subtitle": "Web Server & Reverse Proxy",
+      "tag": "🌐 ส่วนที่ 1 / 3",
+      "body": "เรียนรู้หลักการ Web Server ติดตั้ง Nginx และปรับแต่งหน้าเว็บบนตู้จำลองของคุณ",
+      "speakerNotes": "เราเริ่มส่วนแรกกันเลยครับ Nginx เป็นโปรแกรมที่เราจะสัมผัสบ่อยที่สุด เพราะเป็นด่านหน้าของระบบ"
     },
     {
       "id": "w4a-nginx-theory",
       "type": "content",
-      "title": "1. Nginx: เว็บเซิร์ฟเวอร์ & ตัวส่งต่อคำขอ (Web Server)",
-      "tag": "ทฤษฎีเซิร์ฟเวอร์ - Nginx",
+      "title": "Nginx คืออะไร? ทำงานอย่างไร?",
+      "tag": "ทฤษฎี Nginx",
       "items": [
-        "หน้าที่หลัก: คอยเปิดรับคำขอ (Request) จากเว็บเบราว์เซอร์ของไคลเอนต์ผ่านพอร์ต HTTP/HTTPS",
-        "บทบาทการทำงาน:",
-        "  - Web Server: ค้นหาไฟล์หน้าเว็บ (.html, .css, .js) หรือรูปภาพในระบบส่งกลับไปให้ผู้เปิดเบราว์เซอร์ดู",
-        "  - Reverse Proxy: ทำหน้าที่เป็นด่านหน้าคอยกรองและกระจายคำขอส่งต่อไปยังโปรแกรมรันโค้ดเบื้องหลัง",
-        "เปรียบเทียบในชีวิตจริง: เหมือนพนักงานต้อนรับที่อยู่เคาน์เตอร์หน้าสุด คอยยื่นโบรชัวร์ให้ลูกค้า หรือชี้ทางให้ลูกค้าเดินไปแผนกต่างๆ"
+        "Nginx (อ่านว่า 'Engine-X') คือซอฟต์แวร์ Web Server โอเพนซอร์สที่มีประสิทธิภาพสูงและใช้งานฟรี",
+        "หน้าที่หลัก 2 อย่าง:",
+        "  - Web Server: ส่งไฟล์ HTML, CSS, รูปภาพ ให้เบราว์เซอร์ของผู้ใช้โดยตรง",
+        "  - Reverse Proxy: รับคำขอจาก Browser แล้วส่งต่อไปยัง Node.js หรือโปรแกรมอื่นเบื้องหลัง",
+        "พอร์ตที่ทำงาน:",
+        "  - HTTP  : พอร์ต 80  (ไม่เข้ารหัส)",
+        "  - HTTPS : พอร์ต 443 (เข้ารหัสด้วย SSL/TLS)",
+        "สถิติการใช้งานจริง: Nginx ถูกใช้งานโดยเว็บไซต์กว่า 34% ของเว็บทั้งหมดในโลก รวมถึง Netflix, Dropbox, GitHub"
       ],
-      "speakerNotes": "Nginx คือด่านหน้าสุดของเว็บเซิร์ฟเวอร์ คอยรับงานจากลูกค้าที่เบราว์เซอร์และแจกจ่ายงานต่อให้เหมาะสมครับ"
+      "speakerNotes": "อธิบายให้ชัดว่า Nginx ไม่ได้แค่ส่งไฟล์ HTML แต่ยังทำหน้าที่เป็น Reverse Proxy ได้ด้วย ซึ่งจำเป็นมากเมื่อเราต้องการให้ Node.js ทำงานหลังบ้านครับ"
+    },
+    {
+      "id": "w4a-nginx-flow-anim",
+      "type": "nginx-flow-anim",
+      "title": "🎬 Animation: HTTP Request ไหลผ่าน Nginx อย่างไร?",
+      "tag": "Animation — Nginx Flow",
+      "speakerNotes": "ใช้ animation นี้สาธิตให้นักเรียนเห็นการไหลของ HTTP Request ตั้งแต่ Browser ส่งคำขอ ➜ Nginx รับและหาไฟล์ ➜ ส่งกลับเป็น HTML ➜ Browser แสดงผล คลิกปุ่มเพื่อดูทีละขั้นตอนครับ"
+    },
+    {
+      "id": "w4a-nginx-install",
+      "type": "content",
+      "title": "ขั้นตอนที่ 1: อัปเดตระบบและติดตั้ง Nginx",
+      "tag": "ปฏิบัติการ Nginx - ขั้นตอนที่ 1",
+      "items": [
+        "ขั้นตอนที่ 1.1 — อัปเดตรายการแพ็กเกจระบบให้เป็นปัจจุบัน:",
+        "  $ apt update",
+        "  $ apt upgrade -y",
+        "ขั้นตอนที่ 1.2 — ติดตั้ง Nginx:",
+        "  $ apt install nginx -y",
+        "ขั้นตอนที่ 1.3 — ตรวจสอบว่าติดตั้งสำเร็จ:",
+        "  $ nginx -v",
+        "  ผลลัพธ์ที่ถูกต้อง: nginx version: nginx/1.x.x",
+        "ขั้นตอนที่ 1.4 — เปิดบริการและตั้งให้เปิดอัตโนมัติทุกครั้งที่รีบูต:",
+        "  $ systemctl start nginx",
+        "  $ systemctl enable nginx"
+      ],
+      "speakerNotes": "ให้ทุกคนพิมพ์คำสั่งตามทีละขั้นตอน apt update อาจใช้เวลาสักครู่ขึ้นอยู่กับความเร็วเน็ตครับ"
+    },
+    {
+      "id": "w4a-nginx-status",
+      "type": "content",
+      "title": "ขั้นตอนที่ 2: ตรวจสอบสถานะ Nginx ด้วย systemctl",
+      "tag": "ปฏิบัติการ Nginx - ขั้นตอนที่ 2",
+      "items": [
+        "คำสั่งตรวจสอบสถานะการทำงาน:",
+        "  $ systemctl status nginx",
+        "สิ่งที่ต้องอ่านในผลลัพธ์:",
+        "  ✅ Active: active (running) — บริการทำงานปกติ",
+        "  ❌ Active: inactive (dead)  — บริการไม่ได้รัน ให้สั่ง systemctl start nginx",
+        "คำสั่งควบคุม Nginx ที่ต้องจำ:",
+        "  $ systemctl start nginx    → เริ่มบริการ",
+        "  $ systemctl stop nginx     → หยุดบริการ",
+        "  $ systemctl restart nginx  → รีสตาร์ตบริการ",
+        "  $ systemctl reload nginx   → โหลดคอนฟิกใหม่โดยไม่หยุดบริการ",
+        "  $ systemctl enable nginx   → ตั้งให้เปิดอัตโนมัติเมื่อรีบูต"
+      ],
+      "speakerNotes": "ให้นักเรียนทุกคนรันคำสั่ง systemctl status nginx แล้วตรวจสอบว่าเห็น 'active (running)' สีเขียว ถ้าไม่เห็นให้แจ้งครูทันทีครับ"
+    },
+    {
+      "id": "w4a-nginx-quiz1",
+      "type": "interactive-act",
+      "title": "คำถาม: คำสั่ง systemctl ของ Nginx",
+      "tag": "คำถามย่อย Nginx",
+      "question": "ถ้าคุณแก้ไขไฟล์ตั้งค่า Nginx แล้วต้องการให้บริการรับค่าใหม่โดยที่ไม่ต้องหยุดบริการ (ไม่ให้เว็บล่ม) ควรใช้คำสั่งใด?",
+      "options": [
+        "systemctl restart nginx",
+        "systemctl reload nginx",
+        "systemctl stop nginx"
+      ],
+      "answer": "systemctl reload nginx",
+      "explanation": "คำสั่ง reload จะโหลดคอนฟิกใหม่โดยไม่หยุดบริการ ทำให้เว็บไม่ล่มระหว่างอัปเดต ส่วน restart จะหยุดแล้วเปิดใหม่ ซึ่งจะทำให้เว็บล่มชั่วคราว"
+    },
+    {
+      "id": "w4a-nginx-browser-test",
+      "type": "content",
+      "title": "ขั้นตอนที่ 3: ทดสอบเปิดหน้าเว็บผ่าน Browser",
+      "tag": "ปฏิบัติการ Nginx - ขั้นตอนที่ 3",
+      "items": [
+        "วิธีทดสอบว่า Nginx ทำงานได้จริง:",
+        "  - เปิด Web Browser บนเครื่อง PC ของตนเอง",
+        "  - พิมพ์ IP ของตู้จำลองลงในช่อง Address bar:",
+        "  - ตัวอย่าง: http://192.168.10.101",
+        "ผลลัพธ์ที่ถูกต้อง:",
+        "  ✅ จะเห็นหน้าเว็บขึ้นข้อความ 'Welcome to nginx!'",
+        "ถ้าทดสอบบนเซิร์ฟเวอร์ตัวเองได้ด้วยคำสั่ง curl:",
+        "  $ curl http://localhost",
+        "  ผลลัพธ์: แสดงโค้ด HTML ของหน้า Welcome to nginx"
+      ],
+      "speakerNotes": "ให้ทุกคนเปิดบราวเซอร์แล้วพิมพ์ IP ของตู้ตนเอง ถ้าเห็นหน้า Welcome to nginx ให้ยกมือครับ เราจะรอให้ทุกคนผ่านขั้นตอนนี้ก่อน"
+    },
+    {
+      "id": "w4a-nginx-config",
+      "type": "content",
+      "title": "ขั้นตอนที่ 4: โครงสร้างไฟล์และโฟลเดอร์สำคัญของ Nginx",
+      "tag": "ปฏิบัติการ Nginx - ขั้นตอนที่ 4",
+      "items": [
+        "โฟลเดอร์และไฟล์สำคัญที่ต้องรู้จัก:",
+        "  📁 /etc/nginx/               → โฟลเดอร์หลักเก็บไฟล์คอนฟิกทั้งหมด",
+        "  📄 /etc/nginx/nginx.conf     → ไฟล์คอนฟิกหลักของ Nginx",
+        "  📁 /etc/nginx/sites-available → เก็บ Virtual Host ทั้งหมดที่มี",
+        "  📁 /etc/nginx/sites-enabled  → เก็บ Virtual Host ที่เปิดใช้งานอยู่",
+        "  📁 /var/www/html/            → โฟลเดอร์เก็บไฟล์เว็บ (HTML, CSS, JS, รูปภาพ)",
+        "  📄 /var/www/html/index.html  → หน้าเว็บเริ่มต้นที่แสดงเมื่อเปิด IP",
+        "คำสั่งดูไฟล์ index.html:",
+        "  $ cat /var/www/html/index.html"
+      ],
+      "speakerNotes": "สอนให้นักเรียนรู้จักโครงสร้างไดเรกทอรีของ Nginx ที่สำคัญที่สุดคือ /var/www/html คือที่เก็บไฟล์เว็บ และ /etc/nginx คือที่เก็บไฟล์ตั้งค่าครับ"
+    },
+    {
+      "id": "w4a-nginx-edit-html",
+      "type": "content",
+      "title": "ขั้นตอนที่ 5: แก้ไขหน้าเว็บด้วย nano",
+      "tag": "ปฏิบัติการ Nginx - ขั้นตอนที่ 5",
+      "items": [
+        "เปิดแก้ไขไฟล์ index.html ด้วย text editor ชื่อ nano:",
+        "  $ nano /var/www/html/index.html",
+        "ลบโค้ดเดิมทั้งหมด แล้วพิมพ์โค้ดใหม่ (ตัวอย่าง):",
+        "  <html>",
+        "  <head><title>My Server</title></head>",
+        "  <body>",
+        "    <h1>สวัสดีครับ! ผมคือ [ชื่อของคุณ]</h1>",
+        "    <p>นี่คือเว็บเซิร์ฟเวอร์ส่วนตัวของผม</p>",
+        "  </body>",
+        "  </html>",
+        "บันทึกไฟล์ด้วย nano:",
+        "  - กด Ctrl + O  → บันทึกไฟล์",
+        "  - กด Enter     → ยืนยันชื่อไฟล์",
+        "  - กด Ctrl + X  → ออกจาก nano",
+        "จากนั้น refresh หน้าเว็บใน Browser เพื่อดูผลลัพธ์ใหม่"
+      ],
+      "speakerNotes": "ให้นักเรียนลองแก้ไขหน้าเว็บใส่ชื่อตัวเองลงไปด้วย เป็นการปรับหน้าเว็บส่วนตัวครั้งแรก ซึ่งจะน่าตื่นเต้นมากครับ ใครทำสำเร็จให้ยกมือโชว์หน้าจอด้วย"
+    },
+    {
+      "id": "w4a-nginx-test-config",
+      "type": "content",
+      "title": "กฎเหล็ก: ตรวจสอบคอนฟิกก่อน Restart ทุกครั้ง",
+      "tag": "ปฏิบัติการ Nginx - กฎความปลอดภัย",
+      "items": [
+        "⚠️ กฎสำคัญที่สุดของ Admin: ห้าม restart Nginx ทันทีหลังแก้ไขคอนฟิก",
+        "วิธีที่ถูกต้อง — ตรวจสอบไวยากรณ์ก่อนทุกครั้ง:",
+        "  $ nginx -t",
+        "ผลลัพธ์ที่ปลอดภัย (ถึงจะ restart ได้):",
+        "  ✅ nginx: the configuration file /etc/nginx/nginx.conf syntax is ok",
+        "  ✅ nginx: configuration file /etc/nginx/nginx.conf test is successful",
+        "ผลลัพธ์ที่มีปัญหา (ต้องแก้ไขก่อน):",
+        "  ❌ nginx: [emerg] unexpected '}' in /etc/nginx/nginx.conf:xx",
+        "เหตุผล: ถ้าคอนฟิกผิดแล้วสั่ง restart บริการจะล่มทันทีและเว็บจะหยุดทำงาน"
+      ],
+      "speakerNotes": "นี่คือกฎเหล็กที่ Admin ทุกคนต้องรู้ ถ้าคอนฟิกผิดแล้วสั่ง restart เว็บจะล่มทันที การรัน nginx -t ก่อนเป็นการป้องกันปัญหาครับ"
+    },
+    {
+      "id": "w4a-mariadb-divider",
+      "type": "cover",
+      "title": "ส่วนที่ 2: MariaDB Database",
+      "subtitle": "Relational Database Management System",
+      "tag": "🗄️ ส่วนที่ 2 / 3",
+      "body": "เรียนรู้การติดตั้ง MariaDB สร้างฐานข้อมูล และใช้คำสั่ง SQL เบื้องต้น",
+      "speakerNotes": "เยี่ยมครับ ทุกคนมี Nginx รันแล้ว! ตอนนี้เราจะมาติดตั้ง MariaDB ซึ่งเป็นระบบฐานข้อมูลที่แอปพลิเคชันส่วนใหญ่ต้องใช้ครับ"
     },
     {
       "id": "w4a-mariadb-theory",
       "type": "content",
-      "title": "2. MariaDB: ระบบจัดการฐานข้อมูล (Database)",
-      "tag": "ทฤษฎีเซิร์ฟเวอร์ - MariaDB",
+      "title": "MariaDB คืออะไร? ทำไมต้องใช้ฐานข้อมูล?",
+      "tag": "ทฤษฎี MariaDB",
       "items": [
-        "หน้าที่หลัก: จัดเก็บข้อมูลของระบบในรูปแบบตารางความสัมพันธ์ (Relational Database) ที่สามารถค้นหา เพิ่ม แก้ไข และลบได้สะดวก",
-        "บทบาทการทำงาน:",
-        "  - ทำหน้าที่เก็บรหัสผ่านผู้ใช้งาน ข้อมูลโปรไฟล์ บันทึกธุรกรรม หรือเนื้อหาบทความต่างๆ ในระบบ",
-        "  - ทำงานรองรับคำสั่งภาษา SQL ในการดึงหรือสืบค้นข้อมูลที่มีความถูกต้องแม่นยำสูง",
-        "เปรียบเทียบในชีวิตจริง: เหมือนตู้เก็บแฟ้มเอกสารนิรภัยหลังสำนักงาน ที่มีการจัดหมวดหมู่แฟ้มไว้อย่างเรียบร้อยและลงกลอนอย่างแน่นหนา"
+        "MariaDB คือระบบจัดการฐานข้อมูลสัมพันธ์ (RDBMS) โอเพนซอร์ส พัฒนาต่อยอดจาก MySQL",
+        "ทำไมถึงต้องมีฐานข้อมูล?",
+        "  - เก็บข้อมูลผู้ใช้งาน รหัสผ่าน โปรไฟล์ บทความ อย่างปลอดภัยและค้นหาได้",
+        "  - รองรับการค้นหาข้อมูลที่ซับซ้อนด้วยภาษา SQL",
+        "  - มีระบบรักษาความสมบูรณ์ของข้อมูล (ACID Transactions)",
+        "ภาษาที่ใช้: SQL (Structured Query Language) — ภาษาสากลสำหรับจัดการข้อมูล",
+        "พอร์ตที่ใช้: พอร์ต 3306",
+        "คำสั่งพื้นฐาน SQL ที่ต้องรู้:",
+        "  - SELECT : ดึงข้อมูล",
+        "  - INSERT : เพิ่มข้อมูล",
+        "  - UPDATE : แก้ไขข้อมูล",
+        "  - DELETE : ลบข้อมูล"
       ],
-      "speakerNotes": "ถ้า Nginx เป็นคนต้อนรับ MariaDB ก็คือตู้เซฟเก็บเอกสารหลังบ้าน ที่เก็บรหัสผ่าน บัญชีผู้ใช้ หรือข้อมูลสำคัญทุกอย่างครับ"
+      "speakerNotes": "อธิบายเปรียบเทียบว่า ถ้าไม่มีฐานข้อมูลเราก็เก็บข้อมูลใน text file ซึ่งช้าและไม่ปลอดภัย MariaDB เป็นเหมือนตู้เซฟที่จัดระเบียบข้อมูลไว้อย่างดีครับ"
+    },
+    {
+      "id": "w4a-mariadb-query-anim",
+      "type": "mariadb-query-anim",
+      "title": "🎬 Animation: ลองใช้คำสั่ง SQL แบบ Interactive",
+      "tag": "Animation — SQL Query",
+      "speakerNotes": "ใช้ animation นี้สาธิตคำสั่ง SQL หลักทั้ง 4 คำสั่ง: SHOW DATABASES, CREATE TABLE, INSERT, SELECT ให้นักเรียนกดปุ่มเพื่อรันแต่ละคำสั่งและดูผลลัพธ์แบบ Real-time ครับ"
+    },
+    {
+      "id": "w4a-mariadb-install",
+      "type": "content",
+      "title": "ขั้นตอนที่ 1: ติดตั้ง MariaDB Server",
+      "tag": "ปฏิบัติการ MariaDB - ขั้นตอนที่ 1",
+      "items": [
+        "ติดตั้ง MariaDB:",
+        "  $ apt install mariadb-server -y",
+        "เริ่มบริการและตั้งให้เปิดอัตโนมัติ:",
+        "  $ systemctl start mariadb",
+        "  $ systemctl enable mariadb",
+        "ตรวจสอบสถานะ:",
+        "  $ systemctl status mariadb",
+        "  ✅ ต้องเห็น: Active: active (running)",
+        "ตรวจสอบเวอร์ชันที่ติดตั้ง:",
+        "  $ mariadb --version",
+        "  ผลลัพธ์ตัวอย่าง: mariadb  Ver 15.1 Distrib 10.x.x-MariaDB"
+      ],
+      "speakerNotes": "ติดตั้ง MariaDB ด้วย apt install mariadb-server ตามด้วยการตรวจสอบสถานะครับ อาจใช้เวลาสักครู่ในการดาวน์โหลด"
+    },
+    {
+      "id": "w4a-mariadb-secure",
+      "type": "content",
+      "title": "ขั้นตอนที่ 2: ตั้งรหัสผ่านและรักษาความปลอดภัย",
+      "tag": "ปฏิบัติการ MariaDB - ขั้นตอนที่ 2",
+      "items": [
+        "รัน Script ตั้งค่าความปลอดภัยเริ่มต้น:",
+        "  $ mariadb-secure-installation",
+        "การตอบคำถามในขั้นตอนนี้:",
+        "  - Enter current password for root: กด Enter (ไม่มีรหัสผ่านตอนแรก)",
+        "  - Switch to unix_socket authentication? → N",
+        "  - Change the root password? → Y แล้วพิมพ์รหัสผ่านใหม่ที่จำได้",
+        "  - Remove anonymous users? → Y",
+        "  - Disallow root login remotely? → Y",
+        "  - Remove test database? → Y",
+        "  - Reload privilege tables? → Y",
+        "✅ เมื่อเสร็จจะแสดงข้อความ: Thanks for using MariaDB!"
+      ],
+      "speakerNotes": "ขั้นตอนนี้สำคัญมากครับ เป็นการปิดช่องโหว่ความปลอดภัยเริ่มต้นของ MariaDB ให้นักเรียนจดรหัสผ่านที่ตั้งไว้ด้วยเพราะต้องใช้ในขั้นตอนถัดไป"
+    },
+    {
+      "id": "w4a-mariadb-login",
+      "type": "content",
+      "title": "ขั้นตอนที่ 3: เข้าใช้งาน MariaDB Console",
+      "tag": "ปฏิบัติการ MariaDB - ขั้นตอนที่ 3",
+      "items": [
+        "เข้าสู่ระบบ MariaDB ด้วย root:",
+        "  $ mariadb -u root -p",
+        "  (จะถามรหัสผ่านที่ตั้งไว้ในขั้นตอนก่อน)",
+        "✅ เมื่อเข้าสำเร็จ prompt จะเปลี่ยนเป็น: MariaDB [(none)]>",
+        "คำสั่งพื้นฐานใน MariaDB Console:",
+        "  - ดูฐานข้อมูลทั้งหมด:  SHOW DATABASES;",
+        "  - ดู Users ทั้งหมด:     SELECT User, Host FROM mysql.user;",
+        "  - ออกจาก Console:      EXIT;  หรือ  QUIT;",
+        "⚠️ สำคัญ: ทุกคำสั่ง SQL ต้องลงท้ายด้วยเครื่องหมาย ; (semicolon) เสมอ"
+      ],
+      "speakerNotes": "พาทุกคนเข้าสู่ MariaDB Console และลองรัน SHOW DATABASES; เพื่อดูฐานข้อมูลเริ่มต้น จะเห็น information_schema, mysql, performance_schema ครับ"
+    },
+    {
+      "id": "w4a-mariadb-create-db",
+      "type": "content",
+      "title": "ขั้นตอนที่ 4: สร้างฐานข้อมูลและผู้ใช้งาน",
+      "tag": "ปฏิบัติการ MariaDB - ขั้นตอนที่ 4",
+      "items": [
+        "สร้างฐานข้อมูลใหม่ (ชื่อ mywebdb):",
+        "  MariaDB> CREATE DATABASE mywebdb;",
+        "สร้าง User ใหม่สำหรับแอปพลิเคชัน (ชื่อ webuser รหัสผ่าน mypass123):",
+        "  MariaDB> CREATE USER 'webuser'@'localhost' IDENTIFIED BY 'mypass123';",
+        "มอบสิทธิ์การเข้าถึงให้ webuser บนฐานข้อมูล mywebdb:",
+        "  MariaDB> GRANT ALL PRIVILEGES ON mywebdb.* TO 'webuser'@'localhost';",
+        "บันทึกการเปลี่ยนแปลงสิทธิ์:",
+        "  MariaDB> FLUSH PRIVILEGES;",
+        "ตรวจสอบว่าสร้างสำเร็จ:",
+        "  MariaDB> SHOW DATABASES;",
+        "  ✅ ต้องเห็น mywebdb อยู่ในรายการ"
+      ],
+      "speakerNotes": "สอนทีละบรรทัด ย้ำว่าต้องมี ; ทุกคำสั่ง และ FLUSH PRIVILEGES สำคัญมากเพื่อให้สิทธิ์มีผล ถ้าไม่รันคำสั่งนี้ webuser อาจเข้าถึงฐานข้อมูลไม่ได้ครับ"
+    },
+    {
+      "id": "w4a-mariadb-sql",
+      "type": "content",
+      "title": "ขั้นตอนที่ 5: สร้างตารางและทดลองใช้คำสั่ง SQL",
+      "tag": "ปฏิบัติการ MariaDB - ขั้นตอนที่ 5",
+      "items": [
+        "เลือกใช้ฐานข้อมูล mywebdb:",
+        "  MariaDB> USE mywebdb;",
+        "สร้างตาราง students:",
+        "  MariaDB> CREATE TABLE students (",
+        "    id INT AUTO_INCREMENT PRIMARY KEY,",
+        "    name VARCHAR(100),",
+        "    email VARCHAR(100)",
+        "  );",
+        "เพิ่มข้อมูล (INSERT):",
+        "  MariaDB> INSERT INTO students (name, email) VALUES ('สมชาย', 'somchai@school.com');",
+        "ดึงข้อมูลทั้งหมด (SELECT):",
+        "  MariaDB> SELECT * FROM students;",
+        "✅ ถ้าเห็นข้อมูลที่ INSERT ไว้ แสดงว่าสำเร็จแล้วครับ!"
+      ],
+      "speakerNotes": "ให้นักเรียนลอง INSERT ข้อมูลชื่อตัวเองลงไปด้วย แล้ว SELECT ออกมาดู เพื่อให้เข้าใจการทำงานของ SQL ครับ"
+    },
+    {
+      "id": "w4a-mariadb-quiz",
+      "type": "interactive-act",
+      "title": "คำถาม: SQL พื้นฐาน",
+      "tag": "คำถามย่อย MariaDB",
+      "question": "นักเรียนต้องการดูข้อมูลทั้งหมดในตาราง students ควรใช้คำสั่ง SQL ใด?",
+      "options": [
+        "SHOW students;",
+        "SELECT * FROM students;",
+        "GET ALL FROM students;"
+      ],
+      "answer": "SELECT * FROM students;",
+      "explanation": "SELECT * FROM students; คือคำสั่งมาตรฐาน SQL ในการดึงข้อมูลทุก column ทุก row จากตาราง students โดย * หมายถึง 'ทุก column' และต้องลงท้ายด้วย ; เสมอ"
+    },
+    {
+      "id": "w4a-mariadb-verify",
+      "type": "content",
+      "title": "การตรวจสอบ MariaDB — สรุปคำสั่งที่ต้องรู้",
+      "tag": "สรุป MariaDB",
+      "items": [
+        "ตรวจสอบสถานะบริการ (จาก Terminal ปกติ):",
+        "  $ systemctl status mariadb",
+        "  ✅ ต้องเห็น: Active: active (running)",
+        "ตรวจสอบว่า MariaDB เปิดพอร์ต 3306:",
+        "  $ ss -tlnp | grep 3306",
+        "  ✅ ต้องเห็น: LISTEN ... 3306",
+        "เข้า Console ด้วย root:",
+        "  $ mariadb -u root -p",
+        "เข้า Console ด้วย webuser (ทดสอบสิทธิ์):",
+        "  $ mariadb -u webuser -p mywebdb",
+        "คำสั่งสรุปที่ต้องรู้ใน Console:",
+        "  SHOW DATABASES;   → แสดงรายการ Database",
+        "  SHOW TABLES;      → แสดงตารางใน Database ปัจจุบัน",
+        "  DESCRIBE students; → แสดงโครงสร้างตาราง"
+      ],
+      "speakerNotes": "ให้นักเรียนทดสอบทุกคำสั่งเหล่านี้และยืนยันว่า MariaDB ทำงานได้ถูกต้องก่อนไปส่วนถัดไปครับ"
+    },
+    {
+      "id": "w4a-nodejs-divider",
+      "type": "cover",
+      "title": "ส่วนที่ 3: Node.js Runtime",
+      "subtitle": "JavaScript Backend Runtime Environment",
+      "tag": "⚡ ส่วนที่ 3 / 3",
+      "body": "ติดตั้ง Node.js เขียน HTTP Server แรกของคุณ และรันบนเซิร์ฟเวอร์",
+      "speakerNotes": "ยอดเยี่ยมครับ! ทุกคนมีทั้ง Nginx และ MariaDB ทำงานแล้ว ตอนนี้เราจะมาติดตั้ง Node.js ซึ่งเป็นตัวรันโค้ด JavaScript ฝั่ง Server ครับ"
     },
     {
       "id": "w4a-nodejs-theory",
       "type": "content",
-      "title": "3. Node.js: เครื่องยนต์รันโค้ดหลังบ้าน (Backend Application)",
-      "tag": "ทฤษฎีเซิร์ฟเวอร์ - Node.js",
+      "title": "Node.js คืออะไร? ทำงานอย่างไร?",
+      "tag": "ทฤษฎี Node.js",
       "items": [
-        "หน้าที่หลัก: รันโค้ดระบบหลังบ้าน (API / Backend) เพื่อประมวลผลตรรกะทางธุรกิจ ความปลอดภัย และการเชื่อมต่อข้อมูล",
-        "บทบาทการทำงาน:",
-        "  - รับข้อมูลจาก Nginx ที่ส่งต่อมา ➔ ทำการตรวจสอบสิทธิ์ความปลอดภัย ➔ ติดต่อไปยัง MariaDB เพื่ออ่านเขียนข้อมูล ➔ ส่งผลลัพธ์กลับไปหาเบราว์เซอร์",
-        "  - ทำงานด้วยรหัสภาษา JavaScript ซึ่งเป็นภาษาที่ใช้เขียนควบคุมได้รวดเร็วและรองรับผู้ใช้ได้จำนวนมากพร้อมกัน",
-        "เปรียบเทียบในชีวิตจริง: เหมือนพ่อครัวในห้องครัวหลังร้าน ที่รับออเดอร์จากเด็กเสิร์ฟ แล้วปรุงอาหารประสมวัตถุดิบออกมาให้ลูกค้ากิน"
+        "Node.js คือ Runtime Environment สำหรับรันโค้ด JavaScript บนฝั่ง Server (ไม่ใช่แค่ใน Browser)",
+        "จุดเด่นสำคัญ:",
+        "  - Asynchronous & Non-blocking: รองรับผู้ใช้จำนวนมากพร้อมกันโดยไม่ต้องรอคิว",
+        "  - ใช้ภาษา JavaScript เหมือนกับ Frontend ทำให้โปรแกรมเมอร์รู้ภาษาเดียวทำได้ทั้ง 2 ฝั่ง",
+        "  - มี npm (Node Package Manager) ที่รวม Library ให้ใช้งานมากกว่า 2 ล้านตัว",
+        "ตัวอย่างการใช้งานจริง:",
+        "  - สร้าง REST API รับ-ส่งข้อมูล JSON",
+        "  - รัน Web Application เช่น Express.js",
+        "  - เชื่อมต่อและสืบค้นข้อมูลจาก MariaDB",
+        "พอร์ตที่นิยมใช้: พอร์ต 3000 (หรือ 8080)"
       ],
-      "speakerNotes": "Node.js คือคนทำตรรกะระบบ เช่น ระบบล็อกอิน ระบบคำนวณเงิน โดยจะดึงข้อมูลจาก MariaDB และส่งผลลัพธ์ผ่าน Nginx กลับไปหาหน้าจอนักเรียนครับ"
+      "speakerNotes": "Node.js ทำให้เราใช้ JavaScript เขียนโปรแกรมทำงานบนเซิร์ฟเวอร์ได้ โดยรับข้อมูลจาก Nginx และดึงข้อมูลจาก MariaDB ครับ"
     },
     {
-      "id": "w4a-docker-github-theory",
+      "id": "w4a-nodejs-request-anim",
+      "type": "nodejs-request-anim",
+      "title": "🎬 Animation: Node.js รับและตอบ Request อย่างไร?",
+      "tag": "Animation — Node.js Request Flow",
+      "speakerNotes": "ใช้ animation นี้สาธิตการทำงานร่วมกันของ Browser ➜ Node.js ➜ MariaDB ➜ กลับ Node.js ➜ Browser ครบวงจร นักเรียนจะเห็น Server Console Log ที่อัปเดตแบบ Real-time ด้วยครับ"
+    },
+    {
+      "id": "w4a-nodejs-install",
       "type": "content",
-      "title": "4. Docker & GitHub: ตู้แอปสำเร็จรูป & ที่เก็บซอร์สโค้ด",
-      "tag": "ทฤษฎีเซิร์ฟเวอร์ - Docker & GitHub",
+      "title": "ขั้นตอนที่ 1: ติดตั้ง Node.js บน Ubuntu/Debian",
+      "tag": "ปฏิบัติการ Node.js - ขั้นตอนที่ 1",
       "items": [
-        "Docker (ระบบตู้คอนเทนเนอร์เสมือน):",
-        "  - ทำการแพ็กเกจระบบโค้ดพร้อมตัวรันรวมกันไว้ในตู้คอนเทนเนอร์เดี่ยว เพื่อให้ย้ายไปเปิดบนเซิร์ฟเวอร์เครื่องใดก็ทำงานได้ทันทีโดยไม่ต้องตั้งค่าโปรแกรมใหม่",
-        "  - เปรียบเทียบ: เหมือนตู้คอนเทนเนอร์บนเรือสินค้าที่ใส่ของทุกอย่างไว้ข้างในแล้วย้ายไปที่ไหนก็สเปกเดิม",
-        "GitHub (ที่ฝากซอร์สโค้ดบนคลาวด์):",
-        "  - เป็นแหล่งจัดเก็บและบันทึกประวัติการพัฒนาโค้ด (Version Control) ช่วยให้โปรแกรมเมอร์หลายคนร่วมมือเขียนโค้ดและแบ็กอัปงานได้อย่างปลอดภัย",
-        "  - เปรียบเทียบ: เหมือนห้องสมุดกลางที่เก็บพิมพ์เขียวของระบบเวอร์ชันต่างๆ ไว้อย่างละเอียด"
+        "วิธีที่ 1 — ติดตั้งจาก Repository มาตรฐาน (ง่ายที่สุด):",
+        "  $ apt install nodejs npm -y",
+        "วิธีที่ 2 — ติดตั้ง Node.js เวอร์ชันล่าสุด (LTS) ผ่าน NodeSource (แนะนำ):",
+        "  $ curl -fsSL https://deb.nodesource.com/setup_lts.x | bash -",
+        "  $ apt install nodejs -y",
+        "ตรวจสอบเวอร์ชันที่ติดตั้ง:",
+        "  $ node -v",
+        "  ผลลัพธ์ตัวอย่าง: v20.x.x",
+        "  $ npm -v",
+        "  ผลลัพธ์ตัวอย่าง: 10.x.x",
+        "✅ ถ้าเห็นเลขเวอร์ชันออกมา แสดงว่าติดตั้งสำเร็จแล้ว"
       ],
-      "speakerNotes": "Docker ช่วยให้เราเปิดโปรแกรมได้ง่ายๆ เหมือนแกะกล่องใช้งาน ส่วน GitHub เป็นแหล่งแบ็กอัปและแชร์โค้ดของเรากับเพื่อนร่วมทีมครับ"
+      "speakerNotes": "ใช้วิธีที่ 1 ก่อนครับ ถ้าได้เวอร์ชันเก่ามากค่อยเปลี่ยนเป็นวิธีที่ 2 ตรวจสอบด้วย node -v เสมอหลังติดตั้งครับ"
     },
     {
-      "id": "w4a-stack-cooperation",
+      "id": "w4a-nodejs-hello",
       "type": "content",
-      "title": "สถาปัตยกรรมการทำงานร่วมกันของ Server Stack",
-      "tag": "ทฤษฎีเซิร์ฟเวอร์ - การเชื่อมโยง",
+      "title": "ขั้นตอนที่ 2: สร้างโปรเจกต์ Vite.js",
+      "tag": "ปฏิบัติการ Node.js - ขั้นตอนที่ 2",
       "items": [
-        "เส้นทางการไหลของข้อมูลเมื่อผู้ใช้งานเข้าชมเว็บไซต์:",
-        "  - 1. ผู้ใช้งานกรอก URL ➔ ส่งคำร้องขอผ่านเครือข่ายเข้าหา Nginx (พอร์ต 80)",
-        "  - 2. Nginx ส่งต่อข้อมูล (Proxy Pass) ไปที่บริการ Backend ของ Node.js (พอร์ต 3000)",
-        "  - 3. Node.js ประมวลผลคำขอและไปเรียกสืบค้นข้อมูลจากฐานข้อมูล MariaDB (พอร์ต 3306)",
-        "  - 4. ข้อมูลถูกส่งกลับย้อนมาที่ Node.js ➔ ส่งไป Nginx ➔ แสดงผลลัพธ์บนเบราว์เซอร์ผู้ใช้งาน",
-        "  - *ระบบทั้งหมดนี้สามารถรันอยู่อย่างปลอดภัยในตู้คอนเทนเนอร์ของ Docker โดยมีซอร์สโค้ดซิงค์อยู่บน GitHub"
+        "Vite.js คืออะไร?",
+        "  - เครื่องมือ Build/Dev Server สำหรับ Frontend (HTML/CSS/JS) ที่เร็วมาก",
+        "  - รัน Dev Server บนพอร์ต 5173 เพื่อทดสอบการพัฒนา และ Build Output เป็นไฟล์ Static พร้อม deploy",
+        "  - ใช้งานร่วมกับ Nginx เพื่อรับ Request และ Proxy มายัง Vite Dev Server",
+        "สร้างโปรเจกต์ Vite ใหม่:",
+        "  $ mkdir ~/webapp && cd ~/webapp",
+        "  $ npm create vite@latest . -- --template vanilla",
+        "  (เลือก vanilla เพื่อสอนพื้นฐาน HTML/CSS/JS ล้วน)",
+        "ติดตั้ง dependencies:",
+        "  $ npm install",
+        "ดูโครงสร้างไฟล์ที่สร้างขึ้นมา:",
+        "  $ ls",
+        "  ▶ index.html   src/   package.json   vite.config.js",
+        "✅ เสร็จ! โปรเจกต์ Vite พร้อมรันแล้ว"
       ],
-      "speakerNotes": "ย้ำเตือนภาพรวมการเชื่อมต่อ: เบราว์เซอร์ ↔ Nginx (พอร์ต 80) ↔ Node.js (พอร์ต 3000) ↔ MariaDB (พอร์ต 3306) เพื่อให้นักศึกษามองเห็นภาพระบบที่จะต้องทำต่อไป"
+      "speakerNotes": "Vite.js เป็นเครื่องมือพัฒนา Frontend ยอดนิยมในปัจจุบัน ใช้สอนเพราะนักเรียนจะได้เห็นแบบรับมือจริงว่า Node.js ใช้ร่วมกับ Frontend Framework อย่างไรครับ"
     },
     {
-      "id": "w4a-virtualization",
+
+      "id": "w4a-nodejs-run",
       "type": "content",
-      "title": "เทคโนโลยีเสมือนจริง (Virtualization) คืออะไร?",
-      "tag": "แนวคิดระบบเสมือน",
+      "title": "ขั้นตอนที่ 3: รัน Vite Dev Server และเปิด Host ทุกเครื่อง",
+      "tag": "ปฏิบัติการ Node.js - ขั้นตอนที่ 3",
       "items": [
-        "ความหมาย: การใช้น้ำซอฟต์แวร์ในการจำลองทรัพยากรฮาร์ดแวร์เพื่อสร้างคอมพิวเตอร์เสมือน (VM)",
-        "เปรียบเทียบชีวิตจริง: เหมือนระบบแชร์อพาร์ตเมนต์ อาคารจริงหลังเดียว (Physical Server) ถูกแบ่งซอยห้องเช่าแยกเป็นสัดส่วน (Virtual Machines) โดยมีระบบมิเตอร์ไฟฟ้าควบคุมเฉพาะตัว",
-        "ข้อดีของการทำระบบเสมือนสำหรับองค์กร:",
-        "  - ประหยัดต้นทุน: ซื้อคอมพิวเตอร์ฮาร์ดแวร์ระดับดีเพียง 1 เครื่อง ทำหน้าที่แทนเซิร์ฟเวอร์ย่อยได้ 10-20 เครื่อง",
-        "  - ยืดหยุ่นสูง: สามารถสั่งโคลน ย้ายสำรอง และกู้คืนข้อมูล (Snapshot / Restore) ได้รวดเร็วในไม่กี่วินาที"
+        "แก้ไข vite.config.js ให้ Vite เปิด host 0.0.0.0 (รับทุก IP):",
+        "  $ nano vite.config.js",
+        "  พิมพ์โค้ดดังนี้:",
+        "  import { defineConfig } from 'vite'",
+        "  export default defineConfig({",
+        "    server: { host: '0.0.0.0', port: 5173 }",
+        "  })",
+        "บันทึก: Ctrl+O → Enter → Ctrl+X",
+        "รัน Vite Dev Server:",
+        "  $ npm run dev",
+        "ผลลัพธ์ที่ถูกต้อง:",
+        "  VITE v5.x.x  ready in 300 ms",
+        "  ➜  Local:   http://localhost:5173/",
+        "  ➜  Network: http://192.168.10.101:5173/",
+        "ทดสอบจาก Browser บน PC:",
+        "  - พิมพ์ URL: http://[IP ของตู้จำลอง]:5173",
+        "  ✅ ต้องเห็นหน้าเว็บ Vite Default ขึ้นมา",
+        "หยุด Server: กด Ctrl + C"
       ],
-      "speakerNotes": "เมื่อเข้าใจระบบซอฟต์แวร์เซิร์ฟเวอร์แล้ว คำถามคือเราจะจัดสรรเครื่องอย่างไรให้นักเรียนทดลองได้ทุกคน? คำตอบคือใช้ Virtualization เพื่อแบ่งเครื่องใหญ่เครื่องเดียวออกเป็นตู้เสมือนส่วนตัวครับ"
+      "speakerNotes": "การเปิด host: '0.0.0.0' สำคัญมาก เพราะถ้าไม่เปิดจะรับแค่ localhost เครื่องอื่นในเครือข่ายจะเข้าถึงไม่ได้ครับ"
     },
     {
-      "id": "w4a-hypervisor",
-      "type": "two-col",
-      "title": "ความแตกต่างของ Hypervisor: Type 1 vs Type 2",
-      "tag": "ประเภท Hypervisor",
-      "cols": [
-        {
-          "icon": "🥇",
-          "title": "Type 1 — Bare-metal Hypervisor",
-          "items": [
-            "สถาปัตยกรรม: ซอฟต์แวร์ติดตั้งตรงลงบนฮาร์ดแวร์เครื่อง โดยไม่มีระบบปฏิบัติการอื่นขวางกลาง",
-            "ประสิทธิภาพ: สูงสุด ดึงพลังการประมวลผลการทำงานได้สมบูรณ์ เหมาะสำหรับระดับองค์กรและศูนย์ข้อมูล",
-            "ตัวอย่างที่ใช้ในงานจริง: Proxmox VE, VMware ESXi, Microsoft Hyper-V"
-          ]
-        },
-        {
-          "icon": "🥈",
-          "title": "Type 2 — Hosted Hypervisor",
-          "items": [
-            "สถาปัตยกรรม: ซอฟต์แวร์ติดตั้งบนระบบปฏิบัติการเดิมอีกชั้นหนึ่ง (รันอยู่บน Windows หรือ macOS)",
-            "ประสิทธิภาพ: ปานกลาง มีการสูญเสียกำลังงานผ่าน OS หลัก คอยคุมการแลกเปลี่ยนข้อมูล",
-            "ตัวอย่างการใช้งาน: VirtualBox, VMware Workstation, Parallels Desktop"
-          ]
-        }
-      ],
-      "speakerNotes": "อธิบายเปรียบเทียบประสิทธิภาพ: Type 1 ติดตั้งแทน OS หลัก เหมาะกับเครื่องเซิร์ฟเวอร์ห้องปฏิบัติการ ส่วน Type 2 ต้องรันบน Windows อีกที เช่น VirtualBox เหมาะใช้ลองเล่นครับ"
-    },
-    {
-      "id": "w4a-proxmox-intro",
+      "id": "w4a-nginx-reverse-proxy",
       "type": "content",
-      "title": "ทำความรู้จักกับระบบปฏิบัติการ Proxmox VE",
-      "tag": "เกี่ยวกับ Proxmox VE",
+      "title": "ขั้นตอนที่ 4: ตั้งค่า Nginx Reverse Proxy → Vite",
+      "tag": "Nginx Reverse Proxy",
       "items": [
-        "ชื่อเต็ม: Proxmox Virtual Environment",
-        "สถานะสิทธิ์: เป็นซอฟต์แวร์เปิดเผยซอร์สโค้ด (Open Source) ที่ใช้งานได้ฟรีไม่มีค่าลิขสิทธิ์พื้นฐาน",
-        "จุดเด่นด้านบริหารจัดการ: ทำงานผ่านหน้าจอเว็บเบราว์เซอร์ (Web UI) เต็มรูปแบบทางพอร์ต 8006",
-        "ฐานระบบหลัก: ทำงานอยู่บน Debian GNU/Linux รุ่นเสถียร (ใช้ชุดคำสั่งจัดการแพ็กเกจ apt ได้ปกติ)",
-        "ความยืดหยุ่น: สามารถรันได้ทั้งระบบเครื่องเสมือนสมบูรณ์ (KVM) และระบบตู้จำลองขนาดเล็ก (LXC)"
+        "เปิด Nginx Config สำหรับเว็บของเรา:",
+        "  $ nano /etc/nginx/sites-available/webapp",
+        "พิมพ์ Config ต่อไปนี้:",
+        "  server {",
+        "      listen 80;",
+        "      server_name _;",
+        "  ",
+        "      location / {",
+        "          proxy_pass http://127.0.0.1:5173;",
+        "          proxy_http_version 1.1;",
+        "          proxy_set_header Upgrade $http_upgrade;",
+        "          proxy_set_header Connection 'upgrade';",
+        "          proxy_set_header Host $host;",
+        "          proxy_cache_bypass $http_upgrade;",
+        "      }",
+        "  }",
+        "เปิดใช้ Config และ Reload Nginx:",
+        "  $ ln -s /etc/nginx/sites-available/webapp /etc/nginx/sites-enabled/",
+        "  $ rm /etc/nginx/sites-enabled/default",
+        "  $ nginx -t",
+        "  $ systemctl reload nginx",
+        "✅ ตอนนี้เปิด http://[IP] พอร์ต 80 จะถูกส่งต่อไปยัง Vite Server อัตโนมัติ"
       ],
-      "speakerNotes": "ทำความรู้จักตัวเอกฝั่งการแบ่งเครื่อง คือ Proxmox VE ซึ่งเราติดตั้งลงเครื่องจริงของห้องเรียนเพื่อบริหารตู้จำลองครับ"
+      "speakerNotes": "proxy_pass http://127.0.0.1:5173 คือหัวใจของ Reverse Proxy — Nginx รับ Request ที่พอร์ต 80 แล้วส่งต่อไปยัง Vite ที่ localhost:5173 ทำให้ผู้ใช้มองไม่เห็นพอร์ต 5173 เลยครับ"
     },
     {
-      "id": "w4a-kvm-vs-lxc",
-      "type": "two-col",
-      "title": "สถาปัตยกรรมตู้จำลอง: KVM vs LXC Containers",
-      "tag": "KVM vs LXC",
-      "cols": [
-        {
-          "icon": "🖥️",
-          "title": "KVM (Kernel-based Virtual Machine)",
-          "items": [
-            "ลักษณะ: เครื่องเสมือนสมบูรณ์ (Full VM)",
-            "การทำงาน: มีระบบ Kernel ของตนเองแยกอิสระ สามารถติดตั้งระบบต่างขั้ว เช่น Windows Server, Linux Server หรือ FreeBSD",
-            "การใช้ทรัพยากร: กินแรมและเนื้อที่ค่อนข้างสูงตามการทำงานระบบปฏิบัติการจำลองนั้น"
-          ]
-        },
-        {
-          "icon": "📦",
-          "title": "LXC (Linux Containers)",
-          "items": [
-            "ลักษณะ: ตู้จำลองน้ำหนักเบา (Container)",
-            "การทำงาน: แชร์ระบบ Kernel ร่วมกับระบบหลักของ Proxmox โดยแยกระบบไฟล์และการใช้งานตัวแปรเฉพาะของใครของมัน",
-            "การใช้ทรัพยากร: น้อยมาก (ประมาณ 100-200MB ต่อตู้) เหมาะสำหรับให้บริการจำลองย่อยๆ"
-          ]
-        }
-      ],
-      "speakerNotes": "เปรียบเทียบสถาปัตยกรรม KVM และ LXC อีกครั้ง เพื่อให้นักเรียนเข้าใจว่าทำไมตู้ของเราในวันนี้จึงบูตได้รวดเร็วมากเพราะใช้ LXC Container ครับ"
-    },
-    {
-      "id": "w4a-requirements",
+      "id": "w4a-nodejs-background",
+
       "type": "content",
-      "title": "ความต้องการระบบของเครื่องแม่ข่ายหลัก (สำหรับผู้สอน)",
-      "tag": "เบื้องหลัง - สเปกเซิร์ฟเวอร์",
+      "title": "ขั้นตอนที่ 5: รัน Vite ในพื้นหลัง (ไม่หยุดเมื่อปิด Terminal)",
+      "tag": "ปฏิบัติการ Node.js - ขั้นตอนที่ 5",
       "items": [
-        "หน่วยประมวลผล (CPU): 64-bit (Intel หรือ AMD) และต้องเปิดใช้งานระบบ VT-x หรือ AMD-V ในหน้าจอ BIOS เพื่อให้เครื่องแม่ข่ายรันระบบเสมือนได้",
-        "หน่วยความจำ (RAM): ขั้นต่ำ 2 GB สำหรับระบบหลัก Proxmox VE และบวกเพิ่มตามความจุตู้เสมือน (LXC) ของนักเรียนทุกคน",
-        "พื้นที่จัดเก็บ (Disk): แนะนำดิสก์ SSD เพื่อความรวดเร็วในการอ่านเขียนไฟล์สำหรับตู้บริการของผู้เรียนพร้อมๆ กัน",
-        "การ์ดเครือข่าย (NIC): ความเร็วระดับ 1 Gbps ขึ้นไป เพื่อรองรับทราฟฟิกการเชื่อมต่อ SSH ของนักศึกษาทั้งห้องเรียน"
+        "ปัญหา: ถ้ากด Ctrl+C หรือปิด Terminal โปรแกรมจะหยุด เว็บจะล่มทันที",
+        "วิธีแก้ — ใช้ nohup รันในพื้นหลัง:",
+        "  $ nohup npm run dev > vite.log 2>&1 &",
+        "  ผลลัพธ์: [1] 2345 (PID ของโปรแกรม)",
+        "ตรวจสอบ Log ว่ารันสำเร็จ:",
+        "  $ cat vite.log",
+        "  ➜  Network: http://192.168.10.101:5173/",
+        "ตรวจสอบผ่าน curl:",
+        "  $ curl http://localhost:5173",
+        "ดูโปรแกรมที่รันอยู่ในพื้นหลัง:",
+        "  $ ps aux | grep node",
+        "หยุด Server (ใช้ PID ที่เห็น):",
+        "  $ kill 2345",
+        "⭐ วิธีที่ดีกว่าในอนาคต: ใช้ PM2 (Process Manager สำหรับ Node.js) — จะสอนในบทเรียนถัดไป"
       ],
-      "speakerNotes": "ทบทวนความรู้สเปกฮาร์ดแวร์เบื้องหลังที่อาจารย์ผู้สอนต้องเตรียมความพร้อมก่อนจัดระบบจำลองให้นักศึกษาใช้บริการครับ"
+      "speakerNotes": "nohup npm run dev > vite.log 2>&1 & ส่ง output เข้าไฟล์ vite.log และรัน background ด้วย & แม้ปิด terminal แล้วเว็บยังเปิดได้อยู่ครับ"
     },
     {
-      "id": "w4a-install-step1",
-      "type": "content",
-      "title": "การเตรียมเซิร์ฟเวอร์ 1: ขั้นตอนการเลือกดิสก์ติดตั้ง (Target Harddisk)",
-      "tag": "เบื้องหลัง - เลือกดิสก์",
-      "items": [
-        "หน้าต่างแรก: ผู้สอนบูตเครื่องเซิร์ฟเวอร์หลักผ่าน Flash Drive แล้วเลือกโหมด Install Proxmox VE (Graphical)",
-        "สัญญาการใช้งาน: แสดงข้อตกลง EULA และการยอมรับสิทธิ์ในการติดตั้งระบบควบคุมของ Proxmox",
-        "การเลือกพาร์ติชันดิสก์ปลายทาง:",
-        "  - ผู้สอนตรวจสอบที่อยู่ดิสก์ที่จะลงตัวระบบควบคุมหลักให้ถูกต้อง (เช่น /dev/sda หรือ nvme)",
-        "  - สามารถคลิก Options เพื่อเปลี่ยนรูปแบบระบบไฟล์ที่เหมาะสมกับเซิร์ฟเวอร์ได้"
-      ],
-      "speakerNotes": "อธิบายให้นักศึกษาเข้าใจเบื้องหลังการระบุดิสก์ติดตั้งโดยอาจารย์ผู้สอน เพื่อเตรียมจัดสรรพื้นที่ให้นักเรียน"
-    },
-    {
-      "id": "w4a-cmd-install1",
+      "id": "w4a-nodejs-quiz",
       "type": "interactive-act",
-      "title": "คำถามย่อยบทเรียน: การเลือกดิสก์จัดเตรียม",
-      "tag": "คำถามเบื้องหลัง 1",
-      "question": "หากเครื่องเซิร์ฟเวอร์หลักของคุณครูมีฮาร์ดดิสก์ 2 ลูก ได้แก่ SSD ขนาด 250GB และ HDD ขนาด 2TB ในขั้นตอนจัดเตรียมระบบ ควรเลือกลงระบบหลักลงบนดิสก์ลูกใดจึงจะช่วยให้ตู้จำลองของนักเรียนเปิดรันได้เร็วที่สุด?",
+      "title": "คำถาม: Vite.js และ Reverse Proxy",
+      "tag": "คำถามย่อย Node.js",
+      "question": "นักเรียนรัน Vite Dev Server ในพื้นหลังแล้ว สิ่งที่จะเห็นใน /etc/nginx/sites-available/webapp คืออะไร?",
       "options": [
-        "เลือกดิสก์ HDD 2TB เพื่อเน้นความประหยัดและพื้นที่จัดเก็บเอกสารเยอะที่สุด",
-        "เลือกดิสก์ SSD 250GB เพื่อเน้นความเร็วในการเข้าถึงดิสก์ของตู้จำลองต่างๆ",
-        "ติดตั้งลงบนแฟลชไดรฟ์ USB และถอดเข้าออกทุกครั้งหลังเสร็จการเรียนการสอน"
+        "proxy_pass http://127.0.0.1:5173;",
+        "root /var/www/html;",
+        "proxy_pass http://127.0.0.1:3000;"
       ],
-      "answer": "เลือกดิสก์ SSD 250GB เพื่อเน้นความเร็วในการเข้าถึงดิสก์ของตู้จำลองต่างๆ",
-      "explanation": "การรันตู้จำลองพร้อมกันหลายคนจะเกิดการอ่านเขียนดิสก์ปริมาณมาก การเลือกใช้ SSD จะช่วยลดความล่าช้าสะสมและทำให้ระบบตอบสนองดีที่สุด"
+      "answer": "proxy_pass http://127.0.0.1:5173;",
+      "explanation": "Vite Dev Server รันบนพอร์ต 5173 ดังนั้น proxy_pass ต้องชี้ไปยัง 127.0.0.1:5173 เพื่อให้ Nginx ส่งต่อ Request มายัง Vite ใช้ root สำหรับแสดงไฟล์ Static โดยตรง ไม่ใช่ Proxy ครับ"
     },
     {
-      "id": "w4a-install-step2",
+      "id": "w4a-nodejs-verify",
       "type": "content",
-      "title": "การเตรียมเซิร์ฟเวอร์ 2: เขตพื้นที่ใช้งานและรหัสความปลอดภัยหลัก",
-      "tag": "เบื้องหลัง - เวลา & รหัส",
+      "title": "สรุป: คำสั่งสำคัญ — Vite + Nginx Reverse Proxy",
+      "tag": "สรุป Node.js + Vite",
       "items": [
-        "การระบุพิกัดที่ตั้ง (Time Zone Selection):",
-        "  - ผู้สอนเลือก Country เป็น Thailand และ Time zone เป็น Asia/Bangkok",
-        "  - เลือก Keyboard Layout เป็น English (US) เพื่อให้การป้อนคำสั่งสัญลักษณ์ถูกต้องตรงกัน",
-        "การกำหนดสิทธิ์ผู้เข้าควบคุมสูงสุด (Admin Password):",
-        "  - ผู้สอนตั้งรหัสผ่านสำหรับผู้ใช้ root (รหัสผ่านหลักที่จะใช้ดูแลโครงสร้างและบริหารตู้ของนักเรียนทั้งหมด)",
-        "  - ระบุ Email สำหรับรับคำแจ้งเตือนข้อบกพร่องระบบจากฐานระบบส่งเมล์หลัก"
+        "ติดตั้งและสร้างโปรเจกต์:",
+        "  $ npm create vite@latest . -- --template vanilla",
+        "  $ npm install",
+        "รันในพื้นหลัง:",
+        "  $ nohup npm run dev > vite.log 2>&1 &",
+        "ตรวจสอบ:",
+        "  $ curl http://localhost:5173   → ต้องได้รับ HTML",
+        "  $ curl http://localhost:80     → Nginx Reverse Proxy → Vite",
+        "ตรวจสอบพอร์ตทั้งหมด:",
+        "  $ ss -tlnp | grep -E '80|5173|3306'",
+        "  ✅ ต้องเห็น: 80 (Nginx), 5173 (Vite), 3306 (MariaDB)",
+        "ฟลอวการทำงาน:",
+        "  Browser → Nginx:80 → Vite:5173 → HTML/JS/CSS"
       ],
-      "speakerNotes": "ขั้นตอนนี้ผู้สอนจะตั้งพิกัดเวลาให้ตรงกับประเทศไทยและระบุรหัส root ของตัวระบบควบคุมหลักครับ"
+      "speakerNotes": "นี่คือภาพรวมของ Stack: Nginx รับ Request ที่พอร์ต 80 แล้วส่งต่อไปยัง Vite ที่รันบนพอร์ต 5173 ด้านในครับ ผู้ใช้เห็นแค่พอร์ต 80"
     },
     {
-      "id": "w4a-cmd-install2",
-      "type": "interactive-act",
-      "title": "คำถามย่อยบทเรียน: ความสำคัญของเวลาและบันทึกกิจกรรม",
-      "tag": "คำถามเบื้องหลัง 2",
-      "question": "เหตุใดขั้นตอนการเลือก Time zone ให้ตรงกับเวลาจริงประเทศไทยจึงมีความสำคัญอย่างมากต่อการจัดเตรียมระบบบริหารเครือข่าย?",
-      "options": [
-        "เพื่อช่วยจำกัดความเร็วอินเทอร์เน็ตของตู้จำลองให้เปิดในเวลาเรียนเท่านั้น",
-        "เพื่อให้การระบุจังหวะบันทึกการทำงาน (Log Files) และการจัดเวลาสำรองข้อมูล (Backup) ตรงกับเวลาจริง",
-        "เพื่อให้นักศึกษาเรียนจบคาบได้ตรงตามตารางเวลาหลักสูตรอัตโนมัติ"
-      ],
-      "answer": "เพื่อให้การระบุจังหวะบันทึกการทำงาน (Log Files) และการจัดเวลาสำรองข้อมูล (Backup) ตรงกับเวลาจริง",
-      "explanation": "จังหวะเวลาของระบบมีความสำคัญอย่างยิ่งในการจับคู่ข้อมูลบันทึกข้อผิดพลาด (Logs Analysis) และการตั้งเวลารันสคริปต์อัตโนมัติ เช่น การจัดตารางสำรองข้อมูล (Backup Tasks)"
-    },
-    {
-      "id": "w4a-install-step3",
+      "id": "w4a-stack-full-check",
+
       "type": "content",
-      "title": "การเตรียมเซิร์ฟเวอร์ 3: กำหนดค่าเครือข่ายคงที่ (Static IP Settings)",
-      "tag": "เบื้องหลัง - เครือข่ายคงที่",
+      "title": "✅ ตรวจสอบ Stack ทั้งหมด — ทุกอย่างทำงานพร้อมกัน",
+      "tag": "ตรวจสอบ Full Stack",
       "items": [
-        "ขั้นตอนนี้มีความสำคัญสูงสุดเพื่อกำหนดช่องทางการเข้าถึงของผู้เรียน:",
-        "Management Interface: ผู้สอนเลือกการ์ดเชื่อมต่อสายแลนหลัก (เช่น enp3s0 หรือ eth0)",
-        "Hostname: ตั้งชื่อโดเมนประจำเซิร์ฟเวอร์ เช่น pve-host.labs หรือ nos-server.local",
-        "IP Address / Netmask: กำหนด IP แบบคงที่ (Static) เช่น 192.168.10.50/24 (ห้ามใช้ DHCP เพื่อป้องกัน IP เปลี่ยนหลังรีสตาร์ท)",
-        "Gateway / DNS Server: ระบุ IP ของสวิตช์เราเตอร์หลัก เพื่อเชื่อมระบบออกอินเทอร์เน็ตภายนอกได้"
+        "รันคำสั่งต่อไปนี้เพื่อตรวจสอบว่าทุกบริการทำงานพร้อมกัน:",
+        "",
+        "1. ตรวจสอบ Nginx:",
+        "  $ systemctl status nginx | grep Active",
+        "  ✅ ต้องเห็น: Active: active (running)",
+        "",
+        "2. ตรวจสอบ MariaDB:",
+        "  $ systemctl status mariadb | grep Active",
+        "  ✅ ต้องเห็น: Active: active (running)",
+        "",
+        "3. ตรวจสอบ Node.js (ถ้ารัน nohup):",
+        "  $ curl http://localhost:3000",
+        "  ✅ ต้องเห็นข้อความตอบกลับ",
+        "",
+        "4. ตรวจสอบพอร์ตทั้งหมดที่เปิดอยู่:",
+        "  $ ss -tlnp | grep -E '80|3306|3000'",
+        "  ✅ ต้องเห็น: 80, 3306, และ 3000"
       ],
-      "speakerNotes": "การกำหนด Static IP เป็นขั้นตอนสำคัญที่สุดเพื่อล็อกไอพีของเซิร์ฟเวอร์ให้คงที่เสมอ"
+      "speakerNotes": "นี่คือขั้นตอนสุดท้ายที่พิสูจน์ว่า Stack ทั้ง 3 ตัวทำงานพร้อมกันสมบูรณ์ครับ ถ้านักเรียนคนไหนเห็นทั้ง 3 พอร์ตใน ss -tlnp ถือว่าสำเร็จ 100%"
     },
     {
-      "id": "w4a-cmd-install3",
-      "type": "interactive-act",
-      "title": "คำถามย่อยบทเรียน: ประโยชน์ของ Static IP",
-      "tag": "คำถามเบื้องหลัง 3",
-      "question": "เหตุใดเครื่องแม่ข่ายที่ควบคุมด้วย Proxmox VE จึงมีความจำเป็นต้องกำหนดค่า IP Address แบบคงที่ (Static IP) แทนการรับ IP อัตโนมัติจาก DHCP?",
-      "options": [
-        "เพื่อให้เครื่องเซิร์ฟเวอร์สามารถเชื่อมต่ออินเทอร์เน็ตต่างประเทศได้เร็วขึ้น",
-        "เพื่อป้องกันไม่ให้หมายเลข IP ของโฮสต์หลักเกิดการเปลี่ยนแปลง ซึ่งจะส่งผลให้หน้าควบคุมและตู้ของนักเรียนทุกคนหลุดการทำงาน",
-        "เป็นข้อบังคับทางด้านลิขสิทธิ์ซอฟต์แวร์ในการเริ่มบูตเครื่องครั้งแรก"
-      ],
-      "answer": "เพื่อป้องกันไม่ให้หมายเลข IP ของโฮสต์หลักเกิดการเปลี่ยนแปลง ซึ่งจะส่งผลให้หน้าควบคุมและตู้ของนักเรียนทุกคนหลุดการทำงาน",
-      "explanation": "หากเซิร์ฟเวอร์ใช้ IP แบบสุ่มของ DHCP ไอพีอาจเปลี่ยนเมื่อมีการรีบูต ทำให้เครื่องผู้เรียนไม่สามารถตามพิกัดไอพีเดิมเพื่อ SSH หรือเปิด Web UI ได้"
-    },
-    {
-      "id": "w4a-install-summary",
-      "type": "content",
-      "title": "การเตรียมเซิร์ฟเวอร์ 4: ตรวจทาน ตกลงรันระบบ และรอการบูตครั้งแรก",
-      "tag": "เบื้องหลัง - ยืนยันระบบ",
-      "items": [
-        "หน้าจอสรุปข้อมูล (Summary Page): โชว์ผลการตั้งค่าทั้งหมดที่อาจารย์ผู้สอนป้อนเข้ามาก่อนหน้านี้",
-        "การรันขั้นตอนสุดท้าย:",
-        "  - ตรวจรายละเอียด IP, Netmask, DNS และดิสก์เป้าหมายให้ถูกต้องแม่นยำ",
-        "  - ผู้สอนคลิกปุ่ม Install เพื่อติดตั้งแพ็คเกจ Debian และ Proxmox VE ลงสู่ดิสก์",
-        "  - หลังขึ้นครบ 100% ตัวเครื่องจะรีบูตตัวเอง และพร้อมรองรับการเข้าเชื่อมต่อจากเครื่องนักเรียนในแล็บ"
-      ],
-      "speakerNotes": "หลังติดตั้งเสร็จสมบูรณ์ โฮสต์หลักจะบูตขึ้นหน้าต่างระบุลิงก์เข้าใช้งานให้นักเรียนล็อกอินเข้าใช้งานตามแผนผังครับ"
-    },
-    {
-      "id": "w4a-web-manager",
-      "type": "content",
-      "title": "การเข้าควบคุมหน้าต่าง Web UI แดชบอร์ดผ่านพอร์ต 8006",
-      "tag": "การเปิดหน้าควบคุม",
-      "items": [
-        "เมื่อเครื่องเซิร์ฟเวอร์หลักบูตระบบเสร็จสิ้น หน้าจอจะปรากฏข้อความสีฟ้าแจ้งสิทธิ์ทางหน้าจอ เช่น:",
-        "  - Please use your web browser to configure Proxmox VE at: https://192.168.10.50:8006/",
-        "การเข้าถึงผ่านคอมพิวเตอร์นักศึกษา:",
-        "  - เปิด Google Chrome หรือเบราว์เซอร์อื่นๆ พิมพ์ URL ตามที่แจ้งบนจอหลัก",
-        "  - ต้องระบุ https:// (การเชื่อมต่อปลอดภัยแบบ SSL) และตามด้วยสัญลักษณ์พอร์ต :8006 เสมอ",
-        "  - หน้าเตือนความปลอดภัย (Not Secure): ให้กดปุ่ม Advanced ➔ Proceed เพื่อข้ามเข้าสู่ระบบปกติ"
-      ],
-      "speakerNotes": "อธิบายสิทธิ์การล็อกอินเข้าหน้าควบคุมบอร์ด PVE ผ่านพอร์ต 8006"
-    },
-    {
-      "id": "w4a-student-lab-intro",
-      "type": "content",
-      "title": "ปฏิบัติการนักเรียน: ติดตั้งและตั้งค่าเว็บเซิร์ฟเวอร์ด้วยตนเอง",
-      "tag": "แล็บเริ่มต้นสำหรับนักศึกษา",
-      "items": [
-        "เป้าหมายแล็บในวันนี้: นักศึกษาทุกคนจะฝึกติดตั้งเซิร์ฟเวอร์ส่วนตัวของตนเองบน Ubuntu Linux",
-        "แผนผังการทดลองปฏิบัติ:",
-        "  - 1. คุณครูทำการโคลนตู้ LXC Container (ฐาน Ubuntu) ให้นักเรียนทุกคนตามหมายเลข IP",
-        "  - 2. นักเรียนทำการรีโมทเข้าควบคุมทางไกลด้วยคำสั่ง SSH (พอร์ต 22)",
-        "  - 3. นักเรียนสั่งอัปเดตและติดตั้งระบบ Nginx Web Server เพื่อเปิดใช้งานพอร์ต 80",
-        "  - 4. ตรวจสอบความพร้อมการทำงานและเปิดหน้าเว็บผ่าน Browser",
-        "  - *กรณีไม่เสร็จ: สามารถแบ่งขั้นตอนการรันและปรับแต่งหน้าเว็บไปทำต่อเนื่องในวันศุกร์ได้"
-      ],
-      "speakerNotes": "เริ่มแล็บปฏิบัติการสำหรับนักศึกษา เพื่อให้นักเรียนลงมือควบคุมตู้เสมือนจริงของตัวเอง"
-    },
-    {
-      "id": "w4a-student-ssh",
-      "type": "content",
-      "title": "ขั้นตอนที่ 1: การล็อกอินเข้าควบคุมตู้เสมือนผ่านทาง SSH",
-      "tag": "ปฏิบัติการ - ล็อกอิน SSH",
-      "items": [
-        "โปรโตคอล SSH: ทำการเชื่อมต่อควบคุมคอมเพิวเตอร์ระยะไกลแบบปลอดภัยบนพอร์ตมาตรฐาน 22",
-        "ขั้นตอนการเชื่อมต่อ:",
-        "  - 1. เปิดโปรแกรม Terminal บนเครื่องของตนเอง",
-        "  - 2. พิมพ์คำสั่ง: ssh root@[IP_Container_ที่ได้รับ]",
-        "  -    เช่น: ssh root@192.168.10.101",
-        "  - 3. ระบบถามยืนยันเชื่อมต่อครั้งแรก (yes/no): พิมพ์ yes แล้วกด Enter",
-        "  - 4. ป้อนรหัสผ่านที่ครูกำหนดให้ (พิมพ์รหัสผ่านแล้วจอจะไม่ขึ้นตัวอักษรเพื่อความปลอดภัย) แล้วกด Enter"
-      ],
-      "speakerNotes": "ทบทวนคำสั่งเชื่อมต่อควบคุมตู้ Linux LXC Container ของตนเองผ่าน SSH"
-    },
-    {
-      "id": "w4a-student-update",
-      "type": "content",
-      "title": "ขั้นตอนที่ 2: อัปเดตรายการซอฟต์แวร์ระบบปฏิบัติการ",
-      "tag": "ปฏิบัติการ - อัปเดตระบบ",
-      "items": [
-        "ทำไมต้องอัปเดต: เพื่ออัปเกรดดัชนีรายการซอฟต์แวร์ให้เป็นเวอร์ชันล่าสุด ป้องกันแอปพลิเคชันเวอร์ชันเก่าหาลิงก์ติดตั้งไม่เจอ",
-        "คำสั่งในการอัปเดตระบบปฏิบัติการ Ubuntu/Debian:",
-        "  - พิมพ์คำสั่ง: apt update",
-        "  - (หากไม่ได้ล็อกอินด้วยสิทธิ์ root ต้องพิมพ์ sudo apt update)",
-        "ตรวจสอบสถานะการอัปเดต:",
-        "  - รอระบบวิ่งรับรายการไฟล์จากเซิร์ฟเวอร์จนเสร็จสิ้น และขึ้น Prompt รอรับคำสั่งต่อ"
-      ],
-      "speakerNotes": "รันชุดคำสั่ง apt update เพื่อปรับปรุงรายการแพ็กเกจระบบ"
-    },
-    {
-      "id": "w4a-student-install",
-      "type": "content",
-      "title": "ขั้นตอนที่ 3: ติดตั้ง Nginx Web Server ด้วยระบบจัดการแพ็กเกจ",
-      "tag": "ปฏิบัติการ - ติดตั้ง Nginx",
-      "items": [
-        "ซอฟต์แวร์ Nginx: เว็บบริการรับส่งหน้าเว็บ HTTP ที่รวดเร็วและเป็นที่นิยมสูงสุดในระดับสากล",
-        "คำสั่งติดตั้งโปรแกรม Nginx บนลินุกซ์:",
-        "  - พิมพ์คำสั่ง: apt install nginx -y",
-        "  - ออปชัน -y: หมายถึง ยอมรับการติดตั้งทันทีโดยไม่ต้องถามคำถามตอบตกลงระหว่างดาวน์โหลด",
-        "กระบวนการเบื้องหลัง:",
-        "  - ระบบจะคำนวณเนื้อที่ดิสก์ ดึงไฟล์และคลายซิปติดตั้งระบบลงในพาร์ติชันโดยอัตโนมัติ"
-      ],
-      "speakerNotes": "รันชุดคำสั่งติดตั้ง Nginx Web Server"
-    },
-    {
-      "id": "w4a-student-start",
-      "type": "content",
-      "title": "ขั้นตอนที่ 4: สั่งเริ่มทำงานและเช็คสถานะการทำงานบริการเว็บ",
-      "tag": "ปฏิบัติการ - ควบคุมบริการ",
-      "items": [
-        "เครื่องมือบริการ: ลินุกซ์ใช้คำสั่ง systemctl ในการสั่งเปิด ปิด หรือดูระบบการทำงานของแอปพื้นหลัง",
-        "คำสั่งเริ่มการรันเว็บเซิร์ฟเวอร์ Nginx ทันที:",
-        "  - พิมพ์คำสั่ง: systemctl start nginx",
-        "คำสั่งตรวจสอบสถานะการทำงานปัจจุบัน:",
-        "  - พิมพ์คำสั่ง: systemctl status nginx",
-        "สิ่งที่ต้องตรวจสอบบนหน้าจอ:",
-        "  - ต้องมีคำว่า active (running) สีเขียว เพื่อแสดงว่าเว็บทำงานเป็นปกติและพร้อมทำงานแล้ว"
-      ],
-      "speakerNotes": "สั่งสตาร์ตและดูสถานะความพร้อมด้วย systemctl"
-    },
-    {
-      "id": "w4a-student-verify",
-      "type": "content",
-      "title": "ขั้นตอนที่ 5: ทดสอบเปิดหน้าเว็บเบราว์เซอร์ผ่านพอร์ต 80",
-      "tag": "ปฏิบัติการ - ตรวจสอบหน้าเว็บ",
-      "items": [
-        "วิธีการตรวจสอบบริการเว็บเซิร์ฟเวอร์จริง:",
-        "  - 1. เปิด Web Browser บนเครื่อง PC ของตนเอง (เช่น Chrome หรือ Firefox)",
-        "  - 2. พิมพ์ URL หมายเลข IP ตู้ Container ของตนเองลงในช่อง Address bar",
-        "  -    เช่น พิมพ์: http://192.168.10.101/ (หรือกรอกแค่ 192.168.10.101)",
-        "  - 3. หากติดตั้งถูกต้อง จะพบหน้าเว็บเริ่มต้นของ Nginx ขึ้นหัวข้อต้อนรับ:",
-        "  -    'Welcome to nginx!'"
-      ],
-      "speakerNotes": "เปิดหน้าเว็บตรวจสอบผลลัพธ์ผ่าน IP ส่วนตัว"
-    },
-    {
-      "id": "w4a-stack-check-anim",
+      "id": "w4a-stack-installer-anim",
       "type": "stack-installer-anim",
       "title": "เครื่องมือจำลอง: ทดสอบการติดตั้งและเช็คบริการในคอนเทนเนอร์",
       "tag": "จำลองคอนเทนเนอร์ & ติดตั้ง",
-      "speakerNotes": "นี่คือระบบอนิเมชันแสดงการทำงานในตู้คอนเทนเนอร์ LXC ของนักเรียนแต่ละคนครับ โดยอาจารย์สามารถใช้อนิเมชันนี้สาธิตการติดตั้ง Nginx, MariaDB, Node.js และ Git พร้อมกับการรันเช็คสถานะและพอร์ตต่างๆ"
-    },
-    {
-      "id": "w4a-carry-over-plan",
-      "type": "content",
-      "title": "📌 แผนการปฏิบัติงานและโจทย์แบ่งทำสำหรับวันศุกร์ (Carry-over Plan)",
-      "tag": "การจัดการเรียนการสอนแบบยืดหยุ่น",
-      "items": [
-        "สำหรับนักศึกษาทำเสร็จในคาบวันอังคารนี้แล้ว:",
-        "  - สามารถลองเข้าแก้ไขข้อความในไฟล์ /var/www/html/index.html ไว้ล่วงหน้าได้",
-        "สำหรับนักศึกษาที่ยังติดตั้งไม่เสร็จหรือติดปัญหาระบบเครือข่าย:",
-        "  - ไม่ต้องกังวล! ในคาบวันศุกร์นี้ (คาบ 4b) เราจะเริ่มชั่วโมงแรกด้วยการช่วยทดสอบและติดตั้งต่อจนเสร็จสมบูรณ์ครบทุกคน",
-        "  - จากนั้นจะเข้าสู่กระบวนการเขียนหน้าโปรไฟล์แนะนำตนเอง (Portfolio) ด้วยเครื่องมือเขียนข้อความ nano และทดสอบความคงตัวของระบบเว็บเซิร์ฟเวอร์"
-      ],
-      "speakerNotes": "ชี้แจงความยืดหยุ่นของปฏิบัติการที่ให้นักศึกษาต่อยอดงานได้ในวันศุกร์นี้เพื่อรองรับผู้เรียนทุกคน"
+      "speakerNotes": "ใช้ animation นี้สาธิตให้นักเรียนเห็นภาพรวมการทำงานของ Nginx, MariaDB และ Node.js ที่รันอยู่ในตู้จำลองส่วนตัวของแต่ละคนครับ"
     },
     {
       "id": "w4a-summary",
       "type": "content",
-      "title": "สรุปเนื้อหาบทเรียนประจำคาบสัปดาห์ที่ 4a",
+      "title": "สรุปบทเรียนสัปดาห์ที่ 4 (วันอังคาร)",
       "tag": "สรุปบทเรียน",
       "items": [
-        "✅ ส่วนประกอบหลักของ Server ได้แก่ Nginx (เว็บ), MariaDB (ฐานข้อมูล), Node.js (โค้ดระบบ), Docker (ตู้ระบบ), และ GitHub (เก็บงาน)",
-        "✅ เทคโนโลยีจำลองระบบ (Virtualization) ช่วยแบ่งฮาร์ดแวร์จริงย่อยเป็นเครื่องคอมเสมือนแยกสัดส่วนชัดเจน",
-        "✅ Proxmox VE เป็น Type 1 Hypervisor คุณภาพสูง ติดตั้งตรง และคุมเครื่องเสมือนผ่าน Web UI พอร์ต 8006",
-        "✅ การทำแล็บติดตั้งเว็บส่วนตัว: เชื่อมต่อ SSH (พอร์ต 22) ➔ apt update ➔ apt install nginx ➔ systemctl start"
+        "🌐 Nginx Web Server:",
+        "  ✅ ติดตั้งด้วย: apt install nginx -y",
+        "  ✅ จัดการด้วย: systemctl start/stop/restart/reload/enable nginx",
+        "  ✅ ไฟล์เว็บอยู่ที่: /var/www/html/index.html",
+        "  ✅ ตรวจคอนฟิกด้วย: nginx -t",
+        "",
+        "🗄️ MariaDB Database:",
+        "  ✅ ติดตั้งด้วย: apt install mariadb-server -y",
+        "  ✅ ตั้งค่าความปลอดภัยด้วย: mariadb-secure-installation",
+        "  ✅ เข้า Console ด้วย: mariadb -u root -p",
+        "  ✅ คำสั่ง SQL: CREATE DATABASE, CREATE USER, GRANT, SELECT, INSERT",
+        "",
+        "⚡ Node.js Runtime:",
+        "  ✅ ติดตั้งด้วย: apt install nodejs npm -y",
+        "  ✅ ตรวจสอบด้วย: node -v และ npm -v",
+        "  ✅ รันโปรแกรมด้วย: node server.js",
+        "  ✅ รันพื้นหลังด้วย: nohup node server.js &"
       ],
-      "speakerNotes": "ทบทวนสรุปใจความสำคัญอีกครั้ง ตั้งแต่เรื่อง Server Stack ส่วนประกอบของเซิร์ฟเวอร์หลัก ไปจนถึงคำสั่งปฏิบัติการของนักเรียน"
+      "speakerNotes": "ทบทวนสิ่งที่นักเรียนได้ทำในวันนี้ทั้งหมด ย้ำว่านี่คือ Server Stack พื้นฐานที่ใช้งานจริงในองค์กร และนักเรียนได้ติดตั้งเองบนเซิร์ฟเวอร์จริงครับ"
     },
     {
       "id": "w4a-wayground-intro",
       "type": "wayground",
-      "title": "ประเมินความรู้เทคโนโลยีเสมือนด้วย Wayground!",
+      "title": "ประเมินความรู้ Server Stack ด้วย Wayground!",
       "subtitle": "กิจกรรมประเมินผลผ่านเกมทบทวน 10 ข้อท้าทาย",
       "tag": "ประเมินผลท้ายคาบ",
       "csvPath": "/data/week-4a_wayground_import.xlsx",
-      "body": "วัดระดับทักษะความรู้ความเข้าใจเกี่ยวกับส่วนประกอบเซิร์ฟเวอร์หลัก การจำลองระบบเสมือน ขั้นตอนติดตั้งระบบ Proxmox VE และคำสั่งติดตั้งเว็บ Nginx ผ่านระบบทดสอบ Wayground Quiz จำนวน 10 ข้อ ดึงไฟล์เทมเพลต Excel ด้านขวาเพื่อดำเนินการได้ทันที",
-      "speakerNotes": "ให้นักศึกษาทำแบบทดสอบ 10 ข้อผ่านไฟล์นำเข้า Wayground เพื่อประเมินคะแนนประจำคาบครับ"
+      "body": "วัดระดับทักษะความรู้เกี่ยวกับการติดตั้งและใช้งาน Nginx, MariaDB และ Node.js รวมทั้งคำสั่งสำคัญและหลักการทำงาน ผ่านระบบทดสอบ Wayground Quiz จำนวน 10 ข้อ ดึงไฟล์เทมเพลต Excel ด้านขวาเพื่อดำเนินการได้ทันที",
+      "speakerNotes": "ให้นักเรียนทำแบบทดสอบ 10 ข้อผ่านไฟล์นำเข้า Wayground เพื่อประเมินคะแนนประจำคาบครับ"
     },
     {
       "id": "w4a-homework",
       "type": "homework",
-      "title": "การบ้านเดี่ยว: ออกแบบแผนระบบความต้องการเซิร์ฟเวอร์เสมือน",
+      "title": "การบ้าน: บันทึกขั้นตอนการติดตั้ง Server Stack",
       "tag": "การบ้านท้ายบทเรียน",
       "items": [
-        "คำชี้แจง: ให้เขียนวิเคราะห์อธิบายและคำนวณพารามิเตอร์เครือข่ายด้วยภาษาความเข้าใจตนเอง",
-        "สถานการณ์: หากคุณครูกำหนดหมายเลข IP ให้เครื่อง Proxmox VE หลักเป็น 192.168.100.10/24 และ Gateway คือ 192.168.100.1",
-        "สิ่งที่ต้องระบุในรายงานคำอธิบาย:",
-        "  1. อธิบายความสัมพันธ์และหน้าที่ของ Nginx, MariaDB, Node.js, Docker และ GitHub ในสถาปัตยกรรมของเซิร์ฟเวอร์เดียวกัน",
-        "  2. วางแผนจัดสรรช่วงไอพี (IP Address Range) สำหรับแบ่งตู้ LXC Containers ให้นักเรียนจำนวน 10 เครื่อง โดยไม่ให้ไอพีไปทับกับเครื่องหลักและเราเตอร์",
-        "  3. แสดงชุดคำสั่งในการเชื่อมต่อ SSH, อัปเดต และติดตั้งบริการเว็บ Nginx บนตู้ Container ปลายทาง IP 192.168.100.125",
-        "วิธีการส่ง: เขียนลงกระดาษหรือพิมพ์ส่งงานผ่าน Google Classroom ก่อนเรียนคาบวันศุกร์นี้"
+        "คำชี้แจง: ให้บันทึกขั้นตอนที่ทำในคาบวันนี้พร้อม Screenshot หลักฐาน",
+        "สิ่งที่ต้องส่ง:",
+        "  1. 📷 Screenshot หน้าเว็บของตู้จำลอง (Nginx) ที่แสดงชื่อตนเองในหน้า index.html",
+        "  2. 📷 Screenshot ผลลัพธ์คำสั่ง SELECT * FROM students; ใน MariaDB Console",
+        "  3. 📷 Screenshot ผลลัพธ์จาก curl http://localhost:3000 ของ Node.js Server",
+        "  4. 📷 Screenshot ผลคำสั่ง ss -tlnp | grep -E '80|3306|3000' ที่แสดงทุกพอร์ต",
+        "  5. ✍️ อธิบายสั้นๆ ว่า Nginx, MariaDB, Node.js แต่ละตัวทำหน้าที่อะไรในระบบ",
+        "วิธีส่ง: แนบ Screenshot และคำอธิบายส่งผ่าน Google Classroom ก่อนเรียนคาบวันศุกร์นี้"
       ],
-      "speakerNotes": "ชี้แจงหัวข้อการบ้านเดี่ยวเกี่ยวกับการคำนวณไอพีแล็บและการอธิบาย Server Stack เพื่อเช็คความพร้อมก่อนเปิดคาบวันศุกร์ครับ"
+      "speakerNotes": "การบ้านนี้เน้นให้นักเรียนมีหลักฐานว่าตนเองติดตั้ง Stack ได้สำเร็จจริง และเข้าใจบทบาทของแต่ละโปรแกรมครับ"
     }
   ]
 }
