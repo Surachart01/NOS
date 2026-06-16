@@ -484,7 +484,6 @@
       "speakerNotes": "Vite.js เป็นเครื่องมือพัฒนา Frontend ยอดนิยมในปัจจุบัน ใช้สอนเพราะนักเรียนจะได้เห็นแบบรับมือจริงว่า Node.js ใช้ร่วมกับ Frontend Framework อย่างไรครับ"
     },
     {
-
       "id": "w4a-nodejs-run",
       "type": "content",
       "title": "ขั้นตอนที่ 3: รัน Vite Dev Server และเปิด Host ทุกเครื่อง",
@@ -544,7 +543,6 @@
     },
     {
       "id": "w4a-nodejs-background",
-
       "type": "content",
       "title": "ขั้นตอนที่ 5: รัน Vite ในพื้นหลัง (ไม่หยุดเมื่อปิด Terminal)",
       "tag": "ปฏิบัติการ Node.js - ขั้นตอนที่ 5",
@@ -604,7 +602,6 @@
     },
     {
       "id": "w4a-stack-full-check",
-
       "type": "content",
       "title": "✅ ตรวจสอบ Stack ทั้งหมด — ทุกอย่างทำงานพร้อมกัน",
       "tag": "ตรวจสอบ Full Stack",
