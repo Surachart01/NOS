@@ -192,6 +192,241 @@ function TwoColSlide({ s }: { s: SlideData }) {
 }
 
 /* ============================================================
+   NGINX CONFIG SLIDE — full config "what to type" view
+   ============================================================ */
+function NginxConfigSlide({ s }: { s: SlideData }) {
+  const [activeLine, setActiveLine] = useState<number | null>(null);
+
+  type ConfigLine = {
+    line: string;
+    type: 'block' | 'directive' | 'key' | 'blank';
+    label?: string;
+    color?: string;
+    icon?: string;
+  };
+
+  const configLines: ConfigLine[] = [
+    { line: 'server {',                                          type: 'block'    },
+    { line: '    listen 80;',                                    type: 'directive', icon: '🔌', color: '#60a5fa', label: 'รับ Request บนพอร์ต 80 (HTTP มาตรฐาน)' },
+    { line: '    server_name _;',                                type: 'directive', icon: '🏷️', color: '#34d399', label: 'รับทุก IP และทุกโดเมน (_ = wildcard)' },
+    { line: '',                                                  type: 'blank'    },
+    { line: '    location / {',                                  type: 'block',    icon: '📍', color: '#f59e0b', label: 'กฎสำหรับ URL ทุกรูปแบบ (เริ่มด้วย /)' },
+    { line: '        proxy_pass http://127.0.0.1:5173;',         type: 'key',      icon: '🚀', color: '#f87171', label: '⭐ ส่งต่อ Request ไปยัง Vite ที่พอร์ต 5173' },
+    { line: '        proxy_http_version 1.1;',                   type: 'directive', icon: '📡', color: '#818cf8', label: 'ใช้ HTTP/1.1 รองรับ WebSocket (Vite HMR)' },
+    { line: '        proxy_set_header Upgrade $http_upgrade;',   type: 'directive', icon: '🔄', color: '#94a3b8', label: 'ส่ง header สำหรับ WebSocket Upgrade' },
+    { line: "        proxy_set_header Connection 'upgrade';",    type: 'directive', icon: '🔄', color: '#94a3b8', label: 'ระบุว่าเป็นการเชื่อมต่อแบบ Upgrade' },
+    { line: '        proxy_set_header Host $host;',              type: 'directive', icon: '🏠', color: '#6ee7b7', label: 'ส่ง Host header ต้นฉบับไปด้วย' },
+    { line: '        proxy_cache_bypass $http_upgrade;',         type: 'directive', icon: '⚡', color: '#fbbf24', label: 'ไม่ใช้ cache เมื่อเป็น WebSocket' },
+    { line: '    }',                                             type: 'block'    },
+    { line: '}',                                                 type: 'block'    },
+  ];
+
+  const annotatedLines = configLines.filter(cl => cl.label);
+
+  const extraCmds = [
+    { cmd: 'ln -s /etc/nginx/sites-available/webapp /etc/nginx/sites-enabled/', color: '#79c0ff', desc: 'เปิดใช้งาน config' },
+    { cmd: 'rm /etc/nginx/sites-enabled/default',                               color: '#ff7b72', desc: 'ลบ config เดิมทิ้ง' },
+    { cmd: 'nginx -t',                                                           color: '#7ee787', desc: 'ตรวจสอบ syntax' },
+    { cmd: 'systemctl reload nginx',                                             color: '#ffa657', desc: 'Reload Nginx' },
+  ];
+
+  const renderLine = (cl: ConfigLine, i: number) => {
+    const isActive = activeLine === i;
+    let content: React.ReactNode;
+
+    if (cl.type === 'blank') {
+      content = <span>&nbsp;</span>;
+    } else if (cl.type === 'key') {
+      content = (
+        <>
+          <span style={{ color: '#c9d1d9' }}>{'        '}</span>
+          <span style={{ color: '#79c0ff' }}>proxy_pass</span>
+          <span style={{ color: '#ffa657' }}> http://</span>
+          <span style={{ color: '#f87171', fontWeight: 700 }}>127.0.0.1:5173</span>
+          <span style={{ color: '#c9d1d9' }}>;</span>
+        </>
+      );
+    } else if (cl.type === 'block') {
+      content = <span style={{ color: '#c9d1d9' }}>{cl.line}</span>;
+    } else {
+      // directive — split key=value at first space after indent
+      const trimmed = cl.line.trimStart();
+      const indent = cl.line.slice(0, cl.line.length - trimmed.length);
+      const spaceIdx = trimmed.indexOf(' ');
+      const key = spaceIdx !== -1 ? trimmed.slice(0, spaceIdx) : trimmed;
+      const val = spaceIdx !== -1 ? trimmed.slice(spaceIdx) : '';
+      content = (
+        <>
+          <span style={{ color: 'transparent' }}>{indent}</span>
+          <span style={{ color: '#79c0ff' }}>{key}</span>
+          <span style={{ color: '#a3d4ff' }}>{val}</span>
+        </>
+      );
+    }
+
+    return (
+      <div
+        key={i}
+        onClick={() => cl.label ? setActiveLine(isActive ? null : i) : undefined}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          padding: '1px 12px',
+          background: isActive ? 'rgba(248,113,113,0.1)' : 'transparent',
+          borderLeft: isActive ? '3px solid #f87171' : '3px solid transparent',
+          cursor: cl.label ? 'pointer' : 'default',
+          transition: 'background 0.12s',
+          gap: 0,
+        }}
+      >
+        {/* line number */}
+        <span style={{ color: '#3d4451', fontSize: '11px', minWidth: '22px', textAlign: 'right', marginRight: '16px', userSelect: 'none', flexShrink: 0 }}>
+          {cl.type !== 'blank' ? i + 1 : ''}
+        </span>
+        {/* code */}
+        <span style={{ fontFamily: "'JetBrains Mono','Fira Code','Courier New',monospace", fontSize: '13.5px', lineHeight: '1.9', whiteSpace: 'pre', flex: 1 }}>
+          {content}
+        </span>
+        {/* dot indicator */}
+        {cl.label && (
+          <span style={{ fontSize: '8px', color: isActive ? cl.color : '#3d4451', marginLeft: '6px', flexShrink: 0, transition: 'color 0.15s' }}>●</span>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes ncfg-pulse {
+          0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
+          50%      { box-shadow: 0 0 12px 3px rgba(248,113,113,0.25); }
+        }
+        @keyframes ncfg-slide-in {
+          from { opacity:0; transform:translateX(6px); }
+          to   { opacity:1; transform:translateX(0); }
+        }
+        .ncfg-proxy { animation: ncfg-pulse 2.2s ease-in-out infinite; }
+        .ncfg-ann   { animation: ncfg-slide-in 0.2s ease-out both; }
+      `}} />
+
+      <div className="slide-tag">{s.tag}</div>
+      <h2 style={{ marginBottom: '10px' }}>{s.title}</h2>
+
+      <div style={{ display: 'flex', gap: '16px', flex: 1, minHeight: 0 }}>
+
+        {/* ══ LEFT: Full config to type ══ */}
+        <div style={{ flex: 1.15, display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
+
+          {/* Step badge + command */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: 'white', borderRadius: '6px', padding: '3px 12px', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>
+              ขั้นตอนที่ 1
+            </span>
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>สร้างไฟล์ config:</span>
+            <code style={{ color: '#7ee787', background: 'rgba(126,231,135,0.1)', border: '1px solid rgba(126,231,135,0.2)', padding: '2px 8px', borderRadius: '5px', fontSize: '12.5px', fontFamily: 'monospace' }}>
+              nano /etc/nginx/sites-available/webapp
+            </code>
+          </div>
+
+          {/* THE CONFIG BLOCK — full height, no truncation */}
+          <div style={{ background: '#0d1117', borderRadius: '12px', overflow: 'hidden', border: '1px solid #30363d', boxShadow: '0 6px 24px rgba(0,0,0,0.4)', display: 'flex', flexDirection: 'column' }}>
+            {/* Titlebar */}
+            <div style={{ background: '#161b22', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #30363d', flexShrink: 0 }}>
+              <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }} />
+              <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }} />
+              <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#27c93f', display: 'inline-block' }} />
+              <span style={{ fontSize: '11px', color: '#8b949e', marginLeft: '8px', fontFamily: 'monospace', flex: 1 }}>
+                /etc/nginx/sites-available/webapp
+              </span>
+              <span style={{ fontSize: '10px', color: '#484f58', fontStyle: 'italic' }}>
+                คลิกบรรทัดเพื่อดูคำอธิบาย
+              </span>
+            </div>
+
+            {/* Code lines — full config, no scroll, fits slide */}
+            <div style={{ padding: '10px 0' }}>
+              {configLines.map((cl, i) => renderLine(cl, i))}
+            </div>
+          </div>
+
+          {/* Step 2 — commands to run after */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: 'white', borderRadius: '6px', padding: '3px 12px', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>
+              ขั้นตอนที่ 2
+            </span>
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>รันคำสั่งต่อไปนี้ใน Terminal:</span>
+          </div>
+          <div style={{ background: '#0d1117', borderRadius: '10px', border: '1px solid #30363d', padding: '10px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 16px' }}>
+            {extraCmds.map((ec, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: '6px', fontFamily: 'monospace', fontSize: '12px' }}>
+                <span style={{ color: '#484f58', flexShrink: 0 }}>$</span>
+                <span style={{ color: ec.color }}>{ec.cmd}</span>
+                <span style={{ color: '#484f58', fontSize: '11px', marginLeft: 'auto', whiteSpace: 'nowrap' }}>← {ec.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ══ RIGHT: Line-by-line explanation table ══ */}
+        <div style={{ width: '258px', display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
+
+          {/* Header */}
+          <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            📋 คำอธิบายแต่ละบรรทัด
+          </div>
+
+          {/* Annotation table */}
+          <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '12px', overflow: 'hidden', flex: 1 }}>
+            {annotatedLines.map((cl, idx) => {
+              const lineIdx = configLines.indexOf(cl);
+              const isActive = activeLine === lineIdx;
+              return (
+                <div
+                  key={idx}
+                  className={isActive ? 'ncfg-ann' : ''}
+                  onClick={() => setActiveLine(isActive ? null : lineIdx)}
+                  style={{
+                    padding: '9px 12px',
+                    borderBottom: idx < annotatedLines.length - 1 ? '1px solid var(--border)' : 'none',
+                    background: isActive ? `${cl.color}18` : 'transparent',
+                    borderLeft: isActive ? `3px solid ${cl.color}` : '3px solid transparent',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {/* Code snippet */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
+                    <span style={{ fontSize: '14px', flexShrink: 0 }}>{cl.icon}</span>
+                    <code style={{ fontSize: '11px', color: isActive ? cl.color : '#79c0ff', fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                      {cl.line.trim().replace(/;$/, '')}
+                    </code>
+                  </div>
+                  {/* Explanation (always visible, not just on click) */}
+                  <div style={{ fontSize: '11.5px', color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)', lineHeight: 1.5, paddingLeft: '20px' }}>
+                    {cl.label}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Result callout */}
+          <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid #22c55e', borderRadius: '10px', padding: '10px 12px' }}>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#22c55e', marginBottom: '4px' }}>✅ ผลลัพธ์ที่ได้</div>
+            <div style={{ fontSize: '11.5px', color: 'var(--text-primary)', lineHeight: 1.55 }}>
+              เปิด <code style={{ color: '#7ee787', background: 'rgba(126,231,135,0.1)', padding: '0 4px', borderRadius: '3px' }}>http://[IP ตู้]</code> บน Browser<br />
+              → Nginx (พอร์ต 80) รับ → ส่งต่อ<br />
+              → Vite Dev Server (พอร์ต 5173) ✨
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
    NGINX FLOW ANIMATION
    ============================================================ */
 function NginxFlowAnimation({ s }: { s: SlideData }) {
@@ -7201,6 +7436,7 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "interactive-act": return <InteractiveActivitySlide s={slide} />;
     case "homework": return <HomeworkSlide s={slide} />;
     case "stack-installer-anim":  return <StackInstallerAnimation s={slide} />;
+    case "nginx-config":            return <NginxConfigSlide s={slide} />;
     case "nginx-flow-anim":        return <NginxFlowAnimation s={slide} />;
     case "mariadb-query-anim":     return <MariaDBQueryAnimation s={slide} />;
     case "nodejs-request-anim":    return <NodeJSRequestAnimation s={slide} />;
