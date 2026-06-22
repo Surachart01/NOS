@@ -1,0 +1,1588 @@
+แผนการจัดการเรียนรู้
+หลักสูตรประกาศนียบัตรวิชาชีพชั้นสูง พุทธศักราช 2567
+ประเภทวิชา อุตสาหกรรมดิจิทัลและเทคโนโลยีสารสนเทศ  |  สาขาวิชา เทคโนโลยีสารสนเทศ
+รหัสวิชา 31901-2002  ระบบปฏิบัติการเครื่องแม่ข่าย
+Network Operating System for Server  (1-4-3)
+ภาคเรียนที่ 1  ปีการศึกษา 2569
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยกิต
+1-4-3  (ทฤษฎี 1 ชม. / ปฏิบัติ 4 ชม. / 3 หน่วยกิต)
+เวลาเรียน
+17 สัปดาห์ x 5 ชม./สัปดาห์ = 85 ชั่วโมง (รวมสอบกลางภาคและปลายภาค)
+วันจันทร์
+3 ชั่วโมง (ทฤษฎี + สาธิต + เริ่ม Lab)
+วันศุกร์
+2 ชั่วโมง (Lab ต่อเนื่อง + สรุป + Reflection)
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+ส่วนที่ 1: ข้อมูลรายวิชา
+ผลลัพธ์การเรียนรู้ระดับรายวิชา
+ติดตั้งและสนับสนุนด้านเทคนิค เพื่อการใช้งานคอมพิวเตอร์แม่ข่ายด้านระบบสารสนเทศและระบบเครือข่ายตามหลักการ ด้วยความละเอียดรอบคอบ รับผิดชอบ การสื่อสาร การคิดเชิงนวัตกรรมและการทำงานเป็นทีม
+จุดประสงค์รายวิชา
+1. เข้าใจโมเดล OSI 7 Layer, TCP/IP และหลักการทำงานของเครือข่ายคอมพิวเตอร์พื้นฐาน
+2. เข้าใจเกี่ยวกับการติดตั้ง การใช้งานระบบปฏิบัติการเครื่องแม่ข่ายและแพ็กเก็ต (Packet) ที่สนับสนุนการให้บริการในระบบเครือข่าย
+3. มีทักษะในการติดตั้งและบริหารจัดการ Proxmox Hypervisor และ Virtual Machine (VM)
+4. มีทักษะในการติดตั้ง Server บริการต่าง ๆ เช่น DNS, Web, Database, DHCP, File, Proxy, AAA, Container
+5. สามารถ Deploy Web Application ลงบน VM ด้วยแนวคิด DevOps เบื้องต้น
+6. มีเจตคติและกิจนิสัยที่ดีในการปฏิบัติงานด้วยความละเอียดรอบคอบ รับผิดชอบ
+สมรรถนะรายวิชา
+1. อธิบายหลักการทำงานของโมเดล OSI 7 Layer และ TCP/IP Protocol ได้
+2. ติดตั้งระบบปฏิบัติการเครื่องแม่ข่ายและแพ็กเก็ต (Packet) ที่สนับสนุนการให้บริการในระบบเครือข่ายตามขั้นตอน
+3. ติดตั้งและบริหารจัดการ Proxmox VE Hypervisor พร้อมสร้าง VM ได้
+4. ให้บริการ Server (DNS, Web, DB, DHCP, File, Proxy, AAA, Container) ได้ครบถ้วน
+5. Deploy Web Application บน VM ด้วย Docker และแนวคิด DevOps ได้
+6. ใช้งานระบบปฏิบัติการเครื่องแม่ข่ายตรงตามวัตถุประสงค์
+คำอธิบายรายวิชา
+ศึกษาและปฏิบัติเกี่ยวกับ โมเดล OSI 7 Layer และ TCP/IP Protocol, ระบบปฏิบัติการบนเครื่องแม่ข่าย (Network Operating System), การเข้าหัวสาย LAN ตามมาตรฐาน TIA/EIA, การติดตั้ง Proxmox Hypervisor, การสร้างและจัดการ Virtual Machine (VM), การตั้งค่าพื้นฐาน, การจัดการผู้ใช้งาน, Firewall, SSH, DNS Server, Web Server, Database Server, DHCP Server, File and Resource Sharing Server, Proxy Server, AAA Server, Container Platform (Docker), IoT Platform, SSL Certificate และการ Deploy Web Application ด้วยแนวคิด DevOps เบื้องต้น
+ส่วนที่ 2: หน่วยการเรียนรู้
+หน่วยที่
+หน่วยการเรียนรู้
+ทฤษฎี (ชม.)
+ปฏิบัติ (ชม.)
+รวม (ชม.)
+1
+โมเดล OSI 7 Layer และ TCP/IP Protocol
+1
+4
+5
+2
+การเข้าหัวสาย LAN และระบบเครือข่ายพื้นฐาน
+1
+4
+5
+3
+ภาพรวม Network Operating System (NOS) และสถาปัตยกรรม Server
+1
+4
+5
+4
+Proxmox VE — ติดตั้งและตั้งค่า Hypervisor
+1
+4
+5
+5
+สร้าง VM บน Proxmox และติดตั้ง Linux Server
+1
+4
+5
+6
+การเข้าถึงระยะไกลด้วย SSH และการจัดการ CLI
+1
+4
+5
+7
+การจัดการผู้ใช้และสิทธิ์ (User & Permission)
+1
+4
+5
+8
+Firewall เบื้องต้น (UFW / firewalld)
+1
+4
+5
+-
+สอบกลางภาค (ทฤษฎี + ปฏิบัติ)
+-
+-
+5
+9
+DHCP Server
+1
+4
+5
+10
+DNS Server
+1
+4
+5
+11
+Web Server (Nginx / Apache)
+1
+4
+5
+12
+Database Server (MariaDB) + LAMP/LEMP Stack
+1
+4
+5
+13
+File & Resource Sharing (Samba/NFS) + Proxy Server
+1
+4
+5
+14
+SSL Certificate + AAA Server เบื้องต้น
+1
+4
+5
+15
+Container Platform (Docker) + Deploy Web Application
+1
+4
+5
+16
+DevOps เบื้องต้น: CI/CD, Git, Automation + IoT Platform
+1
+4
+5
+17
+โครงงานบูรณาการ: Home Lab Server + นำเสนอ + สอบปลายภาค
+2
+8
+10
+รวม
+17
+68
+85
+ส่วนที่ 3: แผนการสอนรายสัปดาห์
+สัปดาห์
+หน่วยที่
+หัวข้อ
+จันทร์ (3 ชม.)
+ศุกร์ (2 ชม.)
+1
+1
+OSI 7 Layer & TCP/IP Protocol
+ทฤษฎี: OSI 7 Layer (Physical→Application), TCP/IP Stack, Encapsulation, Protocol แต่ละชั้น
+Lab: วิเคราะห์ Packet ด้วย Wireshark บน VM + จับคู่ Protocol กับ Layer
+2
+2
+เข้าหัวสาย LAN + เครือข่ายพื้นฐาน
+ทฤษฎี: TIA/EIA-568A/B, CAT5e/6, RJ-45 + สาธิตเข้าหัว
+ปฏิบัติ: เข้าหัว Straight/Crossover + ทดสอบด้วย LAN Tester
+3
+3
+ภาพรวม NOS + Server Architecture
+ทฤษฎี: บทบาท Server, Windows vs Linux, Client-Server Model, Hardware Server
+สำรวจ Hardware Server จริง, ถอด/ประกอบ, บันทึกชิ้นส่วน
+4
+4
+Proxmox VE — ติดตั้ง Hypervisor
+ทฤษฎี: Virtualization, KVM/LXC, Proxmox Architecture + เริ่มติดตั้ง Proxmox บน Server จริง
+ตั้งค่า Network Bridge, Storage Pool, เข้า Web UI, อัปเดต
+5
+5
+สร้าง VM + ติดตั้ง Linux Server
+สาธิต + ปฏิบัติ: สร้าง VM, Upload ISO, ติดตั้ง Ubuntu Server 24.04 LTS
+ตั้งค่า Static IP, Hostname, อัปเดตระบบ, ตรวจสอบ Network
+6
+6
+SSH Remote + CLI พื้นฐาน
+ทฤษฎี: SSH Protocol, Port 22, Key-based Auth + Lab: เปิด SSH, เชื่อมต่อจาก Client
+SSH Key Pair Generation, Disable Password Login, SSH Config, scp/rsync
+7
+7
+User & Permission Management
+ทฤษฎี: Linux User Model + Lab: useradd, groupadd, sudoers, chmod/chown
+ออกแบบโครงสร้างผู้ใช้สำหรับ Server จำลอง + ทดสอบสิทธิ์
+8
+8
+Firewall เบื้องต้น
+ทฤษฎี: Firewall Rules, Zones, ufw/firewalld + Lab: ตั้ง Rule พื้นฐาน
+ทดสอบเปิด/ปิดพอร์ต, Logging, กำหนด Policy ให้ VM แต่ละเครื่อง
+กลางภาค
+-
+สอบกลางภาค
+สอบทฤษฎี: OSI, NOS, Linux, Proxmox, SSH (2 ชม.)
+สอบปฏิบัติ: ติดตั้ง VM + SSH + Firewall (2 ชม.) + สรุปผล
+9
+9
+DHCP Server
+ทฤษฎี: DHCP Lease, Scope, Options + Lab: ติดตั้ง isc-dhcp-server บน VM
+ทดสอบแจก IP ให้ Client VM + ปรับ Reservation + ดู Log
+10
+10
+DNS Server
+ทฤษฎี: DNS Hierarchy, A/AAAA/MX/CNAME/PTR Record + Lab: ติดตั้ง BIND9
+ตั้งค่า Forward/Reverse Zone, ทดสอบ nslookup/dig, เชื่อม DNS กับ DHCP
+11
+11
+Web Server (Nginx/Apache)
+ทฤษฎี + Lab: ติดตั้ง Nginx, Virtual Host, ServerBlock
+Deploy เว็บไซต์ HTML/PHP จริง, ตั้ง Domain ผ่าน DNS ของตนเอง
+12
+12
+Database + LAMP Stack
+ทฤษฎี + Lab: ติดตั้ง MariaDB, สร้าง DB/User, Grant Privileges
+เชื่อม Web + DB เป็น LAMP/LEMP Stack, ทดสอบ PHP-MySQL Query
+13
+13
+File Sharing + Proxy
+ทฤษฎี + Lab: Samba (Windows Share), NFS (Linux Share)
+ติดตั้ง Squid Proxy, กำหนด ACL, ทดสอบกรอง URL ผ่าน Browser
+14
+14
+SSL Certificate + AAA
+ทฤษฎี: HTTPS, TLS/SSL, Let's Encrypt, RADIUS Protocol + Lab: ออก Self-Signed SSL
+เปิด HTTPS ให้ Web Server ตนเอง, ทดสอบ RADIUS Auth เบื้องต้น
+15
+15
+Docker + Deploy Web App (DevOps)
+ทฤษฎี: Container vs VM, Docker Image/Container, docker-compose + Lab: ติดตั้ง Docker บน VM
+Deploy Web Application (Node.js / Python Flask) ลง Container, Expose Port
+16
+16
+DevOps + IoT Platform
+ทฤษฎี: CI/CD Pipeline, Git Workflow, Webhook + Lab: ตั้ง Git + Auto-deploy Script
+ติดตั้ง Node-RED / Mosquitto MQTT Broker + ทดสอบ IoT Dashboard
+ปลายภาค
+17
+โครงงาน + สอบปลายภาค
+นำเสนอ Home Lab Server: Proxmox + VM + Services + Web App (กลุ่มละ 10 นาที)
+สอบปลายภาคปฏิบัติ: ตั้ง Server ครบ Service ที่กำหนด + Reflection
+ส่วนที่ 4: ตารางวิเคราะห์พฤติกรรมการเรียนรู้
+หน่วย / เนื้อหา
+K
+S
+A
+Ap
+ทฤษฎี
+ปฏิบัติ
+รวม
+ประเมิน
+1. OSI 7 Layer & TCP/IP
+K2
+S2
+A1
+Ap1
+1
+4
+5
+ใบงาน + Quiz
+2. เข้าหัวสาย LAN
+K2
+S3
+A2
+Ap2
+1
+4
+5
+ใบงาน + Checklist
+3. ภาพรวม NOS + Server
+K2
+S1
+A1
+Ap1
+1
+4
+5
+ใบงาน
+4. Proxmox VE
+K3
+S3
+A2
+Ap2
+1
+4
+5
+ใบงาน
+5. สร้าง VM + Linux Server
+K3
+S3
+A3
+Ap3
+1
+4
+5
+ใบงาน
+6. SSH + CLI
+K3
+S3
+A3
+Ap3
+1
+4
+5
+ใบงาน
+7. User & Permission
+K3
+S3
+A3
+Ap3
+1
+4
+5
+ใบงาน
+8. Firewall
+K3
+S3
+A3
+Ap3
+1
+4
+5
+ใบงาน
+9. DHCP Server
+K3
+S4
+A3
+Ap3
+1
+4
+5
+ใบงาน
+10. DNS Server
+K3
+S4
+A3
+Ap3
+1
+4
+5
+ใบงาน
+11. Web Server
+K3
+S4
+A3
+Ap4
+1
+4
+5
+ใบงาน
+12. Database + LAMP Stack
+K3
+S4
+A3
+Ap4
+1
+4
+5
+ใบงาน
+13. File Sharing + Proxy
+K3
+S4
+A3
+Ap4
+1
+4
+5
+ใบงาน
+14. SSL + AAA
+K4
+S4
+A4
+Ap4
+1
+4
+5
+ใบงาน
+15. Docker + Deploy Web App
+K4
+S4
+A4
+Ap5
+1
+4
+5
+ใบงาน + Demo
+16. DevOps + IoT Platform
+K4
+S4
+A4
+Ap5
+1
+4
+5
+ใบงาน
+17. โครงงานบูรณาการ
+K5
+S5
+A5
+Ap5
+2
+8
+10
+โครงงาน + Presentation
+รวม
+17
+68
+85
+พุทธิพิสัย (K)
+ทักษะพิสัย (S)
+จิตพิสัย (A)
+K2=ความเข้าใจ  K3=การนำไปใช้
+K4=การวิเคราะห์  K5=การสร้างสรรค์
+S1=เลียนแบบ  S2=ทำตามแบบ
+S3=ถูกต้อง  S4=ต่อเนื่อง  S5=เป็นธรรมชาติ
+A1=รับรู้  A2=ตอบสนอง  A3=สร้างคุณค่า
+A4=จัดระบบ  A5=ลักษณะนิสัย
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+1  ชื่อหน่วย: โมเดล OSI 7 Layer และ TCP/IP Protocol
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบายหน้าที่ของแต่ละ Layer ใน OSI 7 Layer Model ได้ถูกต้อง
+• ผู้เรียนสามารถเปรียบเทียบ OSI Model กับ TCP/IP Model ได้
+• ผู้เรียนสามารถระบุ Protocol ที่ทำงานในแต่ละ Layer ได้อย่างน้อย 3 ตัวอย่าง
+• ผู้เรียนสามารถวิเคราะห์ Packet ด้วย Wireshark และระบุ Layer ที่เกี่ยวข้องได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+     เกณฑ์: อธิบายโครงสร้างเครือข่ายและ Protocol ที่เกี่ยวข้องได้
+2.2 บูรณาการกลุ่มอาชีพ: Network Administrator / IT Support / System Administrator
+3. สมรรถนะประจำหน่วย
+• อธิบาย OSI 7 Layer และหน้าที่แต่ละชั้นได้
+• ระบุ Protocol สำคัญ (HTTP, FTP, DNS, TCP, UDP, IP, Ethernet) ในแต่ละ Layer ได้
+• เปรียบเทียบ OSI กับ TCP/IP Model ได้
+• ใช้ Wireshark จับและวิเคราะห์ Packet ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• อธิบาย OSI 7 Layer ครบทุก Layer
+• ระบุ Protocol ที่ทำงานในแต่ละ Layer ได้อย่างน้อย 2 ตัวอย่างต่อ Layer
+• เปรียบเทียบ OSI กับ TCP/IP ได้อย่างชัดเจน
+• ใช้ Wireshark ดู Packet และระบุ Layer ที่เกี่ยวข้องได้
+• แสดงความกระตือรือร้นและตั้งคำถามในชั้นเรียน
+5. สาระการเรียนรู้
+• OSI 7 Layer: Physical, Data Link, Network, Transport, Session, Presentation, Application
+• หน้าที่แต่ละ Layer และอุปกรณ์ที่เกี่ยวข้อง (Hub, Switch, Router, Firewall)
+• Protocol สำคัญ: HTTP/HTTPS, FTP, SMTP, DNS, TCP, UDP, IP, ICMP, ARP, Ethernet
+• การ Encapsulation / Decapsulation ของ Data
+• TCP/IP Model: Network Access, Internet, Transport, Application
+• การเปรียบเทียบ OSI vs TCP/IP
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• บรรยาย OSI 7 Layer แบบ Interactive พร้อม Animation (30 นาที)
+• เปรียบเทียบ OSI vs TCP/IP + Workshop จับคู่ Protocol กับ Layer (45 นาที)
+• สาธิตการใช้ Wireshark ดู Packet บน VM (30 นาที)
+• Q&A + สรุปแนวคิด Encapsulation (15 นาที)
+• ปฏิบัติ: เปิด Wireshark บน VM ที่ตั้งไว้ก่อน Capture Packet จริง (60 นาที)
+• วิเคราะห์ HTTP/DNS/ICMP Packet ระบุ Layer (30 นาที)
+• เขียน Reflection: 'OSI ช่วยแก้ปัญหาเครือข่ายได้อย่างไร' (30 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• Presentation: OSI 7 Layer Animation
+• VM สำหรับ Wireshark Lab (VirtualBox/Proxmox)
+• ใบความรู้ที่ 1: OSI & TCP/IP
+• ใบงานที่ 1: จับคู่ Protocol กับ Layer
+• วิดีโอ: 'OSI Model Explained' (YouTube)
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 1 (จับคู่ Protocol + วิเคราะห์ Packet)
+• แบบสังเกตการณ์ร่วมกิจกรรม
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ใบงาน Wireshark
+ใบงานที่ 1
+ถูกต้อง ≥ 70%
+60%
+แบบทดสอบปรนัย
+ข้อสอบ 10 ข้อ
+ถูกต้อง ≥ 60%
+30%
+จิตพิสัย
+แบบสังเกต
+เข้าร่วมกิจกรรม
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+2  ชื่อหน่วย: การเข้าหัวสาย LAN และระบบเครือข่ายพื้นฐาน
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบายมาตรฐาน TIA/EIA-568A และ 568B ได้
+• ผู้เรียนสามารถเข้าหัว RJ-45 ได้ตามมาตรฐาน Straight-through และ Crossover
+• ผู้เรียนสามารถทดสอบสายด้วย LAN Tester ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+     เกณฑ์: ติดตั้งสาย LAN ตามมาตรฐานได้
+2.2 บูรณาการ: Network Technician / IT Support
+3. สมรรถนะประจำหน่วย
+• อธิบายมาตรฐาน TIA/EIA-568A/B ได้
+• เลือกประเภทสายให้ถูกกับการใช้งาน (Straight/Crossover)
+• เข้าหัว RJ-45 ได้ถูกต้อง
+• ทดสอบสายด้วย LAN Tester ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• อธิบายมาตรฐาน TIA/EIA ได้
+• เข้าหัว RJ-45 แบบ Straight-through ได้
+• เข้าหัว RJ-45 แบบ Crossover ได้
+• ทดสอบสายและระบุปัญหาได้
+• ทำงานอย่างประณีตและเป็นระเบียบ
+5. สาระการเรียนรู้
+• มาตรฐาน TIA/EIA-568A และ 568B: ลำดับสีสาย
+• ประเภทสาย UTP: CAT5e, CAT6, CAT6A
+• Straight-through vs Crossover Cable
+• อุปกรณ์: Crimping Tool, RJ-45 Connector, LAN Tester
+• การวัดและตัดสายให้ได้ขนาด
+• ข้อผิดพลาดที่พบบ่อยและวิธีแก้
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: TIA/EIA-568A/B, ประเภทสาย, Straight vs Crossover (45 นาที)
+• สาธิตการเข้าหัวครบขั้นตอน (30 นาที)
+• ผู้เรียนเริ่มปฏิบัติจริง: เข้าหัว Straight-through (1 สาย) (45 นาที)
+• ปฏิบัติ: เข้าหัว Crossover + ทดสอบด้วย LAN Tester (60 นาที)
+• บันทึกผลและเขียน Checklist (20 นาที)
+• สรุป Reflection: 'ปัญหาที่พบและแก้ไขอย่างไร' (40 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ชุดสาย UTP, RJ-45, Crimping Tool, LAN Tester
+• ใบความรู้ที่ 2: มาตรฐาน TIA/EIA
+• ใบงานที่ 2: Checklist การเข้าหัวสาย
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 2 พร้อม Checklist
+• ผลการทดสอบ LAN Tester
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติเข้าหัว
+Checklist
+ผ่านทดสอบ 100%
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+แบบสังเกต
+ประณีต+ระเบียบ
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+3  ชื่อหน่วย: ภาพรวม Network Operating System และสถาปัตยกรรม Server
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบายบทบาทและประเภทของ NOS ได้
+• ผู้เรียนสามารถเปรียบเทียบ Windows Server กับ Linux Server ได้
+• ผู้เรียนสามารถระบุองค์ประกอบ Hardware ของ Server ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: System Administrator / IT Support
+3. สมรรถนะประจำหน่วย
+• อธิบายประเภท NOS ได้
+• เปรียบเทียบ Windows vs Linux Server ได้
+• ระบุชิ้นส่วน Hardware Server ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• อธิบายบทบาท Server ในองค์กร
+• ระบุความแตกต่าง NOS ≥ 3 ประเด็น
+• สำรวจ Hardware Server จริงได้
+5. สาระการเรียนรู้
+• บทบาทและความสำคัญ Server
+• ประเภท NOS: Windows Server, Ubuntu, Rocky Linux, Debian
+• Client-Server Model
+• Hardware: CPU, RAM, Storage (RAID), NIC
+• เปรียบเทียบ Windows vs Linux: License, CLI, Ecosystem
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• บรรยายบทบาท Server + ประเภท NOS (45 นาที)
+• เปรียบเทียบ Windows vs Linux + Q&A (45 นาที)
+• แนะนำ Client-Server Model + Service Types (30 นาที)
+• สำรวจ Hardware Server จริง (60 นาที)
+• ถอดและประกอบชิ้นส่วน บันทึกรายละเอียด (30 นาที)
+• เขียน Reflection (30 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• Presentation NOS
+• Server จริง
+• ใบความรู้ที่ 3
+• ใบงานที่ 3
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 3: ตารางเปรียบเทียบ NOS
+• รายงานสำรวจ Hardware
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ใบงาน
+ใบงานที่ 3
+≥ 70%
+60%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+30%
+จิตพิสัย
+สังเกต
+กระตือรือร้น
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+4  ชื่อหน่วย: Proxmox VE — ติดตั้งและตั้งค่า Hypervisor
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบายหลักการ Virtualization และความแตกต่างระหว่าง Type 1 / Type 2 Hypervisor ได้
+• ผู้เรียนสามารถติดตั้ง Proxmox VE บน Server จริงได้
+• ผู้เรียนสามารถตั้งค่า Network Bridge และ Storage Pool ใน Proxmox ได้
+• ผู้เรียนสามารถเข้าใช้งาน Proxmox Web UI ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: System Administrator / DevOps Engineer
+3. สมรรถนะประจำหน่วย
+• อธิบาย Virtualization และ Hypervisor ได้
+• ติดตั้ง Proxmox VE บน Hardware จริงได้
+• ตั้งค่า Network Bridge, Storage, เข้า Web UI ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• อธิบาย KVM และ LXC Container ได้
+• Burn ISO, Boot, ติดตั้ง Proxmox ได้ถูกต้อง
+• ตั้งค่า Static IP ให้ Proxmox ได้
+• เข้าใช้ Web UI (https://IP:8006) ได้
+5. สาระการเรียนรู้
+• Virtualization: Type 1 (Bare-metal) vs Type 2 (Hosted)
+• KVM (Kernel-based Virtual Machine) และ LXC Container
+• Proxmox VE Architecture: Node, Cluster, Datacenter
+• การเตรียม Bootable USB และ BIOS/UEFI Settings
+• Network Bridge (vmbr0), Storage (local, LVM, ZFS)
+• Proxmox Web UI: Datacenter, Node, VM, Container
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: Virtualization, Hypervisor Type 1/2, KVM/LXC (30 นาที)
+• Proxmox Architecture + เตรียม USB Bootable (30 นาที)
+• เริ่มติดตั้ง Proxmox บน Server จริง: Boot, Partition, Network Config (60 นาที)
+• ตั้งค่า Network Bridge (vmbr0), Storage Pool (45 นาที)
+• เข้า Proxmox Web UI, อัปเดต Repository (30 นาที)
+• บันทึก Config + Reflection (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• Proxmox VE ISO (ล่าสุด)
+• USB Bootable
+• Server Hardware จริง
+• ใบความรู้ที่ 4: Proxmox VE
+• ใบงานที่ 4: การติดตั้ง Proxmox
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 4: Screenshot การติดตั้งครบขั้นตอน
+• Proxmox Web UI ที่เข้าใช้งานได้จริง
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ
+ใบงานที่ 4
+ติดตั้งสำเร็จ
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+ละเอียดรอบคอบ
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+5  ชื่อหน่วย: สร้าง VM บน Proxmox และติดตั้ง Linux Server
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถสร้าง VM บน Proxmox ได้อย่างถูกต้อง
+• ผู้เรียนสามารถติดตั้ง Ubuntu Server 24.04 LTS บน VM ได้
+• ผู้เรียนสามารถตั้งค่า Static IP, Hostname และอัปเดตระบบได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: System Administrator / DevOps Engineer
+3. สมรรถนะประจำหน่วย
+• สร้าง VM บน Proxmox พร้อม spec ที่เหมาะสมได้
+• ติดตั้ง Ubuntu Server บน VM ได้
+• ตั้งค่า Network, Hostname, อัปเดตระบบได้
+4. จุดประสงค์เชิงพฤติกรรม
+• สร้าง VM กำหนด CPU/RAM/Disk ได้
+• Upload ISO และ Boot VM ได้
+• ติดตั้ง Ubuntu Server แบบ Minimal ได้
+• ตั้งค่า Static IP ด้วย Netplan ได้
+• ใช้ apt update && apt upgrade ได้
+5. สาระการเรียนรู้
+• การสร้าง VM บน Proxmox: VMID, CPU, RAM, Disk, Network
+• Ubuntu Server 24.04 LTS: การติดตั้งแบบ Minimal
+• Netplan: การตั้งค่า Static IP (/etc/netplan/)
+• Hostname: hostnamectl set-hostname
+• Package Management: apt update, apt upgrade, apt install
+• การ Snapshot VM เพื่อ Backup
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• สาธิตการสร้าง VM บน Proxmox Web UI (30 นาที)
+• Upload Ubuntu ISO, Boot VM (20 นาที)
+• ปฏิบัติ: ผู้เรียนสร้าง VM ของตนเองและเริ่มติดตั้ง Ubuntu (70 นาที)
+• ตั้งค่า Static IP ด้วย Netplan (30 นาที)
+• ตั้ง Hostname, อัปเดตระบบ (30 นาที)
+• Snapshot VM + บันทึกผล + Reflection (60 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• Ubuntu Server 24.04 LTS ISO
+• Proxmox Web UI
+• ใบความรู้ที่ 5: การสร้าง VM
+• ใบงานที่ 5: Spec Sheet VM
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 5: Screenshot VM + IP Config
+• VM ที่ใช้งานได้จริง
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ
+ใบงานที่ 5
+VM ทำงานได้
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+รับผิดชอบ
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+6  ชื่อหน่วย: การเข้าถึงระยะไกลด้วย SSH และการจัดการ CLI
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบาย SSH Protocol และ Key-based Authentication ได้
+• ผู้เรียนสามารถสร้าง SSH Key Pair และเชื่อมต่อ Server ด้วย SSH Key ได้
+• ผู้เรียนสามารถ Harden SSH Server (Disable Password Login, Change Port) ได้
+• ผู้เรียนสามารถใช้ scp และ rsync โอนไฟล์ผ่าน SSH ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: System Administrator / DevOps / Network Admin
+3. สมรรถนะประจำหน่วย
+• อธิบาย SSH Protocol และ Public Key Cryptography ได้
+• สร้าง SSH Key Pair (RSA/ED25519) ได้
+• Harden SSH ตามมาตรฐานความปลอดภัยได้
+4. จุดประสงค์เชิงพฤติกรรม
+• เปิด OpenSSH-server บน VM ได้
+• สร้าง SSH Key ด้วย ssh-keygen ได้
+• Copy Public Key ด้วย ssh-copy-id ได้
+• แก้ไข /etc/ssh/sshd_config เพื่อ Harden ได้
+• ใช้ scp โอนไฟล์ได้
+5. สาระการเรียนรู้
+• SSH Protocol: Port 22, Symmetric/Asymmetric Encryption
+• SSH Key: RSA vs ED25519, Public/Private Key
+• OpenSSH: Installation, Configuration (/etc/ssh/sshd_config)
+• SSH Hardening: PasswordAuthentication no, PermitRootLogin no
+• File Transfer: scp, rsync, SFTP
+• SSH Config File (~/.ssh/config)
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: SSH, Encryption, Key-based Auth (30 นาที)
+• สาธิต: เปิด SSH, สร้าง Key, Copy Key (30 นาที)
+• Lab: ผู้เรียนตั้งค่า SSH บน VM ตนเอง (60 นาที)
+• Lab: Harden SSH (/etc/ssh/sshd_config) (45 นาที)
+• ทดสอบ scp โอนไฟล์ระหว่าง VM (30 นาที)
+• บันทึก Config + Reflection (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• Terminal (Windows Terminal / PuTTY / macOS Terminal)
+• ใบความรู้ที่ 6: SSH Protocol
+• ใบงานที่ 6: SSH Config Checklist
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 6: SSH Config + ผลทดสอบ
+• Screenshot การเชื่อมต่อสำเร็จ
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ SSH
+ใบงานที่ 6
+เชื่อมต่อได้
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+ปลอดภัย
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+7  ชื่อหน่วย: การจัดการผู้ใช้และสิทธิ์ (User & Permission Management)
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถสร้างและจัดการ User/Group บน Linux ได้
+• ผู้เรียนสามารถกำหนดสิทธิ์ไฟล์ด้วย chmod, chown ได้
+• ผู้เรียนสามารถกำหนดสิทธิ์ sudo ผ่าน sudoers ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: System Administrator / IT Support
+3. สมรรถนะประจำหน่วย
+• จัดการ User/Group ได้
+• กำหนดสิทธิ์ไฟล์ได้
+• จัดการ sudo ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• สร้าง User ด้วย useradd ได้
+• สร้าง Group ด้วย groupadd ได้
+• ใช้ chmod/chown ได้
+• แก้ sudoers ได้
+5. สาระการเรียนรู้
+• Linux User Model: /etc/passwd, /etc/shadow, /etc/group
+• useradd, usermod, userdel, passwd
+• groupadd, groupmod, gpasswd
+• File Permission: rwx, Octal Notation (755, 644)
+• chmod, chown, chgrp
+• sudoers: visudo, %sudo ALL=(ALL) ALL
+• ACL (Access Control List) เบื้องต้น
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: Linux User Model, Permission System (45 นาที)
+• Lab: useradd, groupadd, chmod, chown บน VM (45 นาที)
+• ออกแบบโครงสร้างผู้ใช้สำหรับ Server จำลอง (30 นาที)
+• Lab: ตั้งค่า sudoers, ทดสอบสิทธิ์ (60 นาที)
+• สร้าง Script สร้างผู้ใช้จำนวนมาก (Batch User) (30 นาที)
+• บันทึก + Reflection (30 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ใบความรู้ที่ 7: User Management
+• ใบงานที่ 7
+• VM Ubuntu Server
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 7: ผลการทดสอบสิทธิ์ครบตาม Scenario
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ
+ใบงานที่ 7
+ตรงตาม Scenario
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+ระเบียบ
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+8  ชื่อหน่วย: Firewall เบื้องต้น (UFW / firewalld)
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบายหลักการ Firewall Rules และ Policy ได้
+• ผู้เรียนสามารถตั้งค่า UFW/firewalld บน Linux Server ได้
+• ผู้เรียนสามารถเปิด/ปิดพอร์ตและดู Log ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: Network Admin / Security Engineer
+3. สมรรถนะประจำหน่วย
+• อธิบาย Firewall Rules ได้
+• ตั้งค่า UFW ได้
+• เปิด/ปิดพอร์ตได้
+4. จุดประสงค์เชิงพฤติกรรม
+• เปิดใช้ UFW ได้
+• Allow/Deny พอร์ตได้
+• ดู UFW Status ได้
+• ดู /var/log/ufw.log ได้
+5. สาระการเรียนรู้
+• Firewall Concept: Stateful vs Stateless, Allow/Deny, Default Policy
+• UFW (Uncomplicated Firewall): ufw enable, ufw allow, ufw deny
+• firewalld: zones, services, ports
+• iptables เบื้องต้น (ทฤษฎี)
+• การดู Log: /var/log/ufw.log, journalctl
+• กำหนด Policy สำหรับ Server แต่ละบริการ
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: Firewall Concept, UFW, firewalld (30 นาที)
+• Lab: ติดตั้ง UFW, ตั้ง Default Deny, Allow SSH/80/443 (60 นาที)
+• สาธิต: ผลของการ Block พอร์ต (30 นาที)
+• Lab: ทดสอบเปิด/ปิดพอร์ต จาก Client VM อื่น (45 นาที)
+• ดู Log + วิเคราะห์ (30 นาที)
+• เขียน Firewall Policy สำหรับ Server ตนเอง (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ใบความรู้ที่ 8: Firewall
+• ใบงานที่ 8: Firewall Policy Document
+• VM Ubuntu Server
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 8: Firewall Policy + Log Analysis
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ Firewall
+ใบงานที่ 8
+Policy ถูกต้อง
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+รับผิดชอบ
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+9  ชื่อหน่วย: DHCP Server
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบาย DHCP Process (DORA) ได้
+• ผู้เรียนสามารถติดตั้งและตั้งค่า isc-dhcp-server ได้
+• ผู้เรียนสามารถทดสอบ DHCP โดยให้ Client VM รับ IP อัตโนมัติได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: Network Administrator / IT Support
+3. สมรรถนะประจำหน่วย
+• อธิบาย DHCP Process ได้
+• ติดตั้ง DHCP Server ได้
+• ทดสอบแจก IP ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• ติดตั้ง isc-dhcp-server ได้
+• ตั้งค่า Scope ได้
+• กำหนด Reservation ได้
+• ดู Lease ได้
+5. สาระการเรียนรู้
+• DHCP Process: Discover, Offer, Request, Acknowledge (DORA)
+• Lease Time, Scope, Range, Exclusion
+• isc-dhcp-server: /etc/dhcp/dhcpd.conf
+• DHCP Options: Router, DNS, Domain Name
+• Static Lease (Reservation) ด้วย MAC Address
+• การดู Lease: /var/lib/dhcp/dhcpd.leases
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: DHCP DORA Process, Lease, Scope (30 นาที)
+• สาธิต: ติดตั้ง isc-dhcp-server, แก้ dhcpd.conf (30 นาที)
+• Lab: ผู้เรียนติดตั้งและตั้งค่า DHCP บน VM ตนเอง (60 นาที)
+• ทดสอบ: Client VM รับ IP จาก DHCP Server ได้ (45 นาที)
+• กำหนด Reservation ด้วย MAC Address (30 นาที)
+• บันทึก Lease + Reflection (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ใบความรู้ที่ 9: DHCP
+• ใบงานที่ 9
+• VM Ubuntu Server (DHCP + Client)
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 9: Config File + Screenshot Client ได้รับ IP
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ DHCP
+ใบงานที่ 9
+Client รับ IP ได้
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+ถูกต้อง
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+10  ชื่อหน่วย: DNS Server
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบาย DNS Hierarchy และ Record Types ได้
+• ผู้เรียนสามารถติดตั้ง BIND9 และตั้งค่า Forward/Reverse Zone ได้
+• ผู้เรียนสามารถทดสอบ DNS ด้วย nslookup/dig ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: Network Administrator / System Administrator
+3. สมรรถนะประจำหน่วย
+• อธิบาย DNS Hierarchy ได้
+• ตั้งค่า BIND9 ได้
+• ทดสอบ DNS ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• ติดตั้ง BIND9 ได้
+• ตั้ง Forward Zone ได้
+• ตั้ง Reverse Zone ได้
+• ทดสอบด้วย dig ได้
+5. สาระการเรียนรู้
+• DNS Hierarchy: Root, TLD, Authoritative, Recursive
+• Record Types: A, AAAA, CNAME, MX, PTR, NS, SOA, TXT
+• BIND9: named.conf, Zone File Format
+• Forward Zone: แปลง Domain → IP
+• Reverse Zone: แปลง IP → Domain
+• ทดสอบ: nslookup, dig, host
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: DNS Hierarchy, Record Types (30 นาที)
+• สาธิต: ติดตั้ง BIND9, แก้ named.conf (30 นาที)
+• Lab: ตั้งค่า Forward Zone (60 นาที)
+• Lab: ตั้งค่า Reverse Zone (45 นาที)
+• ทดสอบด้วย dig, nslookup จาก Client (30 นาที)
+• เชื่อม DNS กับ DHCP + Reflection (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ใบความรู้ที่ 10: DNS
+• ใบงานที่ 10
+• BIND9 Zone Files
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 10: Zone File + ผล dig/nslookup
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ DNS
+ใบงานที่ 10
+Resolve ได้
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+ถูกต้อง
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+11  ชื่อหน่วย: Web Server (Nginx / Apache)
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถติดตั้ง Nginx/Apache และตั้งค่า Virtual Host ได้
+• ผู้เรียนสามารถ Deploy เว็บไซต์ HTML/PHP ได้
+• ผู้เรียนสามารถเชื่อม Domain จาก DNS Server ตนเองกับ Web Server ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: System Administrator / Web Developer / DevOps
+3. สมรรถนะประจำหน่วย
+• ติดตั้ง Web Server ได้
+• ตั้งค่า Virtual Host ได้
+• Deploy เว็บไซต์ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• ติดตั้ง Nginx ได้
+• ตั้งค่า Server Block ได้
+• Upload ไฟล์เว็บไซต์ได้
+• ทดสอบเปิดเว็บได้
+5. สาระการเรียนรู้
+• HTTP Protocol: Request/Response, Method (GET, POST)
+• Nginx: Installation, nginx.conf, sites-available/sites-enabled
+• Apache: Installation, httpd.conf, Virtual Host
+• Server Block / Virtual Host: ServerName, DocumentRoot
+• PHP-FPM สำหรับ Dynamic Content
+• การ Deploy เว็บไซต์ผ่าน scp/rsync
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: HTTP Protocol, Web Server Architecture (30 นาที)
+• สาธิต: ติดตั้ง Nginx, ตั้งค่า Default Site (30 นาที)
+• Lab: ผู้เรียนติดตั้ง Nginx + ตั้ง Virtual Host (60 นาที)
+• Deploy เว็บไซต์ HTML/PHP (45 นาที)
+• เชื่อม Domain จาก DNS Server ตนเอง (30 นาที)
+• ทดสอบเปิดเว็บผ่าน Browser + Reflection (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ใบความรู้ที่ 11: Web Server
+• ใบงานที่ 11
+• เว็บไซต์ตัวอย่าง (HTML/PHP)
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 11: URL ที่เปิดได้จริง + Screenshot
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ Web
+ใบงานที่ 11
+เปิดเว็บได้
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+สร้างสรรค์
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+12  ชื่อหน่วย: Database Server (MariaDB) + LAMP/LEMP Stack
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถติดตั้ง MariaDB และสร้าง Database/User ได้
+• ผู้เรียนสามารถเชื่อม Web Server กับ Database เป็น LAMP/LEMP Stack ได้
+• ผู้เรียนสามารถทดสอบ PHP-MySQL Query ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: System Administrator / Backend Developer / DevOps
+3. สมรรถนะประจำหน่วย
+• ติดตั้ง MariaDB ได้
+• สร้าง DB/User ได้
+• เชื่อม LAMP Stack ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• ติดตั้ง MariaDB ได้
+• mysql_secure_installation ได้
+• สร้าง DB, User, Grant ได้
+• ทดสอบ PHP-MySQL ได้
+5. สาระการเรียนรู้
+• MariaDB vs MySQL: ความแตกต่าง
+• Installation: mariadb-server, mariadb-client
+• mysql_secure_installation
+• SQL พื้นฐาน: CREATE DATABASE, CREATE USER, GRANT
+• LAMP Stack: Linux + Apache/Nginx + MariaDB + PHP
+• PHP: mysqli_connect(), PDO
+• phpMyAdmin (ตัวเลือก)
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: RDBMS, MariaDB, LAMP Stack Concept (30 นาที)
+• สาธิต: ติดตั้ง MariaDB, Secure Installation (30 นาที)
+• Lab: ติดตั้ง MariaDB + สร้าง DB/User บน VM ตนเอง (60 นาที)
+• เชื่อม PHP กับ MariaDB: test connection (45 นาที)
+• Deploy Simple CRUD Application (30 นาที)
+• บันทึก + Reflection (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ใบความรู้ที่ 12: Database
+• ใบงานที่ 12
+• PHP CRUD ตัวอย่าง
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 12: CRUD App ทำงานได้ + Screenshot
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ DB
+ใบงานที่ 12
+CRUD ทำงานได้
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+รับผิดชอบ
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+13  ชื่อหน่วย: File & Resource Sharing (Samba/NFS) + Proxy Server (Squid)
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถติดตั้ง Samba สำหรับแชร์ไฟล์กับ Windows ได้
+• ผู้เรียนสามารถติดตั้ง NFS สำหรับแชร์กับ Linux ได้
+• ผู้เรียนสามารถติดตั้ง Squid Proxy และกำหนด ACL ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: Network Administrator / IT Support
+3. สมรรถนะประจำหน่วย
+• ติดตั้ง Samba ได้
+• ติดตั้ง NFS ได้
+• ติดตั้ง Squid Proxy ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• ตั้งค่า smb.conf ได้
+• Mount NFS Share ได้
+• กำหนด ACL บน Squid ได้
+5. สาระการเรียนรู้
+• Samba: SMB Protocol, /etc/samba/smb.conf, Share Permissions
+• NFS: /etc/exports, mount, showmount
+• Proxy Server: Forward Proxy, Squid
+• Squid: /etc/squid/squid.conf, ACL, http_access
+• การกรอง URL และ Domain Blacklist
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: File Sharing, SMB vs NFS, Proxy Concept (30 นาที)
+• Lab: ติดตั้ง Samba + ตั้งค่า Share (60 นาที)
+• สาธิต: Mount NFS จาก Client VM (30 นาที)
+• ติดตั้ง Squid Proxy + กำหนด ACL (60 นาที)
+• ทดสอบกรอง URL ผ่าน Browser (30 นาที)
+• บันทึก + Reflection (30 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ใบความรู้ที่ 13
+• ใบงานที่ 13
+• VM Ubuntu Server
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 13: Config Files + ผลทดสอบ
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ
+ใบงานที่ 13
+Share/Proxy ทำงาน
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+ร่วมมือ
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+14  ชื่อหน่วย: SSL Certificate + AAA Server เบื้องต้น
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบาย TLS/SSL และ PKI ได้
+• ผู้เรียนสามารถออก Self-Signed Certificate และเปิด HTTPS ได้
+• ผู้เรียนสามารถอธิบาย AAA/RADIUS Protocol เบื้องต้นได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: Security Engineer / Network Admin / System Admin
+3. สมรรถนะประจำหน่วย
+• อธิบาย TLS/SSL ได้
+• ออก SSL Certificate ได้
+• เปิด HTTPS ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• ออก Self-Signed Cert ด้วย openssl ได้
+• ตั้งค่า HTTPS บน Nginx ได้
+• อธิบาย RADIUS ได้
+5. สาระการเรียนรู้
+• TLS/SSL: Handshake, Certificate Chain, CA, PKI
+• Self-Signed Certificate: openssl req -x509
+• Let's Encrypt / Certbot (Concept)
+• HTTPS บน Nginx: ssl_certificate, ssl_certificate_key
+• AAA Framework: Authentication, Authorization, Accounting
+• RADIUS Protocol: FreeRADIUS เบื้องต้น
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: TLS/SSL, PKI, Certificate Chain (30 นาที)
+• Lab: ออก Self-Signed Certificate ด้วย openssl (30 นาที)
+• ตั้งค่า HTTPS บน Nginx (60 นาที)
+• ทดสอบ HTTPS ผ่าน Browser (30 นาที)
+• ทฤษฎี + สาธิต: AAA, RADIUS (45 นาที)
+• บันทึก + Reflection (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ใบความรู้ที่ 14: SSL + AAA
+• ใบงานที่ 14
+• openssl tool
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 14: HTTPS ที่เปิดได้ + Certificate Info
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ SSL
+ใบงานที่ 14
+HTTPS ทำงาน
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+ปลอดภัย
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+15  ชื่อหน่วย: Container Platform (Docker) + Deploy Web Application (DevOps)
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบายความแตกต่างระหว่าง Container และ VM ได้
+• ผู้เรียนสามารถติดตั้ง Docker และสร้าง/รัน Container ได้
+• ผู้เรียนสามารถ Deploy Web Application (Node.js / Python Flask) ลง Container ได้
+• ผู้เรียนสามารถใช้ docker-compose สำหรับ Multi-container Application ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: DevOps Engineer / System Administrator / Cloud Engineer
+3. สมรรถนะประจำหน่วย
+• อธิบาย Container vs VM ได้
+• ติดตั้ง Docker ได้
+• สร้าง Dockerfile และ Build Image ได้
+• Deploy Web App ลง Container ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• ติดตั้ง Docker Engine บน VM ได้
+• ใช้ docker pull, run, ps, stop, rm ได้
+• เขียน Dockerfile ได้
+• docker build, docker run -p ได้
+• เขียน docker-compose.yml ได้
+5. สาระการเรียนรู้
+• Container vs VM: ความแตกต่าง, ข้อดีข้อเสีย
+• Docker Architecture: Docker Engine, Image, Container, Registry
+• Docker Commands: pull, run, ps, stop, rm, images, logs
+• Dockerfile: FROM, RUN, COPY, EXPOSE, CMD
+• docker-compose.yml: services, ports, volumes, networks
+• Docker Hub: Public Registry
+• Deploy Web App: Node.js express / Python Flask ลง Container
+• Expose Port: -p 80:3000
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: Container Concept, Docker Architecture (30 นาที)
+• สาธิต: ติดตั้ง Docker, docker run hello-world (20 นาที)
+• Lab: ติดตั้ง Docker, pull/run nginx, node:alpine (70 นาที)
+• Lab: เขียน Dockerfile สำหรับ Web App ตนเอง (45 นาที)
+• docker-compose.yml: Web App + Database (30 นาที)
+• ทดสอบเปิดผ่าน Browser + Reflection (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• Docker Documentation
+• ใบความรู้ที่ 15: Docker
+• ใบงานที่ 15
+• Web App ตัวอย่าง (Node.js/Flask)
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 15: Dockerfile + docker-compose.yml + URL ที่เปิดได้
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ Docker
+ใบงานที่ 15
+Container รันได้
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+นวัตกรรม
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+16  ชื่อหน่วย: DevOps เบื้องต้น: Git, CI/CD, Automation + IoT Platform
+จำนวนชั่วโมง
+ทฤษฎี 1 ชม.  ปฏิบัติ 4 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถอธิบาย DevOps Lifecycle และ CI/CD Pipeline ได้
+• ผู้เรียนสามารถใช้ Git และ GitHub/Gitea สำหรับ Version Control ได้
+• ผู้เรียนสามารถสร้าง Auto-deploy Script อย่างง่ายได้
+• ผู้เรียนสามารถติดตั้ง Node-RED หรือ Mosquitto MQTT ได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: DevOps Engineer / IoT Developer
+3. สมรรถนะประจำหน่วย
+• อธิบาย DevOps และ CI/CD ได้
+• ใช้ Git workflow ได้
+• สร้าง Auto-deploy Script ได้
+• ติดตั้ง IoT Platform ได้
+4. จุดประสงค์เชิงพฤติกรรม
+• อธิบาย DevOps Lifecycle ได้
+• ใช้ git init, add, commit, push, pull ได้
+• เขียน Shell Script Auto-deploy ได้
+• ติดตั้ง Node-RED ได้
+5. สาระการเรียนรู้
+• DevOps: Culture, Practices, Tools
+• CI/CD: Continuous Integration, Delivery, Deployment
+• Git: Version Control, Branch, Merge
+• GitHub/Gitea: Remote Repository, Webhook
+• Auto-deploy Script: git pull + restart service
+• IoT Platform: Node-RED, Mosquitto MQTT Broker
+• Node-RED: Flow-based Programming, Dashboard
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• ทฤษฎี: DevOps Lifecycle, CI/CD Pipeline (30 นาที)
+• Lab: ติดตั้ง Git, สร้าง Repo, push/pull (45 นาที)
+• สาธิต: Auto-deploy Script จาก Git (45 นาที)
+• ติดตั้ง Node-RED บน VM (30 นาที)
+• สร้าง IoT Dashboard อย่างง่าย (45 นาที)
+• บันทึก + Reflection: 'DevOps เชื่อมกับทุกหน่วยอย่างไร' (45 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• ใบความรู้ที่ 16: DevOps + IoT
+• ใบงานที่ 16
+• Git, Node-RED
+8. หลักฐานการเรียนรู้และการประเมิน
+• ใบงานที่ 16: Git Log + Auto-deploy ทำงานได้ + IoT Dashboard
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+ปฏิบัติ
+ใบงานที่ 16
+Script ทำงาน
+70%
+แบบทดสอบ
+ข้อสอบ
+≥ 60%
+20%
+จิตพิสัย
+สังเกต
+นวัตกรรม
+10%
+แผนการจัดการเรียนรู้
+รหัสวิชา
+31901-2002
+ชื่อวิชา
+ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)
+หน่วยที่
+17  ชื่อหน่วย: โครงงานบูรณาการ: Home Lab Server + นำเสนอ + สอบปลายภาค
+จำนวนชั่วโมง
+ทฤษฎี 2 ชม.  ปฏิบัติ 8 ชม.
+มาตรฐานอาชีพ
+รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+1. ผลลัพธ์การเรียนรู้ระดับหน่วยการเรียน
+• ผู้เรียนสามารถออกแบบและติดตั้ง Home Lab Server ที่ครบ Service ที่กำหนดได้
+• ผู้เรียนสามารถ Deploy Web Application บน VM ด้วย Docker ได้
+• ผู้เรียนสามารถนำเสนอผลงานและตอบคำถามได้
+• ผู้เรียนสามารถเขียน Documentation ประกอบโครงงานได้
+2. อ้างอิงมาตรฐาน / เชื่อมโยงกลุ่มอาชีพ
+2.1 มาตรฐานอาชีพ: รหัส 40106 ช่างสนับสนุนด้านเทคนิค ระดับ 5
+2.2 บูรณาการ: System Administrator / DevOps Engineer
+3. สมรรถนะประจำหน่วย
+• ออกแบบ Network Diagram และ Service Architecture ได้
+• ติดตั้ง Proxmox + VM + Services ครบทุก Service ได้
+• Deploy Web Application บน Docker ได้
+• เขียน Documentation (Runbook) ได้
+• นำเสนอผลงานได้อย่างมั่นใจ
+4. จุดประสงค์เชิงพฤติกรรม
+• วาด Network Diagram ได้
+• ติดตั้ง Service ≥ 5 บริการใน VM ได้
+• Deploy Web App บน Docker ได้
+• เขียน Runbook อย่างน้อย 3 หน้า
+• นำเสนอได้ภายใน 10 นาที
+5. สาระการเรียนรู้
+• การออกแบบ Network Diagram สำหรับ Home Lab
+• Service Requirements: Proxmox + VM + DNS + Web + DB + Docker + Web App
+• Documentation: Runbook / Setup Guide
+• การนำเสนอ: โครงสร้าง Demo, ตอบคำถาม
+• การทดสอบ: Functional Test ทุก Service
+• Reflection: บทเรียนที่ได้รับตลอดภาคเรียน
+6. กิจกรรมการเรียนรู้
+วันจันทร์ (3 ชั่วโมง)
+วันศุกร์ (2 ชั่วโมง)
+• กลุ่มนำเสนอ Home Lab Server (กลุ่มละ 10 นาที)
+• Demo Live: เปิด Service จริง, SSH, เปิดเว็บ, Docker Container
+• คณะกรรมการถามคำถาม (5 นาที/กลุ่ม)
+• สอบปลายภาคปฏิบัติ (Individual): ติดตั้ง Server ตาม Spec ที่กำหนด (90 นาที)
+• สรุป Reflection ภาพรวมตลอดภาคเรียน (30 นาที)
+7. สื่อและแหล่งการเรียนรู้
+• Server จริง / Proxmox Cluster
+• Rubric การนำเสนอ
+• ข้อสอบปฏิบัติปลายภาค
+• แบบประเมิน Documentation
+8. หลักฐานการเรียนรู้และการประเมิน
+• โครงงาน: Runbook + Demo
+• ผลสอบปลายภาคปฏิบัติ
+• Reflection
+วิธีประเมิน
+เครื่องมือ
+เกณฑ์
+สัดส่วน
+โครงงาน + Demo
+Rubric
+ผ่านเกณฑ์ 70%
+40%
+สอบปลายภาคปฏิบัติ
+ข้อสอบ
+≥ 60%
+40%
+Documentation
+Runbook
+ครบถ้วน
+10%
+จิตพิสัย
+สังเกต
+ทีมงาน
+10%
+ส่วนที่ 5: การวัดและประเมินผล
+วิธีการประเมิน
+เครื่องมือ
+สัดส่วนคะแนน
+คะแนนระหว่างภาค (ใบงาน 17 หน่วย)
+ใบงาน, Checklist, Rubric
+40%
+สอบกลางภาค (ทฤษฎี + ปฏิบัติ)
+ข้อสอบ + Practical Exam
+20%
+สอบปลายภาค (ปฏิบัติ)
+Practical Exam
+20%
+โครงงานบูรณาการ + นำเสนอ
+Rubric + Presentation
+15%
+จิตพิสัย / การมีส่วนร่วม
+แบบสังเกตพฤติกรรม
+5%
+รวม
+100%
+เกณฑ์การผ่านรายวิชา
+• ผู้เรียนต้องได้คะแนนรวมไม่ต่ำกว่าร้อยละ 50
+• ผู้เรียนต้องเวลาเรียนไม่ต่ำกว่าร้อยละ 80 ของเวลาเรียนทั้งหมด
+• ผู้เรียนต้องส่งใบงานครบทุกหน่วย
+• ผู้เรียนต้องนำเสนอโครงงานบูรณาการ
+ส่วนที่ 6: แหล่งเรียนรู้และสื่อประกอบ
+• เอกสารอ้างอิง: Ubuntu Server Documentation, Proxmox VE Wiki, BIND9 Admin Manual
+• วิดีโอ: NetworkChuck (YouTube), TechWorld with Nana (YouTube), LearnLinuxTV (YouTube)
+• Platform: Linux Foundation Training, Proxmox Documentation, Docker Official Docs
+• เครื่องมือ: Proxmox VE, Ubuntu Server 24.04 LTS, Docker, BIND9, Nginx, MariaDB, Wireshark
+• Git Repository: เก็บ Script และ Config ทุกหน่วย

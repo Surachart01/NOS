@@ -66,5 +66,16 @@
         "topic": "Nginx Web Server on LXC"
       }
     ]
+  },
+  {
+    "weekLabel": "สัปดาห์ที่ 6: การจัดการผู้ใช้ สิทธิ์ และความปลอดภัย SSH",
+    "sessions": [
+      {
+        "id": "6a",
+        "displayNum": "อ.",
+        "title": "การจัดการผู้ใช้ สิทธิ์ และความปลอดภัย SSH",
+        "topic": "User & Permission Management & SSH Hardening"
+      }
+    ]
   }
 ]
