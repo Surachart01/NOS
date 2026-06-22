@@ -50,6 +50,38 @@ function CoverSlide({ s }: { s: SlideData }) {
   );
 }
 
+function renderFormattedText(text: string) {
+  if (!text) return "";
+  const parts = text.split(/(`[^`]+`)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith("`") && part.endsWith("`")) {
+      const code = part.slice(1, -1);
+      return (
+        <code
+          key={index}
+          style={{
+            background: "#0f172a",
+            color: "#38bdf8",
+            padding: "2px 6px",
+            borderRadius: "5px",
+            fontFamily: "'Fira Code', 'Courier New', Courier, monospace",
+            fontSize: "0.85em",
+            border: "1px solid #1e293b",
+            margin: "0 2px",
+            display: "inline-block",
+            verticalAlign: "middle",
+            fontWeight: "bold",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.12)"
+          }}
+        >
+          {code}
+        </code>
+      );
+    }
+    return part;
+  });
+}
+
 function ContentSlide({ s }: { s: SlideData }) {
   // Detect if a line is a terminal/command line
   const isCmd = (line: string) => {
@@ -134,7 +166,7 @@ function ContentSlide({ s }: { s: SlideData }) {
                     color: isSubItem ? 'var(--text-secondary)' : 'var(--text-primary)',
                     lineHeight: 1.5
                   }}>
-                    {g.text}
+                    {renderFormattedText(g.text)}
                   </li>
                 );
               }
@@ -183,7 +215,7 @@ function TwoColSlide({ s }: { s: SlideData }) {
         {s.cols?.map((col, i) => (
           <div className="col-box" key={i}>
             <h3>{col.icon} {col.title}</h3>
-            <ul>{col.items.map((item, j) => <li key={j}>{item}</li>)}</ul>
+            <ul>{col.items.map((item, j) => <li key={j}>{renderFormattedText(item)}</li>)}</ul>
           </div>
         ))}
       </div>
@@ -3481,11 +3513,18 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
 
 function HomeworkSlide({ s }: { s: SlideData }) {
   const isW3b = s.id?.startsWith('w3b');
+  const isW6a = s.id?.startsWith('w6a');
 
   const scenarioTitle = isW3b ? '🏠 สถานการณ์จำลองในการฝึกปฏิบัติ' : '🏠 สถานการณ์จำลองในโจทย์';
-  const scenarioDesc = isW3b
-    ? 'นักเรียนล็อกอินเข้าระบบ Linux Server และต้องการเตรียมความพร้อมสร้างสภาพแวดล้อมไดเรกทอรีทำงาน พร้อมทดสอบความเข้าใจเกี่ยวกับการจัดการไฟล์และการนำทาง'
-    : 'ให้นักเรียนสมมติว่าตนเอง "กลับถึงบ้าน หยิบสมาร์ทโฟน/คอมพิวเตอร์มาเชื่อมต่อ Wi-Fi ที่บ้าน จากนั้นพิมพ์เปิดเว็บไซต์ www.google.com" เพื่อสืบค้นสื่อการสอน';
+  
+  let scenarioDesc = '';
+  if (isW3b) {
+    scenarioDesc = 'นักเรียนล็อกอินเข้าระบบ Linux Server และต้องการเตรียมความพร้อมสร้างสภาพแวดล้อมไดเรกทอรีทำงาน พร้อมทดสอบความเข้าใจเกี่ยวกับการจัดการไฟล์และการนำทาง';
+  } else if (isW6a) {
+    scenarioDesc = 'นักเรียนล็อกอินเข้าระบบ Linux Server เพื่อสร้างบัญชีและจำกัดสิทธิ์ผู้ใช้งาน รวมถึงการติดตั้ง SSH Key-based Authentication และลงกลอนความปลอดภัยเซิร์ฟเวอร์';
+  } else {
+    scenarioDesc = 'ให้นักเรียนสมมติว่าตนเอง "กลับถึงบ้าน หยิบสมาร์ทโฟน/คอมพิวเตอร์มาเชื่อมต่อ Wi-Fi ที่บ้าน จากนั้นพิมพ์เปิดเว็บไซต์ www.google.com" เพื่อสืบค้นสื่อการสอน';
+  }
 
   const scenarioSteps = isW3b ? (
     <>
@@ -3494,6 +3533,14 @@ function HomeworkSlide({ s }: { s: SlideData }) {
       <span>📝 สร้างและเขียน config.txt</span>
       <span>➔</span>
       <span>🔍 ตรวจสอบและอ่านไฟล์</span>
+    </>
+  ) : isW6a ? (
+    <>
+      <span>👤 สร้างและสลับผู้ใช้งาน</span>
+      <span>➔</span>
+      <span>🔒 กำหนดสิทธิ์ chmod/chown</span>
+      <span>➔</span>
+      <span>🔑 เปิดใช้ SSH Key & Hardening</span>
     </>
   ) : (
     <>
@@ -3507,43 +3554,67 @@ function HomeworkSlide({ s }: { s: SlideData }) {
 
   const tasksHeader = isW3b
     ? '📋 ภารกิจปฏิบัติการที่ต้องเขียนอธิบาย (กรุณาตอบให้ครบทั้ง 4 ข้อ):'
-    : '📋 ภารกิจคำถามที่ต้องตอบเขียนสรุป (กรุณาตอบให้ครบทั้ง 4 ข้อ):';
+    : '📋 ภารกิจคำถามทฤษฎีที่ต้องเขียนอธิบาย (กรุณาตอบให้ครบทั้ง 4 ข้อ):';
 
-  const tasks = isW3b ? [
-    {
-      title: 'การเดินทางและสร้างไดเรกทอรีทำงาน',
-      desc: 'เขียนลำดับคำสั่งที่ถูกต้องเพื่อเดินทางไปยังโฟลเดอร์ home ของ student แล้วสร้างโฟลเดอร์ย่อยใหม่ชื่อ lab-dhcp'
-    },
-    {
-      title: 'การจัดการไฟล์และการเขียนข้อมูลด้วย nano',
-      desc: 'หากต้องการย้ายตำแหน่งเข้าไปในโฟลเดอร์ lab-dhcp แล้วเขียนสร้างไฟล์ข้อความชื่อ config.txt พร้อมบันทึกข้อความภายในไฟล์ด้วย nano ต้องพิมพ์สั่งงานอย่างไร'
-    },
-    {
-      title: 'การตรวจสอบไฟล์และแสดงเนื้อหาเบื้องต้น',
-      desc: 'ระบุคำสั่งในการตรวจสอบรายชื่อไฟล์เพื่อดูว่ามีไฟล์ config.txt อยู่จริง แสดงรายละเอียดสิทธิ์และขนาด และแสดงเนื้อความข้างในโดยไม่ต้องเปิดโปรแกรมแก้ไขข้อความ nano'
-    },
-    {
-      title: 'การเช็คหมายเลขไอพีและการแก้ไวยากรณ์ผิดพลาด',
-      desc: 'บอกวิธีการตรวจสอบหมายเลข IP ของเซิร์ฟเวอร์ และระบุสาเหตุข้อผิดพลาดพร้อมตัวอย่างวิธีพิมพ์แก้ที่ถูกต้องเมื่อพบปัญหา cd.. หรือการใช้คำสั่ง rm เพื่อลบโฟลเดอร์แล้วระบบแสดงข้อความปฏิเสธ'
-    }
-  ] : [
-    {
-      title: 'วิเคราะห์การเชื่อมต่อ DHCP & ขั้นตอน DORA',
-      desc: 'เครื่องคอมพิวเตอร์หรืออุปกรณ์พกพาได้รับหมายเลข IP Address มาได้อย่างไร? อธิบายพร้อมสรุปขั้นตอนการคุยสัญญาณแบบย่อ 4 ลำดับ DORA ด้วยภาษาและความเข้าใจของตนเอง'
-    },
-    {
-      title: 'ระบุชุดข้อมูลเครือข่ายนอกเหนือจาก IP',
-      desc: 'ให้ระบุว่านอกจากหมายเลข IP Address หลักแล้ว เราเตอร์ (DHCP Server) ตอบส่งข้อมูลเครือข่ายส่วนสำคัญอะไรมาให้เครื่องของเราอีกบ้างเพื่อช่วยให้ใช้อินเทอร์เน็ตได้? (ระบุ 3 ข้อมูลเครือข่ายสำคัญ)'
-    },
-    {
-      title: 'กลไกการสืบค้นแคชและการแปลงชื่อ (DNS Process)',
-      desc: 'หลังจากเครื่องของเราได้เลขไอพีแล้ว ระบบทำการติดต่อและแปลงชื่อเว็บไซต์ www.google.com ให้เป็น IP Address ปลายทางของทางกูเกิลผ่าน DNS Server ได้อย่างไร? (อธิบายลำดับการค้นหาข้อมูล)'
-    },
-    {
-      title: 'ประเภทและการใช้งานของ DNS Records',
-      desc: 'หากหน่วยงานต้องการเปิดใช้งานเว็บไซต์หลักและระบบเซิร์ฟเวอร์รับส่งอีเมลเป็นของตนเอง จะต้องเข้าไปทำการตั้งค่า DNS Records ประเภทใดบ้าง? ให้เขียนระบุความหมายและการยกตัวอย่างระเบียนหลักทั้ง 4 ชนิด (A, CNAME, MX, TXT Record)'
-    }
-  ];
+  let tasks = [];
+  if (isW3b) {
+    tasks = [
+      {
+        title: 'การเดินทางและสร้างไดเรกทอรีทำงาน',
+        desc: 'เขียนลำดับคำสั่งที่ถูกต้องเพื่อเดินทางไปยังโฟลเดอร์ home ของ student แล้วสร้างโฟลเดอร์ย่อยใหม่ชื่อ lab-dhcp'
+      },
+      {
+        title: 'การจัดการไฟล์และการเขียนข้อมูลด้วย nano',
+        desc: 'หากต้องการย้ายตำแหน่งเข้าไปในโฟลเดอร์ lab-dhcp แล้วเขียนสร้างไฟล์ข้อความชื่อ config.txt พร้อมบันทึกข้อความภายในไฟล์ด้วย nano ต้องพิมพ์สั่งงานอย่างไร'
+      },
+      {
+        title: 'การตรวจสอบไฟล์และแสดงเนื้อหาเบื้องต้น',
+        desc: 'ระบุคำสั่งในการตรวจสอบรายชื่อไฟล์เพื่อดูว่ามีไฟล์ config.txt อยู่จริง แสดงรายละเอียดสิทธิ์และขนาด และแสดงเนื้อความข้างในโดยไม่ต้องเปิดโปรแกรมแก้ไขข้อความ nano'
+      },
+      {
+        title: 'การเช็คหมายเลขไอพีและการแก้ไวยากรณ์ผิดพลาด',
+        desc: 'บอกวิธีการตรวจสอบหมายเลข IP ของเซิร์ฟเวอร์ และระบุสาเหตุข้อผิดพลาดพร้อมตัวอย่างวิธีพิมพ์แก้ที่ถูกต้องเมื่อพบปัญหา cd.. หรือการใช้คำสั่ง rm เพื่อลบโฟลเดอร์แล้วระบบแสดงข้อความปฏิเสธ'
+      }
+    ];
+  } else if (isW6a) {
+    tasks = [
+      {
+        title: 'การจัดการผู้ใช้และสิทธิ์ยกระดับ (`su` & `sudo`)',
+        desc: 'อธิบายความแตกต่างระหว่างคำสั่ง `su` และ `sudo` พร้อมเหตุผลว่าทำไมในระบบเครือข่ายระดับองค์กรจึงไม่แนะนำให้ใช้สิทธิ์ `root` ในการควบคุมเซิร์ฟเวอร์โดยตรง'
+      },
+      {
+        title: 'หลักการของสิทธิ์ไฟล์ระบบ (`chmod` & `chown`)',
+        desc: 'เปรียบเทียบและชี้แจงความแตกต่างของสิทธิ์ตัวเลข `644`, `755` และ `600` เมื่อนำไปกำหนดให้กับไฟล์หรือโฟลเดอร์ และหากผู้เขียนเผลอรันคำสั่ง `chmod 777` กับโฟลเดอร์เก็บข้อมูลหลัก จะเสี่ยงต่อความปลอดภัยระบบอย่างไร'
+      },
+      {
+        title: 'การทำงานของระบบกุญแจเข้ารหัส (`SSH Key`)',
+        desc: 'อธิบายหลักการทำงานร่วมกันของคู่กุญแจเข้ารหัส `Private Key` และ `Public Key` ในการเชื่อมต่อควบคุมเซิร์ฟเวอร์ และตอบคำถามว่าทำไมวิธีการนี้จึงปลอดภัยจากการถูกสุ่มเดารหัสผ่าน (`Brute Force Attack`) มากกว่าแบบปกติ'
+      },
+      {
+        title: 'การลงกลอนเพิ่มความปลอดภัยของ SSH (`Hardening`)',
+        desc: 'การตั้งค่าในไฟล์ `/etc/ssh/sshd_config` ด้วยตัวแปร `PermitRootLogin no` และ `PasswordAuthentication no` มีวัตถุประสงค์เพื่ออะไร และตอบคำถามว่าทำไมเราห้ามปิดหน้าต่าง Terminal แรกที่รันงานอยู่จนกว่าจะทดสอบเชื่อมต่อสำเร็จ'
+      }
+    ];
+  } else {
+    tasks = [
+      {
+        title: 'วิเคราะห์การเชื่อมต่อ DHCP & ขั้นตอน DORA',
+        desc: 'เครื่องคอมพิวเตอร์หรืออุปกรณ์พกพาได้รับหมายเลข IP Address มาได้อย่างไร? อธิบายพร้อมสรุปขั้นตอนการคุยสัญญาณแบบย่อ 4 ลำดับ DORA ด้วยภาษาและความเข้าใจของตนเอง'
+      },
+      {
+        title: 'ระบุชุดข้อมูลเครือข่ายนอกเหนือจาก IP',
+        desc: 'ให้ระบุว่านอกจากหมายเลข IP Address หลักแล้ว เราเตอร์ (DHCP Server) ตอบส่งข้อมูลเครือข่ายส่วนสำคัญอะไรมาให้เครื่องของเราอีกบ้างเพื่อช่วยให้ใช้อินเทอร์เน็ตได้? (ระบุ 3 ข้อมูลเครือข่ายสำคัญ)'
+      },
+      {
+        title: 'กลไกการสืบค้นแคชและการแปลงชื่อ (DNS Process)',
+        desc: 'หลังจากเครื่องของเราได้เลขไอพีแล้ว ระบบทำการติดต่อและแปลงชื่อเว็บไซต์ www.google.com ให้เป็น IP Address ปลายทางของทางกูเกิลผ่าน DNS Server ได้อย่างไร? (อธิบายลำดับการค้นหาข้อมูล)'
+      },
+      {
+        title: 'ประเภทและการใช้งานของ DNS Records',
+        desc: 'หากหน่วยงานต้องการเปิดใช้งานเว็บไซต์หลักและระบบเซิร์ฟเวอร์รับส่งอีเมลเป็นของตนเอง จะต้องเข้าไปทำการตั้งค่า DNS Records ประเภทใดบ้าง? ให้เขียนระบุความหมายและการยกตัวอย่างระเบียนหลักทั้ง 4 ชนิด (A, CNAME, MX, TXT Record)'
+      }
+    ];
+  }
 
   return (
     <div className="slide slide-content slide-homework" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
@@ -3599,7 +3670,7 @@ function HomeworkSlide({ s }: { s: SlideData }) {
               {scenarioTitle}
             </span>
             <div style={{ fontSize: '12px', lineHeight: '1.4', color: 'var(--text-primary)' }}>
-              {scenarioDesc}
+              {renderFormattedText(scenarioDesc)}
             </div>
             <div style={{
               display: 'flex',
@@ -3656,9 +3727,9 @@ function HomeworkSlide({ s }: { s: SlideData }) {
                 flexShrink: 0
               }}>{index + 1}</div>
               <div>
-                <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{task.title}</div>
+                <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-primary)' }}>{renderFormattedText(task.title)}</div>
                 <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '2px', lineHeight: '1.4' }}>
-                  {task.desc}
+                  {renderFormattedText(task.desc)}
                 </div>
               </div>
             </div>
@@ -3734,13 +3805,79 @@ function LabSlide({ s }: { s: SlideData }) {
         <div className="lab-col">
           <div className="lab-section-title">🎯 วัตถุประสงค์</div>
           <ul className="objectives">
-            {s.objectives?.map((o, i) => <li key={i}>{o}</li>)}
+            {s.objectives?.map((o, i) => <li key={i}>{renderFormattedText(o)}</li>)}
           </ul>
         </div>
         <div className="lab-col">
           <div className="lab-section-title">📋 ขั้นตอน</div>
           <ul className="steps">
-            {s.steps?.map((st, i) => <li key={i} data-step={`${i + 1}.`}>{st}</li>)}
+            {s.steps?.map((st, i) => {
+              const lines = st.split('\n');
+              const text = lines[0];
+              const cmds = lines.slice(1);
+              return (
+                <li key={i} data-step={`${i + 1}.`} style={{ marginBottom: cmds.length > 0 ? '14px' : '6px', listStyleType: 'none', paddingLeft: 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    <div style={{ marginBottom: cmds.length > 0 ? '6px' : '0', color: 'var(--text-primary)', lineHeight: '1.4' }}>
+                      {renderFormattedText(text)}
+                    </div>
+                    {cmds.length > 0 && (
+                      <div style={{ 
+                        background: '#0d1117', 
+                        borderRadius: '10px', 
+                        overflow: 'hidden', 
+                        border: '1px solid #30363d', 
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.25)', 
+                        width: '100%', 
+                        marginTop: '6px',
+                        display: 'block'
+                      }}>
+                        {/* Terminal titlebar */}
+                        <div style={{ background: '#161b22', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #30363d' }}>
+                          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }} />
+                          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }} />
+                          <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#27c93f', display: 'inline-block' }} />
+                          <span style={{ fontSize: '10px', color: '#8b949e', marginLeft: '6px', fontFamily: 'monospace' }}>
+                            Terminal
+                          </span>
+                        </div>
+                        {/* Command lines */}
+                        <div style={{ 
+                          padding: '10px 14px', 
+                          fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace", 
+                          fontSize: '12px', 
+                          lineHeight: '1.7', 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          gap: '2px',
+                          background: '#0d1117'
+                        }}>
+                          {cmds.map((cmd, ci) => {
+                            const trimmed = cmd.trim();
+                            const isPrompt = trimmed.startsWith('$ ') || trimmed.startsWith('# ');
+                            if (isPrompt) {
+                              const prompt = trimmed.slice(0, 2);
+                              const rest = trimmed.slice(2);
+                              return (
+                                <div key={ci}>
+                                  <span style={{ color: '#79c0ff', marginRight: '6px' }}>{prompt}</span>
+                                  <span style={{ color: '#7ee787' }}>{rest}</span>
+                                </div>
+                              );
+                            }
+                            return (
+                              <div key={ci} style={{ color: '#e6edf3' }}>
+                                {cmd}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       </div>
@@ -3753,7 +3890,7 @@ function SummarySlide({ s }: { s: SlideData }) {
     <div className="slide slide-summary">
       <div className="slide-tag">{s.tag}</div>
       <h2>{s.title}</h2>
-      <ul>{s.items?.map((item, i) => <li key={i}>{item}</li>)}</ul>
+      <ul>{s.items?.map((item, i) => <li key={i}>{renderFormattedText(item)}</li>)}</ul>
     </div>
   );
 }
@@ -7422,6 +7559,421 @@ function ProxmoxGuideDocument() {
   );
 }
 
+/* ============================================================
+   INTERACTIVE CHMOD & CHOWN VISUALIZER
+   ============================================================ */
+function ChmodChownVisualizer({ s }: { s: SlideData }) {
+  // Permission state for Owner, Group, Others
+  const [perms, setPerms] = useState({
+    owner: { r: true, w: true, x: false },
+    group: { r: true, w: false, x: false },
+    others: { r: true, w: false, x: false },
+  });
+
+  // Chown state
+  const [fileOwner, setFileOwner] = useState('root');
+  const [fileGroup, setFileGroup] = useState('root');
+  const [chownAnimating, setChownAnimating] = useState(false);
+  const [activeTab, setActiveTab] = useState<'chmod' | 'chown'>('chmod');
+
+  // Calculate octal for a single group
+  const calcOctal = (p: { r: boolean; w: boolean; x: boolean }) =>
+    (p.r ? 4 : 0) + (p.w ? 2 : 0) + (p.x ? 1 : 0);
+
+  // Full octal string
+  const octalStr = `${calcOctal(perms.owner)}${calcOctal(perms.group)}${calcOctal(perms.others)}`;
+
+  // ls -l string
+  const toLs = (p: { r: boolean; w: boolean; x: boolean }) =>
+    `${p.r ? 'r' : '-'}${p.w ? 'w' : '-'}${p.x ? 'x' : '-'}`;
+  const lsStr = `-${toLs(perms.owner)}${toLs(perms.group)}${toLs(perms.others)}`;
+
+  // Security assessment
+  const getSecurityLevel = () => {
+    const o = octalStr;
+    if (o === '777' || o === '776' || o === '767') return { level: 'อันตรายมาก!', color: '#ef4444', emoji: '🚨', desc: 'ทุกคนสามารถอ่าน เขียน รันได้ ห้ามใช้บน Production!' };
+    if (o === '666' || o === '667') return { level: 'ไม่ปลอดภัย', color: '#f97316', emoji: '⚠️', desc: 'ทุกคนสามารถแก้ไขไฟล์ได้ เสี่ยงต่อการถูกแก้ไข' };
+    if (o === '644' || o === '755') return { level: 'แนะนำ ✓', color: '#22c55e', emoji: '✅', desc: o === '644' ? 'เหมาะสำหรับไฟล์ทั่วไป เช่น HTML, CSS, JS' : 'เหมาะสำหรับโฟลเดอร์หรือ Script' };
+    if (o === '600' || o === '400') return { level: 'ปลอดภัยสูง', color: '#3b82f6', emoji: '🔒', desc: 'เหมาะสำหรับไฟล์ลับ เช่น SSH Key, .env' };
+    if (o === '700') return { level: 'ปลอดภัยสูง', color: '#3b82f6', emoji: '🔒', desc: 'เหมาะสำหรับโฟลเดอร์ส่วนตัว เช่น ~/.ssh' };
+    if (o === '000') return { level: 'ล็อกทั้งหมด', color: '#6b7280', emoji: '🔐', desc: 'ไม่มีใครเข้าถึงไฟล์ได้เลย' };
+    return { level: 'กำหนดเอง', color: '#8b5cf6', emoji: '⚙️', desc: 'สิทธิ์กำหนดเอง ตรวจสอบว่าเหมาะสมกับสถานการณ์' };
+  };
+
+  const security = getSecurityLevel();
+
+  // Presets
+  const presets = [
+    { label: '📄 ไฟล์เว็บ', value: '644', owner: { r: true, w: true, x: false }, group: { r: true, w: false, x: false }, others: { r: true, w: false, x: false } },
+    { label: '📁 โฟลเดอร์เว็บ', value: '755', owner: { r: true, w: true, x: true }, group: { r: true, w: false, x: true }, others: { r: true, w: false, x: true } },
+    { label: '🔑 SSH Key', value: '600', owner: { r: true, w: true, x: false }, group: { r: false, w: false, x: false }, others: { r: false, w: false, x: false } },
+    { label: '📂 ~/.ssh', value: '700', owner: { r: true, w: true, x: true }, group: { r: false, w: false, x: false }, others: { r: false, w: false, x: false } },
+    { label: '🔓 อ่านอย่างเดียว', value: '444', owner: { r: true, w: false, x: false }, group: { r: true, w: false, x: false }, others: { r: true, w: false, x: false } },
+    { label: '⚠️ 777 อันตราย', value: '777', owner: { r: true, w: true, x: true }, group: { r: true, w: true, x: true }, others: { r: true, w: true, x: true } },
+  ];
+
+  const applyPreset = (p: typeof presets[0]) => {
+    setPerms({ owner: { ...p.owner }, group: { ...p.group }, others: { ...p.others } });
+  };
+
+  const togglePerm = (target: 'owner' | 'group' | 'others', perm: 'r' | 'w' | 'x') => {
+    setPerms(prev => ({
+      ...prev,
+      [target]: { ...prev[target], [perm]: !prev[target][perm] }
+    }));
+  };
+
+  // Chown users
+  const users = ['root', 'student01', 'webadmin', 'nginx'];
+  const groups = ['root', 'www-data', 'webadmins', 'sudo'];
+
+  const handleChown = (newOwner: string, newGroup: string) => {
+    setChownAnimating(true);
+    setTimeout(() => {
+      setFileOwner(newOwner);
+      setFileGroup(newGroup);
+      setChownAnimating(false);
+    }, 600);
+  };
+
+  const permColors = { r: '#60a5fa', w: '#f59e0b', x: '#22c55e' };
+  const permLabels = { r: 'Read', w: 'Write', x: 'Execute' };
+  const targetLabels = { owner: { label: 'Owner (u)', icon: '👤', color: '#60a5fa' }, group: { label: 'Group (g)', icon: '👥', color: '#a78bfa' }, others: { label: 'Others (o)', icon: '🌍', color: '#f97316' } };
+
+  return (
+    <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes chmod-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes chmod-glow { 0%,100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 20px 4px rgba(99,102,241,0.4); } }
+        @keyframes chown-fly { 0% { transform: translateY(0) scale(1); opacity: 1; } 50% { transform: translateY(-20px) scale(1.15); opacity: 0.6; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
+        @keyframes chmod-pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes chmod-check { 0% { transform: scale(1); } 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .chmod-toggle { transition: all 0.15s ease; cursor: pointer; user-select: none; }
+        .chmod-toggle:hover { transform: scale(1.08); }
+        .chmod-toggle:active { transform: scale(0.95); }
+        .chmod-result { animation: chmod-pop 0.2s ease-out; }
+        .chmod-preset { transition: all 0.2s ease; cursor: pointer; }
+        .chmod-preset:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .chown-card { transition: all 0.3s ease; }
+        .chown-fly { animation: chown-fly 0.6s ease-in-out; }
+        .chmod-tab { transition: all 0.2s; cursor: pointer; }
+        .chmod-tab:hover { opacity: 0.9; }
+      `}} />
+
+      <div className="slide-tag">{s.tag}</div>
+      <h2 style={{ marginBottom: '8px', fontSize: 'clamp(18px, 2.2vw, 26px)' }}>{s.title}</h2>
+
+      {/* Tab switcher */}
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '10px', background: 'var(--bg-elevated)', borderRadius: '10px', padding: '4px', border: '1px solid var(--border)' }}>
+        <div className="chmod-tab" onClick={() => setActiveTab('chmod')} style={{
+          flex: 1, padding: '8px', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold', fontSize: '13px',
+          background: activeTab === 'chmod' ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'transparent',
+          color: activeTab === 'chmod' ? 'white' : 'var(--text-secondary)',
+          boxShadow: activeTab === 'chmod' ? '0 2px 10px rgba(99,102,241,0.3)' : 'none'
+        }}>🔐 chmod — เครื่องคำนวณสิทธิ์</div>
+        <div className="chmod-tab" onClick={() => setActiveTab('chown')} style={{
+          flex: 1, padding: '8px', borderRadius: '8px', textAlign: 'center', fontWeight: 'bold', fontSize: '13px',
+          background: activeTab === 'chown' ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'transparent',
+          color: activeTab === 'chown' ? 'white' : 'var(--text-secondary)',
+          boxShadow: activeTab === 'chown' ? '0 2px 10px rgba(99,102,241,0.3)' : 'none'
+        }}>👤 chown — เปลี่ยนเจ้าของไฟล์</div>
+      </div>
+
+      {activeTab === 'chmod' ? (
+        /* ═══ CHMOD TAB ═══ */
+        <div style={{ display: 'flex', gap: '14px', flex: 1, minHeight: 0 }}>
+
+          {/* LEFT: Permission toggles */}
+          <div style={{ flex: 1.3, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+
+            {/* Permission grid */}
+            <div style={{ background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)', padding: '12px', flex: 1 }}>
+              {/* Header row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '120px repeat(3, 1fr)', gap: '6px', marginBottom: '8px' }}>
+                <div style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 'bold' }}></div>
+                {(['r', 'w', 'x'] as const).map(p => (
+                  <div key={p} style={{ textAlign: 'center', fontSize: '11px', fontWeight: 'bold', color: permColors[p] }}>
+                    {p.toUpperCase()} ({permLabels[p]})
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>ค่า {p === 'r' ? 4 : p === 'w' ? 2 : 1}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Permission rows */}
+              {(['owner', 'group', 'others'] as const).map(target => {
+                const info = targetLabels[target];
+                const octal = calcOctal(perms[target]);
+                return (
+                  <div key={target} style={{
+                    display: 'grid', gridTemplateColumns: '120px repeat(3, 1fr)', gap: '6px', alignItems: 'center',
+                    padding: '8px 6px', borderRadius: '8px', marginBottom: '4px',
+                    background: `${info.color}08`, border: `1px solid ${info.color}22`
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontSize: '18px' }}>{info.icon}</span>
+                      <div>
+                        <div style={{ fontSize: '12px', fontWeight: 'bold', color: info.color }}>{info.label}</div>
+                        <div style={{ fontSize: '18px', fontWeight: 'bold', color: 'var(--text-primary)', fontFamily: 'monospace' }}>{octal}</div>
+                      </div>
+                    </div>
+                    {(['r', 'w', 'x'] as const).map(perm => (
+                      <div
+                        key={perm}
+                        className="chmod-toggle"
+                        onClick={() => togglePerm(target, perm)}
+                        style={{
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                          padding: '8px 4px', borderRadius: '8px',
+                          background: perms[target][perm] ? `${permColors[perm]}22` : 'var(--bg-card)',
+                          border: `2px solid ${perms[target][perm] ? permColors[perm] : 'var(--border)'}`,
+                          boxShadow: perms[target][perm] ? `0 0 8px ${permColors[perm]}33` : 'none'
+                        }}
+                      >
+                        <div style={{ fontSize: '20px', marginBottom: '2px' }}>
+                          {perms[target][perm] ? (perm === 'r' ? '📖' : perm === 'w' ? '✏️' : '⚡') : '🚫'}
+                        </div>
+                        <div style={{
+                          fontSize: '14px', fontWeight: 'bold', fontFamily: 'monospace',
+                          color: perms[target][perm] ? permColors[perm] : '#6b7280'
+                        }}>
+                          {perms[target][perm] ? perm : '-'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Presets */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+              {presets.map((p, i) => (
+                <div key={i} className="chmod-preset" onClick={() => applyPreset(p)} style={{
+                  background: octalStr === p.value ? 'var(--accent-dim, rgba(99,102,241,0.15))' : 'var(--bg-card)',
+                  border: `1px solid ${octalStr === p.value ? 'var(--accent, #6366f1)' : 'var(--border)'}`,
+                  borderRadius: '8px', padding: '6px 8px', textAlign: 'center'
+                }}>
+                  <div style={{ fontSize: '11px', fontWeight: 'bold' }}>{p.label}</div>
+                  <div style={{ fontSize: '14px', fontFamily: 'monospace', fontWeight: 'bold', color: octalStr === p.value ? 'var(--accent, #6366f1)' : 'var(--text-secondary)' }}>{p.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT: Result display */}
+          <div style={{ width: '280px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+
+            {/* Big octal display */}
+            <div key={octalStr} className="chmod-result" style={{
+              background: `${security.color}15`, border: `2px solid ${security.color}`,
+              borderRadius: '14px', padding: '14px', textAlign: 'center',
+            }}>
+              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '4px' }}>ค่าสิทธิ์ (Octal)</div>
+              <div style={{ fontSize: '48px', fontWeight: '900', fontFamily: "'JetBrains Mono', monospace", color: security.color, letterSpacing: '8px', lineHeight: 1.1 }}>
+                {octalStr}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '6px' }}>
+                <span style={{ fontSize: '16px' }}>{security.emoji}</span>
+                <span style={{ fontSize: '13px', fontWeight: 'bold', color: security.color }}>{security.level}</span>
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', lineHeight: 1.4 }}>{security.desc}</div>
+            </div>
+
+            {/* ls -l display */}
+            <div style={{ background: '#0d1117', borderRadius: '10px', padding: '10px 12px', border: '1px solid #30363d' }}>
+              <div style={{ fontSize: '10px', color: '#8b949e', marginBottom: '4px' }}>$ ls -l result</div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', display: 'flex', gap: '0' }}>
+                <span style={{ color: '#8b949e' }}>-</span>
+                <span style={{ color: '#60a5fa', fontWeight: 'bold' }}>{toLs(perms.owner)}</span>
+                <span style={{ color: '#a78bfa', fontWeight: 'bold' }}>{toLs(perms.group)}</span>
+                <span style={{ color: '#f97316', fontWeight: 'bold' }}>{toLs(perms.others)}</span>
+                <span style={{ color: '#8b949e' }}> 1 {fileOwner} {fileGroup}</span>
+              </div>
+              <div style={{ display: 'flex', gap: '2px', marginTop: '6px' }}>
+                {lsStr.split('').map((ch, i) => (
+                  <div key={i} style={{
+                    width: '18px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '12px', fontFamily: 'monospace', fontWeight: 'bold', borderRadius: '3px',
+                    background: i === 0 ? '#21262d' : i <= 3 ? '#60a5fa18' : i <= 6 ? '#a78bfa18' : '#f9731618',
+                    color: ch === '-' ? '#6b7280' : i <= 3 ? '#60a5fa' : i <= 6 ? '#a78bfa' : '#f97316',
+                    border: `1px solid ${ch === '-' ? '#30363d' : i <= 3 ? '#60a5fa33' : i <= 6 ? '#a78bfa33' : '#f9731633'}`
+                  }}>{ch}</div>
+                ))}
+              </div>
+              <div style={{ display: 'flex', marginTop: '3px', fontSize: '9px', color: '#8b949e' }}>
+                <span style={{ width: '18px', textAlign: 'center' }}>ชนิด</span>
+                <span style={{ width: '54px', textAlign: 'center', marginLeft: '2px' }}>Owner</span>
+                <span style={{ width: '54px', textAlign: 'center', marginLeft: '2px' }}>Group</span>
+                <span style={{ width: '54px', textAlign: 'center', marginLeft: '2px' }}>Others</span>
+              </div>
+            </div>
+
+            {/* chmod command */}
+            <div style={{ background: '#0d1117', borderRadius: '10px', padding: '10px 12px', border: '1px solid #30363d' }}>
+              <div style={{ fontSize: '10px', color: '#8b949e', marginBottom: '4px' }}>คำสั่ง chmod ที่ต้องพิมพ์</div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '12px' }}>
+                <span style={{ color: '#79c0ff' }}>$ </span>
+                <span style={{ color: '#7ee787' }}>chmod</span>
+                <span style={{ color: '#ffa657', fontWeight: 'bold' }}> {octalStr}</span>
+                <span style={{ color: '#c9d1d9' }}> filename</span>
+              </div>
+            </div>
+
+            {/* Calculation breakdown */}
+            <div style={{ background: 'var(--bg-card)', borderRadius: '10px', padding: '10px', border: '1px solid var(--border)', flex: 1 }}>
+              <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 'bold', marginBottom: '6px' }}>📊 วิธีคิดตัวเลข</div>
+              {(['owner', 'group', 'others'] as const).map(target => {
+                const p = perms[target];
+                const info = targetLabels[target];
+                return (
+                  <div key={target} style={{ fontSize: '11px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ color: info.color, fontWeight: 'bold', minWidth: '55px' }}>{info.icon} {target === 'owner' ? 'Owner' : target === 'group' ? 'Group' : 'Others'}:</span>
+                    <span style={{ fontFamily: 'monospace', color: 'var(--text-primary)' }}>
+                      {p.r ? '4' : '0'}+{p.w ? '2' : '0'}+{p.x ? '1' : '0'}
+                    </span>
+                    <span style={{ color: 'var(--text-secondary)' }}>=</span>
+                    <span style={{ fontWeight: 'bold', color: info.color, fontFamily: 'monospace', fontSize: '14px' }}>{calcOctal(p)}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* ═══ CHOWN TAB ═══ */
+        <div style={{ display: 'flex', gap: '14px', flex: 1, minHeight: 0 }}>
+
+          {/* LEFT: File visualization */}
+          <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+
+            {/* Current file info */}
+            <div className={chownAnimating ? 'chown-fly' : ''} style={{
+              background: 'var(--bg-elevated)', borderRadius: '14px', border: '2px solid var(--border)',
+              padding: '16px', textAlign: 'center', transition: 'all 0.3s'
+            }}>
+              <div style={{ fontSize: '40px', marginBottom: '6px' }}>📄</div>
+              <div style={{ fontFamily: 'monospace', fontSize: '14px', fontWeight: 'bold', marginBottom: '8px' }}>/var/www/html/index.html</div>
+
+              {/* Owner / Group display */}
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '6px' }}>
+                <div style={{ background: '#60a5fa18', border: '2px solid #60a5fa', borderRadius: '10px', padding: '10px 16px', minWidth: '100px' }}>
+                  <div style={{ fontSize: '10px', color: '#60a5fa', fontWeight: 'bold', marginBottom: '4px' }}>👤 Owner</div>
+                  <div style={{ fontSize: '18px', fontWeight: 'bold', fontFamily: 'monospace', color: '#60a5fa' }}>{fileOwner}</div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', fontSize: '18px', color: 'var(--text-secondary)' }}>:</div>
+                <div style={{ background: '#a78bfa18', border: '2px solid #a78bfa', borderRadius: '10px', padding: '10px 16px', minWidth: '100px' }}>
+                  <div style={{ fontSize: '10px', color: '#a78bfa', fontWeight: 'bold', marginBottom: '4px' }}>👥 Group</div>
+                  <div style={{ fontSize: '18px', fontWeight: 'bold', fontFamily: 'monospace', color: '#a78bfa' }}>{fileGroup}</div>
+                </div>
+              </div>
+
+              {/* ls -l preview */}
+              <div style={{ background: '#0d1117', borderRadius: '8px', padding: '8px 12px', marginTop: '10px', fontFamily: 'monospace', fontSize: '12px', color: '#c9d1d9', textAlign: 'left' }}>
+                <span style={{ color: '#8b949e' }}>{lsStr}</span> 1 <span style={{ color: '#60a5fa', fontWeight: 'bold' }}>{fileOwner}</span> <span style={{ color: '#a78bfa', fontWeight: 'bold' }}>{fileGroup}</span> 612 Jun 10 index.html
+              </div>
+            </div>
+
+            {/* Chown command preview */}
+            <div style={{ background: '#0d1117', borderRadius: '10px', padding: '12px 16px', border: '1px solid #30363d' }}>
+              <div style={{ fontSize: '10px', color: '#8b949e', marginBottom: '6px' }}>คำสั่ง chown ที่ใช้</div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: '13px', lineHeight: 1.8 }}>
+                <div>
+                  <span style={{ color: '#79c0ff' }}>$ </span>
+                  <span style={{ color: '#ff7b72' }}>sudo</span>
+                  <span style={{ color: '#7ee787' }}> chown</span>
+                  <span style={{ color: '#60a5fa', fontWeight: 'bold' }}> {fileOwner}</span>
+                  <span style={{ color: '#c9d1d9' }}>:</span>
+                  <span style={{ color: '#a78bfa', fontWeight: 'bold' }}>{fileGroup}</span>
+                  <span style={{ color: '#ffa657' }}> /var/www/html/index.html</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Common chown scenarios */}
+            <div style={{ background: 'var(--bg-card)', borderRadius: '10px', padding: '10px 12px', border: '1px solid var(--border)', flex: 1 }}>
+              <div style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '6px', textTransform: 'uppercase' }}>📌 สถานการณ์จำลอง (กดเพื่อทดลอง)</div>
+              {[
+                { label: '🌐 มอบไฟล์เว็บให้ student01 + www-data', owner: 'student01', group: 'www-data', desc: 'ลง Nginx แล้วไฟล์เป็น root ต้องมอบให้นักเรียน' },
+                { label: '👨‍💻 มอบให้ทีม webadmins ดูแล', owner: 'webadmin', group: 'webadmins', desc: 'ให้ทีมงานทั้งกลุ่มมีสิทธิ์จัดการร่วมกัน' },
+                { label: '🔙 คืนเจ้าของให้ root', owner: 'root', group: 'root', desc: 'กลับค่าเริ่มต้น เจ้าของเป็น root ทั้งคู่' },
+                { label: '🟢 มอบให้ Nginx ดูแล', owner: 'nginx', group: 'www-data', desc: 'ให้ Nginx service เป็นเจ้าของจัดการเอง' },
+              ].map((sc, i) => (
+                <div key={i} className="chmod-preset" onClick={() => handleChown(sc.owner, sc.group)} style={{
+                  display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 8px', borderRadius: '6px', marginBottom: '4px',
+                  background: fileOwner === sc.owner && fileGroup === sc.group ? 'var(--accent-dim, rgba(99,102,241,0.15))' : 'var(--bg-elevated)',
+                  border: `1px solid ${fileOwner === sc.owner && fileGroup === sc.group ? 'var(--accent, #6366f1)' : 'var(--border)'}`,
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: '11px', fontWeight: 'bold' }}>{sc.label}</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>{sc.desc}</div>
+                  </div>
+                  <div style={{ fontFamily: 'monospace', fontSize: '11px', color: 'var(--accent, #6366f1)', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{sc.owner}:{sc.group}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* RIGHT: Controls */}
+          <div style={{ width: '240px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+
+            {/* Change Owner */}
+            <div style={{ background: '#60a5fa12', border: '1px solid #60a5fa44', borderRadius: '10px', padding: '10px 12px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#60a5fa', marginBottom: '6px' }}>👤 เปลี่ยน Owner (เจ้าของ)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+                {users.map(u => (
+                  <div key={u} className="chmod-toggle" onClick={() => handleChown(u, fileGroup)} style={{
+                    padding: '6px 8px', borderRadius: '6px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold',
+                    fontFamily: 'monospace',
+                    background: fileOwner === u ? '#60a5fa' : 'var(--bg-card)',
+                    color: fileOwner === u ? 'white' : 'var(--text-primary)',
+                    border: `1px solid ${fileOwner === u ? '#60a5fa' : 'var(--border)'}`
+                  }}>{u}</div>
+                ))}
+              </div>
+            </div>
+
+            {/* Change Group */}
+            <div style={{ background: '#a78bfa12', border: '1px solid #a78bfa44', borderRadius: '10px', padding: '10px 12px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#a78bfa', marginBottom: '6px' }}>👥 เปลี่ยน Group (กลุ่ม)</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
+                {groups.map(g => (
+                  <div key={g} className="chmod-toggle" onClick={() => handleChown(fileOwner, g)} style={{
+                    padding: '6px 8px', borderRadius: '6px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold',
+                    fontFamily: 'monospace',
+                    background: fileGroup === g ? '#a78bfa' : 'var(--bg-card)',
+                    color: fileGroup === g ? 'white' : 'var(--text-primary)',
+                    border: `1px solid ${fileGroup === g ? '#a78bfa' : 'var(--border)'}`
+                  }}>{g}</div>
+                ))}
+              </div>
+            </div>
+
+            {/* Info boxes */}
+            <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid #22c55e44', borderRadius: '10px', padding: '10px 12px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#22c55e', marginBottom: '4px' }}>💡 จำง่ายๆ</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                <strong style={{ color: '#60a5fa' }}>chmod</strong> = เปลี่ยน <strong>สิทธิ์</strong> (ทำอะไรได้บ้าง?)<br/>
+                <strong style={{ color: '#a78bfa' }}>chown</strong> = เปลี่ยน <strong>เจ้าของ</strong> (ของใคร?)<br/>
+                <strong style={{ color: '#f97316' }}>chgrp</strong> = เปลี่ยนแค่ <strong>กลุ่ม</strong> อย่างเดียว
+              </div>
+            </div>
+
+            <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '10px', padding: '10px 12px', flex: 1 }}>
+              <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '4px' }}>🔄 ออปชัน -R (Recursive)</div>
+              <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
+                เปลี่ยนทั้งโฟลเดอร์และไฟล์ลูกข้างในทั้งหมดทีเดียว:<br/>
+                <code style={{ color: '#7ee787', background: '#0d1117', padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
+                  chown -R student01:www-data /var/www/
+                </code>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SlideRenderer({ slide }: { slide: SlideData }) {
   switch (slide.type) {
     case "cover": return <CoverSlide s={slide} />;
@@ -7440,6 +7992,7 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "nginx-flow-anim":        return <NginxFlowAnimation s={slide} />;
     case "mariadb-query-anim":     return <MariaDBQueryAnimation s={slide} />;
     case "nodejs-request-anim":    return <NodeJSRequestAnimation s={slide} />;
+    case "chmod-chown-visual":     return <ChmodChownVisualizer s={slide} />;
     default: return <ContentSlide s={slide} />;
   }
 }

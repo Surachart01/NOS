@@ -110,6 +110,116 @@ w6a_questions = [
         ],
         "correct": 3,
         "time": 30
+    },
+    {
+        "q": "หากต้องการคัดลอกไฟล์ Public Key ของเครื่องเราไปยังเซิร์ฟเวอร์เพื่อให้ล็อกอินด้วย Key สำเร็จโดยอัตโนมัติ ควรใช้คำสั่งใด?",
+        "options": [
+            "ssh-copy-id",
+            "ssh-add-key",
+            "scp-key",
+            "ssh-install"
+        ],
+        "correct": 1,
+        "time": 20
+    },
+    {
+        "q": "สิทธิ์ตัวเลขฐานแปด (Octal Mode) ของไฟล์ข้อความ '-rwx------' คือเลขใด?",
+        "options": [
+            "700",
+            "755",
+            "644",
+            "600"
+        ],
+        "correct": 1,
+        "time": 20
+    },
+    {
+        "q": "หากหน้าเว็บไฟล์ index.html ในโฟลเดอร์ /var/www/html/ ถูกกำหนดสิทธิ์เป็น '600' (rw-------) และเป็นของ root ผู้ใช้งานทั่วไปที่เปิดเว็บเบราว์เซอร์จะพบข้อผิดพลาดใด?",
+        "options": [
+            "403 Forbidden (เนื่องจากผู้ใช้งาน Nginx/Others อ่านไฟล์ไม่ได้)",
+            "404 Not Found (เนื่องจากไฟล์ถูกลบ)",
+            "500 Internal Server Error (เนื่องจากสคริปต์พัง)",
+            "200 OK (แสดงผลปกติ)"
+        ],
+        "correct": 1,
+        "time": 30
+    },
+    {
+        "q": "สิทธิ์แบบใดที่เรียกว่า 'Dangerous Permissions' (สิทธิ์อันตรายที่สุด) ที่ไม่ควรนำมาใช้บน Production Server โดยเด็ดขาด?",
+        "options": [
+            "777 (rwxrwxrwx)",
+            "755 (rwxr-xr-x)",
+            "644 (rw-r--r--)",
+            "600 (rw-------)"
+        ],
+        "correct": 1,
+        "time": 20
+    },
+    {
+        "q": "คำสั่งใดใช้สลับบัญชีผู้ใช้งานจาก root ไปเป็นบัญชี 'student01' โดยดึงค่าสภาพแวดล้อมระบบ (Environment Variables) ของ student01 มาด้วย?",
+        "options": [
+            "su - student01",
+            "su student01",
+            "switch student01",
+            "login student01"
+        ],
+        "correct": 1,
+        "time": 25
+    },
+    {
+        "q": "คำสั่งตรวจสอบความถูกต้องของไวยากรณ์ (Syntax Test) ในไฟล์ตั้งค่า SSH Server ก่อนสั่ง reload บริการคือคำสั่งใด?",
+        "options": [
+            "sudo sshd -t",
+            "sudo systemctl check ssh",
+            "sudo ssh -test",
+            "sudo service sshd verify"
+        ],
+        "correct": 1,
+        "time": 25
+    },
+    {
+        "q": "หากต้องการโหลดไฟล์ตั้งค่าของ SSH Server ใหม่ (Reload) เพื่อให้การตั้งค่ามีผลโดยไม่มีการตัดการเชื่อมต่อของผู้ใช้ปัจจุบัน ควรใช้คำสั่งใด?",
+        "options": [
+            "sudo systemctl reload ssh",
+            "sudo systemctl restart ssh",
+            "sudo systemctl stop ssh",
+            "sudo systemctl enable ssh"
+        ],
+        "correct": 1,
+        "time": 25
+    },
+    {
+        "q": "ในสิทธิ์ระบบลินุกซ์ สัญลักษณ์ 'o' (Others) หมายถึงกลุ่มเป้าหมายในข้อใด?",
+        "options": [
+            "ผู้ใช้ทุกคนที่เหลืออยู่ในระบบนอกเหนือจาก Owner และ Group",
+            "เจ้าของไฟล์ (Owner)",
+            "สมาชิกในกลุ่ม (Group)",
+            "สิทธิ์พิเศษระบบ (root)"
+        ],
+        "correct": 1,
+        "time": 20
+    },
+    {
+        "q": "หากต้องการเปลี่ยนกลุ่มเจ้าของไฟล์ (Group Ownership) เพียงอย่างเดียวของไฟล์ report.txt โดยไม่เปลี่ยนเจ้าของไฟล์ตัวจริง ควรใช้คำสั่งใด?",
+        "options": [
+            "sudo chgrp www-data report.txt",
+            "sudo chown www-data report.txt",
+            "sudo chmod g+w report.txt",
+            "sudo usermod -aG www-data report.txt"
+        ],
+        "correct": 1,
+        "time": 25
+    },
+    {
+        "q": "ไฟล์ที่ใช้เก็บรายชื่อ Public Keys ของคอมพิวเตอร์ภายนอกที่ได้รับอนุญาตให้ล็อกอินเข้าเซิร์ฟเวอร์ของแต่ละผู้ใช้ในระบบ จะถูกบันทึกไว้ในพาธใดบนเซิร์ฟเวอร์?",
+        "options": [
+            "~/.ssh/authorized_keys",
+            "~/.ssh/id_ed25519.pub",
+            "/etc/ssh/ssh_host_key",
+            "/var/log/auth.log"
+        ],
+        "correct": 1,
+        "time": 30
     }
 ]
 
@@ -139,7 +249,7 @@ def generate_xlsx(questions, output_path):
             ws.cell(row=row, column=11).value = None
             
         wb.save(output_path)
-        print(f"Successfully generated {output_path}")
+        print(f"Successfully generated {output_path} with {len(questions)} questions")
     except Exception as e:
         print(f"Error generating spreadsheet: {e}")
 

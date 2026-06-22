@@ -1,17 +1,11 @@
-{
-  "week": "6a",
-  "title": "การจัดการผู้ใช้ สิทธิ์ และความปลอดภัย SSH",
-  "topic": "User & Permission Management & SSH Hardening",
-  "description": "เรียนรู้วิธีการจัดการบัญชีผู้ใช้งาน กลุ่ม และการกำหนดสิทธิ์ไฟล์บนลินุกซ์เซิร์ฟเวอร์ พร้อมฝึกฝนการเข้าถึงระยะไกลผ่าน SSH อย่างปลอดภัยระดับองค์กรด้วยระบบคู่กุญแจเข้ารหัส (SSH Keys) และการลงกลอนเซิร์ฟเวอร์",
-  "learningObjectives": [
-    "อธิบายหลักสิทธิ์ขั้นต่ำที่จำเป็น (Principle of Least Privilege) และอันตรายของการใช้บัญชี root ได้",
-    "สร้างบัญชีผู้ใช้ กลุ่ม และกำหนดสิทธิ์สิทธิพิเศษด้วย sudo ได้อย่างถูกต้องตามมาตรฐาน",
-    "ใช้คำสั่ง chmod และ chown ในการควบคุมการเข้าถึงไฟล์และไดเรกทอรีระบบได้อย่างแม่นยำ",
-    "สร้างคู่กุญแจ SSH Key (RSA/ED25519) และตั้งค่าล็อกอินโดยไม่ต้องใช้รหัสผ่านได้สำเร็จ",
-    "ตั้งค่าไฟล์ sshd_config เพื่อปิดการใช้รหัสผ่านและป้องกันบัญชี root ล็อกอินโดยตรง (SSH Hardening)",
-    "ใช้งานคำสั่ง scp หรือเครื่องมืออื่นเพื่อโอนย้ายไฟล์งานขึ้นเซิร์ฟเวอร์อย่างปลอดภัย"
-  ],
-  "slides": [
+import json
+
+path = '/Users/surachartlimrattanaphun/Desktop/NOS/NOS/public/data/week-6a.json'
+with open(path, 'r', encoding='utf-8') as f:
+    data = json.load(f)
+
+# Re-create slides list including Wayground and the new Tuser grading scenario in Lab 06.1
+original_slides = [
     {
       "id": "w6a-s1",
       "type": "cover",
@@ -312,5 +306,11 @@
       ],
       "speakerNotes": "ชี้แจงหัวข้อการบ้านเพื่อให้นักเรียนทุกคนทบทวนความรู้และแนบหลักฐานความปลอดภัยที่ตนเองสร้างขึ้นครับ"
     }
-  ]
-}
+]
+
+data['slides'] = original_slides
+
+with open(path, 'w', encoding='utf-8') as f:
+    json.dump(data, f, ensure_ascii=False, indent=2)
+
+print("JSON file successfully updated: slide Lab 06.1 redesigned with Tuser grading account & Wayground restored!")
