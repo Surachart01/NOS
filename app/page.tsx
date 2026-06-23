@@ -60,18 +60,12 @@ function renderFormattedText(text: string) {
         <code
           key={index}
           style={{
-            background: "#0f172a",
-            color: "#38bdf8",
-            padding: "2px 6px",
-            borderRadius: "5px",
-            fontFamily: "'Fira Code', 'Courier New', Courier, monospace",
-            fontSize: "0.85em",
-            border: "1px solid #1e293b",
-            margin: "0 2px",
-            display: "inline-block",
-            verticalAlign: "middle",
+            color: "#0284c7",
+            fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', Courier, monospace",
+            fontSize: "0.9em",
             fontWeight: "bold",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.12)"
+            display: "inline",
+            wordBreak: "break-word"
           }}
         >
           {code}
@@ -166,29 +160,29 @@ function ContentSlide({ s }: { s: SlideData }) {
                     color: isSubItem ? 'var(--text-secondary)' : 'var(--text-primary)',
                     lineHeight: 1.5
                   }}>
-                    {renderFormattedText(g.text)}
+                    <span style={{ flex: 1, minWidth: 0 }}>
+                      {renderFormattedText(g.text)}
+                    </span>
                   </li>
                 );
               }
               // Terminal block
               return (
-                <li key={gi} style={{ listStyleType: 'none', paddingLeft: 0, width: '100%' }}>
-                  <div style={{ background: '#0d1117', borderRadius: '10px', overflow: 'hidden', border: '1px solid #30363d', boxShadow: '0 4px 16px rgba(0,0,0,0.25)' }}>
-                    {/* Terminal titlebar */}
-                    <div style={{ background: '#161b22', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #30363d' }}>
-                      <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }} />
-                      <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }} />
-                      <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#27c93f', display: 'inline-block' }} />
-                      <span style={{ fontSize: '11px', color: '#8b949e', marginLeft: '8px', fontFamily: 'monospace' }}>
-                        {g.lines[0].trim().startsWith('MariaDB') ? 'MariaDB Monitor' : 'Terminal'}
-                      </span>
-                    </div>
-                    {/* Command lines */}
-                    <div style={{ padding: '12px 16px', fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace", fontSize: '13px', lineHeight: '1.9', display: 'flex', flexDirection: 'column', gap: '1px' }}>
-                      {g.lines.map((line, li) => (
-                        <div key={li}>{colourCmd(line)}</div>
-                      ))}
-                    </div>
+                <li key={gi} className="terminal-prompt-box" style={{ listStyleType: 'none', paddingLeft: 0, width: '100%' }}>
+                  {/* Terminal titlebar */}
+                  <div style={{ background: '#161b22', padding: '7px 14px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #30363d' }}>
+                    <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }} />
+                    <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }} />
+                    <span style={{ width: 11, height: 11, borderRadius: '50%', background: '#27c93f', display: 'inline-block' }} />
+                    <span style={{ fontSize: '11px', color: '#8b949e', marginLeft: '8px', fontFamily: 'monospace' }}>
+                      {g.lines[0].trim().startsWith('MariaDB') ? 'MariaDB Monitor' : 'Terminal'}
+                    </span>
+                  </div>
+                  {/* Command lines */}
+                  <div style={{ padding: '12px 16px', fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace", fontSize: '13px', lineHeight: '1.9', display: 'flex', flexDirection: 'column', gap: '1px' }}>
+                    {g.lines.map((line, li) => (
+                      <div key={li}>{colourCmd(line)}</div>
+                    ))}
                   </div>
                 </li>
               );
@@ -215,7 +209,7 @@ function TwoColSlide({ s }: { s: SlideData }) {
         {s.cols?.map((col, i) => (
           <div className="col-box" key={i}>
             <h3>{col.icon} {col.title}</h3>
-            <ul>{col.items.map((item, j) => <li key={j}>{renderFormattedText(item)}</li>)}</ul>
+            <ul>{col.items.map((item, j) => <li key={j}><span style={{ flex: 1, minWidth: 0 }}>{renderFormattedText(item)}</span></li>)}</ul>
           </div>
         ))}
       </div>
@@ -3805,7 +3799,7 @@ function LabSlide({ s }: { s: SlideData }) {
         <div className="lab-col">
           <div className="lab-section-title">🎯 วัตถุประสงค์</div>
           <ul className="objectives">
-            {s.objectives?.map((o, i) => <li key={i}>{renderFormattedText(o)}</li>)}
+            {s.objectives?.map((o, i) => <li key={i}><span style={{ flex: 1, minWidth: 0 }}>{renderFormattedText(o)}</span></li>)}
           </ul>
         </div>
         <div className="lab-col">
@@ -3813,11 +3807,11 @@ function LabSlide({ s }: { s: SlideData }) {
           <ul className="steps">
             {s.steps?.map((st, i) => {
               const lines = st.split('\n');
-              const text = lines[0];
+              const text = lines[0].replace(/^\d+\.\s*/, '');
               const cmds = lines.slice(1);
               return (
                 <li key={i} data-step={`${i + 1}.`} style={{ marginBottom: cmds.length > 0 ? '14px' : '6px', listStyleType: 'none', paddingLeft: 0 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ marginBottom: cmds.length > 0 ? '6px' : '0', color: 'var(--text-primary)', lineHeight: '1.4' }}>
                       {renderFormattedText(text)}
                     </div>
@@ -3890,7 +3884,7 @@ function SummarySlide({ s }: { s: SlideData }) {
     <div className="slide slide-summary">
       <div className="slide-tag">{s.tag}</div>
       <h2>{s.title}</h2>
-      <ul>{s.items?.map((item, i) => <li key={i}>{renderFormattedText(item)}</li>)}</ul>
+      <ul>{s.items?.map((item, i) => <li key={i}><span style={{ flex: 1, minWidth: 0 }}>{renderFormattedText(item)}</span></li>)}</ul>
     </div>
   );
 }
