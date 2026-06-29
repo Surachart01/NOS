@@ -1,0 +1,57 @@
+{
+  "week": "11b",
+  "title": "ปฏิบัติการสร้าง Golden Image Template และการจัดทำ Docker Containers",
+  "topic": "Container Provisioning & Cloning Lab",
+  "description": "ฝึกปฏิบัติแปลงตู้ LXC เป็นแม่แบบต้นแบบระบบใน Proxmox สั่งรันคำสั่ง Linked Clone และการติดตั้งทดสอบเรียกใช้ตู้บริการด้วย Docker Engine",
+  "learningObjectives": [
+    "สร้างและจัดการ Proxmox LXC Custom Template ได้ถูกต้องตามเงื่อนไข",
+    "รันคำสั่งใช้งาน Docker Container (docker run) เพื่อเปิดเว็บเซิร์ฟเวอร์แบบพร้อมใช้ได้",
+    "ตรวจสอบและมอนิเตอร์ตู้บริการย่อยผ่าน docker ps และ docker stats ได้สำเร็จ"
+  ],
+  "slides": [
+    {
+      "id": "w11b-s1",
+      "type": "cover",
+      "title": "ปฏิบัติการสร้าง Template และติดตั้งโปรแกรมบน Container",
+      "subtitle": "Container Provisioning & Cloning Lab",
+      "tag": "สัปดาห์ที่ 11 (วันศุกร์ - 2 ชม.)",
+      "body": "ในคาบนี้ เราจะลุยระบบ Proxmox แปลงตู้ Ubuntu ให้เป็น Template เพื่อโคลนนิ่งตู้บริการย่อยอย่างรวดเร็ว และลงมือรันเว็บเซิร์ฟเวอร์สำเร็จรูปขนาดเล็กด้วย Docker Engine ประจำตู้",
+      "speakerNotes": "สวัสดีวันศุกร์แล็บปฏิบัติการครับ คาบนี้เราจะนำระบบ Template ใน Proxmox มาลองสร้างตู้โคลน จากนั้นลง Docker และรันเว็บสำเร็จรูปใน 1 คำสั่งกันครับ"
+    },
+    {
+      "id": "w11b-s2",
+      "type": "lab",
+      "title": "Lab 11.2 — แปลงตู้ LXC ต้นแบบ และติดตั้งแอปด้วย Docker Container",
+      "tag": "ปฏิบัติการประจำวันศุกร์",
+      "duration": "1.5 ชั่วโมง",
+      "objectives": [
+        "แปลงตู้ Ubuntu LXC ให้กลายเป็น Template และโคลนแบบ Linked Clone ออกมาได้ถูกต้อง",
+        "ติดตั้งระบบ Docker Engine และรันคำสั่งดึงเว็บสำเร็จรูปจากคลาวด์มาทำงานได้",
+        "ตรวจสอบสถานะการกินแรมของตู้ Docker สำเร็จ"
+      ],
+      "steps": [
+        "1. สั่งแปลงตู้ LXC หมายเลขเดิมให้เป็นต้นแบบ Template บน Proxmox: \n(คลิกขวาที่ตู้ต้นแบบ -> Convert to Template)",
+        "2. โคลนตู้ใหม่ (Linked Clone) หมายเลข 250 และเปิดระบบล็อกอิน",
+        "3. ติดตั้ง Docker Engine ตามชุดคำสั่งในสไลด์วันอังคารให้เรียบร้อย",
+        "4. ทดลองรัน Nginx Web Server สำเร็จรูปบน Docker พอร์ต 8080: \n$ sudo docker run -d -p 8080:80 --name my-docker-web nginx",
+        "5. ตรวจเช็คตู้คอนเทนเนอร์ที่รันอยู่: \n$ sudo docker ps",
+        "6. เปิดเบราว์เซอร์เข้าลิงก์ http://[IP ตู้]:8080 เพื่อตรวจทานหน้าจอทักทายของ Nginx ของตู้ Docker",
+        "7. ใช้คำสั่งมอนิเตอร์สถานะแรมของตู้ Docker: \n$ sudo docker stats --no-stream"
+      ],
+      "speakerNotes": "สอนให้นักศึกษาเห็นว่า Docker สามารถบูตขึ้นและกินทรัพยากรน้อยกว่า VM ปกติอย่างไรเพื่อสร้างภาพการใช้งานเครื่องแม่ข่ายยุคคลาวด์"
+    },
+    {
+      "id": "w11b-s3",
+      "type": "summary",
+      "title": "สรุปสัปดาห์ที่ 11",
+      "tag": "Week Summary",
+      "items": [
+        "✅ เข้าใจแนวคิดและสถาปัตยกรรมของ Container Platform ทั้งระดับ OS (LXC) และระดับ App (Docker)",
+        "✅ ดำเนินการติดตั้ง Docker Engine และปล่อยตู้เว็บสำเร็จรูปจากภาพสะท้อนคลาวด์ได้สำเร็จ",
+        "📝 ส่งงาน: ผลลัพธ์การรัน docker ps และหน้าจอเว็บพอร์ต 8080 ของตู้ตนเอง",
+        "📚 สัปดาห์หน้า: บริการจัดสรรไอพี DHCP และบริการแปลงชื่อโดเมน DNS Server ท้องถิ่น"
+      ],
+      "speakerNotes": "จบคลาสวันศุกร์และย้ำเรื่องการใช้ Container สำหรับงานจัดสรรโปรเจกต์กลุ่ม"
+    }
+  ]
+}

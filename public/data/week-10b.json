@@ -1,0 +1,57 @@
+{
+  "week": "10b",
+  "title": "ปฏิบัติการติดตั้ง HTTPS และการชี้ทางพอร์ต SSL อัตโนมัติ",
+  "topic": "HTTPS Enforcement & SSL Configurations",
+  "description": "ฝึกปฏิบัติสร้างใบรับรอง Self-Signed SSL, ตั้งค่า Nginx บังคับใช้พอร์ต 443 (HTTPS) และจัดระเบียบส่งต่อการเชื่อมต่อจากพอร์ต 80 แบบ 301 Redirect ถาวร",
+  "learningObjectives": [
+    "สร้างใบรับรองความปลอดภัย Self-Signed Certificate และ Private Key ด้วย OpenSSL ได้สำเร็จ",
+    "ปรับตั้งค่า Nginx Server Block ให้รองรับการทำงานพอร์ต SSL 443 ได้อย่างถูกต้อง",
+    "ตั้งสลับลิงก์ผู้ใช้อัตโนมัติจาก HTTP ไป HTTPS ทันทีที่ล็อกอินเข้ามา"
+  ],
+  "slides": [
+    {
+      "id": "w10b-s1",
+      "type": "cover",
+      "title": "ปฏิบัติการติดตั้ง HTTPS และตั้งค่า Redirect ความปลอดภัย",
+      "subtitle": "HTTPS Enforcement & SSL Configurations Lab",
+      "tag": "สัปดาห์ที่ 10 (วันศุกร์ - 2 ชม.)",
+      "body": "ในคาบปฏิบัติการ 2 ชั่วโมงนี้ ทุกคนจะได้ลองใช้ openssl ออกใบรับรองส่วนตัว นำไปติดตั้งบนเว็บเซิร์ฟเวอร์ Nginx และเขียนกฎการ redirect พอร์ตเพื่อให้ผู้ใช้ทุกคนใช้งานได้เฉพาะช่องทางที่เข้ารหัสปลอดภัยสูง",
+      "speakerNotes": "สวัสดีครับวันศุกร์ วันนี้เราจะทำให้เว็บ LNMP ของเรารับการสื่อสารแบบ HTTPS แม่กุญแจล็อกเพื่อความมั่นใจในการกรอกข้อมูลต่างๆ ครับ"
+    },
+    {
+      "id": "w10b-s2",
+      "type": "lab",
+      "title": "Lab 10.2 — ออกใบรับรองความปลอดภัยและบังคับใช้ HTTPS กับ Nginx",
+      "tag": "ปฏิบัติการประจำวันศุกร์",
+      "duration": "1.5 ชั่วโมง",
+      "objectives": [
+        "สร้างไฟล์ใบรับรอง Self-signed SSL สำเร็จด้วยคำสั่ง OpenSSL",
+        "แก้ไขคอนฟิก Nginx เพื่อรองรับพอร์ต 443 และสั่ง Redirect 301 ได้ถูกต้อง",
+        "เปิดเบราว์เซอร์เข้าลิงก์และตรวจเช็คความปลอดภัยสำเร็จ"
+      ],
+      "steps": [
+        "1. สร้างโฟลเดอร์สำหรับจัดเก็บกุญแจเข้ารหัส: \n$ sudo mkdir -p /etc/nginx/ssl",
+        "2. สั่งออกใบรับรอง Self-signed แบบไม่มีรหัสผ่านผ่าน OpenSSL: \n$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/self.key -out /etc/nginx/ssl/self.crt \n(กรอกรหัสประเทศ TH และข้อมูลพื้นฐานตามข้อบังคับ)",
+        "3. แก้ไขไฟล์คอนฟิกพอร์ตของ Nginx: \n$ sudo nano /etc/nginx/sites-available/default",
+        "4. เพิ่มบล็อกรับฟังพอร์ต 443 ร่วมกับใบรับรอง พร้อมจัดทำระบบ Redirect บนพอร์ต 80: \nserver {\n    listen 80 default_server;\n    return 301 https://$host$request_uri;\n}\nserver {\n    listen 443 ssl default_server;\n    ssl_certificate /etc/nginx/ssl/self.crt;\n    ssl_certificate_key /etc/nginx/ssl/self.key;\n    root /var/www/html;\n    index index.php index.html;\n}",
+        "5. ตรวจสอบการตั้งค่าและรีสตาร์ทบริการ: \n$ sudo nginx -t \n$ sudo systemctl restart nginx",
+        "6. อนุมัติพอร์ต 443 บนไฟร์วอลล์เครื่อง: \n$ sudo ufw allow 443/tcp",
+        "7. พิมพ์เข้าเว็บ http://[IP เครื่องตนเอง] บนเบราว์เซอร์ และทดสอบการเปลี่ยนเส้นทางไปยัง https:// อัตโนมัติ"
+      ],
+      "speakerNotes": "คอยชี้แจงเด็กๆ เรื่องความแตกต่างของใบรับรอง Self-signed กับ Let's Encrypt ว่าในระบบอินเทอร์เน็ตจริงจะใช้ Let's Encrypt เพื่อรับสัญลักษณ์แม่กุญแจล็อกสีเขียวสวยงาม"
+    },
+    {
+      "id": "w10b-s3",
+      "type": "summary",
+      "title": "สรุปสัปดาห์ที่ 10",
+      "tag": "Week Summary",
+      "items": [
+        "✅ ตั้งค่าการทำงานของ Nginx ทำหน้าที่เป็น Reverse Proxy สมบูรณ์",
+        "✅ ออกใบรับรอง SSL/TLS และบังคับใช้การเปลี่ยนเส้นทางทราฟฟิกไปยัง HTTPS พอร์ต 443",
+        "📝 ส่งงาน: ผลลัพธ์การเปลี่ยนเส้นทาง https:// และสิทธิ์การอ่านกุญแจเข้ารหัส",
+        "📚 สัปดาห์หน้า: การศึกษาและใช้งาน Container Platform (Proxmox LXC & Docker)"
+      ],
+      "speakerNotes": "จบคลาสวันศุกร์และย้ำให้นักศึกษารู้จักรักษาความลับของ Private Key (.key) ห้ามแจกจ่ายให้ผู้อื่นเด็ดขาด"
+    }
+  ]
+}

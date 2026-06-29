@@ -1,0 +1,63 @@
+{
+  "week": "10a",
+  "title": "สถาปัตยกรรม Nginx Reverse Proxy และแนวคิดการเข้ารหัสข้อมูล SSL/TLS",
+  "topic": "Nginx Reverse Proxy & SSL/TLS Concepts",
+  "description": "ทำความเข้าใจแนวคิด Reverse Proxy การซ่อนไอพีแอปพลิเคชันหลังบ้าน และทฤษฎีการเข้ารหัสข้อมูล (Symmetric/Asymmetric Encryption) สำหรับทำ HTTPS",
+  "learningObjectives": [
+    "อธิบายความต่างและประโยชน์ระหว่าง Forward Proxy และ Reverse Proxy ได้",
+    "ตั้งค่า Nginx ให้ส่งต่อทราฟฟิกไปยังบริการพอร์ตภายใน (Proxy Pass) ได้",
+    "อธิบายแนวคิดการทำงานของคู่กุญแจ Public/Private Key ในระบบ SSL/TLS ได้"
+  ],
+  "slides": [
+    {
+      "id": "w10a-s1",
+      "type": "cover",
+      "title": "สถาปัตยกรรม Nginx Reverse Proxy และแนวคิด SSL/TLS",
+      "subtitle": "Nginx Reverse Proxy & Encryption Concepts",
+      "tag": "สัปดาห์ที่ 10 (วันอังคาร - 3 ชม.)",
+      "body": "วันนี้เราจะเรียนรู้วิธีการใช้ Nginx เป็นตัวผ่านทางกลาง (Reverse Proxy) ปิดพอร์ตหลังบ้านไม่ให้คนข้างนอกรู้ และเข้าใจพื้นฐานการทำงานเข้ารหัสคีย์แบบอสมมาตรเพื่อรองรับการใช้งาน SSL/TLS",
+      "speakerNotes": "สวัสดีครับ คาบนี้เราจะปิดไม่ให้คนภายนอกติดต่อโดยตรงกับแอปพลิเคชัน Node.js หรือ PHP หลังบ้าน แต่จะใช้ Nginx มาเป็นผู้รับรับเรื่องแล้วส่งต่อให้แทนครับ"
+    },
+    {
+      "id": "w10a-s2",
+      "type": "content",
+      "title": "ทำความเข้าใจแนวคิด Reverse Proxy",
+      "tag": "สถาปัตยกรรมเครือข่าย",
+      "items": [
+        "1. Forward Proxy (เช่น เว็บพร็อกซี่ทั่วไป):",
+        "  - ช่วยให้ Client ภายในเครือข่ายเข้าถึงภายนอกได้โดยซ่อนตัวตนฝั่ง Client ไว้",
+        "2. Reverse Proxy (เช่น Nginx หน้าแอปพลิเคชัน):",
+        "  - ตั้งอยู่หน้าเซิร์ฟเวอร์เป้าหมาย ทำหน้าที่รับคำขอจาก Client ภายนอก ส่งต่อไปยังเซิร์ฟเวอร์ภายในเครื่อง",
+        "  - ประโยชน์: ซ่อนไอพีที่แท้จริงของแอปพลิเคชันภายใน, ทำหน้าที่กระจายโหลด (Load Balancing), และทำจุดรับสิทธิ์เข้ารหัสข้อมูล (SSL Termination Point)",
+        "3. SSL Termination:",
+        "  - Nginx จะเป็นผู้ถอดรหัส HTTPS ให้เหลือเพียง HTTP ธรรมดาในการส่งต่อไปยังแอปพอร์ตภายใน (เช่น Node.js พอร์ต 3000) เพื่อให้ฝั่งแอปประมวลผลได้เร็วขึ้น"
+      ],
+      "speakerNotes": "วาดภาพบนกระดานให้เด็กๆ เห็นว่า Reverse Proxy เปรียบเสมือนประชาสัมพันธ์ขององค์กร แขกมาคุยกับประชาสัมพันธ์ แล้วประชาสัมพันธ์จะเดินไปหยิบเอกสารจากแผนกหลังบ้านมาส่งให้ แขกไม่จำต้องรู้ว่าแผนกหลังบ้านอยู่ตรงไหน"
+    },
+    {
+      "id": "w10a-s3",
+      "type": "content",
+      "title": "การตั้งค่า Nginx ทำหน้าที่เป็น Reverse Proxy",
+      "tag": "คำสั่งคอนฟิก Nginx",
+      "items": [
+        "ตัวอย่างการเขียนคอนฟิก Server Block (ในไฟล์ /etc/nginx/sites-available/default):",
+        "  server {",
+        "      listen 80;",
+        "      server_name myapp.local;",
+        "",
+        "      location / {",
+        "          proxy_pass http://127.0.0.1:3000;   # ชี้ไปยังแอปพอร์ตภายในเครื่อง",
+        "          proxy_set_header Host $host;",
+        "          proxy_set_header X-Real-IP $remote_addr;",
+        "          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
+        "          proxy_set_header X-Forwarded-Proto $scheme;",
+        "      }",
+        "  }",
+        "ตรวจสอบความถูกต้องของ Syntax ของคอนฟิก Nginx และสั่งรันระบบใหม่:",
+        "  $ sudo nginx -t",
+        "  $ sudo systemctl restart nginx"
+      ],
+      "speakerNotes": "อธิบายคำสั่ง proxy_set_header ว่าทำไมต้องส่งค่า Host และ IP ของ Remote Client ตัวจริงข้ามผ่าน Proxy ไปด้วย เพื่อให้แอปพลิเคชันหลังบ้านสามารถเช็คประวัติล็อกอินและวิเคราะห์ IP ของผู้ใช้งานได้ถูกต้อง"
+    }
+  ]
+}

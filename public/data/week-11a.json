@@ -1,0 +1,58 @@
+{
+  "week": "11a",
+  "title": "การจัดการ Container Platform (Proxmox LXC & Docker)",
+  "topic": "Container Platform: LXC & Docker Engine",
+  "description": "ทำความเข้าใจเทคโนโลยีตู้คอนเทนเนอร์ (Containerization) เปรียบเทียบ LXC และ Docker เรียนรู้วิธีการติดตั้ง Docker Engine บน Ubuntu Server เพื่อเตรียมพร้อมเครื่องเป็นแพลตฟอร์มรันแอปพลิเคชันเสมือนขนาดเล็ก",
+  "learningObjectives": [
+    "อธิบายแนวคิดเรื่อง Containerization ความต่างระหว่าง LXC และ Docker Engine ได้",
+    "ติดตั้งและบริหารจัดการ Docker Engine บนระบบปฏิบัติการ Linux ได้สำเร็จ",
+    "เตรียมความพร้อมตู้คอนเทนเนอร์และเรียนรู้โครงสร้าง Docker Hub เพื่อดึงภาพระบบมาใช้งาน"
+  ],
+  "slides": [
+    {
+      "id": "w11a-s1",
+      "type": "cover",
+      "title": "เทคโนโลยีตู้คอนเทนเนอร์ และบริการ Container Platform",
+      "subtitle": "Container Platform: LXC & Docker Engine",
+      "tag": "สัปดาห์ที่ 11 (วันอังคาร - 3 ชม.)",
+      "body": "วันนี้เราจะก้าวเข้าสู่การสร้าง Container Platform บนเซิร์ฟเวอร์ของเรา เรียนรู้แนวคิด LXC (ระบบจำลองระดับ OS) และการติดตั้ง Docker Engine (ระบบรันแอปขนาดเล็กแบบแยกขาด) เพื่อขยายบริการได้อย่างรวดเร็วและใช้ทรัพยากรต่ำ",
+      "speakerNotes": "สวัสดีครับทุกคน คาบนี้ตามคำอธิบายรายวิชา เราต้องรันบริการด้าน Container Platform วันนี้เราจะลงลึกถึงการตั้งตู้คอนเทนเนอร์ใน Proxmox และการลง Docker บน Linux Server กันครับ"
+    },
+    {
+      "id": "w11a-s2",
+      "type": "content",
+      "title": "สถาปัตยกรรม Container: LXC vs Docker",
+      "tag": "ทฤษฎีเทคโนโลยีตู้จำลอง",
+      "items": [
+        "1. Linux Container (LXC):",
+        "  - ออกแบบมาเพื่อจำลองระบบปฏิบัติการทั้งระบบ (System Container) ทำงานคล้าย VM แต่เบากว่า",
+        "  - เหมาะสำหรับการทำเครื่องเซิร์ฟเวอร์ย่อยที่ต้องการรัน System Services หลายอย่างพร้อมกัน",
+        "2. Docker Engine (Application Container):",
+        "  - ออกแบบมาเพื่อจำลองและบรรจุเฉพาะ 1 แอปพลิเคชันย่อย (เช่น ตู้รันเฉพาะ Nginx, ตู้รันเฉพาะ Node.js)",
+        "  - แยกขาดในระดับสแต็กแอปพลิเคชัน บูตเสร็จเกือบจะทันที และเคลื่อนย้ายแพลตฟอร์มสะดวกผ่าน Docker Image",
+        "💡 ในการให้บริการ เราสามารถรัน Docker Engine ซ้อนอยู่ภายใน Proxmox LXC Container ได้ เพื่อแบ่งเบาและกระจายสแต็กแอปพลิเคชันอย่างเป็นระบบ"
+      ],
+      "speakerNotes": "อธิบายให้นักศึกษาเห็นภาพชัดเจนว่า LXC ทำหน้าที่เหมือนตู้คอนโดส่วนตัว ส่วน Docker เหมือนกล่องขนมย่อยๆ ที่เราซื้อมาวางไว้ในตู้คอนโดนั้นอีกที"
+    },
+    {
+      "id": "w11a-s3",
+      "type": "content",
+      "title": "ขั้นตอนการติดตั้ง Docker Engine บน Ubuntu Server",
+      "tag": "การติดตั้งระบบเซิร์ฟเวอร์",
+      "items": [
+        "ล้างแพ็กเกจเก่าที่อาจจะตกค้างอยู่ในเครื่อง:",
+        "  $ sudo apt-get remove docker docker-engine docker.io containerd runc",
+        "ติดตั้งเครื่องมือเตรียมรับรองคีย์และแหล่งดาวน์โหลดอย่างเป็นทางการ:",
+        "  $ sudo apt update && sudo apt install -y ca-certificates curl gnupg lsb-release",
+        "ดาวน์โหลด GPG Key ของ Docker:",
+        "  $ sudo mkdir -p /etc/apt/keyrings",
+        "  - $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
+        "เพิ่มที่อยู่ Repository เข้าไปยังระบบแพ็กเกจ apt:",
+        "  - $ echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
+        "ติดตั้งซอฟต์แวร์แกนหลักของระบบตู้คลาวด์:",
+        "  $ sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin"
+      ],
+      "speakerNotes": "สอนการติดตั้งตามมาตรฐานทางการของ Docker เพื่อป้องกันปัญหาโปรแกรมหมดอายุ หรือได้เวอร์ชันเก่าที่ไม่รองรับ Docker Compose"
+    }
+  ]
+}
