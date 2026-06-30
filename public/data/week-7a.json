@@ -23,7 +23,7 @@
     },
     {
       "id": "w7a-s2",
-      "type": "content",
+      "type": "ip-infographic",
       "title": "โครงสร้าง IP Address ที่ต้องรู้จัก",
       "tag": "พื้นฐานเครือข่าย",
       "items": [
@@ -140,7 +140,7 @@
     },
     {
       "id": "w7a-s6",
-      "type": "content",
+      "type": "packet-flow-anim",
       "title": "Network Packet Flow — ข้อมูลเดินทางอย่างไร? (OSI Layer 3-4)",
       "tag": "แนวคิดการส่งข้อมูล",
       "items": [

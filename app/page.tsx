@@ -8017,6 +8017,11 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "mariadb-query-anim":     return <MariaDBQueryAnimation s={slide} />;
     case "nodejs-request-anim":    return <NodeJSRequestAnimation s={slide} />;
     case "chmod-chown-visual":     return <ChmodChownVisualizer s={slide} />;
+    case "tcp-udp-anim":           return <TCPUDPAnimation s={slide} />;
+    case "socket-binding-anim":    return <SocketBindingAnimation s={slide} />;
+    case "port-scan-anim":         return <PortScanAnimation s={slide} />;
+    case "ip-infographic":         return <IPAddressInfographic s={slide} />;
+    case "packet-flow-anim":       return <PacketFlowAnimation s={slide} />;
     default: return <ContentSlide s={slide} />;
   }
 }
@@ -9246,6 +9251,995 @@ export default function Home() {
           </>
         )}
       </main>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   TCP vs UDP Animation  (week-7a slide type: tcp-udp-anim)
+───────────────────────────────────────────────────────────────────────── */
+function TCPUDPAnimation({ s }: { s: SlideData }) {
+  const [tab, setTab] = useState<"theory" | "anim">("theory");
+  const [tcpStep, setTcpStep] = useState(-1);
+  const [tcpRunning, setTcpRunning] = useState(false);
+  const [tcpDone, setTcpDone] = useState(false);
+  const [udpStep, setUdpStep] = useState(-1);
+  const [udpRunning, setUdpRunning] = useState(false);
+  const [udpDone, setUdpDone] = useState(false);
+
+  const tcpSteps = [
+    { label: "SYN",     fullname: "Synchronize",             color: "#3b82f6", desc: "1️⃣ Client ส่ง SYN ขอเปิดการเชื่อมต่อ" },
+    { label: "SYN-ACK", fullname: "Synchronize-Acknowledge",  color: "#8b5cf6", desc: "2️⃣ Server ตอบรับด้วย SYN-ACK ยืนยันพร้อม" },
+    { label: "ACK",     fullname: "Acknowledge",              color: "#3b82f6", desc: "3️⃣ Client ส่ง ACK — Handshake สำเร็จ!" },
+    { label: "DATA 1",  fullname: "Data Segment #1",          color: "#10b981", desc: "4️⃣ ส่งข้อมูลชุดที่ 1" },
+    { label: "ACK ✓",   fullname: "Acknowledge #1",           color: "#8b5cf6", desc: "5️⃣ Server ยืนยันรับชุดที่ 1" },
+    { label: "DATA 2",  fullname: "Data Segment #2",          color: "#10b981", desc: "6️⃣ ส่งข้อมูลชุดที่ 2" },
+    { label: "ACK ✓",   fullname: "Acknowledge #2",           color: "#8b5cf6", desc: "7️⃣ Server ยืนยันรับชุดที่ 2 ✅ ครบถ้วน!" },
+  ];
+
+  const udpSteps = [
+    { label: "DATA 1", fullname: "Datagram #1", color: "#f59e0b", desc: "1️⃣ ส่งชุดที่ 1 ออกไปเลย ไม่รอ",                  lost: false },
+    { label: "DATA 2", fullname: "Datagram #2", color: "#f59e0b", desc: "2️⃣ ส่งชุดที่ 2 ต่อเนื่อง ไม่รอยืนยัน",           lost: false },
+    { label: "DATA 3", fullname: "Datagram #3", color: "#ef4444", desc: "3️⃣ ชุดที่ 3 หายกลางทาง! ❌ ไม่มีการแจ้งเตือน",   lost: true  },
+    { label: "DATA 4", fullname: "Datagram #4", color: "#f59e0b", desc: "4️⃣ ส่งชุดที่ 4 ต่อ — ปลายทางไม่รู้ว่าหาย!",    lost: false },
+  ];
+
+  const runTCP = () => {
+    setTcpStep(-1); setTcpDone(false); setTcpRunning(true);
+    tcpSteps.forEach((_, i) => {
+      setTimeout(() => {
+        setTcpStep(i);
+        if (i === tcpSteps.length - 1) { setTcpRunning(false); setTcpDone(true); }
+      }, i * 900);
+    });
+  };
+
+  const runUDP = () => {
+    setUdpStep(-1); setUdpDone(false); setUdpRunning(true);
+    udpSteps.forEach((_, i) => {
+      setTimeout(() => {
+        setUdpStep(i);
+        if (i === udpSteps.length - 1) { setUdpRunning(false); setUdpDone(true); }
+      }, i * 700);
+    });
+  };
+
+  const pktRow = (st: { label: string; fullname?: string; color: string; desc: string; lost?: boolean }, active: boolean) => (
+    <div style={{
+      display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px",
+      borderRadius: "10px", transition: "all 0.4s",
+      background: active ? `${st.color}18` : "rgba(255,255,255,0.03)",
+      border: `1px solid ${active ? st.color + "55" : "rgba(255,255,255,0.06)"}`,
+      opacity: active ? 1 : 0.3,
+    }}>
+      {/* Badge: abbreviation + full name below */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px", flexShrink: 0 }}>
+        <span style={{
+          fontSize: "11px", fontWeight: 800, padding: "3px 10px", borderRadius: "6px",
+          background: active ? st.color : "rgba(255,255,255,0.1)", color: "#fff",
+          textDecoration: st.lost ? "line-through" : "none",
+          whiteSpace: "nowrap",
+        }}>{st.label}</span>
+        {st.fullname && (
+          <span style={{
+            fontSize: "8px", color: active ? `${st.color}cc` : "rgba(255,255,255,0.2)",
+            fontStyle: "italic", whiteSpace: "nowrap", letterSpacing: "0.2px",
+          }}>{st.fullname}</span>
+        )}
+      </div>
+      <span style={{ fontSize: "10px", color: active ? "rgba(255,255,255,0.85)" : "rgba(255,255,255,0.3)" }}>
+        {st.desc}
+      </span>
+      {st.lost && active && <span style={{ marginLeft: "auto", fontSize: "14px" }}>💥</span>}
+    </div>
+  );
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "3% 4%",
+      background: "linear-gradient(135deg,#0f172a 0%,#1e1b4b 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai',sans-serif", boxSizing: "border-box", gap: "16px",
+    }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+        <div>
+          <span style={{ fontSize: "11px", color: "#6366f1", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+            อนิเมชันเปรียบเทียบโปรโตคอล
+          </span>
+          <h2 style={{ margin: "4px 0 0", fontSize: "clamp(16px,2.2vw,24px)", fontWeight: 800 }}>{s.title}</h2>
+        </div>
+        <div style={{ display: "flex", gap: "6px" }}>
+          {(["theory", "anim"] as const).map(t => (
+            <button key={t} onClick={() => setTab(t)} style={{
+              padding: "7px 16px", borderRadius: "8px", border: "none", cursor: "pointer",
+              fontWeight: 700, fontSize: "12px", transition: "all 0.2s",
+              background: tab === t ? "#6366f1" : "rgba(255,255,255,0.08)",
+              color: tab === t ? "#fff" : "rgba(255,255,255,0.5)",
+            }}>
+              {t === "theory" ? "📚 ทฤษฎี" : "▶ อนิเมชัน"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* THEORY TAB */}
+      {tab === "theory" && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px", flex: 1 }}>
+          {[
+            {
+              proto: "TCP", fullname: "Transmission Control Protocol", icon: "🔗", color: "#3b82f6",
+              tagColor: "#93c5fd",
+              facts: [
+                ["🤝 3-Way Handshake", "ต้องจับมือ SYN→SYN-ACK→ACK ก่อนส่งข้อมูลทุกครั้ง"],
+                ["✅ รับประกันครบถ้วน", "ถ้าข้อมูลหาย ระบบส่งใหม่อัตโนมัติ"],
+                ["📦 จัดลำดับข้อมูล", "ข้อมูลถึงปลายทางเรียงลำดับถูกต้องเสมอ"],
+                ["🐢 ช้ากว่า UDP", "ต้องรอยืนยัน ACK ก่อนส่งต่อ"],
+              ],
+              usedBy: "SSH (22), HTTP (80), HTTPS (443), MariaDB (3306), Samba (445)",
+              usedColor: "#6ee7b7",
+              usedBg: "rgba(16,185,129,0.1)", usedBorder: "rgba(16,185,129,0.2)",
+            },
+            {
+              proto: "UDP", fullname: "User Datagram Protocol", icon: "⚡", color: "#f59e0b",
+              tagColor: "#fcd34d",
+              facts: [
+                ["🚀 ไม่มี Handshake", "ส่งข้อมูลออกไปเลยทันที ไม่ต้องรอจับมือ"],
+                ["❌ ไม่รับประกัน", "ถ้าข้อมูลหาย ไม่แจ้งเตือน ไม่ส่งซ้ำ"],
+                ["⚡ เร็วกว่า TCP", "ไม่มีขั้นตอน Handshake หรือรอ ACK"],
+                ["📻 เหมือนสัญญาณวิทยุ", "ส่งออกอากาศเลย ได้ยินก็ดี ถ้าหลุดก็ช่าง"],
+              ],
+              usedBy: "DNS (53), DHCP (67/68), MQTT (1883), วีดีโอคอล, เกมออนไลน์",
+              usedColor: "#fcd34d",
+              usedBg: "rgba(245,158,11,0.1)", usedBorder: "rgba(245,158,11,0.2)",
+            },
+          ].map(item => (
+            <div key={item.proto} style={{
+              background: `${item.color}08`, border: `1px solid ${item.color}35`,
+              borderRadius: "16px", padding: "20px", display: "flex", flexDirection: "column", gap: "10px",
+            }}>
+              <div style={{ fontWeight: 800, fontSize: "15px", color: item.color }}>
+                {item.icon} {item.proto} — {item.fullname}
+              </div>
+              {item.facts.map(([k, v]) => (
+                <div key={k} style={{ background: `${item.color}10`, borderRadius: "8px", padding: "8px 10px", border: `1px solid ${item.color}20` }}>
+                  <div style={{ fontWeight: 700, fontSize: "11px", color: item.tagColor, marginBottom: "2px" }}>{k}</div>
+                  <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)" }}>{v}</div>
+                </div>
+              ))}
+              <div style={{ marginTop: "auto", background: item.usedBg, borderRadius: "8px", padding: "8px 10px", border: `1px solid ${item.usedBorder}`, fontSize: "10px", color: item.usedColor }}>
+                📌 <strong>ใช้กับ:</strong> {item.usedBy}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ANIMATION TAB */}
+      {tab === "anim" && (
+        <>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", flex: 1 }}>
+            {/* TCP Panel */}
+            <div style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.3)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: "13px", color: "#3b82f6" }}>🔗 TCP</div>
+                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>3-Way Handshake ก่อนส่งข้อมูล</div>
+                </div>
+                <button onClick={runTCP} disabled={tcpRunning} style={{
+                  padding: "7px 14px", borderRadius: "8px", border: "none", cursor: tcpRunning ? "wait" : "pointer",
+                  background: tcpRunning ? "rgba(59,130,246,0.3)" : "#3b82f6", color: "#fff",
+                  fontWeight: 700, fontSize: "12px", transition: "all 0.2s",
+                }}>{tcpRunning ? "กำลังส่ง..." : "▶ Play TCP"}</button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                {tcpSteps.map((st, i) => <div key={i}>{pktRow(st, tcpStep >= i)}</div>)}
+              </div>
+              {tcpDone && (
+                <div style={{ textAlign: "center", color: "#10b981", fontWeight: 700, fontSize: "12px", padding: "8px", background: "rgba(16,185,129,0.12)", borderRadius: "8px", border: "1px solid rgba(16,185,129,0.3)" }}>
+                  ✅ ส่งข้อมูลสำเร็จ — ได้รับครบ 100%!
+                </div>
+              )}
+            </div>
+
+            {/* UDP Panel */}
+            <div style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "16px", padding: "16px", display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: "13px", color: "#f59e0b" }}>⚡ UDP</div>
+                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>ยิงข้อมูลออกไปเลย ไม่รอ ไม่ยืนยัน</div>
+                </div>
+                <button onClick={runUDP} disabled={udpRunning} style={{
+                  padding: "7px 14px", borderRadius: "8px", border: "none", cursor: udpRunning ? "wait" : "pointer",
+                  background: udpRunning ? "rgba(245,158,11,0.3)" : "#d97706", color: "#fff",
+                  fontWeight: 700, fontSize: "12px", transition: "all 0.2s",
+                }}>{udpRunning ? "กำลังส่ง..." : "▶ Play UDP"}</button>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+                {udpSteps.map((st, i) => <div key={i}>{pktRow(st, udpStep >= i)}</div>)}
+              </div>
+              {udpDone && (
+                <div style={{ textAlign: "center", color: "#f59e0b", fontWeight: 700, fontSize: "12px", padding: "8px", background: "rgba(245,158,11,0.1)", borderRadius: "8px", border: "1px solid rgba(245,158,11,0.3)" }}>
+                  ⚡ ส่งเร็วมาก แต่ชุดที่ 3 หาย — ไม่มีการแจ้งเตือน!
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Comparison table */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "8px", flexShrink: 0 }}>
+            {[
+              { label: "ความเร็ว", tcp: "ช้ากว่า (ต้อง Handshake)", udp: "เร็วกว่า (ไม่ต้องรอ)" },
+              { label: "ความน่าเชื่อถือ", tcp: "สูง — มีการยืนยัน ACK", udp: "ต่ำ — ไม่ยืนยัน" },
+              { label: "เหมาะกับ", tcp: "SSH, HTTP, Database", udp: "DNS, DHCP, MQTT" },
+              { label: "ตัวอย่าง", tcp: "ส่งไฟล์, เว็บ, DB Query", udp: "วีดีโอคอล, เกม, IoT" },
+            ].map((r, i) => (
+              <div key={i} style={{ background: "rgba(255,255,255,0.04)", borderRadius: "10px", padding: "10px", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div style={{ fontSize: "10px", color: "#a5b4fc", fontWeight: 700, marginBottom: "6px" }}>{r.label}</div>
+                <div style={{ fontSize: "11px", color: "#60a5fa", marginBottom: "3px" }}>🔗 {r.tcp}</div>
+                <div style={{ fontSize: "11px", color: "#fbbf24" }}>⚡ {r.udp}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Socket Binding Animation  (week-7a slide type: socket-binding-anim)
+───────────────────────────────────────────────────────────────────────── */
+function SocketBindingAnimation({ s }: { s: SlideData }) {
+  const [binding, setBinding] = useState<"0.0.0.0" | "127.0.0.1">("0.0.0.0");
+  const [attacking, setAttacking] = useState(false);
+  const [packets, setPackets] = useState<{ id: number; blocked: boolean }[]>([]);
+  const nextId = React.useRef(0);
+
+  const launchAttack = () => {
+    if (attacking) return;
+    setAttacking(true);
+    let count = 0;
+    const iv = setInterval(() => {
+      const id = nextId.current++;
+      const blocked = binding === "127.0.0.1";
+      setPackets(prev => [...prev, { id, blocked }]);
+      setTimeout(() => setPackets(prev => prev.filter(p => p.id !== id)), 2400);
+      count++;
+      if (count >= 6) { clearInterval(iv); setTimeout(() => setAttacking(false), 600); }
+    }, 320);
+  };
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "3% 4%",
+      background: "linear-gradient(135deg,#0f172a 0%,#1a0a2e 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai',sans-serif", boxSizing: "border-box", gap: "16px",
+    }}>
+      {/* Header */}
+      <div style={{ flexShrink: 0 }}>
+        <span style={{ fontSize: "11px", color: "#f59e0b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+          ⚠️ หัวข้อความปลอดภัยสำคัญ
+        </span>
+        <h2 style={{ margin: "4px 0 0", fontSize: "clamp(16px,2.2vw,24px)", fontWeight: 800 }}>{s.title}</h2>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "18px", flex: 1 }}>
+        {/* Left: Controls */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "14px", padding: "16px", border: "1px solid rgba(255,255,255,0.1)" }}>
+            <div style={{ fontWeight: 700, fontSize: "13px", color: "#a5b4fc", marginBottom: "12px" }}>⚙️ เลือก Binding Address:</div>
+            {(["0.0.0.0", "127.0.0.1"] as const).map(addr => (
+              <button key={addr} onClick={() => setBinding(addr)} style={{
+                display: "block", width: "100%", marginBottom: "8px", textAlign: "left",
+                padding: "12px 16px", borderRadius: "10px", border: "none", cursor: "pointer",
+                background: binding === addr ? (addr === "0.0.0.0" ? "rgba(239,68,68,0.3)" : "rgba(16,185,129,0.3)") : "rgba(255,255,255,0.06)",
+                color: "#fff", fontWeight: 700, fontSize: "13px", transition: "all 0.2s",
+                outline: binding === addr ? `2px solid ${addr === "0.0.0.0" ? "#ef4444" : "#10b981"}` : "none",
+              }}>
+                {addr === "0.0.0.0" ? "🌍" : "🔒"} {addr}
+                <span style={{ display: "block", fontSize: "10px", fontWeight: 400, color: "rgba(255,255,255,0.6)", marginTop: "3px" }}>
+                  {addr === "0.0.0.0" ? "รับสายจากทุกคนในโลก (อันตราย!)" : "เฉพาะในเครื่องตัวเองเท่านั้น (ปลอดภัย)"}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <button onClick={launchAttack} disabled={attacking} style={{
+            padding: "14px", borderRadius: "12px", border: "none", cursor: attacking ? "wait" : "pointer",
+            background: attacking ? "rgba(239,68,68,0.3)" : "linear-gradient(135deg,#ef4444,#b91c1c)",
+            color: "#fff", fontWeight: 800, fontSize: "14px", transition: "all 0.2s",
+          }}>
+            {attacking ? "🔴 กำลังส่งแพ็กเก็ต..." : "🚨 จำลองการโจมตี!"}
+          </button>
+
+          <div style={{
+            padding: "14px", borderRadius: "12px", transition: "all 0.3s",
+            background: binding === "0.0.0.0" ? "rgba(239,68,68,0.1)" : "rgba(16,185,129,0.1)",
+            border: `1px solid ${binding === "0.0.0.0" ? "rgba(239,68,68,0.3)" : "rgba(16,185,129,0.3)"}`,
+          }}>
+            <div style={{ fontWeight: 700, fontSize: "13px", color: binding === "0.0.0.0" ? "#ef4444" : "#10b981", marginBottom: "6px" }}>
+              {binding === "0.0.0.0" ? "⚠️ สถานะ: อันตราย!" : "✅ สถานะ: ปลอดภัย!"}
+            </div>
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", lineHeight: 1.6 }}>
+              {binding === "0.0.0.0"
+                ? "บริการนี้เปิดรับสายจากทุก IP ในโลก แฮกเกอร์สแกนเจอและโจมตีได้โดยตรง!"
+                : "บริการนี้รับเฉพาะ localhost เท่านั้น แม้ไม่มีไฟร์วอลล์ก็ไม่มีใครจากภายนอกเข้าได้!"}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Visualization */}
+        <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "14px", padding: "16px", border: "1px solid rgba(255,255,255,0.08)", display: "flex", flexDirection: "column", gap: "14px", overflow: "hidden" }}>
+          <div style={{ fontWeight: 700, fontSize: "12px", color: "#a5b4fc" }}>🖥️ จำลองการเชื่อมต่อ</div>
+
+          {/* Network diagram */}
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.4)", borderRadius: "8px", padding: "10px 14px", textAlign: "center", minWidth: "72px" }}>
+              <div style={{ fontSize: "20px" }}>👤</div>
+              <div style={{ color: "#ef4444", fontWeight: 700, fontSize: "10px" }}>Attacker</div>
+              <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)" }}>Internet</div>
+            </div>
+
+            <div style={{ flex: 1, position: "relative", height: "44px" }}>
+              <div style={{ position: "absolute", top: "50%", left: 0, right: 0, height: "2px", background: "rgba(255,255,255,0.12)", transform: "translateY(-50%)" }} />
+              {/* Animated packets */}
+              {packets.map(p => (
+                <div key={p.id} style={{
+                  position: "absolute", top: "50%", fontSize: "16px",
+                  transform: "translateY(-50%)",
+                  animation: `pkt${p.blocked ? "Block" : "Pass"}_${p.id % 3} 2.2s ease-in forwards`,
+                  left: "0%",
+                }}>📦</div>
+              ))}
+            </div>
+
+            <div style={{
+              background: binding === "127.0.0.1" ? "rgba(16,185,129,0.15)" : "rgba(255,255,255,0.06)",
+              border: `1px solid ${binding === "127.0.0.1" ? "rgba(16,185,129,0.5)" : "rgba(255,255,255,0.15)"}`,
+              borderRadius: "8px", padding: "10px 14px", textAlign: "center", minWidth: "82px",
+              transition: "all 0.3s",
+            }}>
+              <div style={{ fontSize: "20px" }}>🖥️</div>
+              <div style={{ color: binding === "127.0.0.1" ? "#10b981" : "#94a3b8", fontWeight: 700, fontSize: "10px" }}>Server</div>
+              <div style={{ fontSize: "9px", color: binding === "0.0.0.0" ? "#ef4444" : "#10b981", fontWeight: 700 }}>{binding}</div>
+            </div>
+          </div>
+
+          {/* Detail card */}
+          {[
+            { addr: "0.0.0.0", icon: "🌍", title: "0.0.0.0 — รับสายจากทุก Interface", color: "#ef4444",
+              points: ["รับสายจากทุก IP Address ที่เข้ามา", "แฮกเกอร์ภายนอกเชื่อมต่อได้โดยตรง", "⚠️ ต้องใช้ Firewall ป้องกันทุกครั้ง", "Config: bind-address = 0.0.0.0"] },
+            { addr: "127.0.0.1", icon: "🔒", title: "127.0.0.1 — Loopback เท่านั้น", color: "#10b981",
+              points: ["รับเฉพาะ localhost ภายในเครื่อง", "ภายนอกเชื่อมต่อไม่ได้แม้ไม่มีไฟร์วอลล์", "PHP/Python ในเครื่องเดียวกันเชื่อมได้", "Config: bind-address = 127.0.0.1"] },
+          ].filter(item => item.addr === binding).map(item => (
+            <div key={item.addr} style={{ background: `${item.color}08`, borderRadius: "10px", padding: "12px", border: `1px solid ${item.color}25`, flex: 1 }}>
+              <div style={{ fontWeight: 700, fontSize: "12px", color: item.color, marginBottom: "8px" }}>{item.icon} {item.title}</div>
+              {item.points.map((pt, i) => (
+                <div key={i} style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", padding: "3px 0", display: "flex", gap: "6px" }}>
+                  <span style={{ color: item.color, flexShrink: 0 }}>•</span> {pt}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes pktPass_0 { 0%{left:0%;opacity:1} 100%{left:calc(100% - 20px);opacity:0.4} }
+        @keyframes pktPass_1 { 0%{left:0%;opacity:1} 100%{left:calc(100% - 20px);opacity:0.4} }
+        @keyframes pktPass_2 { 0%{left:0%;opacity:1} 100%{left:calc(100% - 20px);opacity:0.4} }
+        @keyframes pktBlock_0 { 0%{left:0%;opacity:1} 50%{left:42%;opacity:1;transform:translateY(-50%) scale(1)} 65%{left:42%;opacity:1;transform:translateY(-50%) scale(1.4)} 100%{left:42%;opacity:0;transform:translateY(-50%) scale(0.4)} }
+        @keyframes pktBlock_1 { 0%{left:0%;opacity:1} 50%{left:42%;opacity:1;transform:translateY(-50%) scale(1)} 65%{left:42%;opacity:1;transform:translateY(-50%) scale(1.4)} 100%{left:42%;opacity:0;transform:translateY(-50%) scale(0.4)} }
+        @keyframes pktBlock_2 { 0%{left:0%;opacity:1} 50%{left:42%;opacity:1;transform:translateY(-50%) scale(1)} 65%{left:42%;opacity:1;transform:translateY(-50%) scale(1.4)} 100%{left:42%;opacity:0;transform:translateY(-50%) scale(0.4)} }
+      `}</style>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Port Scan Animation  (week-7a slide type: port-scan-anim)
+───────────────────────────────────────────────────────────────────────── */
+function PortScanAnimation({ s }: { s: SlideData }) {
+  const ports = [
+    { port: 22,   name: "SSH",      color: "#3b82f6", open: true,  icon: "🔑" },
+    { port: 80,   name: "HTTP",     color: "#10b981", open: true,  icon: "🌐" },
+    { port: 443,  name: "HTTPS",    color: "#10b981", open: false, icon: "🔐" },
+    { port: 3306, name: "MariaDB",  color: "#ef4444", open: true,  icon: "🗄️" },
+    { port: 445,  name: "Samba",    color: "#f59e0b", open: false, icon: "📁" },
+    { port: 8080, name: "HTTP-Alt", color: "#8b5cf6", open: false, icon: "🔧" },
+    { port: 1883, name: "MQTT",     color: "#06b6d4", open: false, icon: "📡" },
+    { port: 9999, name: "Unknown?", color: "#ef4444", open: false, icon: "❓" },
+  ];
+
+  const [scanning, setScanning] = useState(false);
+  const [scannedIdx, setScannedIdx] = useState(-1);
+  const [phase, setPhase] = useState<"idle"|"scanning"|"found"|"exploiting"|"pwned">("idle");
+
+  const startScan = () => {
+    if (scanning) return;
+    setScanning(true); setScannedIdx(-1); setPhase("scanning");
+    ports.forEach((_, i) => {
+      setTimeout(() => {
+        setScannedIdx(i);
+        if (i === ports.length - 1) {
+          setScanning(false); setPhase("found");
+          setTimeout(() => setPhase("exploiting"), 1500);
+          setTimeout(() => setPhase("pwned"), 3200);
+        }
+      }, i * 480 + 300);
+    });
+  };
+
+  const resetScan = () => { setScanning(false); setScannedIdx(-1); setPhase("idle"); };
+
+  const terminalContent: Record<string, React.ReactNode> = {
+    idle: <span style={{ color: "rgba(255,255,255,0.3)" }}>กด "เริ่ม nmap Scan" เพื่อดูการโจมตี...</span>,
+    scanning: <span style={{ color: "#94a3b8" }}>$ nmap -sV 192.168.1.100<br />กำลังสแกน...</span>,
+    found: <>
+      <span style={{ color: "#94a3b8" }}>$ nmap -sV 192.168.1.100{"\n"}</span>
+      <span style={{ color: "#10b981" }}>PORT     STATE  SERVICE{"\n"}22/tcp   open   ssh OpenSSH 8.9{"\n"}80/tcp   open   http Nginx 1.18{"\n"}</span>
+      <span style={{ color: "#ef4444", fontWeight: 700 }}>3306/tcp open   mysql MariaDB 10.6{"\n"}</span>
+      <span style={{ color: "#fbbf24" }}>⚠️ พบพอร์ต 3306 เปิดอยู่ที่ 0.0.0.0!</span>
+    </>,
+    exploiting: <>
+      <span style={{ color: "#10b981" }}>PORT 3306 — MariaDB detected!{"\n"}</span>
+      <span style={{ color: "#fbbf24" }}>$ mysql -h 192.168.1.100 -u root -p{"\n"}</span>
+      <span style={{ color: "#94a3b8" }}>Trying root/root...{"\n"}Trying root/admin...{"\n"}</span>
+      <span style={{ color: "#ef4444" }}>Brute-forcing...</span>
+    </>,
+    pwned: <>
+      <span style={{ color: "#10b981" }}>Welcome to the MariaDB monitor!{"\n"}</span>
+      <span style={{ color: "#ef4444", fontWeight: 700 }}>☠️ ACCESS GRANTED!{"\n"}ขโมยข้อมูลทั้งหมดได้แล้ว!</span>
+    </>,
+  };
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "3% 4%",
+      background: "linear-gradient(135deg,#0a0a0a 0%,#1a0505 50%,#0a0a0a 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai','Fira Code',monospace", boxSizing: "border-box", gap: "14px",
+    }}>
+      {/* Header */}
+      <div style={{ flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <span style={{ fontSize: "11px", color: "#ef4444", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+            🚨 จำลองการโจมตี Port Scanning
+          </span>
+          <h2 style={{ margin: "4px 0 0", fontSize: "clamp(14px,2vw,22px)", fontWeight: 800 }}>{s.title}</h2>
+        </div>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <button onClick={startScan} disabled={scanning} style={{
+            padding: "8px 16px", borderRadius: "10px", border: "none", cursor: scanning ? "wait" : "pointer",
+            background: scanning ? "rgba(239,68,68,0.3)" : "linear-gradient(135deg,#ef4444,#991b1b)",
+            color: "#fff", fontWeight: 700, fontSize: "12px", transition: "all 0.2s",
+          }}>
+            {scanning ? "⏳ กำลังสแกน..." : "🔭 เริ่ม nmap Scan"}
+          </button>
+          {phase !== "idle" && !scanning && (
+            <button onClick={resetScan} style={{
+              padding: "8px 16px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.2)",
+              cursor: "pointer", background: "transparent", color: "rgba(255,255,255,0.6)",
+              fontWeight: 700, fontSize: "12px",
+            }}>↺ รีเซต</button>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "16px", flex: 1 }}>
+        {/* Port grid */}
+        <div>
+          <div style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "8px", fontFamily: "monospace" }}>
+            $ nmap -sV 192.168.1.100
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px" }}>
+            {ports.map((p, i) => {
+              const scanned = scannedIdx >= i;
+              const isCurrentlyScan = i === scannedIdx && scanning;
+              return (
+                <div key={p.port} style={{
+                  display: "flex", alignItems: "center", gap: "8px",
+                  padding: "9px 12px", borderRadius: "10px", transition: "all 0.4s",
+                  background: !scanned ? "rgba(255,255,255,0.03)" : p.open ? `${p.color}18` : "rgba(255,255,255,0.05)",
+                  border: `1px solid ${!scanned ? "rgba(255,255,255,0.06)" : p.open ? p.color + "55" : "rgba(255,255,255,0.1)"}`,
+                }}>
+                  <span style={{ fontSize: "16px", opacity: scanned ? 1 : 0.3 }}>{p.icon}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: "12px", fontWeight: 700, fontFamily: "monospace",
+                      color: !scanned ? "rgba(255,255,255,0.2)" : p.open ? p.color : "rgba(255,255,255,0.4)" }}>
+                      :{p.port}
+                    </div>
+                    <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>{p.name}</div>
+                  </div>
+                  {scanned && (
+                    <span style={{
+                      fontSize: "9px", fontWeight: 700, padding: "2px 7px", borderRadius: "5px",
+                      background: p.open ? `${p.color}30` : "rgba(255,255,255,0.07)",
+                      color: p.open ? p.color : "rgba(255,255,255,0.4)",
+                      border: `1px solid ${p.open ? p.color + "44" : "rgba(255,255,255,0.1)"}`,
+                    }}>{p.open ? "OPEN" : "closed"}</span>
+                  )}
+                  {isCurrentlyScan && <span style={{ fontSize: "11px" }}>🔍</span>}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Terminal + result */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div style={{
+            background: "rgba(10,10,10,0.9)", borderRadius: "12px", padding: "14px",
+            border: "1px solid rgba(239,68,68,0.2)", fontFamily: "monospace", fontSize: "11px",
+            lineHeight: 1.9, flex: 1, whiteSpace: "pre-wrap",
+          }}>
+            <div style={{ color: "#ef4444", fontWeight: 700, marginBottom: "8px" }}>🖥️ Terminal — Attacker</div>
+            {terminalContent[phase]}
+          </div>
+
+          {phase === "pwned" && (
+            <div style={{ background: "rgba(16,185,129,0.08)", borderRadius: "12px", padding: "12px", border: "1px solid rgba(16,185,129,0.3)", flexShrink: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: "12px", color: "#10b981", marginBottom: "8px" }}>🛡️ วิธีป้องกัน:</div>
+              {[
+                "ติดตั้ง UFW Firewall บล็อกพอร์ต 3306",
+                "Bind MariaDB ที่ 127.0.0.1 ไม่ใช่ 0.0.0.0",
+                "ใช้ Fail2Ban บล็อก IP ที่ Login ผิดซ้ำ",
+                "เปลี่ยน Default Password ทันที",
+              ].map((tip, i) => (
+                <div key={i} style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", padding: "3px 0", display: "flex", gap: "6px" }}>
+                  <span style={{ color: "#10b981", flexShrink: 0 }}>✅</span> {tip}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {phase === "idle" && (
+            <div style={{ background: "rgba(239,68,68,0.07)", borderRadius: "12px", padding: "12px", border: "1px solid rgba(239,68,68,0.2)", flexShrink: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: "12px", color: "#ef4444", marginBottom: "6px" }}>⚠️ ข้อควรระวัง:</div>
+              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", lineHeight: 1.7 }}>
+                ห้ามใช้ nmap สแกนเครื่องที่ไม่ได้รับอนุญาตในชีวิตจริง ถือเป็นการละเมิดกฎหมายคอมพิวเตอร์! ใช้ได้เฉพาะเซิร์ฟเวอร์ของตัวเองครับ
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+/* ─────────────────────────────────────────────────────────────────────────
+   IP Address Infographic  (week-7a slide type: ip-infographic)
+───────────────────────────────────────────────────────────────────────── */
+function IPAddressInfographic({ s }: { s: SlideData }) {
+  const [activeCard, setActiveCard] = useState<number | null>(null);
+  const [showCmd, setShowCmd] = useState(false);
+
+  const components = [
+    {
+      icon: "🔢", label: "IP Address", value: "192.168.1.100", color: "#6366f1", shadow: "rgba(99,102,241,0.35)",
+      analogy: "เลขห้องในคอนโด", range: "0–255 ต่อชุด",
+      desc: "หมายเลขประจำตัวเครื่อง ใช้ระบุตำแหน่งในการส่งข้อมูล ประกอบด้วยตัวเลข 4 ชุด คั่นด้วยจุด",
+    },
+    {
+      icon: "🏢", label: "Subnet Mask", value: "/24 = 255.255.255.0", color: "#3b82f6", shadow: "rgba(59,130,246,0.35)",
+      analogy: "ชื่อตึกของคอนโด", range: "/24 = 256 เครื่อง  /16 = 65,536 เครื่อง",
+      desc: "ตัวกำหนดขอบเขตวงเครือข่าย บอกว่าอุปกรณ์ใดอยู่ในวงเดียวกัน",
+    },
+    {
+      icon: "🚪", label: "Default Gateway", value: "192.168.1.1", color: "#10b981", shadow: "rgba(16,185,129,0.35)",
+      analogy: "ประตูออกสู่อินเทอร์เน็ต", range: "ปกติเป็น IP แรกในวง เช่น .1",
+      desc: "IP ของเราเตอร์ทำหน้าที่เป็นประตูทางออกนอกเครือข่าย ถ้าไม่มี — เข้าเน็ตไม่ได้!",
+    },
+    {
+      icon: "📖", label: "DNS Server", value: "8.8.8.8 (Google)", color: "#f59e0b", shadow: "rgba(245,158,11,0.35)",
+      analogy: "สมุดโทรศัพท์ดิจิทัล", range: "8.8.8.8 (Google), 1.1.1.1 (Cloudflare)",
+      desc: "แปลง Domain Name เช่น google.com ให้เป็น IP ที่คอมพิวเตอร์เข้าใจ",
+    },
+  ];
+
+  const commands = [
+    { cmd: "ip a",            desc: "ดู IP และ Network Interface ทั้งหมด",    color: "#6366f1" },
+    { cmd: "ip a show eth0",  desc: "ดูเฉพาะการ์ดแลนชื่อ eth0",              color: "#3b82f6" },
+    { cmd: "hostname -I",     desc: "แสดง IP Address อย่างรวดเร็ว",          color: "#10b981" },
+    { cmd: "ip route",        desc: "ดู Routing Table และ Default Gateway",   color: "#f59e0b" },
+  ];
+
+  const ipParts  = ["192", "168", "1", "100"];
+  const ipColors = ["#6366f1", "#8b5cf6", "#a78bfa", "#c4b5fd"];
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "2.5% 3.5%",
+      background: "linear-gradient(135deg,#0a0f1e 0%,#0f172a 50%,#0a1628 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai',sans-serif", boxSizing: "border-box", gap: "12px",
+      position: "relative", overflow: "hidden",
+    }}>
+      {/* BG orbs */}
+      <div style={{ position:"absolute", top:"-80px", right:"-80px", width:"260px", height:"260px", borderRadius:"50%", background:"radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%)", pointerEvents:"none" }} />
+      <div style={{ position:"absolute", bottom:"-60px", left:"-60px", width:"200px", height:"200px", borderRadius:"50%", background:"radial-gradient(circle,rgba(16,185,129,0.08) 0%,transparent 70%)", pointerEvents:"none" }} />
+
+      {/* Header */}
+      <div style={{ flexShrink:0, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <div>
+          <span style={{ fontSize:"11px", color:"#6366f1", fontWeight:700, textTransform:"uppercase", letterSpacing:"2px" }}>🌐 พื้นฐานเครือข่าย</span>
+          <h2 style={{ margin:"3px 0 0", fontSize:"clamp(18px,2.2vw,26px)", fontWeight:800, letterSpacing:"-0.5px" }}>{s.title}</h2>
+        </div>
+        <button onClick={() => setShowCmd(!showCmd)} style={{
+          padding:"7px 14px", borderRadius:"10px", border:`1px solid rgba(99,102,241,0.3)`, cursor:"pointer",
+          background: showCmd ? "#6366f1" : "rgba(99,102,241,0.15)",
+          color: showCmd ? "#fff" : "#a5b4fc", fontWeight:700, fontSize:"12px", transition:"all 0.25s",
+        }}>
+          {showCmd ? "📊 ดู Infographic" : "💻 ดูคำสั่ง CLI"}
+        </button>
+      </div>
+
+      {!showCmd ? (
+        <>
+          {/* IP breakdown */}
+          <div style={{ background:"rgba(99,102,241,0.07)", borderRadius:"16px", padding:"12px 18px", border:"1px solid rgba(99,102,241,0.2)", flexShrink:0, display:"flex", flexDirection:"column", gap:"8px" }}>
+            <div style={{ fontSize:"11px", color:"#a5b4fc", fontWeight:700, letterSpacing:"1px" }}>🔍 กายวิภาค IP Address</div>
+            <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"0" }}>
+              {ipParts.map((part, i) => (
+                <React.Fragment key={i}>
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
+                    <div style={{
+                      fontSize:"clamp(20px,2.8vw,32px)", fontWeight:900, fontFamily:"monospace",
+                      color:ipColors[i], padding:"7px 14px",
+                      background:`${ipColors[i]}15`, borderRadius:"10px", border:`2px solid ${ipColors[i]}40`,
+                      minWidth:"62px", textAlign:"center",
+                    }}>{part}</div>
+                    <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.4)", fontWeight:600 }}>{["ตัวที่ 1","ตัวที่ 2","ตัวที่ 3","ตัวที่ 4"][i]}</div>
+                  </div>
+                  {i < 3 && <div style={{ fontSize:"26px", fontWeight:900, color:"rgba(255,255,255,0.25)", padding:"0 3px", marginBottom:"16px" }}>.</div>}
+                </React.Fragment>
+              ))}
+              <div style={{ marginLeft:"18px", background:"rgba(255,255,255,0.04)", borderRadius:"10px", padding:"7px 14px", border:"1px solid rgba(255,255,255,0.08)", textAlign:"center" }}>
+                <div style={{ fontSize:"10px", color:"#94a3b8" }}>ช่วงที่ใช้ได้</div>
+                <div style={{ fontSize:"15px", fontWeight:700, color:"#e2e8f0" }}>0 – 255</div>
+                <div style={{ fontSize:"9px", color:"#94a3b8" }}>ต่อชุด</div>
+              </div>
+            </div>
+          </div>
+
+          {/* 4 cards */}
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"10px", flex:1 }}>
+            {components.map((c, i) => (
+              <div key={i} onClick={() => setActiveCard(activeCard === i ? null : i)} style={{
+                borderRadius:"16px", padding:"14px 12px", cursor:"pointer",
+                background: activeCard === i ? `${c.color}18` : "rgba(255,255,255,0.04)",
+                border:`1.5px solid ${activeCard === i ? c.color+"66" : "rgba(255,255,255,0.08)"}`,
+                transition:"all 0.25s", display:"flex", flexDirection:"column", gap:"9px",
+                boxShadow: activeCard === i ? `0 8px 28px ${c.shadow}` : "none",
+                transform: activeCard === i ? "translateY(-2px)" : "none",
+              }}>
+                <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
+                  <div style={{ fontSize:"20px", width:"40px", height:"40px", borderRadius:"11px", background:`${c.color}20`, display:"flex", alignItems:"center", justifyContent:"center", border:`1px solid ${c.color}30`, flexShrink:0 }}>{c.icon}</div>
+                  <div>
+                    <div style={{ fontWeight:800, fontSize:"12px", color:c.color }}>{c.label}</div>
+                    <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.35)", marginTop:"1px" }}>คลิกดูรายละเอียด</div>
+                  </div>
+                </div>
+                <div style={{ background:`${c.color}15`, borderRadius:"8px", padding:"7px 9px", border:`1px solid ${c.color}25` }}>
+                  <div style={{ fontSize:"10px", fontWeight:700, color:c.color, fontFamily:"monospace" }}>{c.value}</div>
+                  <div style={{ fontSize:"10px", color:"rgba(255,255,255,0.5)", marginTop:"2px" }}>🏷️ <span style={{ color:"rgba(255,255,255,0.65)" }}>{c.analogy}</span></div>
+                </div>
+                {activeCard === i && (
+                  <div style={{ animation:"fadeIn 0.2s ease" }}>
+                    <div style={{ fontSize:"11px", color:"rgba(255,255,255,0.75)", lineHeight:1.65, marginBottom:"7px" }}>{c.desc}</div>
+                    <div style={{ background:"rgba(255,255,255,0.05)", borderRadius:"6px", padding:"5px 8px", fontSize:"10px", color:"rgba(255,255,255,0.45)" }}>📏 {c.range}</div>
+                  </div>
+                )}
+                <div style={{ textAlign:"center", color:`${c.color}80`, fontSize:"11px", marginTop:"auto" }}>{activeCard === i ? "▲" : "▼"}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Network strip */}
+          <div style={{ background:"rgba(255,255,255,0.03)", borderRadius:"14px", padding:"10px 16px", border:"1px solid rgba(255,255,255,0.06)", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+            <div style={{ fontSize:"11px", color:"#64748b", fontWeight:700, whiteSpace:"nowrap" }}>ตัวอย่าง:</div>
+            {[
+              { icon:"💻", label:"เครื่องคุณ",   ip:"192.168.1.100", color:"#6366f1" },
+              { icon:"→",  label:"",             ip:"",              color:"#334155" },
+              { icon:"📡", label:"Switch",        ip:"Layer 2",       color:"#3b82f6" },
+              { icon:"→",  label:"",             ip:"",              color:"#334155" },
+              { icon:"🌐", label:"Router/GW",     ip:"192.168.1.1",   color:"#10b981" },
+              { icon:"→",  label:"",             ip:"",              color:"#334155" },
+              { icon:"☁️", label:"Internet",      ip:"DNS: 8.8.8.8",  color:"#f59e0b" },
+            ].map((n, i) => n.icon === "→"
+              ? <div key={i} style={{ fontSize:"18px", color:"#334155" }}>→</div>
+              : (
+                <div key={i} style={{ textAlign:"center" }}>
+                  <div style={{ fontSize:"22px" }}>{n.icon}</div>
+                  <div style={{ fontSize:"10px", fontWeight:700, color:n.color, marginTop:"2px" }}>{n.label}</div>
+                  <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.4)", fontFamily:"monospace" }}>{n.ip}</div>
+                </div>
+              )
+            )}
+          </div>
+        </>
+      ) : (
+        <div style={{ flex:1, display:"flex", flexDirection:"column", gap:"10px" }}>
+          <div style={{ fontSize:"12px", color:"#94a3b8", fontWeight:600 }}>💻 คำสั่งดูข้อมูลเครือข่ายบน Linux Terminal:</div>
+          {commands.map((c, i) => (
+            <div key={i} style={{ background:"rgba(15,23,42,0.8)", borderRadius:"14px", padding:"15px 20px", border:`1px solid ${c.color}30`, display:"flex", alignItems:"center", gap:"16px" }}>
+              <div style={{ background:`${c.color}20`, borderRadius:"10px", padding:"9px 16px", fontFamily:"monospace", fontSize:"14px", fontWeight:700, color:c.color, border:`1px solid ${c.color}40`, whiteSpace:"nowrap", flexShrink:0 }}>
+                $ {c.cmd}
+              </div>
+              <div style={{ fontSize:"13px", color:"rgba(255,255,255,0.85)", fontWeight:600 }}>{c.desc}</div>
+            </div>
+          ))}
+          <div style={{ background:"rgba(99,102,241,0.08)", borderRadius:"14px", padding:"14px 18px", border:"1px solid rgba(99,102,241,0.2)", display:"flex", gap:"14px", alignItems:"flex-start" }}>
+            <span style={{ fontSize:"22px", flexShrink:0 }}>💡</span>
+            <div>
+              <div style={{ fontWeight:700, fontSize:"13px", color:"#a5b4fc", marginBottom:"5px" }}>อ่านผลลัพธ์ ip a อย่างไร?</div>
+              <div style={{ fontSize:"12px", color:"rgba(255,255,255,0.7)", lineHeight:1.7 }}>
+                ในผลลัพธ์จะเห็น <span style={{ color:"#6366f1", fontFamily:"monospace", fontWeight:700 }}>inet</span> แสดง IPv4 และ <span style={{ color:"#8b5cf6", fontFamily:"monospace", fontWeight:700 }}>inet6</span> แสดง IPv6 ของแต่ละการ์ดเครือข่าย
+                <br />การ์ดเครือข่ายใน LXC/VM มักชื่อว่า <span style={{ color:"#10b981", fontFamily:"monospace" }}>eth0</span> หรือ <span style={{ color:"#10b981", fontFamily:"monospace" }}>ens18</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <style>{`@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}`}</style>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Packet Flow Animation  (week-7a slide type: packet-flow-anim)
+   Shows OSI Layer encapsulation step-by-step with interactive controls
+───────────────────────────────────────────────────────────────────────── */
+function PacketFlowAnimation({ s }: { s: SlideData }) {
+  const [step, setStep] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [showFirewall, setShowFirewall] = useState(false);
+
+  const steps = [
+    {
+      layer: "Layer 7 — Application",
+      icon: "🌐",
+      color: "#6366f1",
+      title: "Browser สร้าง HTTP Request",
+      desc: "ผู้ใช้พิมพ์ URL → Browser สร้างข้อความขอหน้าเว็บ",
+      packet: { type: "HTTP", label: "GET / HTTP/1.1\nHost: 192.168.1.5", color: "#6366f1" },
+      explain: "ณ จุดนี้ข้อมูลยังเป็นแค่ \"ข้อความคำขอ\" ธรรมดา ยังไม่มีที่อยู่ปลายทางใดๆ ระบบจะส่งต่อลงมายัง Layer 4 เพื่อห่อด้วย TCP",
+    },
+    {
+      layer: "Layer 4 — Transport (TCP)",
+      icon: "📦",
+      color: "#3b82f6",
+      title: "TCP ห่อข้อมูลเป็น Segment",
+      desc: "กำหนด Source Port (สุ่มอัตโนมัติ) และ Destination Port (80 สำหรับ HTTP)",
+      packet: { type: "TCP Segment", label: "Src Port: 54321\nDst Port: 80\n[HTTP Data]", color: "#3b82f6" },
+      explain: "TCP เพิ่ม \"ป้าย\" ระบุหมายเลขช่องทาง (Port) ทำให้เซิร์ฟเวอร์รู้ว่าข้อมูลนี้ต้องส่งให้ Nginx ที่รออยู่พอร์ต 80 ไม่ใช่โปรแกรมอื่น",
+    },
+    {
+      layer: "Layer 3 — Network (IP)",
+      icon: "🗺️",
+      color: "#10b981",
+      title: "IP ห่ออีกชั้น เพิ่มที่อยู่",
+      desc: "บันทึก Source IP ของเครื่องส่ง และ Destination IP ของเซิร์ฟเวอร์",
+      packet: { type: "IP Packet", label: "Src IP: 192.168.1.100\nDst IP: 192.168.1.5\n[TCP][HTTP]", color: "#10b981" },
+      explain: "IP เหมือนซองจดหมายที่เขียนที่อยู่ผู้ส่งและผู้รับ เราเตอร์จะใช้ข้อมูลชั้นนี้ตัดสินใจว่าจะส่ง Packet ไปทางไหน",
+    },
+    {
+      layer: "Layer 2 — Data Link (Ethernet)",
+      icon: "🔌",
+      color: "#f59e0b",
+      title: "Ethernet ห่อชั้นนอกสุด",
+      desc: "ใส่ MAC Address เครื่องต้นทางและปลายทาง เพื่อส่งข้ามสวิตช์ในวงแลน",
+      packet: { type: "Ethernet Frame", label: "Src MAC: AA:BB:CC\nDst MAC: 11:22:33\n[IP][TCP][HTTP]", color: "#f59e0b" },
+      explain: "MAC Address ใช้เฉพาะในวงแลนเดียวกัน เมื่อข้ามไปวงอื่น เราเตอร์จะเปลี่ยน MAC ใหม่ แต่ IP ยังคงเดิมตลอดทาง",
+    },
+    {
+      layer: "🚦 Firewall ตรวจสอบ (Layer 3-4)",
+      icon: "🛡️",
+      color: "#ef4444",
+      title: "Firewall คอยตรวจ Packet",
+      desc: "Firewall อ่าน IP และ Port แล้วเปรียบกับกฎที่ตั้งไว้",
+      packet: { type: "INSPECT", label: "IP: 192.168.1.100 ✓\nPort: 80 ✓\n→ ALLOW", color: "#ef4444" },
+      explain: "Firewall ทำงานที่ Layer 3-4 มองเห็นแค่ IP และ Port ไม่ได้อ่านเนื้อหาข้อมูลจริงๆ ดังนั้นถ้าต้องการ Block พอร์ต 3306 (MariaDB) ก็เขียนกฎ: ห้าม Port 3306 เข้า",
+    },
+    {
+      layer: "🖥️ Server แกะชั้น & ส่งให้ Nginx",
+      icon: "⚙️",
+      color: "#8b5cf6",
+      title: "Server แกะข้อมูลทีละชั้น",
+      desc: "แกะ Ethernet → IP → TCP → อ่าน Port 80 → ส่ง HTTP Request ให้ Nginx",
+      packet: { type: "Delivered!", label: "→ Nginx (Port 80)\nGET / HTTP/1.1\n✅ ประมวลผลและตอบกลับ", color: "#8b5cf6" },
+      explain: "เซิร์ฟเวอร์แกะชั้นออกทีละชั้น (Decapsulation) ตรงข้ามกับตอนส่ง เมื่อถึง TCP ชั้น ระบบดู Destination Port = 80 จึงโยน Request ให้ Nginx ประมวลผลและส่ง HTML กลับ",
+    },
+  ];
+
+  const currentStep = steps[step];
+
+  const goNext = () => { if (step < steps.length - 1) setStep(s => s + 1); };
+  const goPrev = () => { if (step > 0) setStep(s => s - 1); };
+
+  React.useEffect(() => {
+    if (!playing) return;
+    if (step >= steps.length - 1) { setPlaying(false); return; }
+    const t = setTimeout(() => setStep(s => s + 1), 1800);
+    return () => clearTimeout(t);
+  }, [playing, step]);
+
+  const layerColors = ["#6366f1", "#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "2.5% 3.5%",
+      background: "linear-gradient(135deg,#0a0f1e 0%,#0f172a 60%,#0a1020 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai',sans-serif", boxSizing: "border-box", gap: "12px",
+      position: "relative", overflow: "hidden",
+    }}>
+      {/* BG decoration */}
+      <div style={{ position:"absolute", top:"-100px", right:"-100px", width:"300px", height:"300px", borderRadius:"50%", background:`radial-gradient(circle,${currentStep.color}18 0%,transparent 70%)`, pointerEvents:"none", transition:"background 0.5s" }} />
+
+      {/* Header */}
+      <div style={{ flexShrink:0, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <div>
+          <span style={{ fontSize:"11px", color:"#6366f1", fontWeight:700, textTransform:"uppercase", letterSpacing:"2px" }}>แนวคิดการส่งข้อมูล</span>
+          <h2 style={{ margin:"3px 0 0", fontSize:"clamp(15px,2vw,22px)", fontWeight:800 }}>{s.title}</h2>
+        </div>
+        <div style={{ display:"flex", gap:"6px" }}>
+          <button onClick={() => { setStep(0); setPlaying(false); }} style={{ padding:"6px 12px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:"rgba(255,255,255,0.5)", cursor:"pointer", fontSize:"11px", fontWeight:600 }}>↺ รีเซต</button>
+          <button onClick={() => setPlaying(!playing)} style={{ padding:"6px 14px", borderRadius:"8px", border:"none", cursor:"pointer", fontWeight:700, fontSize:"12px", background: playing ? "rgba(239,68,68,0.25)" : `${currentStep.color}`, color:"#fff", transition:"all 0.2s" }}>
+            {playing ? "⏸ หยุด" : step === steps.length-1 ? "✅ จบแล้ว" : "▶ Auto Play"}
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display:"grid", gridTemplateColumns:"1.1fr 0.9fr", gap:"14px", flex:1 }}>
+
+        {/* Left: Layer stepper */}
+        <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+          {/* Progress steps */}
+          <div style={{ display:"flex", gap:"4px", alignItems:"center", flexShrink:0 }}>
+            {steps.map((st, i) => (
+              <React.Fragment key={i}>
+                <button onClick={() => { setStep(i); setPlaying(false); }} style={{
+                  width:"32px", height:"32px", borderRadius:"50%", border:"none", cursor:"pointer",
+                  background: i <= step ? layerColors[i] : "rgba(255,255,255,0.08)",
+                  color:"#fff", fontWeight:800, fontSize:"13px", transition:"all 0.3s",
+                  boxShadow: i === step ? `0 0 0 3px ${layerColors[i]}44` : "none",
+                  transform: i === step ? "scale(1.15)" : "scale(1)",
+                  flexShrink:0,
+                }}>
+                  {i < step ? "✓" : i + 1}
+                </button>
+                {i < steps.length - 1 && (
+                  <div style={{ flex:1, height:"2px", background: i < step ? layerColors[i] : "rgba(255,255,255,0.08)", transition:"background 0.4s", minWidth:"8px" }} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+
+          {/* Current step card */}
+          <div style={{
+            background: `${currentStep.color}10`, borderRadius:"16px", padding:"18px",
+            border:`1.5px solid ${currentStep.color}40`, flex:1,
+            display:"flex", flexDirection:"column", gap:"12px", transition:"all 0.4s",
+          }}>
+            <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
+              <div style={{ fontSize:"28px", width:"52px", height:"52px", borderRadius:"14px", background:`${currentStep.color}20`, display:"flex", alignItems:"center", justifyContent:"center", border:`1px solid ${currentStep.color}35`, flexShrink:0 }}>
+                {currentStep.icon}
+              </div>
+              <div>
+                <div style={{ fontSize:"10px", color:`${currentStep.color}`, fontWeight:700, letterSpacing:"1px", textTransform:"uppercase" }}>{currentStep.layer}</div>
+                <div style={{ fontSize:"15px", fontWeight:800, color:"#f1f5f9", marginTop:"3px" }}>{currentStep.title}</div>
+              </div>
+            </div>
+
+            <div style={{ background:"rgba(255,255,255,0.04)", borderRadius:"10px", padding:"10px 14px", border:"1px solid rgba(255,255,255,0.08)", fontSize:"12px", color:"rgba(255,255,255,0.7)" }}>
+              {currentStep.desc}
+            </div>
+
+            {/* Packet visual */}
+            <div style={{ fontFamily:"monospace" }}>
+              <div style={{ fontSize:"10px", color:"rgba(255,255,255,0.4)", marginBottom:"6px", fontWeight:600 }}>📦 PACKET ณ ขั้นตอนนี้:</div>
+              <div style={{
+                background:"rgba(10,15,30,0.8)", borderRadius:"10px", padding:"12px 14px",
+                border:`1px solid ${currentStep.color}50`,
+                whiteSpace:"pre", fontSize:"11px", color:`${currentStep.color}`,
+                fontWeight:600, lineHeight:1.7,
+              }}>{currentStep.packet.label}</div>
+            </div>
+
+            {/* Explanation */}
+            <div style={{ background:`${currentStep.color}08`, borderRadius:"10px", padding:"10px 14px", border:`1px solid ${currentStep.color}20`, marginTop:"auto" }}>
+              <div style={{ fontSize:"10px", color:`${currentStep.color}`, fontWeight:700, marginBottom:"4px" }}>💡 ทำไมถึงต้องมีชั้นนี้?</div>
+              <div style={{ fontSize:"11px", color:"rgba(255,255,255,0.75)", lineHeight:1.7 }}>{currentStep.explain}</div>
+            </div>
+          </div>
+
+          {/* Prev / Next */}
+          <div style={{ display:"flex", gap:"8px", flexShrink:0 }}>
+            <button onClick={goPrev} disabled={step === 0} style={{ flex:1, padding:"10px", borderRadius:"10px", border:"1px solid rgba(255,255,255,0.1)", background:"transparent", color: step === 0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.7)", cursor: step === 0 ? "default" : "pointer", fontWeight:700, fontSize:"13px" }}>
+              ← ย้อนกลับ
+            </button>
+            <button onClick={goNext} disabled={step === steps.length-1} style={{ flex:1, padding:"10px", borderRadius:"10px", border:"none", background: step === steps.length-1 ? "rgba(255,255,255,0.06)" : currentStep.color, color: step === steps.length-1 ? "rgba(255,255,255,0.3)" : "#fff", cursor: step === steps.length-1 ? "default" : "pointer", fontWeight:700, fontSize:"13px", transition:"all 0.2s" }}>
+              ถัดไป →
+            </button>
+          </div>
+        </div>
+
+        {/* Right: Encapsulation visual */}
+        <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
+          <div style={{ fontSize:"11px", color:"#64748b", fontWeight:700 }}>🧅 การห่อชั้น (Encapsulation) — เหมือนหัวหอม</div>
+
+          <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", gap:"5px" }}>
+            {[
+              { num:2, name:"Ethernet Frame", sub:"MAC Address", color:"#f59e0b", active: step >= 3 },
+              { num:3, name:"IP Packet",       sub:"Source / Dest IP", color:"#10b981", active: step >= 2 },
+              { num:4, name:"TCP Segment",     sub:"Port 54321 → 80", color:"#3b82f6", active: step >= 1 },
+              { num:7, name:"HTTP Request",    sub:"GET / HTTP/1.1",   color:"#6366f1", active: step >= 0 },
+            ].map((layer, i) => (
+              <div key={i} style={{
+                padding: `${9 - i*1}px ${12 + i*10}px`,
+                borderRadius:"10px",
+                background: layer.active ? `${layer.color}18` : "rgba(255,255,255,0.03)",
+                border:`1px solid ${layer.active ? layer.color+"55" : "rgba(255,255,255,0.06)"}`,
+                transition:"all 0.5s", opacity: layer.active ? 1 : 0.3,
+                display:"flex", alignItems:"center", justifyContent:"space-between",
+              }}>
+                <div>
+                  <div style={{ fontSize:"11px", fontWeight:700, color: layer.active ? layer.color : "rgba(255,255,255,0.3)" }}>
+                    Layer {layer.num}: {layer.name}
+                  </div>
+                  <div style={{ fontSize:"10px", color:"rgba(255,255,255,0.4)", marginTop:"1px", fontFamily:"monospace" }}>{layer.sub}</div>
+                </div>
+                {layer.active && <span style={{ fontSize:"14px" }}>✅</span>}
+              </div>
+            ))}
+          </div>
+
+          {/* Firewall callout */}
+          <div style={{
+            background: step >= 4 ? "rgba(239,68,68,0.12)" : "rgba(255,255,255,0.03)",
+            borderRadius:"12px", padding:"12px 14px",
+            border: step >= 4 ? "1px solid rgba(239,68,68,0.4)" : "1px solid rgba(255,255,255,0.06)",
+            transition:"all 0.5s",
+          }}>
+            <div style={{ fontWeight:700, fontSize:"12px", color: step >= 4 ? "#ef4444" : "rgba(255,255,255,0.2)", marginBottom:"5px" }}>
+              🛡️ Firewall ทำงานที่ Layer 3-4
+            </div>
+            <div style={{ fontSize:"11px", color: step >= 4 ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.2)", lineHeight:1.6 }}>
+              ตรวจสอบ <strong>IP Address</strong> และ <strong>Port Number</strong><br/>
+              เพื่อ Allow หรือ Block ก่อนข้อมูลถึงปลายทาง
+            </div>
+            {step >= 4 && (
+              <div style={{ marginTop:"8px", fontFamily:"monospace", fontSize:"10px", color:"#10b981", background:"rgba(16,185,129,0.08)", borderRadius:"6px", padding:"6px 10px", border:"1px solid rgba(16,185,129,0.2)" }}>
+                ufw allow 80/tcp<br/>
+                ufw deny 3306/tcp
+              </div>
+            )}
+          </div>
+
+          {/* Network path */}
+          <div style={{ background:"rgba(255,255,255,0.03)", borderRadius:"12px", padding:"10px 14px", border:"1px solid rgba(255,255,255,0.06)", flexShrink:0 }}>
+            <div style={{ fontSize:"10px", color:"#64748b", fontWeight:700, marginBottom:"6px" }}>เส้นทาง:</div>
+            <div style={{ display:"flex", alignItems:"center", gap:"4px", fontSize:"11px" }}>
+              {[
+                { icon:"💻", label:"Client", color:"#6366f1", active: step >= 0 },
+                { icon:"→",  label:"",      color:"#334155", active: true },
+                { icon:"📡", label:"Switch", color:"#3b82f6", active: step >= 3 },
+                { icon:"→",  label:"",      color:"#334155", active: true },
+                { icon:"🛡️", label:"FW",    color:"#ef4444", active: step >= 4 },
+                { icon:"→",  label:"",      color:"#334155", active: true },
+                { icon:"🖥️", label:"Server", color:"#8b5cf6", active: step >= 5 },
+              ].map((n, i) => n.icon === "→"
+                ? <div key={i} style={{ color:"#334155", fontSize:"14px" }}>→</div>
+                : (
+                  <div key={i} style={{ textAlign:"center", opacity: n.active ? 1 : 0.3, transition:"opacity 0.4s" }}>
+                    <div style={{ fontSize:"18px" }}>{n.icon}</div>
+                    <div style={{ fontSize:"9px", color: n.color, fontWeight:700 }}>{n.label}</div>
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
