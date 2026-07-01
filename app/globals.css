@@ -300,44 +300,44 @@ html, body { height: 100%; background: var(--bg-base); color: var(--text-primary
 }
 
 /* ===== SMART SVG TEXT & SHAPE COLOR OVERRIDES FOR LIGHT THEME ===== */
-svg:not(.docker-guide-svg) text { fill: var(--text-primary) !important; }
-svg:not(.docker-guide-svg) text[fill="#e8eaf0"] { fill: var(--text-primary) !important; }
-svg:not(.docker-guide-svg) text[fill="#fff"], svg:not(.docker-guide-svg) text[fill="#ffffff"] { fill: var(--bg-surface) !important; }
-svg rect[fill="#191d29"], svg rect[fill="#12151d"], svg circle[fill="#12151d"], svg ellipse[fill="#12151d"], svg polygon[fill="#191d29"] {
+svg:not(.docker-guide-svg):not(.security-diagram-svg) text { fill: var(--text-primary) !important; }
+svg:not(.docker-guide-svg):not(.security-diagram-svg) text[fill="#e8eaf0"] { fill: var(--text-primary) !important; }
+svg:not(.docker-guide-svg):not(.security-diagram-svg) text[fill="#fff"], svg:not(.docker-guide-svg):not(.security-diagram-svg) text[fill="#ffffff"] { fill: var(--bg-surface) !important; }
+svg:not(.security-diagram-svg) rect[fill="#191d29"], svg:not(.security-diagram-svg) rect[fill="#12151d"], svg:not(.security-diagram-svg) circle[fill="#12151d"], svg:not(.security-diagram-svg) ellipse[fill="#12151d"], svg:not(.security-diagram-svg) polygon[fill="#191d29"] {
   fill: var(--bg-elevated) !important;
   stroke: var(--border) !important;
 }
-svg rect[stroke="#22d3ee"] { stroke: var(--accent) !important; }
-svg circle[stroke="#3b82f6"] { stroke: var(--accent) !important; }
-svg circle[stroke="#06b6d4"] { stroke: var(--accent) !important; }
-svg rect[stroke="#06b6d4"] { stroke: var(--accent) !important; }
-svg line[stroke="#22d3ee"] { stroke: var(--accent) !important; }
-svg line[stroke="#06b6d4"] { stroke: var(--accent) !important; }
-svg polygon[fill="#22d3ee"] { fill: var(--accent) !important; }
-svg polygon[fill="#06b6d4"] { fill: var(--accent) !important; }
-svg circle[fill="#22d3ee"] { fill: var(--accent) !important; }
-svg circle[fill="#06b6d4"] { fill: var(--accent) !important; }
-svg circle[fill="#10b981"] { fill: var(--green) !important; }
-svg line[stroke="#22c55e"] { stroke: var(--green) !important; }
-svg polygon[fill="#22c55e"] { fill: var(--green) !important; }
-svg text[fill="#22c55e"] { fill: var(--green) !important; }
-svg text[fill="#f59e0b"] { fill: var(--accent) !important; }
-svg rect[stroke="#f59e0b"] { stroke: var(--accent) !important; }
-svg circle[stroke="#f59e0b"] { stroke: var(--accent) !important; }
-svg path[stroke="#10b981"] { stroke: var(--green) !important; }
-svg path[stroke="#a78bfa"] { stroke: var(--accent) !important; }
-svg rect[fill="#1e293b"] { fill: var(--bg-elevated) !important; }
-svg rect[stroke="#f43f5e"] { stroke: var(--red) !important; }
-svg text[fill="#f43f5e"] { fill: var(--red) !important; }
-svg rect[stroke="#ec4899"] { stroke: var(--accent) !important; }
-svg text[fill="#ec4899"] { fill: var(--accent) !important; }
-svg rect[fill="#ec4899"] { fill: var(--accent) !important; }
-svg rect[fill="#8b5cf6"] { fill: var(--accent) !important; }
-svg rect[stroke="#8b5cf6"] { stroke: var(--accent) !important; }
-svg line[stroke="#8b5cf6"] { stroke: var(--accent) !important; }
-svg rect[fill="#0c1a2e"] { fill: var(--bg-elevated) !important; }
-svg rect[fill="#1a1200"] { fill: var(--bg-elevated) !important; }
-svg rect[fill="#f43f5e"] { fill: var(--red) !important; }
+svg:not(.security-diagram-svg) rect[stroke="#22d3ee"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) circle[stroke="#3b82f6"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) circle[stroke="#06b6d4"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) rect[stroke="#06b6d4"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) line[stroke="#22d3ee"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) line[stroke="#06b6d4"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) polygon[fill="#22d3ee"] { fill: var(--accent) !important; }
+svg:not(.security-diagram-svg) polygon[fill="#06b6d4"] { fill: var(--accent) !important; }
+svg:not(.security-diagram-svg) circle[fill="#22d3ee"] { fill: var(--accent) !important; }
+svg:not(.security-diagram-svg) circle[fill="#06b6d4"] { fill: var(--accent) !important; }
+svg:not(.security-diagram-svg) circle[fill="#10b981"] { fill: var(--green) !important; }
+svg:not(.security-diagram-svg) line[stroke="#22c55e"] { stroke: var(--green) !important; }
+svg:not(.security-diagram-svg) polygon[fill="#22c55e"] { fill: var(--green) !important; }
+svg:not(.security-diagram-svg) text[fill="#22c55e"] { fill: var(--green) !important; }
+svg:not(.security-diagram-svg) text[fill="#f59e0b"] { fill: var(--accent) !important; }
+svg:not(.security-diagram-svg) rect[stroke="#f59e0b"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) circle[stroke="#f59e0b"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) path[stroke="#10b981"] { stroke: var(--green) !important; }
+svg:not(.security-diagram-svg) path[stroke="#a78bfa"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) rect[fill="#1e293b"] { fill: var(--bg-elevated) !important; }
+svg:not(.security-diagram-svg) rect[stroke="#f43f5e"] { stroke: var(--red) !important; }
+svg:not(.security-diagram-svg) text[fill="#f43f5e"] { fill: var(--red) !important; }
+svg:not(.security-diagram-svg) rect[stroke="#ec4899"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) text[fill="#ec4899"] { fill: var(--accent) !important; }
+svg:not(.security-diagram-svg) rect[fill="#ec4899"] { fill: var(--accent) !important; }
+svg:not(.security-diagram-svg) rect[fill="#8b5cf6"] { fill: var(--accent) !important; }
+svg:not(.security-diagram-svg) rect[stroke="#8b5cf6"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) line[stroke="#8b5cf6"] { stroke: var(--accent) !important; }
+svg:not(.security-diagram-svg) rect[fill="#0c1a2e"] { fill: var(--bg-elevated) !important; }
+svg:not(.security-diagram-svg) rect[fill="#1a1200"] { fill: var(--bg-elevated) !important; }
+svg:not(.security-diagram-svg) rect[fill="#f43f5e"] { fill: var(--red) !important; }
 
 /* Terminal Simulation Animation */
 @keyframes terminal-blink {

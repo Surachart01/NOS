@@ -1,6 +1,8 @@
 import openpyxl
+import random
 
-w7b_pre_questions = [
+# The 10 core questions for Week 7b
+w7b_master_questions = [
     {
         "q": "UFW ย่อมาจากคำเต็มว่าอะไร?",
         "options": [
@@ -57,25 +59,14 @@ w7b_pre_questions = [
         "time": 20
     },
     {
-        "q": "แนวคิด IP Whitelisting ในความปลอดภัยเครือข่ายหมายถึงอะไร?",
+        "q": "คำสั่งในข้อใดเป็นการอนุญาตเฉพาะเครื่องไอพี 192.168.1.150 เข้าถึงพอร์ตฐานข้อมูล 3306 (TCP) ได้ถูกต้องที่สุด?",
         "options": [
-            "การลบรายชื่อไอพีทั้งหมดออกจากระบบล็อกการสแกน",
-            "การเปลี่ยนไอพีแอดเดรสของเครื่องเซิร์ฟเวอร์ให้เป็นสีขาว",
-            "การระบุรายชื่อไอพีที่ปลอดภัยเพื่อให้สิทธิ์เข้าถึงระบบได้เป็นกรณีพิเศษ",
-            "การบล็อกไอพีจากทุกประเทศยกเว้นประเทศไทย"
+            "sudo ufw allow 3306/tcp to 192.168.1.150",
+            "sudo ufw allow from 192.168.1.150 to any port 3306 proto tcp",
+            "sudo ufw permit from 192.168.1.150 port 3306",
+            "sudo ufw whitelist 192.168.1.150 on port 3306"
         ],
-        "correct": 3,
-        "time": 30
-    },
-    {
-        "q": "เครื่องมือ Nmap ทำงานสแกนพอร์ตแบบ SYN Stealth Scan (สแกนแบบเงียบ) ด้วยเทคนิคใด?",
-        "options": [
-            "ส่งแพ็กเก็ต SYN และรอรับ SYN-ACK แต่ไม่ส่ง ACK กลับเพื่อจบ Handshake",
-            "ส่งไฟล์เปล่าขนาด 1MB ไปยังเครื่องเป้าหมายเพื่อวัดเวลา",
-            "ทำการ Ping ไปยังเครื่องเป้าหมายอย่างต่อเนื่องเป็นเวลา 5 นาที",
-            "แสร้งทำเป็นรันโปรแกรม Nginx เพื่อหลอกลวงบราวเซอร์ปลายทาง"
-        ],
-        "correct": 1,
+        "correct": 2,
         "time": 30
     },
     {
@@ -101,75 +92,6 @@ w7b_pre_questions = [
         "time": 30
     },
     {
-        "q": "คำสั่งใดใช้เพื่อตรวจสอบหมายเลขข้อ (Index) ของกฎ UFW เพื่อใช้อ้างอิงลบกฎเฉพาะข้อ?",
-        "options": [
-            "sudo ufw list --index",
-            "sudo ufw status numbered",
-            "sudo ufw show rules",
-            "sudo ufw status verbose"
-        ],
-        "correct": 2,
-        "time": 25
-    }
-]
-
-w7b_post_questions = [
-    {
-        "q": "คำสั่งในข้อใดเป็นการอนุญาตเฉพาะเครื่องไอพี 192.168.1.150 เข้าถึงพอร์ตฐานข้อมูล 3306 (TCP) ได้ถูกต้องที่สุด?",
-        "options": [
-            "sudo ufw allow 3306/tcp to 192.168.1.150",
-            "sudo ufw allow from 192.168.1.150 to any port 3306 proto tcp",
-            "sudo ufw permit from 192.168.1.150 port 3306",
-            "sudo ufw whitelist 192.168.1.150 on port 3306"
-        ],
-        "correct": 2,
-        "time": 30
-    },
-    {
-        "q": "เมื่อใช้คำสั่ง sudo ufw status แล้วได้ข้อความ Status: inactive หมายความว่าอย่างไร?",
-        "options": [
-            "ระบบ UFW กำลังค้นหาการ์ดเชื่อมต่อเครือข่ายใหม่",
-            "UFW Firewall ทำงานปกติแต่ไม่พบบันทึกการเชื่อมต่อใหม่",
-            "UFW Firewall ถูกปิดใช้งานอยู่และไม่มีผลบังคับใช้ใดๆ กับเครือข่าย",
-            "ระบบปิดพอร์ตทุกพอร์ตยกเว้นพอร์ต 22 เพื่อความปลอดภัย"
-        ],
-        "correct": 3,
-        "time": 25
-    },
-    {
-        "q": "เหตุใดการลบกฎไฟร์วอลล์ด้วยลำดับตัวเลข (เช่น sudo ufw delete 3) จึงเป็นที่นิยมและปลอดภัยกว่าการลบด้วยคำสั่งกฎเต็ม?",
-        "options": [
-            "เพราะช่วยลดความเสี่ยงในการสะกดไวยากรณ์กฎผิดพลาดและลบได้รวดเร็ว",
-            "เพื่อหลีกเลี่ยงไม่ให้ CPU ทำงานหนักเกินไปจากการค้นหาคำสั่ง",
-            "เพื่อป้องกันไม่ให้แอปพลิเคชัน Nginx ตรวจเจอการเปลี่ยนแปลงระบบ",
-            "เป็นกฎบังคับทางกฎหมายคอมพิวเตอร์ของการจัดการไฟร์วอลล์"
-        ],
-        "correct": 1,
-        "time": 30
-    },
-    {
-        "q": "คำสั่งใดใช้ในการปิดการทำงานของ UFW Firewall บนตู้ Ubuntu เซิร์ฟเวอร์อย่างถาวร?",
-        "options": [
-            "sudo ufw stop",
-            "sudo ufw disable",
-            "sudo ufw shutdown",
-            "sudo ufw deactivate"
-        ],
-        "correct": 2,
-        "time": 20
-    },
-    {
-        "q": "หากเราสั่ง telnet [IP ปลายทาง] 80 แล้วขึ้นสถานะ Connection timed out ยาวนานโดยไม่มีการตอบกลับ หมายความว่าอะไร?",
-        "options": [
-            "พอร์ต 80 ของเซิร์ฟเวอร์ปิดการใช้งานและปฏิเสธสัญญาณทันที (REJECT)",
-            "มีไฟร์วอลล์ของเซิร์ฟเวอร์เป้าหมายสกัดกั้นสัญญาณไว้ (DROP)",
-            "เซิร์ฟเวอร์เป้าหมายกำลังรัน MariaDB ที่พอร์ต 80 แทน Nginx",
-            "สายแลนเครือข่ายของเซิร์ฟเวอร์เป้าหมายถูกถอดออกทันที"
-        ],
-        "correct": 2,
-        "time": 30
-    },
-    {
         "q": "ใน UFW Log ไฟล์ /var/log/ufw.log ค่าตัวย่อ DPT และ SRC ย่อมาจากอะไรตามลำดับ?",
         "options": [
             "Data Packet Type และ Server Rule Code",
@@ -181,28 +103,6 @@ w7b_post_questions = [
         "time": 25
     },
     {
-        "q": "หากต้องการจำลองสแกนพอร์ตเป้าหมายอย่างรวดเร็ว เฉพาะ 100 พอร์ตยอดนิยม ด้วย Nmap แบบ SYN Stealth Scan ควรพิมพ์คำสั่งอย่างไร?",
-        "options": [
-            "nmap -sS -F [IP]",
-            "nmap -sV -p 1-65535 [IP]",
-            "nmap --fast-scan [IP]",
-            "nmap localhost -F"
-        ],
-        "correct": 1,
-        "time": 30
-    },
-    {
-        "q": "การบล็อก IP เดี่ยว (deny from 192.168.10.15) เทียบกับการบล็อก Subnet /24 (deny from 192.168.10.0/24) มีผลลัพธ์ต่างกันอย่างไร?",
-        "options": [
-            "การบล็อกแบบ Subnet จะสแกนหาเฉพาะเครื่องคอมพิวเตอร์ที่เป็นเซิร์ฟเวอร์หลัก",
-            "การบล็อกแบบ Subnet จะปิดกั้นไอพีทั้งหมดตั้งแต่ .0 ถึง .255 ในวงแลนนั้น",
-            "การบล็อกแบบเดี่ยวมีความปลอดภัยและทำงานได้เร็วกว่าการบล็อกแบบ Subnet 10 เท่า",
-            "ไม่มีความแตกต่างกันในแง่ของจำนวนไอพีที่ถูกปิดกั้น"
-        ],
-        "correct": 2,
-        "time": 30
-    },
-    {
         "q": "เพื่อป้องกันภัยคุกคามประเภท Brute-Force โจมตีพอร์ต 22 (SSH) ด้วยการสุ่มรหัสผ่าน UFW มีฟีเจอร์จำกัดความถี่การเชื่อมต่อที่เรียกว่าอะไร?",
         "options": [
             "ufw deny 22/tcp",
@@ -212,39 +112,53 @@ w7b_post_questions = [
         ],
         "correct": 2,
         "time": 25
-    },
-    {
-        "q": "กฎข้อใดของ UFW ในคลาสเรียนที่จะทำให้เพื่อนร่วมห้อง (ไอพี 192.168.1.180) ไม่สามารถสแกนพอร์ตหรือเชื่อมต่อใดๆ กับเครื่องคุณได้เลย?",
-        "options": [
-            "sudo ufw deny to 192.168.1.180",
-            "sudo ufw deny from 192.168.1.180 to any",
-            "sudo ufw block ip 192.168.1.180",
-            "sudo ufw reject port all to 192.168.1.180"
-        ],
-        "correct": 2,
-        "time": 30
     }
 ]
+
+def generate_shuffled_questions(master_list, seed_questions, seed_options):
+    shuffled = []
+    # Shuffle question indices
+    indices = list(range(len(master_list)))
+    random.seed(seed_questions)
+    random.shuffle(indices)
+    
+    for i, idx in enumerate(indices):
+        q_data = master_list[idx]
+        correct_val = q_data["options"][q_data["correct"] - 1]
+        
+        # Copy and shuffle options using a unique seed per question
+        options = list(q_data["options"])
+        random.seed(seed_options + idx)
+        random.shuffle(options)
+        
+        new_correct = options.index(correct_val) + 1
+        shuffled.append({
+            "q": q_data["q"],
+            "options": options,
+            "correct": new_correct,
+            "time": q_data["time"]
+        })
+    return shuffled
 
 def generate_xlsx(questions, output_path):
     try:
         wb = openpyxl.load_workbook('./documents/QuizizzSampleSpreadsheetUpdated_v2.xlsx')
         ws = wb.active
         
-        # Clear rows
+        # Clear existing content from row 3 to 100
         for r in range(3, 100):
             for c in range(1, 15):
                 ws.cell(row=r, column=c).value = None
                 
-        # Populate
+        # Populate spreadsheet with shuffled questions
         for idx, q_data in enumerate(questions):
             row = idx + 3
             ws.cell(row=row, column=1).value = q_data["q"]
             ws.cell(row=row, column=2).value = "Multiple Choice"
             ws.cell(row=row, column=3).value = q_data["options"][0]
             ws.cell(row=row, column=4).value = q_data["options"][1]
-            ws.cell(row=row, column=5).value = q_data["options"][2]
-            ws.cell(row=row, column=6).value = q_data["options"][3]
+            ws.cell(row=row, column=6).value = q_data["options"][3] if len(q_data["options"]) > 3 else None
+            ws.cell(row=row, column=5).value = q_data["options"][2] if len(q_data["options"]) > 2 else None
             ws.cell(row=row, column=7).value = None
             ws.cell(row=row, column=8).value = q_data["correct"]
             ws.cell(row=row, column=9).value = q_data["time"]
@@ -254,8 +168,13 @@ def generate_xlsx(questions, output_path):
         wb.save(output_path)
         print(f"Successfully generated {output_path} with {len(questions)} questions")
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error generating {output_path}: {e}")
 
 if __name__ == '__main__':
-    generate_xlsx(w7b_pre_questions, './public/data/week-7b_pre_wayground.xlsx')
-    generate_xlsx(w7b_post_questions, './public/data/week-7b_post_wayground.xlsx')
+    # Generate Pre-test (using seed set A)
+    pre_questions = generate_shuffled_questions(w7b_master_questions, seed_questions=42, seed_options=100)
+    generate_xlsx(pre_questions, './public/data/week-7b_pre_wayground.xlsx')
+    
+    # Generate Post-test (using seed set B - different shuffle order)
+    post_questions = generate_shuffled_questions(w7b_master_questions, seed_questions=99, seed_options=200)
+    generate_xlsx(post_questions, './public/data/week-7b_post_wayground.xlsx')

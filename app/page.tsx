@@ -10507,8 +10507,14 @@ function UFWRulesVisualizer({ s }: { s: SlideData }) {
                 )}
               </div>
             ) : (
-              <div style={{ display: "flex", flex: 1, alignItems: "center", justifyContent: "center", color: "rgba(255,255,255,0.3)", fontSize: "11px" }}>
-                ← เลือกแพ็กเก็ตด้านบนเพื่อเริ่มส่งตรวจสอบกฎ
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "8px", color: "#cbd5e1" }}>
+                <span style={{ fontSize: "13px", fontWeight: 800, color: "#a5b4fc" }}>💡 หลักการประเมินกฎ UFW (บนลงล่าง)</span>
+                <div style={{ fontSize: "11.5px", lineHeight: 1.6 }}>
+                  <p style={{ marginBottom: "6px" }}><strong>1. ตรวจแบบ First-Match:</strong> UFW จะนำสัญญานอินเทอร์เน็ตที่วิ่งเข้ามา มาเปิดเปรียบเทียบกับรายการกฎความปลอดภัย เรียงลำดับจาก <strong>ข้อ 1 ลงไปถึงข้อสุดท้าย</strong></p>
+                  <p style={{ marginBottom: "6px" }}><strong>2. หยุดตรวจทันทีเมื่อตรงกฎ:</strong> ทันทีที่เจอเงื่อนไขที่ตรงกัน (เช่น บล็อกไอพีคนร้ายในข้อ 1) ระบบจะทำตามคำสั่งนั้นทันที และ <strong>หยุดตรวจสอบกฎข้อถัดไปทั้งหมดทันที</strong></p>
+                  <p style={{ marginBottom: "6px" }}><strong>3. บล็อกถ้าไม่เข้าเกณฑ์:</strong> หากเปรียบเทียบกฎจนสุดเล่มแล้วไม่ตรงกับข้อใดเลย จะติดบล็อกของนโยบายเริ่มต้น (Default Policy Deny incoming) ทันที</p>
+                  <p style={{ fontSize: "10.5px", color: "rgba(255,255,255,0.4)", marginTop: "4px" }}>👉 <strong>วิธีใช้งาน:</strong> คลิกเลือกส่งแพ็กเก็ตทดสอบในเมนูด้านบนซ้าย เพื่อดูเส้นทางการวิ่งตรวจสอบกฎแบบทีละวินาที</p>
+                </div>
               </div>
             )}
           </div>
@@ -11194,105 +11200,314 @@ function NetworkTopologyAnim({ s }: { s: SlideData }) {
   const [activeFlow, setActiveFlow] = useState<"web" | "ssh" | "db" | "attack" | null>(null);
   const [packetPos, setPacketPos] = useState(0);
   const [blocked, setBlocked] = useState(false);
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([]);
+  const [animating, setAnimating] = useState(false);
 
   const flows = [
-    { id: "web" as const, label: "🌐 HTTP Request", color: "#6366f1", path: "Client → Router → Firewall → Web Server :80", allowed: true },
-    { id: "ssh" as const, label: "🔑 SSH Login", color: "#10b981", path: "Admin → Router → Firewall → Server :22", allowed: true },
-    { id: "db" as const, label: "🗄️ DB Query", color: "#f59e0b", path: "App → Firewall → MariaDB :3306 (localhost)", allowed: true },
-    { id: "attack" as const, label: "💀 Hacker Scan", color: "#ef4444", path: "Attacker → Router → UFW BLOCK! ✋", allowed: false },
+    {
+      id: "web" as const,
+      label: "HTTP Web Traffic",
+      color: "#6366f1",
+      path: "Client -> Router -> UFW Firewall -> Web Server :80",
+      allowed: true,
+      points: [
+        { x: 10, y: 40, label: "Client" },
+        { x: 34, y: 40, label: "Router" },
+        { x: 54, y: 40, label: "UFW Firewall" },
+        { x: 80, y: 22, label: "Web Server (:80)" }
+      ]
+    },
+    {
+      id: "ssh" as const,
+      label: "SSH Admin Login",
+      color: "#10b981",
+      path: "Admin -> UFW Firewall -> SSH Server :22",
+      allowed: true,
+      points: [
+        { x: 92, y: 40, label: "Admin" },
+        { x: 54, y: 40, label: "UFW Firewall" },
+        { x: 80, y: 22, label: "Web Server (:22)" }
+      ]
+    },
+    {
+      id: "db" as const,
+      label: "MariaDB Query",
+      color: "#f59e0b",
+      path: "Web Server -> UFW Firewall -> MariaDB :3306",
+      allowed: true,
+      points: [
+        { x: 80, y: 22, label: "Web Server" },
+        { x: 54, y: 40, label: "UFW Firewall" },
+        { x: 80, y: 58, label: "MariaDB (:3306)" }
+      ]
+    },
+    {
+      id: "attack" as const,
+      label: "Hacker Port Scan",
+      color: "#ef4444",
+      path: "Hacker -> Router -> UFW Firewall (BLOCKED!)",
+      allowed: false,
+      points: [
+        { x: 10, y: 40, label: "Hacker" },
+        { x: 34, y: 40, label: "Router" },
+        { x: 54, y: 40, label: "UFW Firewall" }
+      ]
+    }
   ];
 
+  const getPointOnPath = (points: { x: number; y: number }[], progress: number) => {
+    if (points.length === 0) return { x: 0, y: 0 };
+    if (points.length === 1) return points[0];
+    if (progress <= 0) return points[0];
+    if (progress >= 100) return points[points.length - 1];
+
+    const segmentCount = points.length - 1;
+    const segmentWidth = 100 / segmentCount;
+    const segmentIndex = Math.min(Math.floor(progress / segmentWidth), segmentCount - 1);
+    const segmentProgress = (progress % segmentWidth) / segmentWidth;
+
+    const p1 = points[segmentIndex];
+    const p2 = points[segmentIndex + 1];
+
+    return {
+      x: p1.x + (p2.x - p1.x) * segmentProgress,
+      y: p1.y + (p2.y - p1.y) * segmentProgress
+    };
+  };
+
   const runFlow = (flow: typeof flows[0]) => {
+    if (animating) return;
+    setAnimating(true);
     setActiveFlow(flow.id);
     setPacketPos(0);
     setBlocked(false);
-    const steps = flow.allowed ? 100 : 45;
+    setTerminalLogs([`[SYSTEM] Init flow: ${flow.label}...`]);
+
     let progress = 0;
-    const iv = setInterval(() => {
-      progress += 5;
+    const maxProgress = 100;
+    const interval = setInterval(() => {
+      progress += 2;
       setPacketPos(progress);
-      if (!flow.allowed && progress >= 45) {
-        setBlocked(true);
-        clearInterval(iv);
-      } else if (progress >= 100) {
-        clearInterval(iv);
+
+      if (progress === 10) {
+        setTerminalLogs(prev => [...prev, `[NETWORK] Dispatching packet from source node: ${flow.points[0].label}`]);
       }
-    }, 60);
+      if (progress === 30 && flow.points.length > 3) {
+        setTerminalLogs(prev => [...prev, `[GATEWAY] Packet arrived at Router gateway. Route lookups OK.`]);
+      }
+      if (progress === 50) {
+        setTerminalLogs(prev => [...prev, `[UFW] Intercepted by Stateful Firewall. Evaluating connection state...`]);
+      }
+      if (progress === 70) {
+        if (flow.allowed) {
+          setTerminalLogs(prev => [...prev, `[UFW] Rule matched: ALLOW. Traffic allowed.`]);
+        } else {
+          setTerminalLogs(prev => [...prev, `[UFW] Rule matched: DENY. Dropping incoming packet!`]);
+        }
+      }
+
+      const ufwStopPoint = flow.id === "attack" ? 68 : null;
+      if (ufwStopPoint && progress >= ufwStopPoint) {
+        setBlocked(true);
+        setPacketPos(ufwStopPoint);
+        setTerminalLogs(prev => [...prev, `[SYSTEM] Packet blocked successfully at firewall.`]);
+        clearInterval(interval);
+        setAnimating(false);
+      } else if (progress >= maxProgress) {
+        setTerminalLogs(prev => [...prev, `[SYSTEM] Packet reached destination: ${flow.points[flow.points.length - 1].label}`]);
+        clearInterval(interval);
+        setAnimating(false);
+      }
+    }, 40);
   };
 
   const nodes = [
-    { id: "internet", label: "🌐 Internet", x: 5, y: 40, color: "#6366f1" },
-    { id: "router", label: "📡 Router", x: 25, y: 40, color: "#8b5cf6" },
-    { id: "ufw", label: "🛡️ UFW", x: 48, y: 40, color: "#f59e0b" },
-    { id: "web", label: "🌍 Web\nServer", x: 72, y: 20, color: "#10b981" },
-    { id: "db", label: "🗄️ DB\nServer", x: 72, y: 60, color: "#3b82f6" },
-    { id: "ssh", label: "💻 Admin", x: 92, y: 40, color: "#a78bfa" },
+    { id: "internet", label: "Public Net", x: 10, y: 40, color: "#6366f1", desc: "192.168.1.150" },
+    { id: "router", label: "Gateway", x: 34, y: 40, color: "#8b5cf6", desc: "192.168.1.1" },
+    { id: "ufw", label: "UFW Active", x: 54, y: 40, color: "#f59e0b", desc: "Firewall Node" },
+    { id: "web", label: "Nginx Server", x: 80, y: 22, color: "#10b981", desc: "Port 80/443" },
+    { id: "db", label: "MariaDB", x: 80, y: 58, color: "#3b82f6", desc: "Port 3306 (Local)" },
+    { id: "admin", label: "SSH Client", x: 92, y: 40, color: "#a78bfa", desc: "192.168.1.99" }
   ];
 
   const curFlow = flows.find(f => f.id === activeFlow);
+  const packetCoords = curFlow ? getPointOnPath(curFlow.points, packetPos) : { x: 0, y: 0 };
 
   return (
     <div className="slide slide-content" style={{
       display: "flex", flexDirection: "column", height: "100%", padding: "2.5% 3.5%",
-      background: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)",
-      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "12px"
+      background: "linear-gradient(135deg, #090d16 0%, #111827 50%, #030712 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "14px",
+      position: "relative", overflow: "hidden"
     }}>
-      <div style={{ flexShrink: 0 }}>
-        <div style={{ fontSize: "10px", color: "#a5b4fc", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>🗺️ Network Topology</div>
-        <h2 style={{ margin: "3px 0 0", fontSize: "clamp(14px, 2vw, 20px)", fontWeight: 800 }}>{s.title}</h2>
+      <div style={{
+        position: "absolute", inset: 0, opacity: 0.05, pointerEvents: "none",
+        backgroundImage: "radial-gradient(#fff 1px, transparent 1px)", backgroundSize: "20px 20px"
+      }} />
+
+      <div style={{ flexShrink: 0, zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div>
+          <span style={{ fontSize: "11px", color: "#6366f1", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+            Network Topology
+          </span>
+          <h2 style={{ margin: "4px 0 0", fontSize: "clamp(16px, 2vw, 22px)", fontWeight: 800 }}>{s.title}</h2>
+        </div>
       </div>
 
-      {/* Topology SVG diagram */}
-      <div style={{ flex: 1, background: "rgba(0,0,0,0.3)", borderRadius: "14px", padding: "16px", position: "relative", border: "1px solid rgba(255,255,255,0.05)" }}>
-        <svg width="100%" height="65%" viewBox="0 0 100 80" style={{ overflow: "visible" }}>
-          {/* Connection lines */}
-          <line x1="10" y1="40" x2="25" y2="40" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-          <line x1="30" y1="40" x2="48" y2="40" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-          <line x1="52" y1="40" x2="72" y2="22" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-          <line x1="52" y1="40" x2="72" y2="60" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-          <line x1="77" y1="40" x2="92" y2="40" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" strokeDasharray="1,1" />
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: "16px", flex: 1, minHeight: 0, zIndex: 2 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
+          <div style={{
+            background: "rgba(255,255,255,0.02)", borderRadius: "12px", padding: "14px",
+            border: "1px solid rgba(255,255,255,0.06)", display: "flex", flexDirection: "column", gap: "8px"
+          }}>
+            <span style={{ fontSize: "12px", color: "#a5b4fc", fontWeight: 700 }}>เลือกรูปแบบ Traffic เพื่อจำลองการเดินทาง:</span>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "6px" }}>
+              {flows.map(flow => (
+                <button
+                  key={flow.id}
+                  onClick={() => runFlow(flow)}
+                  disabled={animating}
+                  style={{
+                    padding: "10px 14px", borderRadius: "8px", border: "none", textAlign: "left",
+                    background: activeFlow === flow.id
+                      ? `linear-gradient(135deg, ${flow.color}33, ${flow.color}11)`
+                      : "rgba(255,255,255,0.04)",
+                    color: "#fff", fontSize: "12px", cursor: animating ? "default" : "pointer",
+                    borderLeft: `4px solid ${activeFlow === flow.id ? flow.color : "transparent"}`,
+                    transition: "all 0.2s",
+                    display: "flex", justifyContent: "space-between", alignItems: "center"
+                  }}
+                >
+                  <span style={{ fontWeight: 700 }}>{flow.label}</span>
+                  <span style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)" }}>ส่งแพ็กเก็ต</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-          {/* Moving packet */}
-          {activeFlow && !blocked && (
-            <circle cx={`${packetPos}`} cy="40" r="1.5"
-              fill={curFlow?.color || "#fff"}
-              style={{ filter: `drop-shadow(0 0 3px ${curFlow?.color})`, transition: "cx 0.06s linear" }}
-            />
-          )}
-          {blocked && (
-            <text x="48" y="35" textAnchor="middle" fill="#ef4444" fontSize="4" fontWeight="bold">✋ BLOCK</text>
-          )}
-
-          {/* Nodes */}
-          {nodes.map(n => (
-            <g key={n.id}>
-              <circle cx={n.x} cy={n.y} r="5" fill={n.color + "33"} stroke={n.color} strokeWidth="0.5" />
-              <text x={n.x} y={n.y + 0.8} textAnchor="middle" fill="#fff" fontSize="3.5">{n.label.split("\n")[0]}</text>
-              {n.label.includes("\n") && <text x={n.x} y={n.y + 4} textAnchor="middle" fill="#fff" fontSize="3">{n.label.split("\n")[1]}</text>}
-            </g>
-          ))}
-        </svg>
-
-        {/* Flow buttons */}
-        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          {flows.map(flow => (
-            <button key={flow.id} onClick={() => runFlow(flow)} style={{
-              padding: "7px 14px", borderRadius: "8px", border: `1px solid ${flow.color}40`,
-              background: activeFlow === flow.id ? flow.color + "25" : "rgba(255,255,255,0.04)",
-              color: "#fff", cursor: "pointer", fontSize: "11px", fontWeight: 700, transition: "all 0.2s"
-            }}>{flow.label}</button>
-          ))}
+          <div style={{
+            background: "rgba(0,0,0,0.75)", borderRadius: "12px", border: "1px solid rgba(99,102,241,0.2)",
+            padding: "14px", flex: 1, display: "flex", flexDirection: "column", gap: "6px", minHeight: 0
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "10px", fontFamily: "monospace", color: "#6366f1", fontWeight: 700 }}>TERMINAL CONSOLE LOGS</span>
+              <div style={{ display: "flex", gap: "4px" }}>
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#ef4444" }} />
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b" }} />
+                <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10b981" }} />
+              </div>
+            </div>
+            <div style={{
+              flex: 1, overflowY: "auto", fontFamily: "monospace", fontSize: "10.5px",
+              lineHeight: 1.6, color: "#cbd5e1", display: "flex", flexDirection: "column", gap: "4px"
+            }}>
+              {terminalLogs.length > 0 ? (
+                terminalLogs.map((log, i) => (
+                  <div key={i} style={{
+                    color: log.includes("ALLOW") ? "#10b981" : log.includes("DENY") || log.includes("blocked") ? "#ef4444" : "#cbd5e1",
+                    fontWeight: log.includes("ALLOW") || log.includes("DENY") ? 700 : 400
+                  }}>
+                    {log}
+                  </div>
+                ))
+              ) : (
+                <span style={{ color: "rgba(255,255,255,0.25)" }}>[ระบบพร้อมจำลองการเชื่อมต่อ]</span>
+              )}
+            </div>
+          </div>
         </div>
 
-        {curFlow && (
-          <div style={{ marginTop: "8px", padding: "8px 12px", borderRadius: "8px", fontSize: "11px",
-            background: curFlow.allowed && !blocked ? "rgba(16,185,129,0.1)" : "rgba(239,68,68,0.1)",
-            border: `1px solid ${curFlow.allowed && !blocked ? "#10b981" : "#ef4444"}40`,
-            fontFamily: "monospace"
-          }}>
-            🛣️ {curFlow.path} {blocked ? " — ✋ UFW บล็อก!" : packetPos >= 100 ? " ✅ สำเร็จ!" : " ⏳ กำลังส่ง..."}
+        <div style={{
+          background: "rgba(15,23,42,0.4)", borderRadius: "16px", padding: "20px",
+          border: "1px solid rgba(255,255,255,0.06)", display: "flex", flexDirection: "column",
+          position: "relative", minHeight: 0, justifyContent: "space-between"
+        }}>
+          <div style={{ flex: 1, position: "relative", minHeight: 0 }}>
+            <svg className="security-diagram-svg" width="100%" height="100%" viewBox="0 0 100 80" style={{ overflow: "visible" }}>
+              <defs>
+                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#10b981" stopOpacity="0.2" />
+                </linearGradient>
+                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                  <feGaussianBlur stdDeviation="1.5" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+              </defs>
+
+              <line x1="10" y1="40" x2="34" y2="40" stroke="url(#lineGrad)" strokeWidth="0.8" strokeDasharray="1.5,1.5" />
+              <line x1="34" y1="40" x2="54" y2="40" stroke="url(#lineGrad)" strokeWidth="0.8" strokeDasharray="1.5,1.5" />
+              <line x1="54" y1="40" x2="80" y2="22" stroke="url(#lineGrad)" strokeWidth="0.8" strokeDasharray="1.5,1.5" />
+              <line x1="54" y1="40" x2="80" y2="58" stroke="url(#lineGrad)" strokeWidth="0.8" strokeDasharray="1.5,1.5" />
+              <line x1="80" y1="22" x2="80" y2="58" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" strokeDasharray="1,1" />
+              <line x1="92" y1="40" x2="54" y2="40" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8" strokeDasharray="1.5,1.5" />
+
+              {activeFlow && (
+                <circle
+                  cx={packetCoords.x}
+                  cy={packetCoords.y}
+                  r="1.8"
+                  fill={blocked ? "#ef4444" : curFlow?.color || "#fff"}
+                  filter="url(#glow)"
+                  style={{ transition: "all 0.05s linear" }}
+                />
+              )}
+
+              {blocked && (
+                <g transform="translate(54, 34)">
+                  <circle r="4" fill="#ef4444" opacity="0.25" />
+                  <circle r="2.5" fill="#ef4444" />
+                  <text y="7" textAnchor="middle" fill="#ef4444" fontSize="3" fontWeight="bold">BLOCKED</text>
+                </g>
+              )}
+
+              {nodes.map(n => {
+                const isActive = curFlow?.points.some(p => p.label.includes(n.label.split(" ")[1] || n.label));
+                return (
+                  <g key={n.id} transform={`translate(${n.x}, ${n.y})`}>
+                    {isActive && (
+                      <rect x="-9" y="-8" width="18" height="13" rx="3"
+                        fill="none" stroke={n.color} strokeWidth="1" opacity="0.6" filter="url(#glow)"
+                      />
+                    )}
+                    <rect x="-8" y="-7" width="16" height="11" rx="2"
+                      fill="rgba(30,41,59,0.7)"
+                      stroke={isActive ? n.color : "rgba(255,255,255,0.08)"}
+                      strokeWidth="0.5"
+                    />
+                    <text y="-2" textAnchor="middle" fill="#fff" fontSize="2.8" fontWeight="bold">
+                      {n.label.split(" ")[0]}
+                    </text>
+                    <text y="1.2" textAnchor="middle" fill="rgba(255,255,255,0.8)" fontSize="2" fontWeight="700">
+                      {n.label.split(" ").slice(1).join(" ")}
+                    </text>
+                    <text y="3.2" textAnchor="middle" fill="rgba(255,255,255,0.4)" fontSize="1.6" fontFamily="monospace">
+                      {n.desc}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
           </div>
-        )}
+
+          {curFlow && (
+            <div style={{
+              padding: "10px 14px", borderRadius: "10px", fontSize: "11.5px", marginTop: "10px",
+              background: curFlow.allowed && !blocked ? "rgba(16,185,129,0.08)" : "rgba(239,68,68,0.08)",
+              border: `1.5px solid ${curFlow.allowed && !blocked ? "#10b981" : "#ef4444"}30`,
+              fontFamily: "monospace", display: "flex", justifyContent: "space-between", alignItems: "center"
+            }}>
+              <span><strong>เส้นทาง:</strong> {curFlow.path}</span>
+              <span style={{
+                color: curFlow.allowed && !blocked ? "#10b981" : "#ef4444", fontWeight: "bold",
+                background: curFlow.allowed && !blocked ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)",
+                padding: "2px 8px", borderRadius: "4px"
+              }}>
+                {blocked ? "🚫 BLOCKED" : packetPos >= 100 ? "✅ SUCCESS" : "⏳ RUNNING"}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -11485,7 +11700,7 @@ function TCPStateMachine({ s }: { s: SlideData }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", flex: 1, minHeight: 0 }}>
         {/* State diagram */}
         <div style={{ background: "rgba(0,0,0,0.4)", borderRadius: "12px", padding: "12px", border: "1px solid rgba(14,165,233,0.2)", position: "relative" }}>
-          <svg width="100%" height="100%" viewBox="0 0 100 100" style={{ overflow: "visible" }}>
+          <svg className="security-diagram-svg" width="100%" height="100%" viewBox="0 0 100 100" style={{ overflow: "visible" }}>
             {states.map(state => {
               const isActive = activeState === state.id;
               const isDemoPath = demoSequence.includes(state.id);
@@ -11867,7 +12082,7 @@ function UFWNetfilterArchitecture({ s }: { s: SlideData }) {
       <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "16px", flex: 1, minHeight: 0 }}>
         {/* SVG Flow diagram */}
         <div style={{ background: "rgba(0,0,0,0.35)", borderRadius: "14px", padding: "16px", border: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="100%" height="90%" viewBox="0 0 100 60" style={{ overflow: "visible" }}>
+          <svg className="security-diagram-svg" width="100%" height="90%" viewBox="0 0 100 60" style={{ overflow: "visible" }}>
             {/* Packet entry */}
             <rect x="2" y="25" width="10" height="8" rx="2" fill="#475569" stroke="#64748b" strokeWidth="0.5" />
             <text x="7" y="30" textAnchor="middle" fill="#fff" fontSize="2.2" fontWeight="bold">NETWORK NIC</text>
@@ -11942,30 +12157,35 @@ function UFWNetfilterArchitecture({ s }: { s: SlideData }) {
           </svg>
         </div>
 
-        {/* Info panel */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          {activeHook ? (
-            <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "12px", padding: "16px", border: "1px solid rgba(99,102,241,0.25)" }}>
-              <div style={{ fontSize: "16px", fontWeight: 800, color: "#818cf8" }}>Hook: {activeHook}</div>
-              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", marginTop: "10px", lineHeight: 1.6 }}>{hooks.find(h => h.id === activeHook)?.desc}</div>
-              <div style={{ marginTop: "12px", background: "rgba(99,102,241,0.08)", padding: "10px", borderRadius: "8px", border: "1px solid rgba(99,102,241,0.2)" }}>
-                <div style={{ fontSize: "11px", fontWeight: 700, color: "#a5b4fc" }}>หน้าที่ของ UFW:</div>
-                <div style={{ fontSize: "11.5px", color: "#e2e8f0", marginTop: "4px", lineHeight: 1.5 }}>{hooks.find(h => h.id === activeHook)?.ufwRole}</div>
+        {/* Info panel with detailed explanations to prevent confusion */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px", justifyContent: "space-between" }}>
+          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "12px", padding: "16px", border: "1px solid rgba(99,102,241,0.25)", flex: 1 }}>
+            {activeHook ? (
+              <>
+                <div style={{ fontSize: "15px", fontWeight: 800, color: "#818cf8", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "6px" }}>ด่านคัดกรอง: {activeHook}</div>
+                <div style={{ fontSize: "12px", color: "#cbd5e1", marginTop: "10px", lineHeight: 1.6 }}>{hooks.find(h => h.id === activeHook)?.desc}</div>
+                <div style={{ marginTop: "12px", background: "rgba(99,102,241,0.08)", padding: "10px", borderRadius: "8px", border: "1px solid rgba(99,102,241,0.2)" }}>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: "#a5b4fc" }}>หน้าที่ของ UFW (หัวหน้า รปภ.):</div>
+                  <div style={{ fontSize: "11.5px", color: "#e2e8f0", marginTop: "4px", lineHeight: 1.5 }}>{hooks.find(h => h.id === activeHook)?.ufwRole}</div>
+                </div>
+              </>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                <div style={{ fontSize: "14px", fontWeight: 800, color: "#818cf8" }}>💡 แผนผังเส้นทางดักจับแพ็กเก็ต</div>
+                <div style={{ fontSize: "11.5px", color: "#cbd5e1", lineHeight: 1.6 }}>
+                  <p style={{ marginBottom: "6px" }}>เมื่อทราฟฟิกวิ่งผ่านการ์ดแลน (NIC) สัญญาณจะถูกดักจับและกรองสิทธิ์ตามด่านต่างๆ (เรียกว่า Hooks)</p>
+                  <p style={{ marginBottom: "6px" }}><strong>👉 วิธีใช้:</strong> คลิกเลือกบล็อกสีเทาในแผนภาพซ้ายมือ (เช่น PREROUTING หรือ INPUT) เพื่อดูว่าแต่ละด่านทำหน้าที่คัดกรองอย่างไร</p>
+                  <p><strong>⚠️ จุดสำคัญ:</strong> พอร์ตบริการภายในเครื่องเรา เช่น เว็บพอร์ต 80 หรือ SSH พอร์ต 22 จะคัดกรองที่ด่าน <strong>INPUT</strong> เป็นหลัก!</p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div style={{
-              background: "rgba(255,255,255,0.02)", borderRadius: "12px", padding: "16px", border: "1px solid rgba(255,255,255,0.05)",
-              color: "rgba(255,255,255,0.3)", fontSize: "12px", textAlign: "center", flex: 1, display: "flex", alignItems: "center", justifyContent: "center"
-            }}>
-              คลิกบล็อกหัวข้อในไดอะแกรมเพื่อดูรายละเอียดของระบบคัดกรอง
-            </div>
-          )}
+            )}
+          </div>
 
           <div style={{ background: "rgba(0,0,0,0.5)", borderRadius: "12px", padding: "14px", border: "1px solid rgba(255,255,255,0.05)" }}>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: "#818cf8" }}>💡 Netfilter คืออะไร?</span>
+            <span style={{ fontSize: "11px", fontWeight: 700, color: "#818cf8" }}>💡 ความสัมพันธ์ของ UFW และ Netfilter</span>
             <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", marginTop: "6px", lineHeight: 1.6 }}>
-              เป็นระบบย่อย (Subsystem) ภายใน Linux Kernel ที่ดูแลการคัดกรอง คัดแยก และดัดแปลงแพ็กเก็ตเครือข่าย โดย UFW จะทำหน้าที่สร้างกฎเป็นภาษาระดับสูง จากนั้นเปลี่ยนเป็นคำสั่ง iptables เพื่อป้อนเข้าสู่ตารางตัวกรองของ Netfilter อีกที
+              <strong>Netfilter (รปภ. ประจำจุด):</strong> เป็นระบบกรองของจริงใน Kernel ของ Linux คอยยืนเฝ้าตามทางเดินด่านต่างๆ<br/>
+              <strong>UFW (หัวหน้า รปภ.):</strong> คอยรับคำสั่งภาษาอังกฤษง่ายๆ จากผู้ใช้ แล้วเปลี่ยนกฎไปสั่งให้ Netfilter ดำเนินการบล็อก/อนุญาตจริง
             </div>
           </div>
         </div>
@@ -12086,30 +12306,34 @@ function StatefulConnectionTracking({ s }: { s: SlideData }) {
           </div>
         </div>
 
-        {/* Explain Card */}
+        {/* Explain Card with simple Thai analogies */}
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
           <div style={{ background: "rgba(255,255,255,0.02)", borderRadius: "12px", padding: "16px", border: "1px solid rgba(255,255,255,0.06)", flex: 1 }}>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: "#10b981" }}>🔍 อธิบายกลไกการจับคู่สถานะ</span>
-            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.7)", marginTop: "8px", lineHeight: 1.6 }}>
+            <span style={{ fontSize: "13px", fontWeight: 800, color: "#10b981" }}>🔍 ระบบความจำไฟร์วอลล์ (Stateful)</span>
+            <div style={{ fontSize: "11.5px", color: "#cbd5e1", marginTop: "8px", lineHeight: 1.6 }}>
               {activeStep === "new_syn" && (
                 <>
-                  เมื่อ Client ส่งแพ็กเก็ตแรก <strong>(SYN)</strong> เข้ามา ระบบจะสร้างข้อมูลการเชื่อมต่อในตาราง conntrack และกำหนดสถานะเป็น <strong>NEW</strong>. กฎ UFW จะประเมินว่าควรอนุญาตหรือไม่
+                  <p style={{ color: "#818cf8", fontWeight: 700, marginBottom: "4px" }}>สถานะ 1: NEW (โจร/ผู้ใช้มาถึงประตูครั้งแรก)</p>
+                  เมื่อมีแพ็กเก็ตส่งมาครั้งแรก รปภ. จะนำไปเทียบในสมุด VIP ว่ามีพอร์ตเปิดไว้ไหม และจะคัดลอกบันทึกสถานะไว้ในตารางความจำว่านี่คือการเปิดการเชื่อมต่อครั้งใหม่ <strong>(NEW)</strong>
                 </>
               )}
               {activeStep === "reply" && (
                 <>
-                  เมื่อเซิร์ฟเวอร์ตอบกลับ <strong>(SYN-ACK)</strong> และได้รับ <strong>ACK</strong> ยืนยัน การจับมือสำเร็จ สถานะจะเปลี่ยนเป็น <strong>ESTABLISHED</strong>. หลังจากนี้ ทราฟฟิกขากลับจะได้รับสิทธิ์ผ่านฉลุยโดยไม่ต้องตรวจสอบกฎซ้ำอีกรอบ
+                  <p style={{ color: "#10b981", fontWeight: 700, marginBottom: "4px" }}>สถานะ 2: ESTABLISHED (การแจกสายรัดข้อมือผ่านทาง)</p>
+                  เมื่อมีการตอบรับคุยสัญญากันเรียบร้อย (จับมือ 3-way handshake) รปภ. จะแจก <strong>สายรัดข้อมือผ่านทาง</strong> ข้อมูลขากลับของ IP นี้จึงวิ่งผ่านเข้าออกได้ทันทีโดยไม่ต้องไปต่อคิวเริ่มตรวจกฎในสมุดใหม่
                 </>
               )}
               {activeStep === "ftp_data" && (
                 <>
-                  สถานะ <strong>RELATED</strong> ใช้เมื่อมีบริการสร้างพอร์ตเสริมแยกต่างหากจากช่องควบคุมหลัก (เช่น FTP Data connection หรือ SIP) โดยระบบจะรับรู้ว่าเป็นเครือข่ายเชื่อมโยงจากเซสชันที่อนุญาตแล้ว
+                  <p style={{ color: "#f59e0b", fontWeight: 700, marginBottom: "4px" }}>สถานะ 3: RELATED (ผู้ติดตาม/เพื่อนของผู้รับสิทธิ์)</p>
+                  เป็นบริการข้างเคียงที่สร้างพอร์ตเสริมแยกออกไป (เช่น พอร์ตส่งไฟล์ข้อมูล FTP) UFW มีความฉลาดพอที่จะมองออกว่าไอพีนี้เชื่อมโยงกับเซสชันหลักที่เคยแลกบัตรผ่านไปแล้ว จึงอนุญาตให้วิ่งผ่านได้
                 </>
               )}
               {!activeStep && (
-                <>
-                  เลือกกดปุ่มทราฟฟิกจำลองด้านบนเพื่อดูขั้นตอนการบันทึกและตรวจสอบสถานะของ Stateful Firewall
-                </>
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <p><strong>💡 คำอธิบายตาราง:</strong> ไฟร์วอลล์ที่ดีต้องมี 'ความจำ' (Stateful) โดยจดจำการเชื่อมต่อลงตาราง <code>conntrack</code> (ตารางด้านซ้าย)</p>
+                  <p><strong>👉 วิธีทดสอบ:</strong> คลิกปุ่มจำลองการส่งข้อมูลแถบด้านบน (เช่น ส่ง SYN) เพื่อส่องดูการเปลี่ยนผ่านสถานะในตาราง</p>
+                </div>
               )}
             </div>
           </div>
@@ -12210,47 +12434,135 @@ function NetworkAttacksDefenses({ s }: { s: SlideData }) {
           ))}
         </div>
 
-        {/* Right pane: Graphic visualizer */}
+        {/* Right pane: Graphic visualizer replaced with clean, text-based explanation card */}
         <div style={{
-          background: "rgba(0,0,0,0.5)", borderRadius: "14px", padding: "16px",
+          background: "rgba(15,23,42,0.6)", borderRadius: "14px", padding: "20px",
           border: "1px solid rgba(255,255,255,0.06)", display: "flex", flexDirection: "column",
-          justifyContent: "space-between", position: "relative"
+          justifyContent: "space-between", position: "relative", minHeight: 0
         }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "10px", color: "#ef4444", fontWeight: 700 }}>HACKER IP</span>
-            <span style={{ fontSize: "10px", color: "#10b981", fontWeight: 700 }}>TARGET SERVER</span>
-          </div>
-
-          {/* Flow path */}
-          <div style={{ position: "relative", height: "80px", background: "rgba(255,255,255,0.01)", borderRadius: "10px" }}>
-            {/* Wall representation */}
-            <div style={{
-              position: "absolute", left: "50%", top: 0, bottom: 0, width: "6px",
-              background: isDefenseOn ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.1)",
-              borderLeft: `2px solid ${isDefenseOn ? "#10b981" : "#ef4444"}`,
-              display: "flex", alignItems: "center", justifyContent: "center"
-            }}>
-              <span style={{ fontSize: "10px", transform: "rotate(-90deg)", whiteSpace: "nowrap", color: isDefenseOn ? "#10b981" : "#ef4444", fontWeight: 900 }}>
-                {isDefenseOn ? "🛡️ UFW ACTIVE" : "⚠️ OPEN PORTS"}
-              </span>
+          {!activeAttack ? (
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", height: "100%", gap: "12px", color: "rgba(255,255,255,0.4)", textAlign: "center" }}>
+              <span style={{ fontSize: "36px" }}>🛡️</span>
+              <span style={{ fontSize: "13px", fontWeight: 700 }}>เลือกรูปแบบภัยคุกคามด้านซ้าย</span>
+              <span style={{ fontSize: "11px", maxWidth: "280px", lineHeight: 1.5 }}>เพื่อดูคำอธิบายเปรียบเทียบในชีวิตจริง และวิธีที่ Firewall ป้องกันระบบ</span>
             </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", height: "100%", overflowY: "auto", minHeight: 0 }}>
+              {activeAttack === "scan" && (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(239,68,68,0.2)", paddingBottom: "8px" }}>
+                    <span style={{ fontSize: "16px" }}>🔭</span>
+                    <span style={{ fontSize: "14px", fontWeight: 800, color: "#f87171" }}>Nmap Port Scanning (การแอบเขย่าลูกบิดประตู)</span>
+                  </div>
+                  <div style={{ fontSize: "12px", lineHeight: 1.6, color: "#cbd5e1" }}>
+                    <p style={{ marginBottom: "8px" }}>
+                      <strong>🏠 เปรียบเทียบกับ รปภ.:</strong> เหมือนมีโจรมาเดินเดินวนเวียนรอบๆ คอนโด แล้วลอง
+                      <span style={{ color: "#f59e0b", fontWeight: 700 }}> เอามือขยับลูกบิดประตูห้องต่างๆ </span>
+                      เพื่อหาดูว่ามีห้องไหนลืมล็อกทิ้งไว้ (พอร์ตสถานะ Open)
+                    </p>
+                    <p style={{ marginBottom: "8px" }}>
+                      <strong>⚠️ ความเสียหาย:</strong> โจรจะรู้ทันทีว่ามีบริการอะไรเปิดอยู่บ้าง และรู้เวอร์ชันของโปรแกรมเพื่อเตรียมแผนการเจาะระบบขั้นถัดไป
+                    </p>
+                    <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", padding: "10px", border: "1px solid rgba(255,255,255,0.06)", marginTop: "10px" }}>
+                      <div style={{ fontSize: "10.5px", fontFamily: "monospace", color: "#38bdf8", fontWeight: 700, marginBottom: "4px" }}>
+                        🛡️ คำสั่ง UFW ป้องกัน:
+                      </div>
+                      <div style={{ fontSize: "11.5px", fontFamily: "monospace", background: "#0f172a", padding: "6px", borderRadius: "4px", color: "#10b981", fontWeight: "bold" }}>
+                        sudo ufw default deny incoming
+                      </div>
+                      <p style={{ fontSize: "10.5px", color: "rgba(255,255,255,0.5)", marginTop: "6px", lineHeight: 1.4 }}>
+                        <strong>หลักการทำงาน:</strong> {isDefenseOn ? (
+                          <span style={{ color: "#10b981", fontWeight: 700 }}>
+                            [UFW เปิดทำงาน] รปภ. สร้างกำแพงบังหน้าห้องไว้ทั้งหมด ทำให้ Nmap สแกนแล้วพบสถานะ filtered (ประตูล่องหน) โจรจะไม่เห็นบริการใดๆ เลย ปลอดภัย 100%!
+                          </span>
+                        ) : (
+                          <span style={{ color: "#ef4444", fontWeight: 700 }}>
+                            [UFW ปิดใช้งาน] รปภ. ไม่ทำงาน โจรจะสแกนเจอพอร์ต 22, 80, 3306 ขึ้นเป็น open ทันที! พร้อมบุกรุกระบบ
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
 
-            {/* Packets */}
-            {packets.map(p => (
-              <div key={p.id} style={{
-                position: "absolute", top: `${15 + (p.id % 4) * 15}px`,
-                left: `${p.offset}%`, transform: "translateX(-50%)",
-                width: "8px", height: "8px", borderRadius: "50%",
-                background: p.blocked ? "#ef4444" : "#3b82f6",
-                boxShadow: `0 0 6px ${p.blocked ? "#ef4444" : "#3b82f6"}`,
-                transition: "left 0.8s cubic-bezier(0.1, 0.8, 0.3, 1)"
-              }} />
-            ))}
-          </div>
+              {activeAttack === "brute" && (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(239,68,68,0.2)", paddingBottom: "8px" }}>
+                    <span style={{ fontSize: "16px" }}>🔨</span>
+                    <span style={{ fontSize: "14px", fontWeight: 800, color: "#f87171" }}>SSH Brute Force (การรัวเดารหัสผ่านประตู)</span>
+                  </div>
+                  <div style={{ fontSize: "12px", lineHeight: 1.6, color: "#cbd5e1" }}>
+                    <p style={{ marginBottom: "8px" }}>
+                      <strong>🏠 เปรียบเทียบกับ รปภ.:</strong> เหมือนโจรมายืนหน้าประตูห้อง SSH (พอร์ต 22) แล้ว
+                      <span style={{ color: "#ef4444", fontWeight: 700 }}> รัวกดรหัสผ่านประตูดังปิ๊บๆ ซ้ำๆ </span>
+                      เป็นพันครั้ง หวังว่าจะมีสักครั้งที่เดาถูก
+                    </p>
+                    <p style={{ marginBottom: "8px" }}>
+                      <strong>⚠️ ความเสียหาย:</strong> หากไม่ได้ตั้งรหัสที่ยากพอ โจรจะสามารถถอดรหัสและเข้าควบคุมระบบทั้งหมดของเซิร์ฟเวอร์ได้ทันที
+                    </p>
+                    <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", padding: "10px", border: "1px solid rgba(255,255,255,0.06)", marginTop: "10px" }}>
+                      <div style={{ fontSize: "10.5px", fontFamily: "monospace", color: "#38bdf8", fontWeight: 700, marginBottom: "4px" }}>
+                        🛡️ คำสั่ง UFW ป้องกัน:
+                      </div>
+                      <div style={{ fontSize: "11.5px", fontFamily: "monospace", background: "#0f172a", padding: "6px", borderRadius: "4px", color: "#10b981", fontWeight: "bold" }}>
+                        sudo ufw limit 22/tcp
+                      </div>
+                      <p style={{ fontSize: "10.5px", color: "rgba(255,255,255,0.5)", marginTop: "6px", lineHeight: 1.4 }}>
+                        <strong>หลักการทำงาน:</strong> {isDefenseOn ? (
+                          <span style={{ color: "#10b981", fontWeight: 700 }}>
+                            [UFW เปิดทำงาน] รปภ. ติดตั้งสปริงกลไกลูกบิดพิเศษ หากพบ IP เดิมมาพยายามล็อกอินล้มเหลวเกิน 6 ครั้งใน 30 วินาที ระบบจะดึงสัญญาณแบนและบล็อกการเชื่อมต่อ IP นั้นทันที
+                          </span>
+                        ) : (
+                          <span style={{ color: "#ef4444", fontWeight: 700 }}>
+                            [UFW ปิดใช้งาน] บอทคนร้ายสามารถทำสอบรหัสซ้ำได้ไม่จำกัดจำนวนครั้ง ส่งผลให้ทรัพยากร CPU ของระบบโหลดหนักมาก
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
 
-          <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.5)", textAlign: "center" }}>
-            {activeAttack ? "กำลังส่งแพ็กเก็ตจำลองเข้ามายังระบบ..." : "คลิกเลือกรูปแบบการโจมตีด้านซ้ายเพื่อทดสอบไฟร์วอลล์"}
-          </div>
+              {activeAttack === "ddos" && (
+                <>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", borderBottom: "1px solid rgba(239,68,68,0.2)", paddingBottom: "8px" }}>
+                    <span style={{ fontSize: "16px" }}>💥</span>
+                    <span style={{ fontSize: "14px", fontWeight: 800, color: "#f87171" }}>DDoS Attack (ฝูงชนบุกพังประตู)</span>
+                  </div>
+                  <div style={{ fontSize: "12px", lineHeight: 1.6, color: "#cbd5e1" }}>
+                    <p style={{ marginBottom: "8px" }}>
+                      <strong>🏠 เปรียบเทียบกับ รปภ.:</strong> เหมือนโจรจ้าง
+                      <span style={{ color: "#ef4444", fontWeight: 700 }}> ผู้คนนับหมื่นวิ่งรู้อัดแน่นเข้ามาขวางทางเข้าประตูทางออกคอนโด </span>
+                      ทำให้ลูกค้าจริงไม่สามารถเดินเข้ามาใช้บริการในคอนโดได้เลย
+                    </p>
+                    <p style={{ marginBottom: "8px" }}>
+                      <strong>⚠️ ความเสียหาย:</strong> เซิร์ฟเวอร์และแอปพลิเคชันเว็บล่ม (Service Outage) เนื่องจากระบบเครือข่ายตอบสนองปริมาณข้อมูลขยะไม่ไหว
+                    </p>
+                    <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", padding: "10px", border: "1px solid rgba(255,255,255,0.06)", marginTop: "10px" }}>
+                      <div style={{ fontSize: "10.5px", fontFamily: "monospace", color: "#38bdf8", fontWeight: 700, marginBottom: "4px" }}>
+                        🛡️ คำสั่ง UFW ป้องกัน (แบนเฉพาะเจาะจง IP):
+                      </div>
+                      <div style={{ fontSize: "11.5px", fontFamily: "monospace", background: "#0f172a", padding: "6px", borderRadius: "4px", color: "#10b981", fontWeight: "bold" }}>
+                        sudo ufw deny from [ไอพีคนร้าย]
+                      </div>
+                      <p style={{ fontSize: "10.5px", color: "rgba(255,255,255,0.5)", marginTop: "6px", lineHeight: 1.4 }}>
+                        <strong>หลักการทำงาน:</strong> {isDefenseOn ? (
+                          <span style={{ color: "#10b981", fontWeight: 700 }}>
+                            [UFW เปิดทำงาน] รปภ. ติดป้ายแบล็คลิสต์และคัดกรองแพ็กเก็ตจาก IP โจมตีทิ้งลงถังขยะตั้งแต่หน้าประตูดิน ปล่อยให้ผู้ใช้รายอื่นยังเรียกชมเว็บได้ตามปกติ
+                          </span>
+                        ) : (
+                          <span style={{ color: "#ef4444", fontWeight: 700 }}>
+                            [UFW ปิดใช้งาน] ข้อมูลขยะทราฟฟิกพุ่งเข้าชนเซิร์ฟเวอร์ตรงๆ ดึงทรัพยากร CPU เกิน 100% ส่งผลให้เว็บโหลดช้าหรือปิดตัวลง
+                          </span>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -12383,7 +12695,7 @@ function NmapHandshakeDiagram({ s }: { s: SlideData }) {
       <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "16px", flex: 1, minHeight: 0 }}>
         {/* Diagram Area */}
         <div style={{ background: "rgba(0,0,0,0.35)", borderRadius: "14px", padding: "16px", border: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg width="100%" height="90%" viewBox="0 0 100 60" style={{ overflow: "visible" }}>
+          <svg className="security-diagram-svg" width="100%" height="90%" viewBox="0 0 100 60" style={{ overflow: "visible" }}>
             {/* Host lines */}
             <line x1="20" y1="10" x2="20" y2="50" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
             <line x1="80" y1="10" x2="80" y2="50" stroke="rgba(255,255,255,0.3)" strokeWidth="0.5" />
@@ -12483,7 +12795,7 @@ function WorkshopArchitecture({ s }: { s: SlideData }) {
           background: "rgba(0,0,0,0.35)", borderRadius: "14px", padding: "20px",
           border: "1px solid rgba(16,185,129,0.25)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative"
         }}>
-          <svg width="100%" height="90%" viewBox="0 0 100 60" style={{ overflow: "visible" }}>
+          <svg className="security-diagram-svg" width="100%" height="90%" viewBox="0 0 100 60" style={{ overflow: "visible" }}>
             {/* Server perimeter boundary */}
             <rect x="42" y="5" width="54" height="50" rx="4" fill="none" stroke="#10b981" strokeWidth="1" strokeDasharray="2,2" />
             <text x="69" y="9" textAnchor="middle" fill="#10b981" fontSize="2.5" fontWeight="bold">Server Security Perimeter</text>
