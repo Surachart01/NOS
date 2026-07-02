@@ -8036,6 +8036,7 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "stateful-conn-tracking": return <StatefulConnectionTracking s={slide} />;
     case "network-attacks-defenses": return <NetworkAttacksDefenses s={slide} />;
     case "ufw-log-dissector":      return <UFWLogDissector s={slide} />;
+    case "ufw-log-homework":       return <UFWLogHomework s={slide} />;
     case "nmap-handshake-diagram": return <NmapHandshakeDiagram s={slide} />;
     case "workshop-architecture":  return <WorkshopArchitecture s={slide} />;
     default: return <ContentSlide s={slide} />;
@@ -12029,167 +12030,253 @@ function ServiceHardeningQuiz({ s }: { s: SlideData }) {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
-   UFW NETFILTER ARCHITECTURE  (type: ufw-netfilter-arch)
-───────────────────────────────────────────────────────────────────────── */
+   FIREWALL SIMPLE EXPLAINER  (type: ufw-netfilter-arch)
+   ─────────────────────────────────────────────────────────────────────────── */
 function UFWNetfilterArchitecture({ s }: { s: SlideData }) {
-  const [activeHook, setActiveHook] = useState<string | null>(null);
-  const [activePath, setActivePath] = useState<"incoming" | "forward" | "outgoing" | null>(null);
+  const [activePort, setActivePort] = useState<string | null>(null);
 
-  const hooks = [
-    { id: "PREROUTING", desc: "จุดแรกที่แพ็กเก็ตเข้าการ์ดแลน (NIC) ก่อนทำการค้นหาเส้นทาง (Routing Decision)", ufwRole: "มักใช้ทำ NAT/Port Forwarding" },
-    { id: "INPUT", desc: "แพ็กเก็ตที่มีจุดหมายมายังแอปพลิเคชันภายในเซิร์ฟเวอร์เครื่องนี้โดยตรง", ufwRole: "เป็นจุดที่กฎ UFW BLOCK/ALLOW ขาเข้าทำงานหลัก" },
-    { id: "FORWARD", desc: "แพ็กเก็ตที่ต้องการเดินทางผ่านเครื่องนี้ไปยัง VM หรือ Container อื่น (ไม่ได้ส่งมาหาเครื่องนี้)", ufwRole: "UFW ควบคุมทราฟฟิกข้ามเครือข่าย/แชร์อินเทอร์เน็ต" },
-    { id: "OUTPUT", desc: "แพ็กเก็ตที่แอปพลิเคชันในเครื่องนี้สร้างขึ้นและต้องการส่งออกไปด้านนอก", ufwRole: "UFW กรองขาออกตามนโยบายเริ่มต้น (Default Allow Outgoing)" },
-    { id: "POSTROUTING", desc: "จุดสุดท้ายก่อนที่แพ็กเก็ตจะถูกปล่อยออกไปยังเครือข่ายภายนอก", ufwRole: "ใช้ทำ Source NAT (IP Masquerade)" }
+  const ports = [
+    {
+      id: "web",
+      port: "80 / 443",
+      label: "เว็บไซต์",
+      icon: "🌐",
+      color: "#10b981",
+      borderColor: "#10b98140",
+      status: "ALLOW",
+      statusColor: "#10b981",
+      desc: "พอร์ตเว็บ (80 = HTTP, 443 = HTTPS) — เปิดให้คนทั่วไปเข้าชมเว็บไซต์ได้",
+      cmd: "sudo ufw allow 80/tcp\nsudo ufw allow 443/tcp",
+      analogy: "📖 คล้ายประตูหน้าคอนโดที่เปิดรับแขกสาธารณะเข้าชมห้องตัวอย่าง"
+    },
+    {
+      id: "ssh",
+      port: "22",
+      label: "SSH (จัดการระบบ)",
+      icon: "🔑",
+      color: "#f59e0b",
+      borderColor: "#f59e0b40",
+      status: "LIMIT",
+      statusColor: "#f59e0b",
+      desc: "พอร์ต SSH (22) — ให้แอดมินเชื่อมต่อจัดการระบบจากระยะไกลได้ แต่จำกัดการเดารหัสผ่าน",
+      cmd: "sudo ufw limit 22/tcp",
+      analogy: "🔐 คล้ายประตูห้องทำงานแอดมิน: พนักงานผ่านได้ แต่เดารหัสผิด 6 ครั้งโดนล็อค"
+    },
+    {
+      id: "db",
+      port: "3306",
+      label: "ฐานข้อมูล (MariaDB)",
+      icon: "🗄️",
+      color: "#ef4444",
+      borderColor: "#ef444440",
+      status: "DENY",
+      statusColor: "#ef4444",
+      desc: "พอร์ตฐานข้อมูล (3306) — บล็อกคนนอกทั้งหมด เปิดเฉพาะ IP เพื่อนร่วมระบบ",
+      cmd: "sudo ufw deny 3306/tcp\nsudo ufw allow from 192.168.1.x to any port 3306",
+      analogy: "🏦 คล้ายห้องนิรภัยธนาคาร: ปิดถาวร เข้าได้เฉพาะคนที่ลงทะเบียนไว้"
+    },
+    {
+      id: "other",
+      port: "อื่นๆ ทั้งหมด",
+      label: "พอร์ตที่ไม่ได้ลงทะเบียน",
+      icon: "🚫",
+      color: "#64748b",
+      borderColor: "#64748b40",
+      status: "DEFAULT DENY",
+      statusColor: "#ef4444",
+      desc: "พอร์ตอื่นๆ ที่ไม่ได้เขียนกฎอนุญาตไว้ — UFW บล็อกให้อัตโนมัติทุกพอร์ต",
+      cmd: "sudo ufw default deny incoming",
+      analogy: "🚧 กฎเหล็กเริ่มต้น: ห้ามเข้าทุกประตูหากไม่มีชื่ออยู่ในสมุดบัญชีกฎ"
+    }
   ];
 
-  const getPathStatus = (hook: string) => {
-    if (!activePath) return false;
-    if (activePath === "incoming" && (hook === "PREROUTING" || hook === "INPUT")) return true;
-    if (activePath === "forward" && (hook === "PREROUTING" || hook === "FORWARD" || hook === "POSTROUTING")) return true;
-    if (activePath === "outgoing" && (hook === "OUTPUT" || hook === "POSTROUTING")) return true;
-    return false;
-  };
+  const selected = ports.find(p => p.id === activePort);
 
   return (
     <div className="slide slide-content" style={{
       display: "flex", flexDirection: "column", height: "100%", padding: "2.5% 3.5%",
-      background: "linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)",
+      background: "linear-gradient(135deg, #0a0f1e 0%, #1a1a3e 100%)",
       color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "14px"
     }}>
-      <div style={{ flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <span style={{ fontSize: "11px", color: "#818cf8", fontWeight: 700, textTransform: "uppercase" }}>
-            Kernel Level Filtering Diagram
-          </span>
-          <h2 style={{ margin: "3px 0 0", fontSize: "clamp(16px, 2vw, 22px)", fontWeight: 800 }}>{s.title}</h2>
-        </div>
-        <div style={{ display: "flex", gap: "8px" }}>
-          {[
-            { id: "incoming" as const, label: "Incoming Traffic (เข้าเซิร์ฟเวอร์)" },
-            { id: "forward" as const, label: "Forward Traffic (ส่งต่อ VM)" },
-            { id: "outgoing" as const, label: "Outgoing Traffic (ออกจากระบบ)" }
-          ].map(p => (
-            <button key={p.id} onClick={() => setActivePath(p.id)} style={{
-              padding: "6px 12px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "11px",
-              background: activePath === p.id ? "#6366f1" : "rgba(255,255,255,0.06)",
-              color: "#fff", fontWeight: 700, transition: "all 0.2s"
-            }}>{p.label}</button>
-          ))}
-        </div>
+      {/* Header */}
+      <div style={{ flexShrink: 0 }}>
+        <span style={{ fontSize: "11px", color: "#6366f1", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+          Firewall คืออะไร?
+        </span>
+        <h2 style={{ margin: "4px 0 0", fontSize: "clamp(16px, 2vw, 22px)", fontWeight: 800 }}>{s.title}</h2>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.2fr 0.8fr", gap: "16px", flex: 1, minHeight: 0 }}>
-        {/* SVG Flow diagram */}
-        <div style={{ background: "rgba(0,0,0,0.35)", borderRadius: "14px", padding: "16px", border: "1px solid rgba(255,255,255,0.06)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <svg className="security-diagram-svg" width="100%" height="90%" viewBox="0 0 100 60" style={{ overflow: "visible" }}>
-            {/* Packet entry */}
-            <rect x="2" y="25" width="10" height="8" rx="2" fill="#475569" stroke="#64748b" strokeWidth="0.5" />
-            <text x="7" y="30" textAnchor="middle" fill="#fff" fontSize="2.2" fontWeight="bold">NETWORK NIC</text>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", flex: 1, minHeight: 0 }}>
 
-            {/* Hook: PREROUTING */}
-            <rect x="18" y="23" width="14" height="12" rx="3"
-              fill={getPathStatus("PREROUTING") ? "rgba(99,102,241,0.2)" : "rgba(30,41,59,0.8)"}
-              stroke={getPathStatus("PREROUTING") ? "#6366f1" : "rgba(255,255,255,0.15)"}
-              strokeWidth={getPathStatus("PREROUTING") ? "1" : "0.5"}
-              onClick={() => setActiveHook("PREROUTING")}
-              style={{ cursor: "pointer", transition: "all 0.2s" }}
-            />
-            <text x="25" y="30" textAnchor="middle" fill="#fff" fontSize="2.5" fontWeight="bold">PREROUTING</text>
+        {/* LEFT — Visual Diagram */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
 
-            {/* Routing Decision block */}
-            <polygon points="38,29 44,22 50,29 44,36" fill="#1e293b" stroke="#475569" strokeWidth="0.5" />
-            <text x="44" y="30" textAnchor="middle" fill="#94a3b8" fontSize="1.8" fontWeight="bold">ROUTING</text>
+          {/* Simple flow diagram */}
+          <div style={{
+            background: "rgba(0,0,0,0.4)", borderRadius: "16px", padding: "20px",
+            border: "1px solid rgba(255,255,255,0.07)", display: "flex", flexDirection: "column", gap: "14px"
+          }}>
+            <div style={{ fontSize: "11px", color: "#a5b4fc", fontWeight: 700, textAlign: "center" }}>
+              🗺️ เส้นทางทราฟฟิกผ่านไฟร์วอลล์ (คลิกพอร์ตด้านล่างเพื่อดูรายละเอียด)
+            </div>
 
-            {/* Hook: INPUT */}
-            <rect x="52" y="10" width="14" height="12" rx="3"
-              fill={getPathStatus("INPUT") ? "rgba(16,185,129,0.2)" : "rgba(30,41,59,0.8)"}
-              stroke={getPathStatus("INPUT") ? "#10b981" : "rgba(255,255,255,0.15)"}
-              strokeWidth={getPathStatus("INPUT") ? "1" : "0.5"}
-              onClick={() => setActiveHook("INPUT")}
-              style={{ cursor: "pointer", transition: "all 0.2s" }}
-            />
-            <text x="59" y="17" textAnchor="middle" fill="#fff" fontSize="2.5" fontWeight="bold">INPUT</text>
-
-            {/* Local Process */}
-            <rect x="72" y="12" width="12" height="8" rx="2" fill="#0f172a" stroke="#10b981" strokeWidth="0.8" />
-            <text x="78" y="17" textAnchor="middle" fill="#10b981" fontSize="2.2" fontWeight="bold">Local App (Nginx)</text>
-
-            {/* Hook: FORWARD */}
-            <rect x="52" y="27" width="14" height="12" rx="3"
-              fill={getPathStatus("FORWARD") ? "rgba(245,158,11,0.2)" : "rgba(30,41,59,0.8)"}
-              stroke={getPathStatus("FORWARD") ? "#f59e0b" : "rgba(255,255,255,0.15)"}
-              strokeWidth={getPathStatus("FORWARD") ? "1" : "0.5"}
-              onClick={() => setActiveHook("FORWARD")}
-              style={{ cursor: "pointer", transition: "all 0.2s" }}
-            />
-            <text x="59" y="34" textAnchor="middle" fill="#fff" fontSize="2.5" fontWeight="bold">FORWARD</text>
-
-            {/* Hook: OUTPUT */}
-            <rect x="38" y="44" width="14" height="12" rx="3"
-              fill={getPathStatus("OUTPUT") ? "rgba(99,102,241,0.2)" : "rgba(30,41,59,0.8)"}
-              stroke={getPathStatus("OUTPUT") ? "#6366f1" : "rgba(255,255,255,0.15)"}
-              strokeWidth={getPathStatus("OUTPUT") ? "1" : "0.5"}
-              onClick={() => setActiveHook("OUTPUT")}
-              style={{ cursor: "pointer", transition: "all 0.2s" }}
-            />
-            <text x="45" y="51" textAnchor="middle" fill="#fff" fontSize="2.5" fontWeight="bold">OUTPUT</text>
-
-            {/* Hook: POSTROUTING */}
-            <rect x="70" y="27" width="16" height="12" rx="3"
-              fill={getPathStatus("POSTROUTING") ? "rgba(139,92,246,0.2)" : "rgba(30,41,59,0.8)"}
-              stroke={getPathStatus("POSTROUTING") ? "#8b5cf6" : "rgba(255,255,255,0.15)"}
-              strokeWidth={getPathStatus("POSTROUTING") ? "1" : "0.5"}
-              onClick={() => setActiveHook("POSTROUTING")}
-              style={{ cursor: "pointer", transition: "all 0.2s" }}
-            />
-            <text x="78" y="34" textAnchor="middle" fill="#fff" fontSize="2.5" fontWeight="bold">POSTROUTING</text>
-
-            {/* Lines / Paths */}
-            <path d="M 12,29 L 18,29" stroke="#64748b" strokeWidth="0.5" markerEnd="url(#arrow)" />
-            <path d="M 32,29 L 38,29" stroke="#64748b" strokeWidth="0.5" />
-            <path d="M 44,22 L 44,17 L 52,17" stroke="#64748b" strokeWidth="0.5" />
-            <path d="M 66,17 L 72,17" stroke="#64748b" strokeWidth="0.5" />
-            <path d="M 50,29 L 52,29" stroke="#64748b" strokeWidth="0.5" />
-            <path d="M 66,33 L 70,33" stroke="#64748b" strokeWidth="0.5" />
-            <path d="M 45,44 L 45,36" stroke="#64748b" strokeWidth="0.5" />
-            <path d="M 52,50 L 78,50 L 78,39" stroke="#64748b" strokeWidth="0.5" />
-          </svg>
-        </div>
-
-        {/* Info panel with detailed explanations to prevent confusion */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px", justifyContent: "space-between" }}>
-          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "12px", padding: "16px", border: "1px solid rgba(99,102,241,0.25)", flex: 1 }}>
-            {activeHook ? (
-              <>
-                <div style={{ fontSize: "15px", fontWeight: 800, color: "#818cf8", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "6px" }}>ด่านคัดกรอง: {activeHook}</div>
-                <div style={{ fontSize: "12px", color: "#cbd5e1", marginTop: "10px", lineHeight: 1.6 }}>{hooks.find(h => h.id === activeHook)?.desc}</div>
-                <div style={{ marginTop: "12px", background: "rgba(99,102,241,0.08)", padding: "10px", borderRadius: "8px", border: "1px solid rgba(99,102,241,0.2)" }}>
-                  <div style={{ fontSize: "11px", fontWeight: 700, color: "#a5b4fc" }}>หน้าที่ของ UFW (หัวหน้า รปภ.):</div>
-                  <div style={{ fontSize: "11.5px", color: "#e2e8f0", marginTop: "4px", lineHeight: 1.5 }}>{hooks.find(h => h.id === activeHook)?.ufwRole}</div>
-                </div>
-              </>
-            ) : (
-              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-                <div style={{ fontSize: "14px", fontWeight: 800, color: "#818cf8" }}>💡 แผนผังเส้นทางดักจับแพ็กเก็ต</div>
-                <div style={{ fontSize: "11.5px", color: "#cbd5e1", lineHeight: 1.6 }}>
-                  <p style={{ marginBottom: "6px" }}>เมื่อทราฟฟิกวิ่งผ่านการ์ดแลน (NIC) สัญญาณจะถูกดักจับและกรองสิทธิ์ตามด่านต่างๆ (เรียกว่า Hooks)</p>
-                  <p style={{ marginBottom: "6px" }}><strong>👉 วิธีใช้:</strong> คลิกเลือกบล็อกสีเทาในแผนภาพซ้ายมือ (เช่น PREROUTING หรือ INPUT) เพื่อดูว่าแต่ละด่านทำหน้าที่คัดกรองอย่างไร</p>
-                  <p><strong>⚠️ จุดสำคัญ:</strong> พอร์ตบริการภายในเครื่องเรา เช่น เว็บพอร์ต 80 หรือ SSH พอร์ต 22 จะคัดกรองที่ด่าน <strong>INPUT</strong> เป็นหลัก!</p>
-                </div>
+            {/* Internet → Firewall → Server flow */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
+              {/* Internet box */}
+              <div style={{
+                background: "rgba(99,102,241,0.15)", borderRadius: "12px", padding: "12px 16px",
+                border: "1.5px solid #6366f1", textAlign: "center", minWidth: "80px"
+              }}>
+                <div style={{ fontSize: "22px" }}>🌍</div>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "#a5b4fc", marginTop: "4px" }}>อินเทอร์เน็ต</div>
+                <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)" }}>คนแปลกหน้า/คนร้าย</div>
               </div>
-            )}
-          </div>
 
-          <div style={{ background: "rgba(0,0,0,0.5)", borderRadius: "12px", padding: "14px", border: "1px solid rgba(255,255,255,0.05)" }}>
-            <span style={{ fontSize: "11px", fontWeight: 700, color: "#818cf8" }}>💡 ความสัมพันธ์ของ UFW และ Netfilter</span>
-            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.6)", marginTop: "6px", lineHeight: 1.6 }}>
-              <strong>Netfilter (รปภ. ประจำจุด):</strong> เป็นระบบกรองของจริงใน Kernel ของ Linux คอยยืนเฝ้าตามทางเดินด่านต่างๆ<br/>
-              <strong>UFW (หัวหน้า รปภ.):</strong> คอยรับคำสั่งภาษาอังกฤษง่ายๆ จากผู้ใช้ แล้วเปลี่ยนกฎไปสั่งให้ Netfilter ดำเนินการบล็อก/อนุญาตจริง
+              {/* Arrow in */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                <div style={{ color: "#ef4444", fontSize: "9px", fontWeight: 700 }}>ทราฟฟิกขาเข้า</div>
+                <div style={{ fontSize: "18px", color: "#94a3b8" }}>→</div>
+              </div>
+
+              {/* Firewall box */}
+              <div style={{
+                background: "linear-gradient(135deg, rgba(239,68,68,0.2), rgba(99,102,241,0.2))",
+                borderRadius: "14px", padding: "14px 20px",
+                border: "2px solid #818cf8", textAlign: "center", minWidth: "100px",
+                boxShadow: "0 0 20px rgba(99,102,241,0.3)"
+              }}>
+                <div style={{ fontSize: "26px" }}>🛡️</div>
+                <div style={{ fontSize: "12px", fontWeight: 800, color: "#c7d2fe", marginTop: "4px" }}>UFW Firewall</div>
+                <div style={{ fontSize: "9px", color: "#818cf8" }}>รปภ. คัดกรองพอร์ต</div>
+              </div>
+
+              {/* Arrow out */}
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "2px" }}>
+                <div style={{ color: "#10b981", fontSize: "9px", fontWeight: 700 }}>ที่ผ่านอนุมัติ</div>
+                <div style={{ fontSize: "18px", color: "#94a3b8" }}>→</div>
+              </div>
+
+              {/* Server box */}
+              <div style={{
+                background: "rgba(16,185,129,0.15)", borderRadius: "12px", padding: "12px 16px",
+                border: "1.5px solid #10b981", textAlign: "center", minWidth: "80px"
+              }}>
+                <div style={{ fontSize: "22px" }}>🖥️</div>
+                <div style={{ fontSize: "11px", fontWeight: 700, color: "#6ee7b7", marginTop: "4px" }}>เซิร์ฟเวอร์</div>
+                <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)" }}>ภายในคอนโด</div>
+              </div>
+            </div>
+
+            {/* Port Cards */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px" }}>
+              {ports.map(p => (
+                <div
+                  key={p.id}
+                  onClick={() => setActivePort(activePort === p.id ? null : p.id)}
+                  style={{
+                    padding: "8px 10px", borderRadius: "10px", cursor: "pointer",
+                    background: activePort === p.id ? `${p.color}22` : "rgba(255,255,255,0.04)",
+                    border: `1.5px solid ${activePort === p.id ? p.color : "rgba(255,255,255,0.08)"}`,
+                    display: "flex", alignItems: "center", gap: "8px", transition: "all 0.2s"
+                  }}
+                >
+                  <span style={{ fontSize: "16px" }}>{p.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: "11px", fontWeight: 700, color: "#e2e8f0" }}>Port {p.port}</div>
+                    <div style={{ fontSize: "9.5px", color: "rgba(255,255,255,0.5)", marginTop: "1px" }}>{p.label}</div>
+                  </div>
+                  <span style={{
+                    fontSize: "9px", fontWeight: 800, padding: "2px 6px", borderRadius: "4px",
+                    background: `${p.statusColor}22`, color: p.statusColor, border: `1px solid ${p.statusColor}44`
+                  }}>{p.status}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
+
+        {/* RIGHT — Explanation Panel */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          {selected ? (
+            /* Detailed view for selected port */
+            <div style={{
+              background: "rgba(255,255,255,0.03)", borderRadius: "16px", padding: "18px",
+              border: `1.5px solid ${selected.color}66`, flex: 1, display: "flex", flexDirection: "column", gap: "12px"
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <span style={{ fontSize: "28px" }}>{selected.icon}</span>
+                <div>
+                  <div style={{ fontSize: "16px", fontWeight: 800, color: "#e2e8f0" }}>Port {selected.port}</div>
+                  <div style={{ fontSize: "11px", color: selected.statusColor, fontWeight: 700 }}>สถานะ: {selected.status}</div>
+                </div>
+              </div>
+              <div style={{ fontSize: "12px", color: "#cbd5e1", lineHeight: 1.7 }}>{selected.desc}</div>
+              <div style={{ background: "rgba(0,0,0,0.3)", borderRadius: "10px", padding: "12px", fontFamily: "monospace", fontSize: "11px" }}>
+                <div style={{ color: "#94a3b8", marginBottom: "6px", fontSize: "9px" }}>📋 คำสั่ง UFW ที่ใช้:</div>
+                <pre style={{ color: "#6ee7b7", margin: 0, whiteSpace: "pre-wrap" }}>{selected.cmd}</pre>
+              </div>
+              <div style={{
+                background: `${selected.color}15`, borderRadius: "10px", padding: "12px",
+                border: `1px solid ${selected.color}33`, fontSize: "11.5px", color: "#e2e8f0", lineHeight: 1.6
+              }}>
+                {selected.analogy}
+              </div>
+            </div>
+          ) : (
+            /* Default overview when nothing selected */
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", flex: 1 }}>
+              <div style={{
+                background: "rgba(99,102,241,0.1)", borderRadius: "16px", padding: "18px",
+                border: "1.5px solid rgba(99,102,241,0.3)"
+              }}>
+                <div style={{ fontSize: "14px", fontWeight: 800, color: "#a5b4fc", marginBottom: "10px" }}>
+                  🛡️ Firewall คืออะไร?
+                </div>
+                <div style={{ fontSize: "12px", color: "#cbd5e1", lineHeight: 1.8 }}>
+                  <p style={{ marginBottom: "8px" }}>
+                    <strong style={{ color: "#818cf8" }}>Firewall</strong> คือ &ldquo;รปภ. ประจำคอนโด&rdquo; ที่ยืนเฝ้าประตูทุกบานของเซิร์ฟเวอร์ตลอด 24 ชั่วโมง
+                  </p>
+                  <p style={{ marginBottom: "8px" }}>
+                    ทุกครั้งที่มีสัญญาณเน็ตวิ่งเข้ามา รปภ. จะดู <strong style={{ color: "#f59e0b" }}>พอร์ตปลายทาง</strong> แล้วเปิดสมุดกฎตรวจว่า &ldquo;พอร์ตนี้ลงทะเบียนไว้ไหม?&rdquo;
+                  </p>
+                  <p>
+                    ถ้าไม่มีชื่ออยู่ในสมุด → <strong style={{ color: "#ef4444" }}>บล็อกทันที</strong> ไม่มีข้อยกเว้น
+                  </p>
+                </div>
+              </div>
+
+              <div style={{
+                background: "rgba(16,185,129,0.08)", borderRadius: "14px", padding: "14px",
+                border: "1px solid rgba(16,185,129,0.25)", fontSize: "12px", color: "#cbd5e1", lineHeight: 1.7
+              }}>
+                <div style={{ fontWeight: 800, color: "#10b981", marginBottom: "8px" }}>💡 UFW ย่อมาจากอะไร?</div>
+                <p style={{ marginBottom: "6px" }}><strong>UFW = Uncomplicated Firewall</strong></p>
+                <p>เป็นโปรแกรมบน Ubuntu/Linux ที่ออกแบบมาให้ใช้งานง่าย พิมพ์คำสั่งสั้นๆ แทนการต้องจัดการ iptables ที่ซับซ้อน</p>
+              </div>
+
+              <div style={{
+                background: "rgba(255,255,255,0.03)", borderRadius: "12px", padding: "12px",
+                border: "1px solid rgba(255,255,255,0.07)", fontSize: "11px", color: "rgba(255,255,255,0.5)",
+                textAlign: "center"
+              }}>
+                👆 คลิกการ์ดพอร์ตทางซ้ายเพื่อดูตัวอย่างการตั้งค่ากฎความปลอดภัยแต่ละพอร์ต
+              </div>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Speaker Notes strip */}
+      {s.speakerNotes && (
+        <div style={{
+          flexShrink: 0, background: "rgba(255,255,255,0.03)", borderRadius: "10px",
+          padding: "10px 14px", border: "1px solid rgba(255,255,255,0.06)",
+          fontSize: "11px", color: "rgba(255,255,255,0.4)", display: "flex", gap: "8px", alignItems: "flex-start"
+        }}>
+          <span style={{ flexShrink: 0, color: "#6366f1" }}>📝 บันทึกครู:</span>
+          <span>{s.speakerNotes}</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -12575,85 +12662,331 @@ function NetworkAttacksDefenses({ s }: { s: SlideData }) {
 function UFWLogDissector({ s }: { s: SlideData }) {
   const [activeToken, setActiveToken] = useState<string | null>(null);
 
+  // Color categories for each token type
+  const categories: Record<string, { color: string; label: string }> = {
+    timestamp:  { color: "#f59e0b", label: "เวลา" },
+    action:     { color: "#ef4444", label: "การกระทำ" },
+    in_iface:   { color: "#a78bfa", label: "Network" },
+    out_iface:  { color: "#a78bfa", label: "Network" },
+    mac:        { color: "#64748b", label: "Layer 2" },
+    src_ip:     { color: "#f97316", label: "ต้นทาง" },
+    dst_ip:     { color: "#22d3ee", label: "ปลายทาง" },
+    len:        { color: "#6b7280", label: "Packet" },
+    proto:      { color: "#818cf8", label: "Protocol" },
+    src_port:   { color: "#fb923c", label: "ต้นทาง" },
+    dst_port:   { color: "#34d399", label: "ปลายทาง" },
+    flags:      { color: "#f43f5e", label: "TCP Flag" },
+  };
+
   const rawLog = [
-    { text: "[UFW BLOCK]", token: "action", desc: "การกระทำของไฟร์วอลล์: กฎข้อนี้สั่งให้สกัดกั้นบล็อกสัญญาณ (BLOCK) เพื่อไม่ให้ทราฟฟิกผ่าน" },
-    { text: "IN=eth0", token: "in_iface", desc: "การ์ดแลนขาเข้า (Input Interface): แพ็กเก็ตนี้วิ่งเข้ามาทางพอร์ตอินเทอร์เน็ตแรกของเซิร์ฟเวอร์ eth0" },
-    { text: "OUT=", token: "out_iface", desc: "การ์ดแลนขาออก (Output Interface): ค่าว่างเปล่า แสดงว่านี่เป็นทราฟฟิกที่มุ่งหน้าเข้ามาหาตัวเซิร์ฟเวอร์โดยตรง ไม่ได้ส่งต่อไปเครื่องอื่น" },
-    { text: "MAC=00:11:22:33:44:55", token: "mac", desc: "ที่อยู่อุปกรณ์ฮาร์ดแวร์ (MAC Address): ข้อมูลระดับ Layer 2 ของการ์ดอินเทอร์เน็ตที่สื่อสารกันในวงแลน" },
-    { text: "SRC=185.220.101.45", token: "src_ip", desc: "ไอพีต้นทาง (Source IP Address): แสดงว่าทราฟฟิกนี้ส่งมาจากไอพีแปลกหน้าภายนอก (เป็น IP ของผู้บุกรุก)" },
-    { text: "DST=192.168.1.100", token: "dst_ip", desc: "ไอพีปลายทาง (Destination IP Address): บ่งชี้ว่าเป้าหมายคือเครื่องเซิร์ฟเวอร์ของคุณนั่นเอง" },
-    { text: "LEN=40", token: "len", desc: "ขนาดรวมของแพ็กเก็ต (Packet Length): มีขนาด 40 ไบต์ ซึ่งเป็นขนาดมาตรฐานของ TCP control packet เปล่าๆ" },
-    { text: "PROTO=TCP", token: "proto", desc: "โปรโตคอลการสื่อสาร (Protocol): ใช้โปรโตคอล TCP (ต้องการเชื่อมต่อแบบเป็นลูปจับมือ)" },
-    { text: "SPT=54321", token: "src_port", desc: "พอร์ตต้นทาง (Source Port): พอร์ตสุ่มฝั่ง Client ของผู้ส่งสำหรับส่งสัญญาณมาหาเซิร์ฟเวอร์" },
-    { text: "DPT=22", token: "dst_port", desc: "พอร์ตเป้าหมาย (Destination Port): พอร์ตปลายทางที่เครื่องเซิร์ฟเวอร์ ในภาพคือพอร์ต 22 (SSH) แสดงว่ามีคนกำลังพยายามสแกนพอร์ตรีโมท!" },
-    { text: "SYN", token: "flags", desc: "สัญญาณสถานะ (TCP Flags): ฟลัก SYN ยืนยันว่าเป็นการส่งคำขอเปิดการเชื่อมต่อใหม่ครั้งแรก" }
+    { text: "Jul  1 22:01:03", token: "timestamp", desc: "📅 วันที่และเวลา (Timestamp): บันทึกว่า UFW สกัดทราฟฟิกนี้เมื่อวันที่ 1 กรกฎาคม เวลา 22:01:03 น. ใช้ดู Pattern การโจมตีว่าเกิดช่วงเวลาไหน เช่น ถ้าเกิดตอนดึกๆ ทุกคืนก็น่าสงสัยมาก" },
+    { text: "[UFW BLOCK]", token: "action", desc: "🔥 การกระทำของไฟร์วอลล์ (Action): [UFW BLOCK] = ไฟร์วอลล์สกัดกั้นและทิ้งแพ็กเก็ตนี้ทันที | [UFW ALLOW] = อนุญาตให้ผ่าน | [UFW LIMIT] = จำกัดความถี่" },
+    { text: "IN=eth0", token: "in_iface", desc: "🔌 Interface ขาเข้า (Input Interface): eth0 คือการ์ดเน็ตเวิร์กหลักที่รับสัญญาณจากอินเทอร์เน็ต หากเป็น lo คือ localhost หากเป็น wlan0 คือ Wi-Fi" },
+    { text: "OUT=", token: "out_iface", desc: "🔀 Interface ขาออก (Output Interface): ค่าว่างเปล่า (OUT=) แปลว่าแพ็กเก็ตนี้ตั้งใจเข้าสู่เครื่องเซิร์ฟเวอร์โดยตรง ไม่ได้ถูกส่งต่อ (Forward) ไปเครื่องอื่น" },
+    { text: "MAC=00:11:22:33:44:55", token: "mac", desc: "💾 MAC Address (Layer 2): ข้อมูลที่อยู่ฮาร์ดแวร์ของการ์ดเน็ตเวิร์ก ใช้บ่งชี้อุปกรณ์ในวงแลน แต่ในการโจมตีจากอินเทอร์เน็ตจะเป็น MAC ของ Router/Gateway ไม่ใช่ผู้โจมตีจริง" },
+    { text: "SRC=185.220.101.45", token: "src_ip", desc: "🌍 IP ต้นทาง (Source IP): นี่คือ IP ของผู้ส่งหรือผู้บุกรุก ในตัวอย่างนี้ 185.220.101.45 เป็น IP จากต่างประเทศที่พยายามสแกนพอร์ต SSH — ควร Blacklist IP นี้ทันที!" },
+    { text: "DST=192.168.1.100", token: "dst_ip", desc: "🎯 IP ปลายทาง (Destination IP): IP ของเซิร์ฟเวอร์ของเราที่โดนเล็งโจมตี 192.168.1.100 คือ Private IP บนวงแลน ในสภาพแวดล้อมจริงจะเป็น Public IP ของ VPS" },
+    { text: "LEN=40", token: "len", desc: "📦 ขนาดแพ็กเก็ต (Packet Length): 40 ไบต์ คือขนาดของ IP Header (20 bytes) + TCP Header (20 bytes) เปล่าๆ โดยไม่มีข้อมูล payload — ลักษณะเฉพาะของ SYN Scan!" },
+    { text: "PROTO=TCP", token: "proto", desc: "📡 โปรโตคอล (Protocol): TCP = ต้องจับมือเชื่อมต่อก่อนส่งข้อมูล | UDP = ส่งข้อมูลตรงๆ ไม่ต้องเชื่อมต่อ | ICMP = Ping สัญญาณตรวจสอบการเชื่อมต่อ" },
+    { text: "SPT=54321", token: "src_port", desc: "🔢 พอร์ตต้นทาง (Source Port): พอร์ตสุ่มฝั่ง Client (Ephemeral Port ช่วง 1024-65535) ที่ใช้รับสัญญาณตอบกลับจากเซิร์ฟเวอร์ ไม่ได้มีความหมายพิเศษมากนัก" },
+    { text: "DPT=22", token: "dst_port", desc: "⚠️ พอร์ตเป้าหมาย (Destination Port): DPT=22 → โจมตีพอร์ต SSH! นี่คือหัวใจสำคัญที่สุด บอกว่าผู้บุกรุกพยายามทำอะไร: DPT=80 (เว็บ), DPT=3306 (ฐานข้อมูล), DPT=22 (รีโมต), DPT=23 (Telnet เก่า)" },
+    { text: "SYN", token: "flags", desc: "🚩 TCP Flag: SYN = คำขอเปิดการเชื่อมต่อใหม่ (คนเดินเข้ามาเคาะประตู) | ACK = ยืนยันรับข้อมูล | RST = ปิดทันที | FIN = จบการสนทนา | SYN ACK = ตอบรับคำขอ" },
   ];
+
+  // 3 example log lines for context
+  const exampleLines = [
+    { label: "🔴 BLOCK SSH Brute Force", color: "#ef4444", log: "Jul  1 22:01:03 [UFW BLOCK] IN=eth0 SRC=185.220.101.45 DST=192.168.1.100 PROTO=TCP SPT=54321 DPT=22 SYN" },
+    { label: "🟢 ALLOW HTTP เว็บปกติ", color: "#10b981", log: "Jul  1 22:01:44 [UFW ALLOW] IN=eth0 SRC=203.0.113.50 DST=192.168.1.100 PROTO=TCP SPT=49200 DPT=80 SYN" },
+    { label: "🔴 BLOCK พอร์ต DB จากนอก", color: "#f97316", log: "Jul  1 22:01:07 [UFW BLOCK] IN=eth0 SRC=45.33.32.156 DST=192.168.1.100 PROTO=TCP SPT=61234 DPT=3306 SYN" },
+  ];
+
+  const activeInfo = rawLog.find(t => t.token === activeToken);
 
   return (
     <div className="slide slide-content" style={{
-      display: "flex", flexDirection: "column", height: "100%", padding: "2.5% 3.5%",
+      display: "flex", flexDirection: "column", height: "100%", padding: "2% 3%",
       background: "linear-gradient(135deg, #020617 0%, #0c1a2e 100%)",
-      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "14px"
+      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "10px",
+      overflow: "hidden"
     }}>
+      {/* Header */}
       <div style={{ flexShrink: 0 }}>
-        <span style={{ fontSize: "11px", color: "#60a5fa", fontWeight: 700, textTransform: "uppercase" }}>
-          Log Analysis Tool
+        <span style={{ fontSize: "10px", color: "#60a5fa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+          🔍 Log Analysis Tool — คลิกแต่ละส่วนเพื่ออ่านความหมาย
         </span>
-        <h2 style={{ margin: "3px 0 0", fontSize: "clamp(16px, 2vw, 22px)", fontWeight: 800 }}>{s.title}</h2>
+        <h2 style={{ margin: "2px 0 0", fontSize: "clamp(13px, 1.8vw, 19px)", fontWeight: 800 }}>{s.title}</h2>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px", flex: 1, minHeight: 0 }}>
-        {/* Interactive Log Reader */}
+      {/* Example log lines reference */}
+      <div style={{ flexShrink: 0, background: "rgba(0,0,0,0.4)", borderRadius: "10px", padding: "8px 12px", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div style={{ fontSize: "9px", color: "#94a3b8", marginBottom: "5px", fontWeight: 700 }}>📋 ตัวอย่าง UFW Log 3 แบบที่พบบ่อย:</div>
+        {exampleLines.map((ex, i) => (
+          <div key={i} style={{ display: "flex", alignItems: "baseline", gap: "8px", marginBottom: "2px" }}>
+            <span style={{ fontSize: "9px", color: ex.color, fontWeight: 700, whiteSpace: "nowrap", minWidth: "140px" }}>{ex.label}</span>
+            <span style={{ fontFamily: "monospace", fontSize: "8.5px", color: "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{ex.log}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Interactive dissector */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px", flex: 1, minHeight: 0 }}>
+        {/* Clickable token log line */}
         <div style={{
-          background: "rgba(0,0,0,0.5)", borderRadius: "14px", padding: "20px",
-          border: "1px solid rgba(96,165,250,0.25)", fontFamily: "monospace", fontSize: "12px",
-          lineHeight: 1.8, display: "flex", flexWrap: "wrap", gap: "8px"
+          background: "rgba(0,0,0,0.65)", borderRadius: "12px", padding: "12px 14px",
+          border: "1px solid rgba(96,165,250,0.2)", fontFamily: "monospace",
+          fontSize: "clamp(9px, 1vw, 12px)", display: "flex", flexWrap: "wrap", gap: "6px", alignItems: "center"
         }}>
+          <span style={{ color: "#475569", fontSize: "9px", width: "100%", marginBottom: "2px" }}>
+            👆 คลิกที่ส่วนต่างๆ ด้านล่างเพื่อดูความหมาย:
+          </span>
           {rawLog.map((token, idx) => {
             const isSelected = activeToken === token.token;
+            const cat = categories[token.token];
             return (
               <span
                 key={idx}
-                onClick={() => setActiveToken(token.token)}
+                onClick={() => setActiveToken(isSelected ? null : token.token)}
                 style={{
-                  cursor: "pointer", padding: "4px 8px", borderRadius: "6px",
-                  background: isSelected ? "rgba(96,165,250,0.25)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${isSelected ? "#60a5fa" : "rgba(255,255,255,0.06)"}`,
-                  color: isSelected ? "#60a5fa" : "#fff",
-                  fontWeight: isSelected ? "bold" : "normal",
-                  transition: "all 0.2s"
+                  cursor: "pointer", padding: "4px 9px", borderRadius: "6px",
+                  background: isSelected ? `${cat.color}22` : "rgba(255,255,255,0.04)",
+                  border: `1.5px solid ${isSelected ? cat.color : "rgba(255,255,255,0.08)"}`,
+                  color: isSelected ? cat.color : "#cbd5e1",
+                  fontWeight: isSelected ? 800 : 400,
+                  transition: "all 0.15s",
+                  position: "relative"
                 }}
               >
                 {token.text}
+                {isSelected && (
+                  <span style={{
+                    position: "absolute", top: "-8px", right: "-2px", fontSize: "7px",
+                    background: cat.color, color: "#000", borderRadius: "4px", padding: "1px 3px", fontWeight: 800
+                  }}>{cat.label}</span>
+                )}
               </span>
             );
           })}
         </div>
 
-        {/* Explain Card */}
+        {/* Color legend */}
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", flexShrink: 0 }}>
+          {[
+            { color: "#f59e0b", label: "เวลา" },
+            { color: "#ef4444", label: "การกระทำ" },
+            { color: "#f97316", label: "ต้นทาง" },
+            { color: "#22d3ee", label: "ปลายทาง" },
+            { color: "#818cf8", label: "Protocol" },
+            { color: "#34d399", label: "Port ปลายทาง" },
+            { color: "#f43f5e", label: "TCP Flag" },
+          ].map((l, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+              <div style={{ width: "8px", height: "8px", borderRadius: "2px", background: l.color }} />
+              <span style={{ fontSize: "9px", color: "#94a3b8" }}>{l.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Explain card */}
         <div style={{ flex: 1, minHeight: 0 }}>
-          {activeToken ? (
+          {activeInfo ? (
             <div style={{
-              background: "rgba(255,255,255,0.03)", borderRadius: "14px", padding: "16px",
-              border: "1px solid rgba(255,255,255,0.08)", height: "100%", boxSizing: "border-box"
+              background: `${categories[activeToken!]?.color}11`, borderRadius: "12px", padding: "14px 18px",
+              border: `1px solid ${categories[activeToken!]?.color}55`, height: "100%", boxSizing: "border-box"
             }}>
-              <div style={{ fontSize: "15px", fontWeight: 800, color: "#60a5fa" }}>
-                ข้อมูลส่วน: {rawLog.find(t => t.token === activeToken)?.text}
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                <div style={{
+                  background: categories[activeToken!]?.color, borderRadius: "6px",
+                  padding: "3px 10px", fontSize: "11px", fontWeight: 800, color: "#000",
+                  fontFamily: "monospace"
+                }}>{activeInfo.text}</div>
+                <span style={{ fontSize: "9px", color: categories[activeToken!]?.color, fontWeight: 700 }}>
+                  — {categories[activeToken!]?.label}
+                </span>
               </div>
-              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.75)", marginTop: "10px", lineHeight: 1.7 }}>
-                {rawLog.find(t => t.token === activeToken)?.desc}
+              <div style={{ fontSize: "clamp(10px, 1.2vw, 13px)", color: "rgba(255,255,255,0.85)", lineHeight: 1.75 }}>
+                {activeInfo.desc}
               </div>
             </div>
           ) : (
             <div style={{
-              background: "rgba(255,255,255,0.02)", borderRadius: "14px", padding: "16px",
-              border: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", justifyContent: "center",
-              color: "rgba(255,255,255,0.3)", fontSize: "12px", height: "100%", boxSizing: "border-box"
+              background: "rgba(255,255,255,0.02)", borderRadius: "12px", padding: "16px",
+              border: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center",
+              justifyContent: "center", color: "rgba(255,255,255,0.25)", fontSize: "11px",
+              height: "100%", boxSizing: "border-box", flexDirection: "column", gap: "6px"
             }}>
-              💡 คลิกที่ข้อมูลฟิลด์ล็อกด้านบนทีละตัว เพื่อทำการถอดรหัสและวิเคราะห์ความหมายที่บันทึก
+              <div style={{ fontSize: "22px" }}>👆</div>
+              <div>คลิกที่ส่วนใดส่วนหนึ่งของ log ด้านบน เพื่อถอดรหัสและอ่านความหมาย</div>
             </div>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   UFW LOG HOMEWORK  (type: ufw-log-homework)
+═══════════════════════════════════════════════════════════════════════ */
+function UFWLogHomework({ s }: { s: SlideData }) {
+  const [activeQ, setActiveQ] = useState(0);
+
+  const homeworkItems = [
+    {
+      id: "hw1",
+      label: "โจทย์ข้อที่ 1",
+      title: "การตรวจวิเคราะห์ Log เบื้องต้น (SSH Port)",
+      log: "Jul  2 03:14:22 server01 kernel: [UFW BLOCK] IN=eth0 OUT= MAC=00:16:3e:aa:bb:cc SRC=185.220.101.47 DST=10.0.0.5 LEN=40 TOS=0x00 PREC=0x00 TTL=241 ID=54321 PROTO=TCP SPT=49823 DPT=22 WINDOW=1024 SYN",
+      questions: [
+        "ไฟร์วอลล์ทำหน้าที่อย่างไรกับแพ็กเก็ตนี้?",
+        "ระบุไอพีต้นทางของผู้ส่ง (SRC) และพอร์ตปลายทางเป้าหมาย (DPT) ของแพ็กเก็ตนี้",
+        "พอร์ตปลายทาง DPT=22 เป็นพอร์ตมาตรฐานของบริการใดในระบบ Linux?"
+      ]
+    },
+    {
+      id: "hw2",
+      label: "โจทย์ข้อที่ 2",
+      title: "การอนุญาตบริการเว็บเข้ารหัส (HTTPS traffic)",
+      log: "Jul  2 10:35:07 server01 kernel: [UFW ALLOW] IN=eth0 OUT= MAC=00:16:3e:aa:bb:cc SRC=203.150.10.22 DST=10.0.0.5 LEN=60 TOS=0x00 PREC=0x00 TTL=54 ID=12345 PROTO=TCP SPT=51234 DPT=443 WINDOW=65535 SYN",
+      questions: [
+        "ในข้อนี้ไฟร์วอลล์บล็อกหรืออนุญาตทราฟฟิกนี้ให้ผ่านเข้าเซิร์ฟเวอร์ได้?",
+        "พอร์ตปลายทาง DPT=443 คือบริการใด และแพ็กเก็ตนี้วิ่งเข้ามาผ่านการ์ดเน็ตเวิร์ก (IN) ชื่ออะไร?",
+        "เพราะเหตุใดไฟร์วอลล์ถึงยอมปล่อยผ่านทราฟฟิกนี้?"
+      ]
+    },
+    {
+      id: "hw3",
+      label: "โจทย์ข้อที่ 3",
+      title: "การตรวจสอบและจำกัดพอร์ตฐานข้อมูล (DB Port)",
+      log: "Jul  2 14:22:51 server01 kernel: [UFW BLOCK] IN=eth0 OUT= MAC=00:16:3e:aa:bb:cc SRC=45.33.32.156 DST=10.0.0.5 LEN=40 TOS=0x00 PREC=0x00 TTL=238 ID=8888 PROTO=TCP SPT=61234 DPT=3306 WINDOW=1024 SYN",
+      questions: [
+        "พอร์ต DPT=3306 คือพอร์ตบริการของโปรแกรมฐานข้อมูลใด?",
+        "จาก log บรรทัดนี้ ผู้ส่งพยายามเชื่อมต่อพอร์ตฐานข้อมูลจากภายนอกสำเร็จหรือไม่ และโดนจัดการด้วยวิธีใด?",
+        "หากต้องการเขียนคำสั่ง UFW เพื่ออนุญาตให้เครื่องไอพี 192.168.1.150 เข้ามาใช้พอร์ต 3306 เพียงเครื่องเดียว ต้องเขียนอย่างไร?"
+      ]
+    },
+    {
+      id: "hw4",
+      label: "โจทย์ข้อที่ 4",
+      title: "การปิดกั้นบริการที่ไม่ปลอดภัย (Telnet Port)",
+      log: "Jul  2 22:58:03 server01 kernel: [UFW BLOCK] IN=eth0 OUT= MAC=00:16:3e:aa:bb:cc SRC=91.108.4.13 DST=10.0.0.5 LEN=40 TOS=0x00 PREC=0x00 TTL=245 ID=31337 PROTO=TCP SPT=55667 DPT=23 WINDOW=65535 SYN",
+      questions: [
+        "พอร์ตปลายทาง DPT=23 คือบริการใด และเหตุใดในปัจจุบันจึงควรปิดใช้งานและเปลี่ยนไปใช้ SSH แทน?",
+        "แพ็กเก็ตข้อนี้พยายามเชื่อมต่อด้วยโปรโตคอล (PROTO) ใด?",
+        "หากต้องการเขียนคำสั่งเพื่อสั่งบล็อก (Deny) พอร์ต 23 ในระบบ UFW ต้องพิมพ์คำสั่งอย่างไร?"
+      ]
+    }
+  ];
+
+  const currentItem = homeworkItems[activeQ];
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "2.5% 3.5%",
+      background: "linear-gradient(135deg, #020617 0%, #0b1528 50%, #020617 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "12px",
+      overflow: "hidden"
+    }}>
+      {/* Header */}
+      <div style={{ flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <span style={{ fontSize: "10px", color: "#f59e0b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px" }}>
+            📝 การบ้านประจำสัปดาห์ (Homework Assignment)
+          </span>
+          <h2 style={{ margin: "2px 0 0", fontSize: "clamp(14px, 2.2vw, 20px)", fontWeight: 800 }}>{s.title}</h2>
+        </div>
+        <div style={{
+          background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)",
+          borderRadius: "8px", padding: "4px 12px", fontSize: "11px", color: "#f59e0b", fontWeight: 700
+        }}>
+          คำถามข้อเขียนอัตนัย (Subjective Questions)
+        </div>
+      </div>
+
+      {/* Main Workspace Layout */}
+      <div style={{ display: "grid", gridTemplateColumns: "0.6fr 1.4fr", gap: "16px", flex: 1, minHeight: 0 }}>
+        
+        {/* Left Side: Question List Navigation */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", overflowY: "auto" }}>
+          {homeworkItems.map((item, idx) => {
+            const isActive = activeQ === idx;
+            return (
+              <div
+                key={idx}
+                onClick={() => setActiveQ(idx)}
+                style={{
+                  padding: "10px 14px", borderRadius: "10px", cursor: "pointer",
+                  background: isActive ? "rgba(99,102,241,0.15)" : "rgba(255,255,255,0.02)",
+                  border: `1.5px solid ${isActive ? "#6366f1" : "rgba(255,255,255,0.06)"}`,
+                  transition: "all 0.2s"
+                }}
+              >
+                <div style={{ fontSize: "10px", color: isActive ? "#818cf8" : "#94a3b8", fontWeight: 700 }}>
+                  {item.label}
+                </div>
+                <div style={{ fontSize: "12px", fontWeight: 800, marginTop: "2px", color: isActive ? "#fff" : "#cbd5e1" }}>
+                  {item.title}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Guide Box */}
+          <div style={{
+            marginTop: "auto", padding: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.02)",
+            border: "1px dashed rgba(255,255,255,0.1)", fontSize: "10px", color: "#94a3b8", lineHeight: 1.5
+          }}>
+            💡 ให้นักศึกษาพิจารณาข้อความ Log บรรทัดที่กำหนด แล้วเขียนวิเคราะห์อธิบายคำตอบลงในสมุดบันทึกหรือส่งตามช่องทางที่อาจารย์กำหนด
+          </div>
+        </div>
+
+        {/* Right Side: Log display and Written Questions */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
+          
+          {/* Active Log Box */}
+          <div style={{
+            background: "rgba(0,0,0,0.8)", borderRadius: "12px", padding: "14px 18px",
+            border: "1px solid rgba(99,102,241,0.25)", fontFamily: "monospace", display: "flex",
+            flexDirection: "column", gap: "6px"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "8px", color: "#6366f1", fontWeight: 700 }}>$ sudo tail -n 1 /var/log/ufw.log</span>
+              <span style={{ fontSize: "8px", color: "#f59e0b", background: "rgba(245,158,11,0.1)", padding: "1px 6px", borderRadius: "4px", fontWeight: 700 }}>UFW Log String</span>
+            </div>
+            <div style={{
+              fontSize: "clamp(8px, 0.95vw, 11px)", color: "#e2e8f0", lineHeight: 1.6,
+              wordBreak: "break-all", whiteSpace: "pre-wrap"
+            }}>
+              {currentItem.log}
+            </div>
+          </div>
+
+          {/* Written Questions List */}
+          <div style={{
+            flex: 1, background: "rgba(255,255,255,0.02)", borderRadius: "12px",
+            border: "1px solid rgba(255,255,255,0.06)", padding: "16px 20px",
+            overflowY: "auto", display: "flex", flexDirection: "column", gap: "14px"
+          }}>
+            <div style={{ fontSize: "12px", color: "#f59e0b", fontWeight: 800, borderBottom: "1px solid rgba(255,255,255,0.08)", paddingBottom: "6px" }}>
+              📋 คำถามวิเคราะห์อัตนัย ({currentItem.label})
+            </div>
+            {currentItem.questions.map((qText, qIdx) => (
+              <div key={qIdx} style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                <div style={{
+                  background: "rgba(99,102,241,0.2)", color: "#818cf8", width: "20px", height: "20px",
+                  borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "10px", fontWeight: 800, flexShrink: 0, marginTop: "2px"
+                }}>
+                  {qIdx + 1}
+                </div>
+                <div style={{ fontSize: "clamp(11px, 1.2vw, 14px)", color: "#e2e8f0", lineHeight: 1.6 }}>
+                  {qText}
+                </div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+
       </div>
     </div>
   );
