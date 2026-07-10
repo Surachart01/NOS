@@ -8973,6 +8973,332 @@ function DockerGuideDocument() {
   );
 }
 
+function PostUbuntuStackGuideDocument() {
+  const Code = ({ children }: { children: React.ReactNode }) => (
+    <pre style={{
+      background: '#0f172a',
+      color: '#e2e8f0',
+      padding: '14px 16px',
+      borderRadius: '8px',
+      overflowX: 'auto',
+      fontSize: '13px',
+      lineHeight: 1.7,
+      border: '1px solid rgba(15,23,42,.18)',
+      marginTop: '10px'
+    }}><code>{children}</code></pre>
+  );
+
+  const Section = ({ num, title, children }: { num: string; title: string; children: React.ReactNode }) => (
+    <section style={{
+      background: 'var(--bg-surface)',
+      border: '1px solid var(--border)',
+      borderRadius: '8px',
+      padding: '22px',
+      marginBottom: '16px'
+    }}>
+      <h2 style={{
+        fontSize: '24px',
+        marginBottom: '12px',
+        color: 'var(--text-primary)',
+        display: 'flex',
+        gap: '10px',
+        alignItems: 'center'
+      }}>
+        <span style={{
+          width: '34px',
+          height: '34px',
+          borderRadius: '8px',
+          background: 'var(--accent)',
+          color: '#fff',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '14px',
+          flexShrink: 0
+        }}>{num}</span>
+        {title}
+      </h2>
+      <div style={{ fontSize: '15px', lineHeight: 1.8, color: 'var(--text-secondary)' }}>
+        {children}
+      </div>
+    </section>
+  );
+
+  const CheckItem = ({ children }: { children: React.ReactNode }) => (
+    <li style={{ marginBottom: '8px', paddingLeft: '2px' }}>{children}</li>
+  );
+
+  return (
+    <div style={{
+      flex: 1,
+      overflowY: 'auto',
+      padding: '28px',
+      background: 'var(--bg-base)'
+    }}>
+      <article style={{ maxWidth: '980px', margin: '0 auto' }}>
+        <header style={{
+          background: 'linear-gradient(135deg, #0f172a 0%, #075985 100%)',
+          color: '#fff',
+          borderRadius: '8px',
+          padding: '34px',
+          marginBottom: '18px'
+        }}>
+          <div style={{ fontSize: '12px', letterSpacing: '.12em', textTransform: 'uppercase', opacity: .8, marginBottom: '10px' }}>
+            คู่มือปฏิบัติหลังติดตั้ง Ubuntu Server
+          </div>
+          <h1 style={{ fontSize: '34px', lineHeight: 1.25, marginBottom: '12px' }}>
+            Git, Nginx Reverse Proxy, MariaDB และ Node.js
+          </h1>
+          <p style={{ maxWidth: '760px', lineHeight: 1.8, opacity: .92 }}>
+            ใบงานนี้เรียงจากหลังติดตั้ง Ubuntu Server เสร็จแล้ว ไปจนถึงการรัน Web Application ผ่าน Nginx Reverse Proxy โดยใช้ Node.js เชื่อมต่อ MariaDB
+          </p>
+        </header>
+
+        <Section num="0" title="ภาพรวมระบบที่ต้องได้">
+          <p>ปลายทางของคู่มือนี้คือระบบพื้นฐานที่ผู้ใช้เข้าเว็บผ่าน Nginx แล้ว Nginx ส่งต่อไปยัง Node.js ที่อยู่หลังบ้าน จากนั้น Node.js อ่านข้อมูลจาก MariaDB</p>
+          <Code>{`Browser
+  -> Nginx :80
+  -> Reverse Proxy
+  -> Node.js :3000
+  -> MariaDB :3306`}</Code>
+          <ul style={{ marginTop: '12px', paddingLeft: '22px' }}>
+            <CheckItem>ผู้ใช้ภายนอกเข้าเว็บผ่านพอร์ต 80</CheckItem>
+            <CheckItem>Node.js รันภายในเครื่องที่ `127.0.0.1:3000`</CheckItem>
+            <CheckItem>MariaDB ใช้เก็บข้อมูล และไม่ควรเปิดให้ภายนอกเชื่อมต่อโดยตรง</CheckItem>
+            <CheckItem>ทุกครั้งที่แก้ Nginx ต้องตรวจด้วย `sudo nginx -t` ก่อน reload</CheckItem>
+          </ul>
+        </Section>
+
+        <Section num="1" title="ตรวจสอบเครื่องหลังติดตั้ง Ubuntu Server">
+          <p>หลัง Login เข้า Ubuntu Server ให้ตรวจ IP, Internet, DNS, Disk และ RAM ก่อนเริ่มติดตั้งบริการ</p>
+          <Code>{`ip a
+hostname -I
+ping -c 4 8.8.8.8
+ping -c 4 google.com
+df -h
+free -h`}</Code>
+          <p style={{ marginTop: '10px' }}>ตั้งชื่อเครื่องให้จำง่าย เช่น `webserver01`</p>
+          <Code>{`sudo hostnamectl set-hostname webserver01
+hostnamectl`}</Code>
+        </Section>
+
+        <Section num="2" title="อัปเดตระบบและติดตั้งเครื่องมือพื้นฐาน">
+          <Code>{`sudo apt update
+sudo apt upgrade -y
+sudo apt install -y curl wget nano unzip htop net-tools ca-certificates gnupg`}</Code>
+          <p style={{ marginTop: '10px' }}>ถ้า `ping 8.8.8.8` ได้แต่ `ping google.com` ไม่ได้ ให้ตรวจ DNS หรือ Netplan ก่อนทำขั้นถัดไป</p>
+        </Section>
+
+        <Section num="3" title="ติดตั้งและตั้งค่า Git">
+          <Code>{`sudo apt install -y git
+git --version
+
+git config --global user.name "Student Name"
+git config --global user.email "student@example.com"
+git config --global init.defaultBranch main
+git config --global --list`}</Code>
+          <p style={{ marginTop: '10px' }}>ถ้ามี Repository ให้ Clone ด้วยคำสั่งนี้</p>
+          <Code>{`cd ~
+git clone https://github.com/example/myapp.git
+cd myapp
+git status`}</Code>
+        </Section>
+
+        <Section num="4" title="ติดตั้ง Nginx Web Server">
+          <Code>{`sudo apt update
+sudo apt install -y nginx
+sudo systemctl status nginx
+sudo systemctl enable nginx
+curl http://localhost`}</Code>
+          <p style={{ marginTop: '10px' }}>ไฟล์หน้าเว็บเริ่มต้นอยู่ที่ `/var/www/html/index.html` สามารถทดสอบแก้หน้าเว็บได้ด้วย `sudo nano /var/www/html/index.html`</p>
+          <Code>{`sudo nginx -t
+sudo systemctl reload nginx`}</Code>
+        </Section>
+
+        <Section num="5" title="ติดตั้งและ Secure MariaDB">
+          <Code>{`sudo apt update
+sudo apt install -y mariadb-server
+sudo systemctl status mariadb
+sudo systemctl enable mariadb
+mariadb --version
+
+sudo mysql_secure_installation`}</Code>
+          <p style={{ marginTop: '10px' }}>แนวทางตอบ `mysql_secure_installation`: ตั้งรหัสผ่าน root, ลบ anonymous user, ปิด remote root login, ลบ test database และ reload privilege tables</p>
+        </Section>
+
+        <Section num="6" title="สร้าง Database และ User สำหรับแอป">
+          <Code>{`sudo mariadb`}</Code>
+          <Code>{`CREATE DATABASE app_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'app_user'@'localhost' IDENTIFIED BY 'StrongPass123!';
+GRANT ALL PRIVILEGES ON app_db.* TO 'app_user'@'localhost';
+FLUSH PRIVILEGES;
+SHOW DATABASES;
+SELECT User, Host FROM mysql.user;
+EXIT;`}</Code>
+          <p style={{ marginTop: '10px' }}>ทดสอบ Login ด้วย user ของแอป ไม่ใช้ root</p>
+          <Code>{`mariadb -u app_user -p app_db`}</Code>
+          <Code>{`CREATE TABLE students (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100)
+);
+
+INSERT INTO students (name, email)
+VALUES ('Student One', 'student1@example.com');
+
+SELECT * FROM students;
+EXIT;`}</Code>
+        </Section>
+
+        <Section num="7" title="ติดตั้ง Node.js และ npm">
+          <p>วิธีพื้นฐานจาก Ubuntu Repository</p>
+          <Code>{`sudo apt install -y nodejs npm
+node -v
+npm -v`}</Code>
+          <p style={{ marginTop: '10px' }}>ถ้าต้องการ Node.js LTS จาก NodeSource ให้ใช้ชุดนี้</p>
+          <Code>{`curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt install -y nodejs
+node -v
+npm -v`}</Code>
+        </Section>
+
+        <Section num="8" title="สร้าง Node.js App ที่เชื่อม MariaDB">
+          <Code>{`mkdir -p ~/myapp
+cd ~/myapp
+npm init -y
+npm install express mysql2
+nano server.js`}</Code>
+          <Code>{`const express = require("express");
+const mysql = require("mysql2/promise");
+
+const app = express();
+const port = 3000;
+
+const dbConfig = {
+  host: "localhost",
+  user: "app_user",
+  password: "StrongPass123!",
+  database: "app_db",
+};
+
+app.get("/", async (req, res) => {
+  res.send(\`
+    <h1>Node.js is running behind Nginx</h1>
+    <p>Try <a href="/students">/students</a></p>
+  \`);
+});
+
+app.get("/students", async (req, res) => {
+  try {
+    const connection = await mysql.createConnection(dbConfig);
+    const [rows] = await connection.execute("SELECT * FROM students");
+    await connection.end();
+    res.json(rows);
+  } catch (error) {
+    res.status(500).json({ message: "Database connection failed", error: error.message });
+  }
+});
+
+app.listen(port, "127.0.0.1", () => {
+  console.log(\`Node.js app listening at http://127.0.0.1:\${port}\`);
+});`}</Code>
+          <Code>{`node server.js
+curl http://127.0.0.1:3000
+curl http://127.0.0.1:3000/students`}</Code>
+        </Section>
+
+        <Section num="9" title="รัน Node.js ในพื้นหลัง">
+          <Code>{`cd ~/myapp
+nohup node server.js > app.log 2>&1 &
+cat app.log
+ps aux | grep node
+curl http://127.0.0.1:3000`}</Code>
+          <p style={{ marginTop: '10px' }}>ถ้าต้องหยุดโปรแกรม ให้ดู PID จาก `ps aux | grep node` แล้วใช้ `kill PID_NUMBER`</p>
+        </Section>
+
+        <Section num="10" title="ตั้งค่า Nginx Reverse Proxy ไปยัง Node.js">
+          <Code>{`sudo nano /etc/nginx/sites-available/myapp`}</Code>
+          <Code>{`server {
+    listen 80;
+    server_name _;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}`}</Code>
+          <Code>{`sudo ln -s /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/myapp
+sudo rm /etc/nginx/sites-enabled/default
+sudo nginx -t
+sudo systemctl reload nginx
+
+curl http://localhost
+curl http://localhost/students`}</Code>
+        </Section>
+
+        <Section num="11" title="เปิด Firewall เฉพาะพอร์ตที่จำเป็น">
+          <Code>{`sudo ufw allow OpenSSH
+sudo ufw allow 'Nginx Full'
+sudo ufw enable
+sudo ufw status
+sudo ss -tulpn`}</Code>
+          <ul style={{ marginTop: '12px', paddingLeft: '22px' }}>
+            <CheckItem>เปิด SSH เพื่อ remote เข้าเครื่อง</CheckItem>
+            <CheckItem>เปิด Nginx เพื่อให้ผู้ใช้เข้าเว็บผ่าน 80/443</CheckItem>
+            <CheckItem>ไม่ต้องเปิดพอร์ต 3000 เพราะ Node.js อยู่หลัง Reverse Proxy</CheckItem>
+            <CheckItem>ไม่ต้องเปิดพอร์ต 3306 ถ้า MariaDB ใช้งานเฉพาะเครื่องเดียวกัน</CheckItem>
+          </ul>
+        </Section>
+
+        <Section num="12" title="Checklist ส่งงาน">
+          <ul style={{ paddingLeft: '22px' }}>
+            <CheckItem>ผลคำสั่ง `hostname -I`</CheckItem>
+            <CheckItem>ผลคำสั่ง `git --version`</CheckItem>
+            <CheckItem>ผลคำสั่ง `sudo systemctl status nginx`</CheckItem>
+            <CheckItem>หน้าเว็บ `http://SERVER_IP` ที่ผ่าน Reverse Proxy ไปยัง Node.js</CheckItem>
+            <CheckItem>ผลคำสั่ง `SELECT * FROM students;` ใน MariaDB</CheckItem>
+            <CheckItem>ผลลัพธ์ `http://SERVER_IP/students` ที่แสดง JSON จากฐานข้อมูล</CheckItem>
+            <CheckItem>ผลคำสั่ง `sudo ss -tlnp | grep -E ':22|:80|:3000|:3306'`</CheckItem>
+          </ul>
+        </Section>
+
+        <Section num="13" title="Troubleshooting ที่พบบ่อย">
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+              <thead>
+                <tr>
+                  <th style={{ textAlign: 'left', padding: '10px', borderBottom: '1px solid var(--border)', color: 'var(--accent)' }}>อาการ</th>
+                  <th style={{ textAlign: 'left', padding: '10px', borderBottom: '1px solid var(--border)', color: 'var(--accent)' }}>วิธีตรวจ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  ['เปิดเว็บไม่ได้', 'sudo systemctl status nginx'],
+                  ['Nginx reload ไม่ได้', 'sudo nginx -t'],
+                  ['ยังเห็นหน้า default', 'ตรวจ /etc/nginx/sites-enabled/'],
+                  ['/students error', 'cat ~/myapp/app.log'],
+                  ['MariaDB Access denied', 'mariadb -u app_user -p app_db'],
+                  ['Node.js ไม่ตอบ', 'ps aux | grep node'],
+                  ['เครื่องอื่นเข้าเว็บไม่ได้', 'sudo ufw status']
+                ].map(([a, b]) => (
+                  <tr key={a}>
+                    <td style={{ padding: '10px', borderBottom: '1px solid var(--border)' }}>{a}</td>
+                    <td style={{ padding: '10px', borderBottom: '1px solid var(--border)', fontFamily: 'monospace' }}>{b}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Section>
+      </article>
+    </div>
+  );
+}
+
 /* ======================================= */
 /* --- MAIN APP --- */
 /* ======================================= */
@@ -8998,7 +9324,15 @@ export default function Home() {
   }, []);
 
   // Load week data
+  const documentModes = ["docker-guide", "proxmox-guide", "post-ubuntu-stack-guide"];
+
   useEffect(() => {
+    if (documentModes.includes(activeWeek)) {
+      setWeekData(null);
+      setSlideIdx(0);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const num = activeWeek;
     fetch(`/data/week-${num}.json?v=${Date.now()}`).then(r => r.json()).then((d: WeekData) => {
@@ -9115,6 +9449,31 @@ export default function Home() {
         {/* Pinned Docker & Proxmox Guide Buttons */}
         <div style={{ padding: '8px 12px', borderTop: '1px solid var(--border)', flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button
+            className={`pinned-stack-btn ${activeWeek === "post-ubuntu-stack-guide" ? "active" : ""}`}
+            onClick={() => setActiveWeek("post-ubuntu-stack-guide")}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: activeWeek === "post-ubuntu-stack-guide" ? '1px solid var(--accent)' : '1px solid var(--border)',
+              background: activeWeek === "post-ubuntu-stack-guide" ? 'var(--accent-dim)' : 'var(--bg-elevated)',
+              color: activeWeek === "post-ubuntu-stack-guide" ? 'var(--accent)' : 'var(--text-primary)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'left'
+            }}
+          >
+            <span style={{ fontSize: '20px', flexShrink: 0 }}>🧭</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: '700', fontSize: '12px', lineHeight: '1.2' }}>คู่มือ Ubuntu Server Stack</div>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>Git, Nginx, MariaDB, Node.js</div>
+            </div>
+          </button>
+
+          <button
             className={`pinned-docker-btn ${activeWeek === "docker-guide" ? "active" : ""}`}
             onClick={() => setActiveWeek("docker-guide")}
             style={{
@@ -9166,7 +9525,7 @@ export default function Home() {
         </div>
 
         <div className="sidebar-footer" style={{ flexShrink: 0 }}>
-          {(activeWeek === "docker-guide" || activeWeek === "proxmox-guide") ? (
+          {documentModes.includes(activeWeek) ? (
             <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center', padding: '4px 0' }}>
               📖 กำลังอ่าน: โหมดเอกสารคู่มือฉบับเต็ม
             </div>
@@ -9186,7 +9545,23 @@ export default function Home() {
 
       {/* Main */}
       <main className="main-area">
-        {activeWeek === "docker-guide" ? (
+        {activeWeek === "post-ubuntu-stack-guide" ? (
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+            <header className="topbar" style={{ flexShrink: 0 }}>
+              <div className="topbar-left">
+                {!sidebarOpen && (
+                  <button className="icon-btn mobile-toggle" style={{ display: "flex" }} onClick={() => setSidebarOpen(true)}>
+                    <MenuIcon />
+                  </button>
+                )}
+                <span className="topbar-chapter" style={{ fontWeight: 'bold', color: 'var(--accent)' }}>
+                  📖 คู่มือหลังติดตั้ง Ubuntu Server: Git, Nginx Reverse Proxy, MariaDB และ Node.js
+                </span>
+              </div>
+            </header>
+            <PostUbuntuStackGuideDocument />
+          </div>
+        ) : activeWeek === "docker-guide" ? (
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
             <header className="topbar" style={{ flexShrink: 0 }}>
               <div className="topbar-left">

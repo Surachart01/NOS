@@ -105,12 +105,6 @@
     "weekLabel": "สัปดาห์ที่ 8: บริการแชร์ไฟล์และทรัพยากร (Samba & NFS Sharing)",
     "sessions": [
       {
-        "id": "8a",
-        "displayNum": "อ.",
-        "title": "หลักการแชร์ไฟล์ข้ามระบบปฏิบัติการ และโปรโตคอล Samba / NFS",
-        "topic": "File & Resource Sharing Concepts"
-      },
-      {
         "id": "8b",
         "displayNum": "ศ.",
         "title": "ปฏิบัติการติดตั้ง Samba File Server และกำหนดสิทธิ์การเข้าถึงโฟลเดอร์",

@@ -2,57 +2,340 @@
   "week": "8b",
   "title": "ปฏิบัติการติดตั้ง Samba File Server และกำหนดสิทธิ์การเข้าถึงโฟลเดอร์",
   "topic": "Samba Server Setup & Directory Sharing Lab",
-  "description": "ฝึกปฏิบัติงานจริงในการติดตั้งเครื่องเซิร์ฟเวอร์ Samba จัดสรรสิทธิ์โฟลเดอร์แบบแบ่งปัน (Public) และแบบจำกัดสิทธิ์รายบุคคล (Private) และลองทำ Mount จากเครื่อง Client",
+  "description": "คาบปฏิบัติการวันศุกร์สำหรับติดตั้ง Samba File Server บน Ubuntu Server ตามคำอธิบายรายวิชา 31901-2002 ระบบปฏิบัติการเครื่องแม่ข่าย ในหัวข้อ File and Resource Sharing Server โดยสร้างพื้นที่แชร์แบบ Public และ Secure กำหนดสิทธิ์ Linux Permission ร่วมกับ Samba User แล้วทดสอบเชื่อมต่อจากเครื่อง Client จริง",
   "learningObjectives": [
-    "ติดตั้งและบริหารจัดการ Samba Server บน Ubuntu LXC ได้สำเร็จ",
-    "กำหนดความปลอดภัยระดับโฟลเดอร์ แยกกลุ่มแชร์ส่วนบุคคลได้อย่างมั่นคง",
-    "เข้าใช้งานและทดสอบโอนย้ายไฟล์ข้ามเครื่องผ่านโปรโตคอล SMB สำเร็จ"
+    "เชื่อมโยงงานปฏิบัติ Samba File Server กับคำอธิบายรายวิชาและสมรรถนะการให้บริการ Server ได้",
+    "ติดตั้งและตรวจสอบสถานะบริการ Samba Server บน Ubuntu LXC/VM ได้สำเร็จ",
+    "สร้างโฟลเดอร์แชร์แบบ Public และ Secure พร้อมกำหนด Linux Permission ได้ถูกต้อง",
+    "เพิ่มผู้ใช้ Samba และอธิบายความสัมพันธ์ระหว่าง Linux User กับ Samba User ได้",
+    "เขียนคอนฟิก /etc/samba/smb.conf เพื่อเปิดแชร์โฟลเดอร์ผ่าน SMB ได้",
+    "ทดสอบเชื่อมต่อจาก Windows, macOS หรือ Linux Client และพิสูจน์ว่าสิทธิ์ทำงานจริงได้"
   ],
   "slides": [
     {
       "id": "w8b-s1",
       "type": "cover",
-      "title": "ปฏิบัติการติดตั้ง Samba File Server และเชื่อมต่อสิทธิ์ความปลอดภัย",
+      "title": "ติดตั้ง Samba File Server และล็อกสิทธิ์โฟลเดอร์",
       "subtitle": "Samba Setup & Directory Sharing Lab",
       "tag": "สัปดาห์ที่ 8 (วันศุกร์ - 2 ชม.)",
-      "body": "ในคาบปฏิบัติการ 2 ชั่วโมงนี้ ทุกคนในห้องเรียนจะได้ติดตั้ง Samba Server ของตัวเอง สร้างโฟลเดอร์แชร์งานสาธารณะ และโฟลเดอร์ลับเฉพาะตน และนำคอมพิวเตอร์ภายนอกล็อกอินเข้ามาบันทึกไฟล์ข้อมูลข้ามเครือข่าย",
-      "speakerNotes": "สวัสดีวันศุกร์ครับทุกคน วันนี้เราจะเอาเครื่องลินุกซ์เซิร์ฟเวอร์ของเรามาเปิดเป็น Network Drive ให้แชร์ไฟล์เก็บรายงานร่วมกันได้อย่างมั่นคงปลอดภัยตามแผนงานองค์กร"
+      "body": "วันนี้เราจะเปลี่ยน Ubuntu Server ให้กลายเป็น Network Drive ขององค์กร นักเรียนจะได้สร้างพื้นที่แชร์ไฟล์จริง เปิดให้บางโฟลเดอร์เข้าได้ทุกคน และล็อกบางโฟลเดอร์ให้เฉพาะผู้ใช้ที่มีสิทธิ์เท่านั้น",
+      "speakerNotes": "สวัสดีครับทุกคน วันนี้เราจะเรียนเรื่อง File Server ด้วย Samba นะครับ ขอให้นึกภาพง่ายๆ ว่าในองค์กรหนึ่ง ถ้าทุกคนเก็บไฟล์ไว้ในแฟลชไดรฟ์ของตัวเอง หรือส่งไฟล์กันไปมาในแชต งานจะกระจัดกระจายและควบคุมยากมาก File Server จึงทำหน้าที่เป็นพื้นที่เก็บไฟล์กลางขององค์กร คล้ายตู้เอกสารกลางหรือไดรฟ์กลางที่ทุกคนเข้ามาใช้งานได้ แต่ไม่ได้แปลว่าทุกคนจะเห็นทุกไฟล์ เราต้องกำหนดสิทธิ์ว่าโฟลเดอร์ไหนเปิดให้ทุกคนเข้าได้ และโฟลเดอร์ไหนต้องล็อกไว้เฉพาะคนที่มีบัญชีผู้ใช้ วันนี้เราจะทำ Ubuntu Server ให้กลายเป็น Network Drive ที่เครื่อง Windows, macOS หรือ Linux เครื่องอื่นเข้ามาใช้ได้จริงครับ"
+    },
+    {
+      "id": "w8b-s2-course-ref",
+      "type": "content",
+      "title": "อ้างอิงคำอธิบายรายวิชา 31901-2002",
+      "tag": "Course Alignment",
+      "items": [
+        "รายวิชา: 31901-2002 ระบบปฏิบัติการเครื่องแม่ข่าย (Network Operating System for Server)",
+        "คำอธิบายรายวิชาระบุให้ศึกษาและปฏิบัติเกี่ยวกับบริการบนเครื่องแม่ข่ายหลายประเภท รวมถึง `File and Resource Sharing Server`",
+        "จุดประสงค์รายวิชาที่เกี่ยวข้อง:",
+        "- ข้อ 2: เข้าใจการติดตั้งและการใช้งานระบบปฏิบัติการเครื่องแม่ข่ายและแพ็กเก็ตที่สนับสนุนการให้บริการในระบบเครือข่าย",
+        "- ข้อ 4: มีทักษะในการติดตั้ง Server บริการต่าง ๆ เช่น DNS, Web, Database, DHCP, File, Proxy, AAA, Container",
+        "สมรรถนะรายวิชาที่เกี่ยวข้อง:",
+        "- ข้อ 2: ติดตั้งระบบปฏิบัติการเครื่องแม่ข่ายและแพ็กเก็ตที่สนับสนุนการให้บริการในระบบเครือข่ายตามขั้นตอน",
+        "- ข้อ 4: ให้บริการ Server (DNS, Web, DB, DHCP, File, Proxy, AAA, Container) ได้ครบถ้วน",
+        "ดังนั้นคาบนี้คือการฝึกบริการ File Server จริง ผ่าน Samba/SMB พร้อมทดสอบการใช้งานจาก Client"
+      ],
+      "speakerNotes": "ก่อนลงมือทำ ผมอยากให้ทุกคนเห็นก่อนว่าบทเรียนนี้เกี่ยวกับรายวิชาอย่างไร รายวิชา 31901-2002 ไม่ได้ให้เราจำคำสั่ง Linux อย่างเดียว แต่ต้องทำให้เครื่องแม่ข่ายให้บริการจริงได้ ในคำอธิบายรายวิชามีหัวข้อ File and Resource Sharing Server อยู่ชัดเจน หมายถึงเครื่องแม่ข่ายที่ให้บริการแชร์ไฟล์และทรัพยากรในเครือข่าย วันนี้ Samba คือเครื่องมือที่เราจะใช้ทำหัวข้อนั้นบน Ubuntu Server ดังนั้นตอนนักเรียนติดตั้ง Samba สร้าง Share และทดสอบจากเครื่อง Client สำเร็จ นั่นคือเรากำลังทำสมรรถนะรายวิชาข้อการให้บริการ Server ด้าน File จริงๆ ครับ"
+    },
+    {
+      "id": "w8b-s2-what-is-samba",
+      "type": "content",
+      "title": "Samba คืออะไร? อธิบายแบบเห็นภาพ",
+      "tag": "Concept ก่อนลงมือ",
+      "items": [
+        "Samba คือโปรแกรมที่ทำให้ Linux แชร์โฟลเดอร์ผ่านเครือข่ายแบบที่ Windows เข้าใจได้",
+        "เครื่อง Client จะมองเห็นโฟลเดอร์บน Ubuntu Server เป็น Network Drive",
+        "ตัวอย่าง Windows เข้าใช้งาน: `\\\\192.168.1.50\\Public`",
+        "ตัวอย่าง macOS/Linux เข้าใช้งาน: `smb://192.168.1.50/Public`",
+        "Samba ใช้โปรโตคอล SMB/CIFS และพอร์ตสำคัญคือ TCP 445",
+        "สิ่งที่ต้องจำ: Samba ไม่ใช่ที่เก็บไฟล์ใหม่ แต่เป็นตัวกลางที่เอาโฟลเดอร์จริงบน Linux ไปเปิดให้เครื่องอื่นเข้าถึง"
+      ],
+      "speakerNotes": "สไลด์นี้คือหัวใจของคาบครับ ให้อธิบายช้าๆ ว่า Samba ไม่ใช่คลาวด์ ไม่ใช่ Google Drive และไม่ใช่ฮาร์ดดิสก์ใหม่ แต่เป็นบริการบน Linux ที่เอาโฟลเดอร์จริงในเครื่อง เช่น /srv/samba/public ไปประกาศบนเครือข่ายให้เครื่องอื่นเข้ามาเปิดได้ ถ้าใช้ Windows นักเรียนจะพิมพ์ลักษณะ \\\\ไอพีเครื่องเซิร์ฟเวอร์\\ชื่อแชร์ เช่น \\\\192.168.1.50\\Public ถ้าใช้ macOS หรือ Linux จะใช้ smb://192.168.1.50/Public จุดสำคัญคือไฟล์จริงยังอยู่บน Ubuntu Server แต่เครื่องอื่นมองเหมือนเป็นไดรฟ์กลางในเครือข่ายครับ"
     },
     {
       "id": "w8b-s2",
-      "type": "lab",
-      "title": "Lab 08.2 — ติดตั้งจัดแจง Samba Server และความปลอดภัยพื้นที่จัดเก็บไฟล์",
-      "tag": "ปฏิบัติการประจำวันศุกร์",
-      "duration": "1.5 ชั่วโมง",
-      "objectives": [
-        "ติดตั้งซอฟต์แวร์ Samba Server และรันการทำงานบริการได้ถูกต้อง",
-        "สร้างโฟลเดอร์แชร์ไฟล์ประเภท Public และ Private แยกสิทธิ์ตามบัญชีผู้ใช้งานสำเร็จ",
-        "โอนย้ายเชื่อมต่อแฟ้มข้อมูลจากภายนอกเข้าหาเซิร์ฟเวอร์อย่างมีเงื่อนไขได้ถูกต้อง"
+      "type": "content",
+      "title": "เป้าหมายคาบนี้: ได้ Network Drive ที่ใช้งานได้จริง",
+      "tag": "Lab Target",
+      "items": [
+        "สิ่งที่ทุกคนต้องทำให้สำเร็จภายในคาบ:",
+        "1. ติดตั้ง Samba Server และตรวจสอบว่าบริการ smbd ทำงานอยู่",
+        "2. สร้างโฟลเดอร์ Public สำหรับแลกไฟล์ในห้องเรียน",
+        "3. สร้างโฟลเดอร์ Secure สำหรับผู้ใช้ที่มีรหัสผ่านเท่านั้น",
+        "4. เพิ่ม Samba User แล้วตั้งรหัสผ่านสำหรับเข้าแชร์ไฟล์",
+        "5. เปิด Firewall ให้พอร์ต Samba ใช้งานได้",
+        "6. ใช้เครื่อง Client เข้า \\\\[IP เครื่องเรา] หรือ smb://[IP เครื่องเรา] แล้วลองสร้างไฟล์",
+        "ผลลัพธ์ท้ายคาบ: มี Screenshot การเชื่อมต่อและหลักฐานว่า Public/Secure แยกสิทธิ์กันจริง"
       ],
-      "steps": [
-        "1. ติดตั้งแพ็กเกจซอฟต์แวร์ Samba: \n$ sudo apt update && sudo apt install -y samba",
-        "2. สร้างไดเรกทอรีสำหรับพื้นที่รับแชร์ข้อมูล: \n$ sudo mkdir -p /srv/samba/public \n$ sudo mkdir -p /srv/samba/secure",
-        "3. กำหนดสิทธิ์ไดเรกทอรีในระดับ Linux ให้ถูกต้อง: \n$ sudo chmod 777 /srv/samba/public \n$ sudo chown www-data:www-data /srv/samba/secure \n$ sudo chmod 700 /srv/samba/secure",
-        "4. เขียนไฟล์คอนฟิก Samba: \n$ sudo nano /etc/samba/smb.conf \n(ระบุ [Public] และ [Secure] ชี้เส้นทาง Path และสิทธิ์ read only / guest ok)",
-        "5. เพิ่มผู้ใช้นักเรียนเข้าสู่ Samba: \n$ sudo smbpasswd -a student01",
-        "6. สั่งอัพเดตบริการเพื่อเริ่มใช้คอนฟิกใหม่: \n$ sudo systemctl restart smbd",
-        "7. อนุญาตบริการ Samba บนไฟร์วอลล์เครื่อง: \n$ sudo ufw allow samba",
-        "8. เปิดโปรแกรม File Explorer หรือ Finder จากเครื่องตนเอง พิมพ์: \\\\[IP เครื่อง]\\Public หรือ smb://[IP เครื่อง]/Public เพื่อทดลองโอนถ่ายเอกสาร"
-      ],
-      "speakerNotes": "ช่วยดูแลนักศึกษาระหว่างล็อกอินพอร์ต Samba แนะนำการกรอกข้อมูล User และตรวจสอบ UFW Rule"
+      "speakerNotes": "ตรงนี้ให้บอกนักเรียนว่า วันนี้เราไม่ได้พิมพ์คำสั่งแบบแยกส่วน แต่เราจะสร้างระบบหนึ่งชุดให้เสร็จจริง เป้าหมายคือ Server ของเราจะมี Share ชื่อ Public และ Secure โดย Public คือพื้นที่ทดลองที่ทุกคนเข้าไปแลกไฟล์ได้ ส่วน Secure คือพื้นที่ที่ต้อง Login ด้วยผู้ใช้ที่ถูกต้องก่อนจึงเข้าได้ ตอนท้ายคาบเด็กต้องพิสูจน์ได้ ไม่ใช่แค่บอกว่าติดตั้งแล้ว แต่ต้องมีหลักฐานว่า Client เข้า Public ได้ สร้างไฟล์ได้ เข้า Secure ด้วย user ถูกได้ และถ้าใช้ user ผิดหรือ guest ต้องเข้าไม่ได้ นี่คือการพิสูจน์ว่า Permission ทำงานจริงครับ"
     },
     {
       "id": "w8b-s3",
+      "type": "two-col",
+      "title": "สิทธิ์ 2 ชั้นที่ต้องเข้าใจ: Linux Permission + Samba Permission",
+      "tag": "Permission Model",
+      "cols": [
+        {
+          "icon": "📁",
+          "title": "Linux Permission",
+          "items": [
+            "ควบคุมสิทธิ์จริงบนดิสก์ของเซิร์ฟเวอร์",
+            "ดูด้วย `ls -ld /srv/samba/public`",
+            "เจ้าของไฟล์ = user",
+            "กลุ่มเจ้าของ = group",
+            "สิทธิ์หลักคือ read, write, execute",
+            "ถ้า Linux ไม่อนุญาต Samba ก็เขียนไฟล์ไม่ได้"
+          ]
+        },
+        {
+          "icon": "🌐",
+          "title": "Samba Permission",
+          "items": [
+            "ควบคุมการเข้าถึงผ่านเครือข่าย SMB",
+            "กำหนดใน `/etc/samba/smb.conf`",
+            "ตั้งค่า `guest ok`, `read only`, `valid users`",
+            "ใช้บัญชี Samba ที่สร้างด้วย `smbpasswd`",
+            "ถ้า Samba ไม่อนุญาต Client ก็เข้าแชร์ไม่ได้"
+          ]
+        }
+      ],
+      "speakerNotes": "สไลด์นี้ต้องใช้เวลาอธิบายหน่อยครับ เพราะเป็นจุดที่นักเรียนมักงง ให้พูดว่า การแชร์ไฟล์ด้วย Samba มีด่านตรวจสองชั้น ชั้นแรกคือ Samba Permission เป็นด่านเครือข่าย ตัดสินว่า Client จากข้างนอกจะเข้า Share นี้ได้ไหม เช่น guest ok yes หรือ no, read only yes หรือ no, valid users มีใครบ้าง ชั้นที่สองคือ Linux Permission เป็นด่านบนดิสก์จริง เช่น owner เป็นใคร chmod เป็น 700 หรือ 777 ต่อให้ Samba บอกว่าเขียนได้ แต่ถ้า Linux Permission ไม่อนุญาต ก็เขียนไฟล์ไม่ได้ ให้เปรียบเหมือนผ่านประตูตึกแล้ว แต่ถ้าประตูห้องยังล็อกอยู่ก็หยิบเอกสารไม่ได้ ต้องผ่านทั้งสองชั้นครับ"
+    },
+    {
+      "id": "w8b-s4",
+      "type": "content",
+      "title": "โครงสร้างโฟลเดอร์ที่เราจะสร้าง",
+      "tag": "Directory Plan",
+      "items": [
+        "เราจะใช้ path กลางใต้ `/srv/samba` เพื่อให้ดูแลง่าย:",
+        "$ sudo mkdir -p /srv/samba/public",
+        "$ sudo mkdir -p /srv/samba/secure",
+        "แนวคิดการใช้งาน:",
+        "- `/srv/samba/public` = พื้นที่แลกไฟล์ในห้อง ทุกคนเข้ามาอ่านและเขียนได้",
+        "- `/srv/samba/secure` = พื้นที่ส่วนตัว/แผนก ต้อง Login ด้วย Samba User ก่อน",
+        "สิ่งที่ต้องระวัง:",
+        "- อย่าแชร์ `/home` หรือ `/` ทั้งระบบ เพราะอาจเปิดไฟล์สำคัญโดยไม่ตั้งใจ",
+        "- ตั้งชื่อ Share ให้สั้นและจำง่าย เช่น Public, Secure",
+        "- ทุกครั้งที่แก้ config ต้องตรวจสอบด้วย `testparm` ก่อน restart service"
+      ],
+      "speakerNotes": "อธิบายว่า /srv เป็นโฟลเดอร์ที่นิยมใช้เก็บข้อมูลของบริการบนเซิร์ฟเวอร์ คำว่า srv มาจาก service หรือ server data เราจึงสร้าง /srv/samba/public และ /srv/samba/secure เพื่อแยกข้อมูลของบริการ Samba ออกจากโฟลเดอร์บ้านของผู้ใช้ อย่าแชร์ /home ทั้งหมด หรือแชร์ / ทั้งระบบ เพราะจะเสี่ยงเปิดไฟล์สำคัญโดยไม่ตั้งใจ Public จะใช้เป็นพื้นที่แลกไฟล์ทดลอง ส่วน Secure จะเป็นพื้นที่ที่ต้องมีบัญชีและรหัสผ่านก่อนเข้าได้ การวางโครงสร้างแบบนี้ทำให้สอนง่าย ตรวจง่าย และในอนาคต Backup ง่ายครับ"
+    },
+    {
+      "id": "w8b-s5",
+      "type": "content",
+      "title": "ขั้นตอนที่ 1: ติดตั้ง Samba และตรวจสอบบริการ",
+      "tag": "Install Samba",
+      "items": [
+        "อัปเดตรายการแพ็กเกจและติดตั้ง Samba:",
+        "$ sudo apt update",
+        "$ sudo apt install -y samba smbclient",
+        "ตรวจสอบว่า Samba ติดตั้งสำเร็จ:",
+        "$ smbd --version",
+        "ตรวจสอบสถานะบริการหลัก:",
+        "$ systemctl status smbd --no-pager",
+        "ถ้าบริการยังไม่ทำงาน ให้สั่งเริ่มและเปิดให้รันอัตโนมัติ:",
+        "$ sudo systemctl enable --now smbd",
+        "หมายเหตุ: `smbd` คือบริการแชร์ไฟล์หลัก ส่วน `smbclient` ใช้ทดสอบการเชื่อมต่อจากฝั่ง Linux"
+      ],
+      "speakerNotes": "ตอนสาธิตให้บอกนักเรียนว่า apt update คือการอัปเดตรายการแพ็กเกจ ไม่ใช่การติดตั้งโปรแกรม ส่วน apt install samba smbclient คือการติดตั้งสองส่วน samba คือบริการฝั่ง Server ที่เปิด Share ส่วน smbclient เป็นเครื่องมือฝั่ง Client บน Linux ใช้ทดสอบว่าเรามองเห็น Share หรือไม่ หลังติดตั้งต้องตรวจ smbd --version เพื่อดูว่ามีโปรแกรมแล้ว และ systemctl status smbd เพื่อดูว่าบริการกำลังทำงานอยู่หรือไม่ ถ้า active running แปลว่าบริการพร้อม ถ้ายังไม่รันใช้ enable --now เพื่อสั่งเริ่มทันทีและตั้งให้เปิดเองตอนบูตเครื่องครับ"
+    },
+    {
+      "id": "w8b-s6",
+      "type": "content",
+      "title": "ขั้นตอนที่ 2: สร้าง Public Share สำหรับแลกไฟล์",
+      "tag": "Public Share",
+      "items": [
+        "สร้างโฟลเดอร์ Public:",
+        "$ sudo mkdir -p /srv/samba/public",
+        "ให้ทุกคนอ่าน/เขียนได้ในคาบทดลอง:",
+        "$ sudo chmod 0777 /srv/samba/public",
+        "เพิ่ม config ท้ายไฟล์ `/etc/samba/smb.conf`:",
+        "$ sudo nano /etc/samba/smb.conf",
+        "[Public]",
+        "   path = /srv/samba/public",
+        "   browseable = yes",
+        "   read only = no",
+        "   guest ok = yes",
+        "   force user = nobody",
+        "แนวคิด: Public Share เหมือนโต๊ะกลางในห้องเรียน ใช้แลกไฟล์ทดลองได้ แต่ไม่ควรเก็บเอกสารลับ"
+      ],
+      "speakerNotes": "ให้บอกนักเรียนว่า Public Share คือพื้นที่เปิดโล่งสำหรับทดลอง เหมือนโต๊ะกลางห้องเรียน ใครวางไฟล์ ใครหยิบไฟล์ก็ได้ คำสั่ง mkdir สร้างโฟลเดอร์จริงบนดิสก์ ส่วน chmod 0777 แปลว่า owner, group และ others อ่าน เขียน และเข้าโฟลเดอร์ได้ทั้งหมด วิธีนี้ง่ายต่อการทดลอง แต่ต้องย้ำว่าในระบบจริงไม่ควรใช้ 777 กับข้อมูลสำคัญ จากนั้นอธิบาย config แต่ละบรรทัด: [Public] คือชื่อ Share, path คือโฟลเดอร์จริง, browseable yes คือให้มองเห็นในรายการ, read only no คือเขียนได้, guest ok yes คือไม่ต้อง Login ก็เข้าได้, force user nobody คือบังคับให้ไฟล์ที่ guest สร้างถูกจัดการในนาม user กลางครับ"
+    },
+    {
+      "id": "w8b-s7",
+      "type": "content",
+      "title": "ขั้นตอนที่ 3: สร้าง Secure Share สำหรับผู้ใช้ที่มีรหัสผ่าน",
+      "tag": "Secure Share",
+      "items": [
+        "สร้าง Linux User สำหรับใช้กับ Samba:",
+        "$ sudo adduser student01",
+        "เพิ่ม user นี้เข้า Samba Password Database:",
+        "$ sudo smbpasswd -a student01",
+        "$ sudo smbpasswd -e student01",
+        "สร้างโฟลเดอร์ Secure และให้ student01 เป็นเจ้าของ:",
+        "$ sudo mkdir -p /srv/samba/secure",
+        "$ sudo chown student01:student01 /srv/samba/secure",
+        "$ sudo chmod 0700 /srv/samba/secure",
+        "หลักการสำคัญ: Samba User ต้องมี Linux User อยู่ก่อนเสมอ เพราะ Samba ยืมตัวตนของ Linux ไปใช้เขียนไฟล์จริงบนดิสก์"
+      ],
+      "speakerNotes": "ตรงนี้ให้เปลี่ยนอารมณ์จาก Public เป็น Secure โดยบอกว่า ถ้า Public คือโต๊ะกลาง Secure คือห้องเอกสารที่ต้องมีกุญแจ ก่อนจะเพิ่มผู้ใช้เข้า Samba ต้องมี Linux User ก่อน เพราะสุดท้ายไฟล์ยังถูกเขียนบนระบบไฟล์ Linux จริงๆ Samba แค่รับ Login จากเครือข่ายแล้วเอาไปผูกกับ user ใน Linux คำสั่ง adduser student01 คือสร้างผู้ใช้ Linux คำสั่ง smbpasswd -a student01 คือเพิ่มรหัสผ่านสำหรับ Samba ซึ่งแยกจากรหัสผ่าน Login Linux ได้ ส่วน smbpasswd -e คือเปิดใช้งานบัญชี Samba หลังจากนั้นเราสร้าง /srv/samba/secure ให้ student01 เป็นเจ้าของ และ chmod 0700 หมายความว่าเฉพาะเจ้าของเท่านั้นที่อ่าน เขียน และเข้าโฟลเดอร์นี้ได้ครับ"
+    },
+    {
+      "id": "w8b-s8",
+      "type": "content",
+      "title": "ขั้นตอนที่ 4: เพิ่ม config Secure Share และตรวจสอบก่อน Restart",
+      "tag": "Samba Config",
+      "items": [
+        "เพิ่ม config ท้ายไฟล์ `/etc/samba/smb.conf`:",
+        "[Secure]",
+        "   path = /srv/samba/secure",
+        "   browseable = yes",
+        "   read only = no",
+        "   guest ok = no",
+        "   valid users = student01",
+        "ตรวจ syntax ของไฟล์ config ก่อน restart:",
+        "$ testparm",
+        "ถ้าไม่เจอ error ให้ restart Samba:",
+        "$ sudo systemctl restart smbd",
+        "ตรวจรายการ Share ที่เปิดอยู่จากฝั่ง Server:",
+        "$ smbclient -L localhost -N",
+        "ถ้าเห็น Public และ Secure แปลว่า Samba อ่าน config ของเราแล้ว"
+      ],
+      "speakerNotes": "อธิบาย config Secure ทีละบรรทัดครับ [Secure] คือชื่อ Share ที่ Client จะพิมพ์เข้ามา path คือโฟลเดอร์จริง browseable yes คือให้เห็นชื่อ Share read only no คืออนุญาตเขียน guest ok no คือห้าม guest เข้า ต้อง Login เท่านั้น valid users = student01 คืออนุญาตเฉพาะ student01 หลังแก้ smb.conf ห้าม restart ทันที ให้ใช้ testparm ก่อน เพราะ testparm จะช่วยตรวจว่าพิมพ์ config ผิดหรือไม่ ถ้าผ่านค่อย restart smbd แล้วใช้ smbclient -L localhost -N เพื่อดูรายการ Share จากฝั่ง Server ถ้าเห็น Public และ Secure แปลว่า Samba อ่าน config ใหม่แล้วครับ"
+    },
+    {
+      "id": "w8b-s9",
+      "type": "content",
+      "title": "ขั้นตอนที่ 5: เปิด Firewall ให้ Samba และเช็กพอร์ต",
+      "tag": "Firewall Check",
+      "items": [
+        "จากสัปดาห์ที่ 7 เราตั้ง UFW ไว้แล้ว ดังนั้นต้องอนุญาตบริการ Samba เพิ่ม:",
+        "$ sudo ufw allow samba",
+        "$ sudo ufw status numbered",
+        "ตรวจว่าพอร์ต SMB เปิดรออยู่:",
+        "$ ss -tulpn | grep smbd",
+        "พอร์ตที่เกี่ยวข้องกับ Samba ที่ควรรู้:",
+        "- TCP 445 = SMB หลักที่ Windows ใช้เข้าถึง Share",
+        "- TCP 139 = NetBIOS Session Service รุ่นเก่า",
+        "- UDP 137/138 = NetBIOS Name Service/Datagram รุ่นเก่า",
+        "สำหรับ lab นี้ ถ้า Client เข้าจากวงเดียวกันไม่ได้ ให้เช็ก UFW ก่อนเป็นอันดับแรก"
+      ],
+      "speakerNotes": "โยงกลับไปบท Firewall ที่สอนไปแล้วครับ ให้ถามนักเรียนว่า ถ้าเราติดตั้ง Samba แล้ว แต่ Firewall ยังบล็อกพอร์ตอยู่ เครื่อง Client จะเข้าได้ไหม คำตอบคือไม่ได้ เพราะบริการทำงานแล้วแต่ประตูเครือข่ายยังปิดอยู่ Samba ใช้ SMB หลักที่ TCP 445 และบางระบบยังเกี่ยวข้องกับ 139, 137, 138 คำสั่ง ufw allow samba จะเพิ่ม rule ให้ชุดพอร์ต Samba จากนั้นใช้ ufw status numbered เพื่อดูว่า rule เข้าแล้วหรือไม่ และใช้ ss -tulpn หรือ ss -tlnp เพื่อดูว่ามี service รอฟังพอร์ต 445 หรือไม่ แนวคิดคือ ทุกครั้งที่ติดตั้งบริการใหม่ ต้องรู้ว่าบริการนั้นใช้พอร์ตอะไรและ Firewall อนุญาตหรือยังครับ"
+    },
+    {
+      "id": "w8b-s10",
+      "type": "lab",
+      "title": "Lab 08.2 — ทดสอบเชื่อมต่อจาก Client และพิสูจน์สิทธิ์",
+      "tag": "Hands-on Lab",
+      "duration": "35 นาที",
+      "objectives": [
+        "เข้า Share Public ได้โดยไม่ต้องใช้รหัสผ่าน",
+        "สร้างไฟล์ test-public.txt ใน Public ได้",
+        "เข้า Share Secure ด้วยบัญชี student01 ได้",
+        "พิสูจน์ว่า guest หรือ user ที่ไม่มีสิทธิ์เข้า Secure ไม่ได้",
+        "ถ่าย Screenshot หลักฐานการทดสอบครบ 3 ภาพ"
+      ],
+      "steps": [
+        "หา IP เครื่อง Server: $ hostname -I",
+        "Windows: เปิด File Explorer แล้วพิมพ์ \\\\[IP เครื่อง Server]\\Public",
+        "macOS: Finder → Go → Connect to Server → smb://[IP เครื่อง Server]/Public",
+        "Linux: ทดสอบด้วย $ smbclient //[IP เครื่อง Server]/Public -N",
+        "สร้างไฟล์ชื่อ test-public.txt ใน Public แล้วกลับไปดูบน Server ด้วย $ ls -l /srv/samba/public",
+        "ลองเข้า \\\\[IP เครื่อง Server]\\Secure หรือ smb://[IP เครื่อง Server]/Secure",
+        "Login ด้วย student01 และรหัสผ่าน Samba ที่ตั้งไว้",
+        "สร้างไฟล์ชื่อ student01-secret.txt ใน Secure แล้วตรวจบน Server ด้วย $ ls -l /srv/samba/secure",
+        "Logout หรือใช้ user ผิด แล้วลองเข้า Secure อีกครั้ง ต้องถูกปฏิเสธ"
+      ],
+      "speakerNotes": "ช่วง Lab ให้เดินตามลำดับนี้ครับ ขั้นแรกให้นักเรียนหา IP เครื่องตัวเองด้วย hostname -I แล้วจดไว้ ขั้นต่อไปให้เพื่อนหรือเครื่อง Client เปิดเข้ามาที่ Public ก่อน เพราะ Public ไม่ต้องใช้รหัสผ่าน ถ้า Public ยังเข้าไม่ได้ อย่าเพิ่งไป Secure ให้แก้ Network, Firewall หรือ Samba service ก่อน เมื่อเข้า Public ได้แล้ว ให้สร้างไฟล์ test-public.txt แล้วกลับมาดูบน Server ด้วย ls -l เพื่อพิสูจน์ว่าไฟล์ถูกเขียนลง Server จริง จากนั้นค่อยทดสอบ Secure โดย Login ด้วย student01 และรหัส Samba ที่ตั้งไว้ ให้สร้างไฟล์ student01-secret.txt แล้วตรวจบน Server สุดท้ายให้ลองเข้า Secure แบบ guest หรือ user ผิด ต้องเข้าไม่ได้ ถ้าเข้าได้แปลว่าสิทธิ์เราตั้งไม่ถูกครับ"
+    },
+    {
+      "id": "w8b-s11",
+      "type": "content",
+      "title": "ตารางตรวจงาน: ส่งอะไรถึงถือว่าผ่าน",
+      "tag": "Submission Checklist",
+      "items": [
+        "นักเรียนส่งหลักฐาน 5 รายการนี้:",
+        "1. Screenshot คำสั่ง `systemctl status smbd` แสดงว่า service ทำงาน",
+        "2. Screenshot คำสั่ง `testparm` ไม่มี error",
+        "3. Screenshot Client เข้า Public และสร้างไฟล์ได้",
+        "4. Screenshot Client เข้า Secure ด้วย student01 ได้",
+        "5. Screenshot การเข้า Secure แบบ guest หรือ user ผิดแล้วถูกปฏิเสธ",
+        "คะแนนแนะนำ:",
+        "- ติดตั้งและเปิดบริการสำเร็จ 2 คะแนน",
+        "- Public Share ใช้งานได้ 2 คะแนน",
+        "- Secure Share ล็อกสิทธิ์ถูกต้อง 3 คะแนน",
+        "- ทดสอบจาก Client และมีหลักฐานครบ 2 คะแนน",
+        "- อธิบายปัญหา/วิธีแก้ที่เจอระหว่างทำ 1 คะแนน"
+      ],
+      "speakerNotes": "ใช้สไลด์นี้ย้ำก่อนหมดคาบว่า งานที่ถือว่าผ่านไม่ใช่แค่ลง Samba ได้ แต่ต้องพิสูจน์การทำงานครบวงจร หลักฐานที่ต้องการมีทั้งฝั่ง Server และ Client ภาพ systemctl status smbd แสดงว่าบริการทำงาน ภาพ testparm แสดงว่า config ไม่ผิด ภาพ Client เข้า Public และสร้างไฟล์ได้ ภาพ Client เข้า Secure ด้วย student01 ได้ และภาพการเข้า Secure แบบผิดสิทธิ์แล้วถูกปฏิเสธ การให้คะแนนแบบนี้ช่วยให้นักเรียนเข้าใจว่าระบบแอดมินต้องมีหลักฐาน ไม่ใช่แค่บอกว่า 'ผมทำแล้ว' ครับ"
+    },
+    {
+      "id": "w8b-s12",
+      "type": "two-col",
+      "title": "Troubleshooting: ถ้าเข้า Share ไม่ได้ ให้ไล่เช็กตามนี้",
+      "tag": "Fix Common Problems",
+      "cols": [
+        {
+          "icon": "🔎",
+          "title": "ฝั่ง Server",
+          "items": [
+            "`systemctl status smbd` ต้อง active",
+            "`testparm` ต้องไม่มี error",
+            "`ufw status` ต้องอนุญาต Samba",
+            "`ss -tulpn` ต้องเห็นพอร์ต 445",
+            "`ls -ld /srv/samba/secure` ต้องมี owner/permission ถูกต้อง",
+            "หลังแก้ config ต้อง `sudo systemctl restart smbd`"
+          ]
+        },
+        {
+          "icon": "💻",
+          "title": "ฝั่ง Client",
+          "items": [
+            "พิมพ์ IP ให้ถูก เช่น `\\\\192.168.1.50\\Public`",
+            "เครื่องต้องอยู่เครือข่ายเดียวกันหรือ route ถึงกัน",
+            "ถ้า Windows จำรหัสผิด ให้ลบ Credential เดิม",
+            "ลอง ping IP Server ก่อน",
+            "ลองเข้า Public ก่อน Secure",
+            "ถ้า Secure ไม่ผ่าน ให้ตั้งรหัสใหม่ด้วย `smbpasswd`"
+          ]
+        }
+      ],
+      "speakerNotes": "สไลด์นี้ใช้ตอนมีปัญหาในห้องได้เลยครับ สอนให้นักเรียนไม่แก้มั่ว แต่ไล่เป็นชั้นๆ เริ่มจากฝั่ง Server ก่อน: smbd active ไหม, testparm ผ่านไหม, ufw อนุญาต Samba ไหม, พอร์ต 445 เปิดไหม, permission ของโฟลเดอร์ถูกไหม ถ้าฝั่ง Server ปกติแล้วค่อยดู Client: พิมพ์ IP ถูกไหม, อยู่เครือข่ายเดียวกันไหม, ping ถึงไหม, Windows จำรหัสเก่าผิดหรือไม่, เข้า Public ได้ไหมก่อนเข้า Secure วิธีคิดคือไล่จากบริการ → config → firewall → network → credential ครับ"
+    },
+    {
+      "id": "w8b-s13",
+      "type": "content",
+      "title": "คำถามชวนคิดท้ายคาบ",
+      "tag": "Reflection",
+      "items": [
+        "ตอบสั้นๆ ในสมุดหรือท้ายไฟล์ส่งงาน:",
+        "1. ทำไม Public Share จึงไม่เหมาะสำหรับเก็บไฟล์สำคัญขององค์กร?",
+        "2. ถ้า Linux Permission เป็น 0700 แต่ Samba ตั้ง read only = no ผู้ใช้จะเขียนไฟล์ได้หรือไม่ เพราะอะไร?",
+        "3. ถ้า Client เข้า Share ไม่ได้ หลังจากติดตั้งเสร็จแล้วควรตรวจ 3 จุดแรกอะไรบ้าง?",
+        "4. ในระบบจริง ควรให้ทุกคนใช้ user เดียวกันเข้า Secure Share หรือควรแยกบัญชีรายคน?",
+        "คำตอบที่อยากได้ไม่ใช่จำคำสั่ง แต่ต้องอธิบายเหตุผลด้านความปลอดภัยและการดูแลระบบได้"
+      ],
+      "speakerNotes": "คำถามท้ายคาบใช้วัดความเข้าใจ ไม่ใช่วัดความจำคำสั่ง ให้ชวนนักเรียนตอบด้วยเหตุผล ข้อ 1 Public ไม่เหมาะเก็บไฟล์สำคัญเพราะ guest หรือผู้ใช้ทั่วไปอาจอ่าน/เขียน/ลบได้ ข้อ 2 ถ้า Linux Permission เป็น 0700 แต่ Samba ตั้ง read only no ผู้ใช้จะเขียนได้เฉพาะกรณีที่เขาเป็นเจ้าของหรือถูก map เป็นเจ้าของที่มีสิทธิ์ ถ้าไม่ผ่าน Linux Permission ก็เขียนไม่ได้ ข้อ 3 ถ้าเข้า Share ไม่ได้ ให้ตรวจ service, firewall, config หรือ network ก่อน ข้อ 4 ระบบจริงควรแยกบัญชีรายคนเพื่อ audit ได้ว่าใครทำอะไร ไม่ควรใช้ user เดียวกันทั้งหมดครับ"
+    },
+    {
+      "id": "w8b-s14",
       "type": "summary",
       "title": "สรุปสัปดาห์ที่ 8",
       "tag": "Week Summary",
       "items": [
-        "✅ เข้าใจบทบาทบริการ File & Resource Sharing ด้วย Samba และ NFS",
-        "✅ ติดตั้ง Samba Server และจัดสิทธิ์ Directory Permissions แยกสิทธิ์ผู้ใช้งานสำเร็จ",
-        "📝 ส่งงาน: ผลลัพธ์การเขียนและคัดลอกไฟล์ลงในไดรฟ์เครือข่าย Samba",
+        "✅ คาบนี้สอดคล้องกับคำอธิบายรายวิชา 31901-2002 ในหัวข้อ File and Resource Sharing Server",
+        "✅ ตอบสมรรถนะรายวิชาเรื่องการติดตั้งแพ็กเก็ตและให้บริการ Server ด้าน File ได้",
+        "✅ File Server ช่วยรวมไฟล์กลางและควบคุมการเข้าถึงในองค์กร",
+        "✅ Samba ทำให้ Linux แชร์ไฟล์ให้ Windows/macOS/Linux ผ่าน SMB ได้",
+        "✅ Public Share ใช้ง่ายแต่ต้องระวังข้อมูลสำคัญ",
+        "✅ Secure Share ต้องผ่านทั้ง Samba Permission และ Linux Permission",
+        "✅ เมื่อติดตั้งบริการใหม่ ต้องคิดถึง Firewall และการทดสอบจาก Client เสมอ",
+        "📝 ส่งงาน: Screenshot 5 รายการ + คำตอบ Reflection 4 ข้อ",
         "📚 สัปดาห์หน้า: ระบบจัดการฐานข้อมูลเชิงสัมพันธ์ MariaDB การติดตั้งและการจัดการสิทธิ์"
       ],
-      "speakerNotes": "จบคลาสวันศุกร์ด้วยการเน้นย้ำสิทธิ์ของ Samba ว่าต้องล้อไปกับสิทธิ์ของระบบไฟล์ Linux ตัวจริงด้วยเสมอ"
+      "speakerNotes": "ปิดคาบด้วยการสรุปว่า วันนี้เราได้ทำ File and Resource Sharing Server ตามคำอธิบายรายวิชาแล้ว สิ่งสำคัญที่ต้องจำคือ Samba ทำให้ Linux แชร์ไฟล์ให้เครื่องอื่นผ่าน SMB ได้, Public Share ใช้ง่ายแต่ไม่เหมาะกับข้อมูลสำคัญ, Secure Share ต้องผ่านทั้ง Samba Permission และ Linux Permission, และเมื่อติดตั้งบริการใหม่ต้องคิดเรื่อง Firewall เสมอ ให้เชื่อมต่อไปบทถัดไปว่า ฐานข้อมูล MariaDB ก็มีหลักการคล้ายกัน คือมีบริการ มี user มี permission และต้องคิดเรื่องความปลอดภัยเหมือนกันครับ"
     }
   ]
 }
