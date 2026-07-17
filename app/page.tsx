@@ -9302,6 +9302,310 @@ sudo ss -tulpn`}</Code>
 /* ======================================= */
 /* --- MAIN APP --- */
 /* ======================================= */
+/* ===== EXAM NOTIFICATION BANNER ===== */
+function ExamNotificationBanner() {
+  const [showPanel, setShowPanel] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+
+  // === DATE CONTROL ===
+  // ตั้งค่าให้แสดงเฉพาะวันที่ 14 กรกฎาคม 2569 (2026 CE)
+  // เปลี่ยน forceVisible = false เมื่อต้องการให้ทำงานตามวันจริง
+  const forceVisible = true; // ← เปลี่ยนเป็น false เมื่อต้องการให้แสดงเฉพาะวันสอบ
+
+  const isExamDay = () => {
+    if (forceVisible) return true;
+    const now = new Date();
+    const day = now.getDate();
+    const month = now.getMonth(); // 0-indexed, July = 6
+    const year = now.getFullYear();
+    return day === 14 && month === 6 && year === 2026;
+  };
+
+  if (!isExamDay() || dismissed) return null;
+
+  return (
+    <>
+      {/* Top Banner Bar */}
+      <div className="exam-notification-wrapper">
+        <div className="exam-notification-bar" onClick={() => setShowPanel(!showPanel)}>
+          <span className="exam-badge">📋 สอบ</span>
+          <span className="exam-notification-text">
+            🔔 สอบปฏิบัติ NOS — วันอังคารที่ 14 กรกฎาคม 2569 | คลิกเพื่อดูโจทย์สอบ
+          </span>
+          <span className="exam-notification-arrow">{showPanel ? '▲' : '▼'}</span>
+        </div>
+      </div>
+
+      {/* Expanded Exam Panel */}
+      {showPanel && (
+        <>
+          <div className="exam-panel-overlay" onClick={() => setShowPanel(false)} />
+          <div className="exam-panel">
+            <div className="exam-panel-header">
+              <h2>📝 โจทย์สอบปฏิบัติ — วิชา NOS</h2>
+              <p>วันอังคารที่ 14 กรกฎาคม พ.ศ. 2569 | สอบบน Proxmox (Ubuntu Server)</p>
+              <button className="exam-panel-close" onClick={() => setShowPanel(false)}>✕</button>
+            </div>
+
+            <div className="exam-panel-body">
+              {/* ===== ส่วนที่ 1: Nginx ===== */}
+              <div className="exam-section">
+                <div className="exam-section-header">
+                  <div className="exam-section-icon nginx">🌐</div>
+                  <div className="exam-section-title">ส่วนที่ 1 — Nginx Web Server</div>
+                  <span className="exam-section-score nginx">30 คะแนน</span>
+                </div>
+                <div className="exam-section-body">
+                  <ul className="exam-task-list">
+                    <li>ติดตั้ง Nginx บน Ubuntu Server ให้สามารถใช้งานได้</li>
+                    <li>สร้างหน้าเว็บ <strong>Portfolio แนะนำตัวเอง</strong> ที่มีองค์ประกอบดังนี้:</li>
+                    <li style={{ paddingLeft: '24px' }}>มี <strong>หัวข้อ (Heading)</strong> ที่แสดงชื่อ-นามสกุลของนักเรียน</li>
+                    <li style={{ paddingLeft: '24px' }}>มี <strong>ข้อมูลส่วนตัว</strong> เช่น ชื่อเล่น, อายุ, สาขาที่เรียน, งานอดิเรก ฯลฯ</li>
+                    <li style={{ paddingLeft: '24px' }}>⭐ มี <strong style={{ color: '#dc2626' }}>สโลแกนของตัวเอง</strong> — ห้ามขาด!</li>
+                    <li style={{ paddingLeft: '24px' }}>มี <strong>ตาราง (Table)</strong> อย่างน้อย 1 ตาราง แสดงข้อมูลอะไรก็ได้</li>
+                    <li style={{ paddingLeft: '24px' }}>มี <strong>ลิงก์ (Link)</strong> อย่างน้อย 1 ลิงก์ ที่สามารถคลิกไปยังเว็บอื่นได้</li>
+                    <li>เว็บไซต์ต้องสามารถเข้าถึงได้ผ่าน <strong>วง LAN</strong> (เครื่องอื่นในห้องเข้าดูได้)</li>
+                  </ul>
+
+                  {/* --- ตัวอย่างผลลัพธ์ --- */}
+                  <div style={{ marginTop: '16px', marginBottom: '12px', fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                    📺 ตัวอย่างผลลัพธ์ที่ต้องการ (ไม่จำเป็นต้องเหมือนทุกอย่าง ขอให้มีองค์ประกอบครบ)
+                  </div>
+                  <div style={{
+                    border: '1px solid #cbd5e1',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    background: '#fff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                  }}>
+                    {/* Browser Chrome Bar */}
+                    <div style={{
+                      background: '#f1f5f9',
+                      padding: '8px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      borderBottom: '1px solid #e2e8f0'
+                    }}>
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#eab308' }} />
+                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e' }} />
+                      <div style={{
+                        flex: 1,
+                        marginLeft: '8px',
+                        background: '#fff',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        padding: '4px 10px',
+                        fontSize: '11px',
+                        color: '#64748b',
+                        fontFamily: "'JetBrains Mono', monospace"
+                      }}>
+                        http://192.168.x.x
+                      </div>
+                    </div>
+
+                    {/* Page Content Preview - Portfolio */}
+                    <div style={{ padding: '20px 24px', fontFamily: 'sans-serif' }}>
+                      {/* Heading */}
+                      <h3 style={{
+                        fontSize: '18px',
+                        fontWeight: 700,
+                        color: '#1e293b',
+                        marginBottom: '4px'
+                      }}>
+                        👤 นาย สมชาย ใจดี
+                        <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 400, marginLeft: '8px' }}>← Heading ชื่อ-นามสกุล</span>
+                      </h3>
+
+                      {/* Slogan */}
+                      <div style={{
+                        fontSize: '13px',
+                        color: '#6366f1',
+                        fontStyle: 'italic',
+                        marginBottom: '14px',
+                        paddingLeft: '2px'
+                      }}>
+                        &quot;ทำวันนี้ให้ดีที่สุด เพราะวันพรุ่งนี้ยังมาไม่ถึง&quot;
+                        <span style={{ fontSize: '10px', color: '#dc2626', fontStyle: 'normal', fontWeight: 700, marginLeft: '6px' }}>← ⭐ สโลแกน (ห้ามขาด!)</span>
+                      </div>
+
+                      {/* Personal Info */}
+                      <div style={{
+                        background: '#f8fafc',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '8px',
+                        padding: '12px 14px',
+                        marginBottom: '14px',
+                        fontSize: '12px',
+                        color: '#334155',
+                        lineHeight: 1.8
+                      }}>
+                        <div>🎈 <strong>ชื่อเล่น:</strong> เก่ง</div>
+                        <div>🎂 <strong>อายุ:</strong> 19 ปี</div>
+                        <div>📚 <strong>สาขา:</strong> เทคโนโลยีสารสนเทศ</div>
+                        <div>🎮 <strong>งานอดิเรก:</strong> เล่นเกม, เขียนโค้ด</div>
+                        <span style={{ fontSize: '10px', color: '#94a3b8' }}>↑ ข้อมูลส่วนตัว (ใส่กี่อย่างก็ได้)</span>
+                      </div>
+
+                      {/* Table */}
+                      <table style={{
+                        width: '100%',
+                        borderCollapse: 'collapse',
+                        fontSize: '12px',
+                        marginBottom: '4px'
+                      }}>
+                        <thead>
+                          <tr style={{ background: '#f1f5f9' }}>
+                            <th style={{ padding: '7px 10px', textAlign: 'left', borderBottom: '2px solid #cbd5e1', color: '#475569', fontWeight: 600 }}>วิชาที่ชอบ</th>
+                            <th style={{ padding: '7px 10px', textAlign: 'left', borderBottom: '2px solid #cbd5e1', color: '#475569', fontWeight: 600 }}>เหตุผล</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>NOS</td>
+                            <td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>ได้ลงมือทำจริง</td>
+                          </tr>
+                          <tr>
+                            <td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>Network</td>
+                            <td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>ชอบเรื่อง Server</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div style={{ fontSize: '10px', color: '#94a3b8', marginBottom: '10px' }}>↑ Table แสดงข้อมูลอะไรก็ได้</div>
+
+                      {/* Link */}
+                      <div style={{ fontSize: '12px', color: '#334155' }}>
+                        🔗 เว็บที่ชอบ:{' '}
+                        <span style={{ color: '#2563eb', textDecoration: 'underline' }}>https://www.google.com</span>
+                        <span style={{ fontSize: '10px', color: '#94a3b8', marginLeft: '6px' }}>← Link ไปเว็บอื่น</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="exam-note" style={{ marginTop: '12px' }}>
+                    <strong>💡 หมายเหตุ:</strong> ยังไม่ต้องทำ Reverse Proxy — ขอแค่ใช้ Nginx เสิร์ฟหน้าเว็บได้ก็พอ 
+                    สามารถตกแต่งเพิ่มเติมได้ตามใจชอบ แต่ต้องมีองค์ประกอบครบตามที่กำหนด
+                  </div>
+                </div>
+              </div>
+
+              {/* ===== ส่วนที่ 2: MariaDB ===== */}
+              <div className="exam-section">
+                <div className="exam-section-header">
+                  <div className="exam-section-icon mariadb">🗄️</div>
+                  <div className="exam-section-title">ส่วนที่ 2 — MariaDB Database</div>
+                  <span className="exam-section-score mariadb">30 คะแนน</span>
+                </div>
+                <div className="exam-section-body">
+                  <ul className="exam-task-list">
+                    <li>ติดตั้ง MariaDB Server บน Ubuntu Server ให้สำเร็จ</li>
+                    <li>ตรวจสอบว่า MariaDB Service ทำงานอยู่</li>
+                    <li>เข้าหน้า MariaDB ให้ได้ แล้วแสดงให้อาจารย์ดู</li>
+                  </ul>
+                  <div className="exam-note">
+                    <strong>💡 หมายเหตุ:</strong> ขอแค่เข้าหน้า MariaDB ได้ก็ผ่าน — ยังไม่ต้องสร้าง Database หรือตาราง
+                  </div>
+                </div>
+              </div>
+
+              {/* ===== ส่วนที่ 3: Firewall ===== */}
+              <div className="exam-section">
+                <div className="exam-section-header">
+                  <div className="exam-section-icon firewall">🔥</div>
+                  <div className="exam-section-title">ส่วนที่ 3 — Firewall (UFW) &nbsp;⚡ ท้าทาย!</div>
+                  <span className="exam-section-score firewall">40 คะแนน</span>
+                </div>
+                <div className="exam-section-body">
+                  {/* --- Mission 3.1: Basic UFW --- */}
+                  <div style={{ marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <span style={{ background: '#fee2e2', color: '#dc2626', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.1</span>
+                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>เปิดใช้งาน UFW และตั้งค่า Default Policy (10 คะแนน)</span>
+                    </div>
+                    <ul className="exam-task-list">
+                      <li>เปิดใช้งาน UFW (Uncomplicated Firewall) บน Ubuntu Server</li>
+                      <li>ตั้ง Default Policy ให้ <strong>ปิดกั้น traffic ขาเข้าทั้งหมด</strong></li>
+                      <li>ตั้ง Default Policy ให้ <strong>อนุญาต traffic ขาออกทั้งหมด</strong></li>
+                    </ul>
+                  </div>
+
+                  {/* --- Mission 3.2: Port Management --- */}
+                  <div style={{ marginBottom: '16px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <span style={{ background: '#dbeafe', color: '#2563eb', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.2</span>
+                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>จัดการ Port — เปิด / ปิด (10 คะแนน)</span>
+                    </div>
+                    <ul className="exam-task-list">
+                      <li><strong>อนุญาต (Allow)</strong> port ต่อไปนี้:</li>
+                      <li style={{ paddingLeft: '24px' }}>Port <code>22</code> (SSH) — ⚠️ ต้องเปิดก่อน enable UFW!</li>
+                      <li style={{ paddingLeft: '24px' }}>Port <code>80</code> (HTTP) — เว็บ Nginx</li>
+                      <li style={{ paddingLeft: '24px' }}>Port <code>443</code> (HTTPS)</li>
+                      <li style={{ paddingLeft: '24px' }}>Port <code>53</code> ทั้ง TCP และ UDP (DNS)</li>
+                      <li><strong>ปิดกั้น (Deny)</strong> port ต่อไปนี้:</li>
+                      <li style={{ paddingLeft: '24px' }}>Port <code>3306</code> (MySQL/MariaDB) — ไม่ให้เข้าถึง Database จากภายนอก</li>
+                      <li style={{ paddingLeft: '24px' }}>Port <code>8080</code> — ปิดไม่ให้ใช้งาน</li>
+                      <li style={{ paddingLeft: '24px' }}>Port <code>23</code> (Telnet) — ไม่ปลอดภัย ปิดกั้นเสมอ</li>
+                      <li style={{ paddingLeft: '24px' }}>Port range <code>6000:6063</code> เฉพาะ TCP (X11) — ปิดทั้ง range</li>
+                    </ul>
+                  </div>
+
+                  {/* --- Mission 3.3: IP Management --- */}
+                  <div style={{ marginBottom: '16px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <span style={{ background: '#fef3c7', color: '#b45309', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.3</span>
+                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>จัดการ IP — บล็อค / อนุญาตเฉพาะ (10 คะแนน)</span>
+                    </div>
+                    <ul className="exam-task-list">
+                      <li><strong>บล็อค IP</strong> ต่อไปนี้ไม่ให้เข้าถึงเครื่องได้เลย:</li>
+                      <li style={{ paddingLeft: '24px' }}>IP <code>192.168.1.100</code></li>
+                      <li style={{ paddingLeft: '24px' }}>IP <code>10.0.0.50</code></li>
+                      <li><strong>อนุญาตเฉพาะ IP</strong> ให้เข้า port ที่กำหนด:</li>
+                      <li style={{ paddingLeft: '24px' }}>อนุญาตให้ IP <code>192.168.1.1</code> เข้าถึงได้เฉพาะ port <code>22</code> เท่านั้น</li>
+                      <li><strong>อนุญาตทั้ง Subnet</strong> ให้เข้า port ที่กำหนด:</li>
+                      <li style={{ paddingLeft: '24px' }}>อนุญาตให้เครือข่าย <code>192.168.1.0/24</code> เข้าถึงได้เฉพาะ port <code>80</code></li>
+                    </ul>
+                  </div>
+
+                  {/* --- Mission 3.4: Verification & Bonus --- */}
+                  <div style={{ paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                      <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.4</span>
+                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>ตรวจสอบและ Bonus (10 คะแนน)</span>
+                    </div>
+                    <ul className="exam-task-list">
+                      <li>แสดงสถานะ Firewall แบบมีเลข rule ให้อาจารย์ตรวจ</li>
+                      <li>แสดงรายละเอียด Firewall ให้เห็น default policy ที่ตั้งค่าไว้</li>
+                      <li><strong>⭐ Bonus:</strong> ตั้ง Rate Limiting บน port SSH เพื่อป้องกัน Brute Force Attack (จำกัดไม่เกิน 6 ครั้งใน 30 วินาที)</li>
+                    </ul>
+                  </div>
+
+                  <div className="exam-note" style={{ marginTop: '16px' }}>
+                    <strong>⚠️ สำคัญมาก:</strong> ต้อง Allow port SSH <strong>ก่อน</strong>เปิด UFW เสมอ! 
+                    ถ้าไม่ทำ จะไม่สามารถ SSH กลับเข้าเครื่องได้อีก — คิดลำดับการทำงานให้ดีก่อนเริ่ม
+                  </div>
+                </div>
+              </div>
+
+              {/* ===== กฎการสอบ ===== */}
+              <div className="exam-rules">
+                <h4>📌 กฎและข้อปฏิบัติในการสอบ</h4>
+                <ul>
+                  <li>ทำงานบน Proxmox ของตนเอง — ใช้ Ubuntu Server ที่ได้รับมอบหมาย</li>
+                  <li>ส่งงานทีละส่วน — อาจารย์จะตรวจให้คะแนนทีละส่วน</li>
+                  <li>สามารถเปิดดูเอกสาร/คู่มือได้ แต่ห้ามส่งคำตอบให้เพื่อน</li>
+                  <li>ถ้าติดปัญหา ให้ยกมือถามอาจารย์ได้</li>
+                  <li>เมื่อทำเสร็จแต่ละส่วน ให้เรียกอาจารย์ตรวจ</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </>
+  );
+}
+
 export default function Home() {
   const [weekGroups, setWeekGroups] = useState<WeekGroup[]>([]);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({"Week 1": true});
@@ -9391,7 +9695,8 @@ export default function Home() {
 
   /* --- Normal View --- */
   return (
-    <div className="app-layout">
+    <>
+      <div className="app-layout">
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "" : "collapsed"}`}>
         <div className="sidebar-header">
@@ -9644,6 +9949,7 @@ export default function Home() {
         )}
       </main>
     </div>
+    </>
   );
 }
 

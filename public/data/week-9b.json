@@ -1,92 +1,359 @@
 {
   "week": "9b",
-  "title": "ปฏิบัติการจัดการสิทธิ์ผู้ใช้งานฐานข้อมูลและการล็อกความปลอดภัย",
-  "topic": "MariaDB User Privileges & Access Hardening",
-  "description": "เรียนรู้วิธีกำหนดสิทธิ์การเข้าถึงฐานข้อมูลในระดับโปรเจกต์ มอบสิทธิ์ (Privileges) ด้วย SQL command สร้างผู้ใช้เฉพาะจุด และจำกัดการเข้าใช้งานเฉพาะเครื่อง (localhost vs %)",
+  "title": "ปฏิบัติการติดตั้ง FTP Server บน Proxmox Container",
+  "topic": "FTP Server Setup with vsftpd, Users, Permissions & Firewall",
+  "description": "คาบปฏิบัติการวันศุกร์สำหรับให้นักเรียนใช้ Container ของตนเองบน Proxmox ติดตั้ง FTP Server ด้วย vsftpd สร้างผู้ใช้สำหรับรับส่งไฟล์ ตั้งค่าโฟลเดอร์และสิทธิ์ เปิด Firewall เฉพาะพอร์ตที่จำเป็น และทดสอบ Upload/Download จากเครื่อง Client จริง",
   "learningObjectives": [
-    "สร้างผู้ใช้งานฐานข้อมูลรายบุคคลและกำหนดรหัสผ่านความปลอดภัยสูงได้",
-    "มอบสิทธิ์การเข้าใช้งานฐานข้อมูล (GRANT/REVOKE) เฉพาะเท่าที่จำเป็นได้",
-    "ทดสอบการเชื่อมต่อระยะไกลและตั้งค่าบล็อก IP หรือจำกัดการรับทราฟฟิกฐานข้อมูลได้สำเร็จ"
+    "อธิบายบทบาทของ FTP Server และความแตกต่างระหว่าง FTP, FTPS และ SFTP ได้",
+    "ติดตั้งและตรวจสอบบริการ vsftpd บน Ubuntu Container ได้",
+    "สร้างผู้ใช้ FTP และกำหนดโฟลเดอร์ใช้งานเฉพาะรายบุคคลได้",
+    "ตั้งค่า vsftpd ให้ผู้ใช้ Upload/Download ได้อย่างปลอดภัยในขอบเขตที่กำหนด",
+    "เปิด UFW Firewall สำหรับ FTP Control Port และ Passive Port Range ได้ถูกต้อง",
+    "ทดสอบ FTP จาก Client และส่งหลักฐานการทำงานครบถ้วนได้"
   ],
   "slides": [
     {
-      "id": "w9b-s1",
+      "id": "w9b-ftp-s1",
       "type": "cover",
-      "title": "การจัดการสิทธิ์ฐานข้อมูลและความปลอดภัยขั้นสูง",
-      "subtitle": "MariaDB User Privileges & Access Hardening Lab",
+      "title": "FTP Server บน Container ส่วนตัว",
+      "subtitle": "vsftpd + User + Permission + Firewall",
       "tag": "สัปดาห์ที่ 9 (วันศุกร์ - 2 ชม.)",
-      "body": "ในคาบปฏิบัติการ 2 ชั่วโมงนี้ เราจะฝึกซ้อมสร้างบัญชีผู้ใช้งานฐานข้อมูลที่ไม่มีสิทธิ์แอดมิน จำกัดพื้นที่การสลับข้อมูลให้เข้าถึงได้เฉพาะตารางที่ตนเองเป็นเจ้าของ และจำกัดการเปิดรับ Remote Access",
-      "speakerNotes": "สวัสดีครับวันศุกร์ คาบนี้เราจะนำหลักการ Least Privilege มาใช้กับฐานข้อมูลจริง เพื่อเตรียมตัวทำระบบหลังบ้านของโครงงานปลายภาคครับ"
+      "body": "วันนี้ทุกคนจะเปลี่ยน Container ของตัวเองใน Proxmox ให้เป็นเครื่องรับ-ส่งไฟล์ผ่านเครือข่าย สร้างผู้ใช้ FTP ตั้งสิทธิ์โฟลเดอร์ เปิด Firewall และทดสอบ Upload/Download จากเครื่อง Client จริง",
+      "speakerNotes": "สวัสดีครับทุกคน วันนี้เราจะเรียนเรื่อง FTP Server โดยใช้ Container ของแต่ละคนใน Proxmox เป็นเครื่องจริงของตัวเอง เป้าหมายไม่ใช่แค่ติดตั้งโปรแกรมให้ผ่าน แต่ต้องทำให้เครื่องของเรารับไฟล์และส่งไฟล์ผ่านเครือข่ายได้จริง คาบนี้จะมีการทำทีละ checkpoint สั้นๆ ทำเสร็จแล้วตรวจทันที ถ้าขั้นไหนไม่ผ่านเราจะหยุดแก้ตรงนั้นก่อน ไม่ปล่อยให้พังยาวไปท้ายคาบครับ"
     },
     {
-      "id": "w9b-s2",
+      "id": "w9b-ftp-s2",
+      "type": "content",
+      "title": "FTP คืออะไร? ใช้ทำอะไรในงาน Server",
+      "tag": "Concept 5 นาที",
+      "items": [
+        "FTP = File Transfer Protocol ใช้รับ-ส่งไฟล์ผ่านเครือข่าย",
+        "ตัวอย่างงานจริง: อัปโหลดไฟล์เว็บ, ส่งไฟล์รายงาน, ส่งไฟล์ backup ขนาดเล็ก",
+        "FTP ใช้พอร์ตหลัก TCP 21 สำหรับ Control Connection",
+        "การส่งข้อมูลจริงมักใช้ Data Connection แยกต่างหาก โดยเฉพาะ Passive Mode",
+        "FTP ธรรมดาไม่เข้ารหัส จึงเหมาะกับ Lab / LAN เท่านั้น",
+        "Production ควรใช้ FTPS หรือ SFTP แทน"
+      ],
+      "speakerNotes": "เริ่มจากภาพง่ายๆ ครับ FTP คือบริการรับส่งไฟล์ เหมือนเรามีเคาน์เตอร์ฝากของบน Server เครื่อง Client จะมาติดต่อที่พอร์ต 21 เพื่อบอกว่าจะ Login, ขอรายชื่อไฟล์, Upload หรือ Download ส่วนตัวไฟล์จริงอาจถูกส่งผ่านพอร์ตอีกชุดหนึ่ง โดยเฉพาะ Passive Mode ที่เราจะตั้งวันนี้ ให้ย้ำเด็กว่า FTP แบบธรรมดาไม่เข้ารหัส Username และ Password จึงไม่ควรใช้บนอินเทอร์เน็ตจริง แต่เหมาะกับการเรียนใน LAN เพื่อเข้าใจหลักการบริการไฟล์ครับ"
+    },
+    {
+      "id": "w9b-ftp-s3",
       "type": "two-col",
-      "title": "การจัดการผู้ใช้ ฐานข้อมูล และการมอบสิทธิ์ (User & Grant DB)",
-      "tag": "คำสั่ง SQL สำหรับแอดมิน",
+      "title": "FTP, FTPS, SFTP ต่างกันอย่างไร?",
+      "tag": "Protocol Comparison",
       "cols": [
         {
-          "icon": "🔑",
-          "title": "การสร้าง DB และ User ใหม่",
+          "icon": "📦",
+          "title": "FTP / FTPS",
           "items": [
-            "เข้าหน้าคอนโซลจัดการฐานข้อมูล:",
-            "  $ sudo mysql -u root",
-            "สร้างฐานข้อมูลสำหรับโครงการเว็บ:",
-            "  CREATE DATABASE school_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;",
-            "สร้างบัญชีผู้ใช้ใหม่จำกัดเฉพาะในเครื่อง local:",
-            "  CREATE USER 'dbadmin'@'localhost' IDENTIFIED BY 'dbpass123';",
-            "สร้างบัญชีผู้ใช้ใหม่สำหรับล็อกอินระยะไกล (ถ้าจำเป็น):",
-            "  CREATE USER 'dbadmin'@'%' IDENTIFIED BY 'remote_password';"
+            "FTP ใช้พอร์ต 21 เป็นหลัก",
+            "FTP ธรรมดาส่งข้อมูลแบบไม่เข้ารหัส",
+            "FTPS = FTP ที่เพิ่ม TLS/SSL",
+            "เหมาะกับการเรียนเรื่อง Control/Data Connection",
+            "ต้องจัดการ Passive Port และ Firewall ให้ถูก"
           ]
         },
         {
-          "icon": "🛡️",
-          "title": "การกำหนดสิทธิ์การใช้ตาราง",
+          "icon": "🔐",
+          "title": "SFTP",
           "items": [
-            "การมอบสิทธิ์แบบสมบูรณ์ให้แก่ผู้ใช้ในฐานข้อมูล:",
-            "  GRANT ALL PRIVILEGES ON school_db.* TO 'dbadmin'@'localhost';",
-            "การมอบสิทธิ์ระดับจำกัด (แนะนำสำหรับ Production):",
-            "  GRANT SELECT, INSERT, UPDATE ON school_db.* TO 'dbadmin'@'localhost';",
-            "โหลดสิทธิ์ใหม่เพื่อให้มีผลใช้งานทันที:",
-            "  FLUSH PRIVILEGES;",
-            "ออกจากหน้าจอฐานข้อมูล:",
-            "  EXIT;"
+            "SFTP มากับ SSH ไม่ใช่ FTP เดิม",
+            "ใช้พอร์ต 22",
+            "เข้ารหัสตั้งแต่ต้น",
+            "ใช้งานง่ายกว่าใน Production หลายกรณี",
+            "วันนี้เรียน FTP ก่อน เพื่อเข้าใจบริการรับส่งไฟล์แบบดั้งเดิม"
           ]
         }
       ],
-      "speakerNotes": "สอนให้นักเรียนเข้าใจคำว่า Local Host ('localhost') กับ Wildcard Host ('%') ว่าสิทธิ์จากเครื่องตัวเองกับสิทธิ์ให้คอมพิวเตอร์เครื่องอื่นติดต่อเข้ามาต่างกันอย่างไร"
+      "speakerNotes": "ตรงนี้ช่วยกันแก้ความเข้าใจผิดครับ หลายคนคิดว่า SFTP คือ FTP แบบปลอดภัย แต่จริงๆ SFTP เป็นคนละโปรโตคอลกับ FTP เดิม โดยทำงานผ่าน SSH พอร์ต 22 ส่วน FTPS คือ FTP ที่ใส่ TLS เพิ่ม วันนี้เราใช้ vsftpd เพื่อเรียน FTP พื้นฐานก่อน เพราะจะได้เห็นเรื่องพอร์ต 21, Passive Mode, Firewall และ Permission ชัดเจน พอเข้าใจแล้วอนาคตจะขยับไป FTPS หรือ SFTP ได้ง่ายครับ"
     },
     {
-      "id": "w9b-s3",
+      "id": "w9b-ftp-s4",
+      "type": "content",
+      "title": "แผนงานวันนี้: ทำเป็นด่าน ๆ ไม่ง่วงแน่นอน",
+      "tag": "Mission Plan",
+      "items": [
+        "Mission 1: ตรวจ IP และอัปเดต Container",
+        "Mission 2: ติดตั้ง vsftpd และเช็ก service",
+        "Mission 3: สร้าง user ชื่อ `ftpstudent`",
+        "Mission 4: สร้างโฟลเดอร์ FTP และไฟล์ welcome",
+        "Mission 5: แก้ config vsftpd ให้ Login/Upload ได้",
+        "Mission 6: เปิด UFW สำหรับ FTP และ Passive Ports",
+        "Mission 7: ทดสอบ Upload/Download ด้วย FileZilla",
+        "Final Boss: ครูสุ่มตรวจด้วย FileZilla, `curl`, หรือ `nmap`"
+      ],
+      "speakerNotes": "ใช้สไลด์นี้ทำให้คาบสนุกขึ้นครับ บอกนักเรียนว่าวันนี้เป็นภารกิจเป็นด่านๆ ทุกคนมี Container เป็นของตัวเอง ถ้าผ่าน Mission 1 ค่อยไป Mission 2 ถ้าติดต้องแก้ตรงนั้นก่อน เป้าหมายสุดท้ายคือเครื่องครูหรือเครื่องเพื่อนต้อง FTP เข้าเครื่องเราได้จริง Upload ไฟล์ได้ Download ไฟล์ได้ และ Firewall ต้องเปิดเท่าที่จำเป็นครับ"
+    },
+    {
+      "id": "w9b-ftp-s5",
+      "type": "content",
+      "title": "Mission 1: ตรวจ Container และเตรียมระบบ",
+      "tag": "Step 1",
+      "items": [
+        "เปิด Console/Terminal ของ Container ในหน้า Proxmox GUI",
+        "(ถ้าใช้ SSH จากเครื่องตัวเองแทน Proxmox GUI ให้ SSH เข้า Container ก่อน)",
+        "$ hostname -I",
+        "$ ip a",
+        "$ ping -c 4 8.8.8.8",
+        "$ ping -c 4 google.com",
+        "$ sudo apt update",
+        "$ sudo apt install -y curl nano net-tools ufw",
+        "Checkpoint: จด IP ของเครื่องตัวเองไว้ เช่น `192.168.1.109`"
+      ],
+      "speakerNotes": "ขั้นแรกต้องตรวจเครื่องก่อนเสมอ ในห้องนี้ให้เด็กเปิด Console หรือ Terminal ของ Container ผ่านหน้า Proxmox GUI เป็นหลัก ไม่จำเป็นต้อง SSH ก่อน ถ้าห้องไหนให้นักเรียนรีโมตจากเครื่องตัวเองค่อยใช้ SSH เข้า Container แล้วค่อยทำคำสั่งชุดเดียวกัน จากนั้นรัน hostname -I เพื่อดู IP รัน ping 8.8.8.8 เพื่อเช็กว่าออกเน็ตได้ และ ping google.com เพื่อเช็ก DNS ถ้า ping IP ได้แต่ ping ชื่อเว็บไม่ได้ แปลว่า DNS มีปัญหา ต้องแก้ก่อน apt update จากนั้นติดตั้งเครื่องมือพื้นฐาน curl nano net-tools ufw ให้พร้อมใช้งาน ก่อนจบ Mission นี้ให้ทุกคนจด IP เครื่องตัวเอง เพราะจะต้องใช้ตอนทดสอบจาก Client ครับ"
+    },
+    {
+      "id": "w9b-ftp-s6",
+      "type": "content",
+      "title": "Mission 2: ติดตั้ง vsftpd FTP Server",
+      "tag": "Step 2",
+      "items": [
+        "ติดตั้ง vsftpd:",
+        "$ sudo apt install -y vsftpd",
+        "เปิด service และตั้งให้รันตอนบูต:",
+        "$ sudo systemctl enable --now vsftpd",
+        "ตรวจสถานะ service:",
+        "$ sudo systemctl status vsftpd --no-pager",
+        "ตรวจว่าพอร์ต 21 เปิดฟังอยู่:",
+        "$ sudo ss -tlnp | grep ':21'",
+        "Checkpoint: ต้องเห็น `Active: active (running)` และมีพอร์ต `:21`"
+      ],
+      "speakerNotes": "อธิบายว่า vsftpd ย่อมาจาก Very Secure FTP Daemon เป็นโปรแกรม FTP Server ที่นิยมบน Linux คำสั่ง apt install คือการติดตั้งโปรแกรม enable --now คือทั้งเริ่ม service ตอนนี้และตั้งให้เปิดเองเมื่อบูตเครื่อง status ใช้ตรวจว่าบริการทำงานหรือไม่ ส่วน ss -tlnp ใช้ดูว่ามีโปรแกรมรอฟังพอร์ต 21 หรือยัง ถ้าไม่มีพอร์ต 21 แปลว่าบริการยังไม่พร้อมให้ Client เชื่อมต่อครับ"
+    },
+    {
+      "id": "w9b-ftp-s7",
+      "type": "content",
+      "title": "Mission 3: สำรอง Config เดิมก่อนแก้",
+      "tag": "Step 3",
+      "items": [
+        "ไฟล์ config หลักของ vsftpd อยู่ที่ `/etc/vsftpd.conf`",
+        "ก่อนแก้ config ต้อง backup ก่อนเสมอ:",
+        "$ sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bak",
+        "เปิดไฟล์ config:",
+        "$ sudo nano /etc/vsftpd.conf",
+        "แนวคิด: ถ้าแก้พัง เรากู้กลับจาก `.bak` ได้",
+        "Checkpoint: มีไฟล์ `/etc/vsftpd.conf.bak` แล้ว"
+      ],
+      "speakerNotes": "สอนนิสัยแอดมินที่ดีครับ ก่อนแก้ไฟล์ config สำคัญต้อง backup เสมอ เพราะถ้าพิมพ์ผิดแล้ว service เปิดไม่ขึ้น เราจะได้ย้อนกลับได้ง่าย คำสั่ง cp คือ copy ไฟล์เดิมไปเป็น .bak จากนั้นค่อยเปิด nano เพื่อแก้ config จริง ให้เด็กเข้าใจว่านี่ไม่ใช่พิธีกรรม แต่เป็นการลดความเสี่ยงของระบบล่มครับ"
+    },
+    {
+      "id": "w9b-ftp-s8",
+      "type": "content",
+      "title": "Mission 4: ตั้งค่า vsftpd ให้ Login และ Upload ได้",
+      "tag": "Step 4",
+      "items": [
+        "ในไฟล์ `/etc/vsftpd.conf` ให้ตั้งค่าหลักดังนี้:",
+        "anonymous_enable=NO",
+        "local_enable=YES",
+        "write_enable=YES",
+        "chroot_local_user=YES",
+        "allow_writeable_chroot=YES",
+        "pasv_enable=YES",
+        "pasv_min_port=40000",
+        "pasv_max_port=40100",
+        "บันทึกไฟล์: Ctrl+O → Enter → Ctrl+X"
+      ],
+      "speakerNotes": "อธิบายทีละบรรทัดครับ anonymous_enable=NO คือไม่ให้คนไม่รู้จักเข้าแบบ anonymous, local_enable=YES คือให้ผู้ใช้ Linux ในเครื่อง Login ได้, write_enable=YES คืออนุญาต Upload หรือเขียนไฟล์, chroot_local_user=YES คือขังผู้ใช้ไว้ใน home ของตัวเอง ไม่ให้เดินดูทั้งระบบ, allow_writeable_chroot=YES ใช้ให้เขียนได้ในพื้นที่ที่ถูก chroot, pasv_enable=YES คือเปิด Passive Mode และกำหนดพอร์ต 40000-40100 เพื่อให้ Firewall เปิดเป็นช่วงชัดเจน ไม่ปล่อยกว้างเกินไปครับ"
+    },
+    {
+      "id": "w9b-ftp-s9",
+      "type": "content",
+      "title": "Mission 5: สร้างผู้ใช้ FTP และโฟลเดอร์รับไฟล์",
+      "tag": "Step 5",
+      "items": [
+        "สร้าง user สำหรับ FTP:",
+        "$ sudo adduser ftpstudent",
+        "สร้างโฟลเดอร์ ftp และ upload:",
+        "$ sudo mkdir -p /home/ftpstudent/ftp/upload",
+        "กำหนด owner ให้ user:",
+        "$ sudo chown -R ftpstudent:ftpstudent /home/ftpstudent/ftp",
+        "สร้างไฟล์ต้อนรับด้วย nano:",
+        "$ sudo nano /home/ftpstudent/ftp/welcome.txt",
+        "พิมพ์ข้อความนี้ลงไปในไฟล์: Welcome to my FTP Server",
+        "บันทึกไฟล์: Ctrl+O → Enter → Ctrl+X",
+        "$ sudo chown ftpstudent:ftpstudent /home/ftpstudent/ftp/welcome.txt",
+        "ตรวจว่าไฟล์ถูกสร้างแล้ว:",
+        "$ cat /home/ftpstudent/ftp/welcome.txt",
+        "Checkpoint: `ls -l /home/ftpstudent/ftp` ต้องเห็น `welcome.txt` และ `upload/`"
+      ],
+      "speakerNotes": "ตรงนี้คือการสร้างตัวตนให้คนมาใช้ FTP ครับ adduser ftpstudent จะสร้าง user Linux และ home directory ให้ เมื่อเราเปิด local_enable ผู้ใช้ Linux นี้จะใช้ Login FTP ได้ mkdir สร้างโฟลเดอร์ ftp/upload เพื่อให้มีที่วางไฟล์ chown ทำให้ ftpstudent เป็นเจ้าของไฟล์และโฟลเดอร์ของตัวเอง สำหรับไฟล์ welcome.txt ให้ใช้ nano แทนคำสั่งลัด echo กับ tee เพราะเด็กจะเห็นภาพชัดกว่า อธิบายว่าเรากำลังเปิดไฟล์ข้อความใหม่ พิมพ์คำว่า Welcome to my FTP Server แล้วบันทึก จากนั้นใช้ cat เพื่อตรวจว่าในไฟล์มีข้อความจริง ไฟล์นี้จะใช้เป็นไฟล์ทดสอบ Download จาก Client ถ้าตอนทดสอบเห็นไฟล์นี้ แปลว่าเข้า FTP ถูกที่ครับ"
+    },
+    {
+      "id": "w9b-ftp-s10",
+      "type": "content",
+      "title": "Mission 6: Restart และตรวจ Log แบบแอดมิน",
+      "tag": "Step 6",
+      "items": [
+        "หลังแก้ config ต้อง restart service:",
+        "$ sudo systemctl restart vsftpd",
+        "$ sudo systemctl status vsftpd --no-pager",
+        "ถ้า service มีปัญหา ให้ดู log:",
+        "$ sudo journalctl -u vsftpd --no-pager -n 30",
+        "ตรวจพอร์ตอีกครั้ง:",
+        "$ sudo ss -tlnp | grep ':21'",
+        "Checkpoint: service ต้อง active และพอร์ต 21 ต้องเปิด"
+      ],
+      "speakerNotes": "บอกนักเรียนว่าแก้ config แล้วต้อง restart เพื่อให้ service อ่านค่าใหม่ ถ้า restart แล้ว fail ห้ามเดาสุ่ม ให้ใช้ journalctl -u vsftpd ดู log 30 บรรทัดล่าสุด ตรงนี้คือทักษะสำคัญของผู้ดูแลระบบ เพราะเวลาระบบจริงมีปัญหา เราต้องอ่านอาการจาก log ไม่ใช่ลบลงใหม่อย่างเดียว เมื่อ status active และ ss เห็นพอร์ต 21 แปลว่า FTP Server ฝั่งเครื่องพร้อมแล้วครับ"
+    },
+    {
+      "id": "w9b-ftp-s11",
+      "type": "content",
+      "title": "Mission 7: เปิด Firewall สำหรับ FTP",
+      "tag": "Step 7",
+      "items": [
+        "(กรณีใช้ SSH เข้าเครื่องเท่านั้น) อนุญาต SSH ก่อน เพื่อไม่ให้หลุดจากเครื่อง:",
+        "$ sudo ufw allow OpenSSH",
+        "(ถ้าใช้ Terminal ผ่าน Proxmox GUI อย่างเดียว ข้อนี้ไม่จำเป็น แต่ทำไว้ก็ได้หากต้องการเปิด SSH)",
+        "อนุญาต FTP Control Port:",
+        "$ sudo ufw allow 21/tcp",
+        "อนุญาต Passive Ports:",
+        "$ sudo ufw allow 40000:40100/tcp",
+        "เปิดใช้งาน UFW:",
+        "$ sudo ufw enable",
+        "$ sudo ufw status numbered",
+        "Checkpoint: ต้องเห็น 21/tcp และ 40000:40100/tcp",
+        "(ถ้าใช้ SSH ต้องเห็น OpenSSH หรือ 22/tcp ด้วย)"
+      ],
+      "speakerNotes": "โยงกลับบท Firewall ครับ FTP ไม่ได้ใช้แค่พอร์ต 21 เสมอไป ถ้าใช้ Passive Mode การส่งไฟล์จริงจะวิ่งผ่านช่วงพอร์ตที่เรากำหนดไว้ 40000-40100 ดังนั้น Firewall ต้องเปิดทั้ง 21/tcp และ 40000:40100/tcp ส่วนคำสั่ง sudo ufw allow OpenSSH ให้บอกนักเรียนว่าเป็นกรณีที่เรา SSH เข้ามาจัดการเครื่อง ถ้าเราใช้ Terminal ผ่าน Proxmox GUI อย่างเดียว ต่อให้ Firewall บล็อก SSH เราก็ยังเปิด Console ใน Proxmox เข้าไปแก้ได้ แต่ถ้าใช้ SSH อยู่จริง ต้อง allow OpenSSH ก่อน enable UFW ไม่อย่างนั้นอาจหลุดจาก Container ได้ครับ"
+    },
+    {
+      "id": "w9b-ftp-s12",
       "type": "lab",
-      "title": "Lab 09.2 — จัดการผู้ใช้และสิทธิ์การจำกัดพื้นที่ความปลอดภัยฐานข้อมูล",
-      "tag": "ปฏิบัติการประจำวันศุกร์",
-      "duration": "1.5 ชั่วโมง",
+      "title": "Checkpoint Lab: ทดสอบด้วย FileZilla",
+      "tag": "Hands-on",
+      "duration": "30 นาที",
       "objectives": [
-        "สร้างผู้ใช้นักพัฒนา dbadmin จำกัดการเข้าสิทธิ์เฉพาะเครื่อง localhost สำเร็จ",
-        "มอบสิทธิ์สลับเข้าถึงตารางและคิวรีอย่างมีเงื่อนไขได้",
-        "ทดสอบสิทธิ์เพื่อพิสูจน์การเข้าดูโฟลเดอร์หรือตารางอื่นที่ไม่มีสิทธิ์แล้วโดนบล็อก"
+        "เปิด FileZilla และเชื่อมต่อไปยัง Container ของตัวเองได้",
+        "Login ด้วย user `ftpstudent` ผ่านช่อง Quickconnect ได้",
+        "Download ไฟล์ `welcome.txt` ได้",
+        "Upload ไฟล์ `student.txt` เข้าโฟลเดอร์ `upload/` ได้",
+        "กลับมาตรวจบน Server ว่าไฟล์ถูก Upload จริง"
       ],
       "steps": [
-        "1. ล็อกอินเข้าฐานข้อมูลเพื่อเป็น root: \n$ sudo mysql -u root",
-        "2. สร้างฐานข้อมูลโรงเรียนและผู้ใช้ใหม่: \nCREATE DATABASE school_db; \nCREATE USER 'dbadmin'@'localhost' IDENTIFIED BY 'dbpass123';",
-        "3. มอบสิทธิ์ทั้งหมดในฐานข้อมูลโรงเรียนให้กับ dbadmin: \nGRANT ALL PRIVILEGES ON school_db.* TO 'dbadmin'@'localhost';",
-        "4. โหลดข้อมูลสิทธิ์ใหม่และออก: \nFLUSH PRIVILEGES; \nEXIT;",
-        "5. ล็อกอินเข้าใช้งานด้วยบัญชีใหม่โดยไม่ต้องใช้ sudo เพื่อตรวจสอบสิทธิ์: \n$ mysql -u dbadmin -p \n(ป้อนรหัสผ่าน dbpass123 และลองรันคำสั่ง SHOW DATABASES; จะต้องเห็นเพียง school_db เท่านั้น)"
+        "ที่ Server หา IP ก่อน: $ hostname -I",
+        "เปิดโปรแกรม FileZilla บนเครื่อง Client",
+        "ช่อง Host: ใส่ IP ของ Container เช่น 192.168.1.109",
+        "ช่อง Username: ใส่ ftpstudent",
+        "ช่อง Password: ใส่รหัสที่ตั้งตอน adduser",
+        "ช่อง Port: ใส่ 21 แล้วกด Quickconnect",
+        "ฝั่ง Remote site ต้องเห็นไฟล์ welcome.txt",
+        "Download: ลาก welcome.txt จากฝั่งขวาไปฝั่งซ้าย",
+        "เข้าโฟลเดอร์ upload ในฝั่ง Remote site",
+        "Upload: ลาก student.txt จากฝั่งซ้ายไปฝั่งขวา",
+        "กลับมาที่ Server ตรวจ: $ ls -l /home/ftpstudent/ftp/upload"
       ],
-      "speakerNotes": "ชี้แนะนักเรียนหากรัน SHOW DATABASES; แล้วยังเห็นฐานข้อมูลระบบอื่น ให้ตรวจสอบโครงสร้าง GRANT ตัวแรกลงไป"
+      "speakerNotes": "ให้เด็กทดสอบด้วย FileZilla เป็นหลักครับ เพราะเห็นภาพชัดกว่า Terminal มาก อธิบายหน้าจอ FileZilla แบบง่ายๆ ว่าฝั่งซ้ายคือไฟล์ในเครื่อง Client ของเรา ฝั่งขวาคือไฟล์บน Server หรือ Container ของเรา ช่องด้านบนให้กรอก Host เป็น IP Container, Username เป็น ftpstudent, Password เป็นรหัสที่ตั้งตอน adduser, Port เป็น 21 แล้วกด Quickconnect ถ้าเชื่อมต่อสำเร็จ ฝั่งขวาต้องเห็น welcome.txt ให้เด็กลองลาก welcome.txt จากขวาไปซ้ายเพื่อ Download จากนั้นเข้าโฟลเดอร์ upload ฝั่งขวา แล้วลาก student.txt จากซ้ายไปขวาเพื่อ Upload สุดท้ายกลับไปที่ Server ตรวจด้วย ls ว่าไฟล์ขึ้นจริงครับ"
     },
     {
-      "id": "w9b-s4",
+      "id": "w9b-ftp-s13",
+      "type": "content",
+      "title": "อ่านหน้าจอ FileZilla ให้เป็น",
+      "tag": "FileZilla Guide",
+      "items": [
+        "ช่อง Host = IP ของ Container ไม่ใช่ IP ของ Proxmox Host",
+        "Username = ftpstudent",
+        "Password = รหัสของ ftpstudent",
+        "Port = 21",
+        "Local site หรือฝั่งซ้าย = ไฟล์ในเครื่องนักเรียน",
+        "Remote site หรือฝั่งขวา = ไฟล์บน FTP Server",
+        "Download = ลากไฟล์จากขวาไปซ้าย",
+        "Upload = ลากไฟล์จากซ้ายไปขวา"
+      ],
+      "speakerNotes": "ใช้สไลด์นี้อธิบายก่อนให้เด็กเริ่มลากไฟล์ครับ จุดที่เด็กมักสับสนคือ Host ต้องเป็น IP ของ Container ตัวเอง ไม่ใช่ IP ของเครื่อง Proxmox Host และต้องใส่ Port 21 เพราะเรากำลังทดสอบ FTP อีกจุดคือซ้ายขวาใน FileZilla ให้พูดง่ายๆ ว่าซ้ายคือเครื่องเรา ขวาคือ Server ถ้าอยากเอาไฟล์จาก Server ลงเครื่องเราเรียกว่า Download ให้ลากจากขวาไปซ้าย ถ้าอยากส่งไฟล์จากเครื่องเราไป Server เรียกว่า Upload ให้ลากจากซ้ายไปขวา แค่นี้เด็กจะเห็นภาพงาน FTP ทันทีครับ"
+    },
+    {
+      "id": "w9b-ftp-s14",
+      "type": "content",
+      "title": "Mini Challenge: ส่งไฟล์ลับให้ครูตรวจ",
+      "tag": "ไม่น่าเบื่อ",
+      "items": [
+        "ให้นักเรียนสร้างไฟล์ชื่อ `student.txt` ในเครื่อง Client",
+        "ในไฟล์ต้องมี: ชื่อ, เลขที่, IP Container, วันที่เรียน",
+        "Upload ไฟล์เข้า `/upload` ผ่าน FTP",
+        "กลับมาที่ Server แล้วใช้คำสั่งตรวจ:",
+        "$ cat /home/ftpstudent/ftp/upload/student.txt",
+        "ครูสุ่ม 3 เครื่อง ให้เพื่อนอีกคนลอง Download `welcome.txt`",
+        "ถ้าทำครบ = ผ่าน Mini Challenge"
+      ],
+      "speakerNotes": "กิจกรรมนี้ทำให้คาบมีเกมเล็กๆ ครับ ให้เด็กสร้างไฟล์ student.txt ฝั่ง Client ไม่ใช่สร้างบน Server เพื่อพิสูจน์ว่า Upload ผ่าน FTP จริง ในไฟล์ใส่ชื่อ เลขที่ IP Container และวันที่เรียน จากนั้น Upload เข้าโฟลเดอร์ upload แล้วกลับมาตรวจด้วย cat บน Server ครูสามารถสุ่มให้เพื่อนอีกคนเชื่อมเข้ามา Download welcome.txt เพื่อยืนยันว่าเครื่องนี้เป็น FTP Server จริงๆ ไม่ใช่แค่ทำบนเครื่องตัวเองครับ"
+    },
+    {
+      "id": "w9b-ftp-s15",
+      "type": "two-col",
+      "title": "Troubleshooting: FTP เข้าไม่ได้ให้ไล่แบบนี้",
+      "tag": "Fix Common Problems",
+      "cols": [
+        {
+          "icon": "🖥️",
+          "title": "ฝั่ง Server",
+          "items": [
+            "`systemctl status vsftpd` ต้อง active",
+            "`ss -tlnp | grep ':21'` ต้องเห็นพอร์ต 21",
+            "`ufw status` ต้องเปิด 21/tcp และ 40000:40100/tcp",
+            "`journalctl -u vsftpd -n 30` อ่าน error ล่าสุด",
+            "ตรวจ config สะกดถูกใน `/etc/vsftpd.conf`"
+          ]
+        },
+        {
+          "icon": "💻",
+          "title": "ฝั่ง Client",
+          "items": [
+            "Ping IP Container ได้หรือไม่",
+            "Host ต้องเป็น IP Container ไม่ใช่ IP Proxmox Host",
+            "Username ต้องเป็น `ftpstudent`",
+            "Password คือรหัสที่ตั้งตอน `adduser`",
+            "ถ้า login ได้แต่ upload ไม่ได้ ให้ตรวจ `write_enable` และ permission"
+          ]
+        }
+      ],
+      "speakerNotes": "ให้นักเรียนฝึกแก้ปัญหาเป็นระบบครับ ถ้าเข้า FTP ไม่ได้ให้เริ่มจาก Server ก่อนว่า service active ไหม พอร์ต 21 เปิดไหม Firewall เปิดไหม ถ้า service fail ให้อ่าน journalctl ถ้าฝั่ง Server ปกติค่อยดู Client ว่า IP ถูกไหม ping ถึงไหม username/password ถูกไหม ถ้า login ได้แต่ upload ไม่ได้ ปัญหามักอยู่ที่ write_enable หรือ permission ของโฟลเดอร์ upload ครับ"
+    },
+    {
+      "id": "w9b-ftp-s16",
+      "type": "content",
+      "title": "หลักฐานส่งงานท้ายคาบ",
+      "tag": "Submission Checklist",
+      "items": [
+        "1. Screenshot `hostname -I` ของ Container",
+        "2. Screenshot `systemctl status vsftpd` แสดง active",
+        "3. Screenshot `ufw status numbered` แสดงพอร์ต 21 และ 40000:40100",
+        "4. Screenshot Client Login FTP สำเร็จ",
+        "5. Screenshot Download `welcome.txt` ได้",
+        "6. Screenshot Upload `student.txt` สำเร็จ",
+        "7. Screenshot Server แสดงไฟล์ใน `/home/ftpstudent/ftp/upload`",
+        "8. ตอบ Reflection 3 ข้อท้ายคาบ"
+      ],
+      "speakerNotes": "ใช้สไลด์นี้ก่อนหมดคาบเพื่อบอกงานส่งให้ชัด หลักฐานต้องพิสูจน์ครบทั้ง service, firewall และการใช้งานจริงจาก Client ถ้ามีแต่ status vsftpd active ยังไม่พอ เพราะยังไม่พิสูจน์ว่า Client เข้าได้ ถ้ามีแต่ FileZilla เข้าได้แต่ไม่มี ufw status ก็ยังไม่รู้ว่า Firewall เปิดถูกไหม ให้เด็กส่งเป็นชุดภาพเรียงตามรายการ จะตรวจง่ายและยุติธรรมครับ"
+    },
+    {
+      "id": "w9b-ftp-s17",
+      "type": "content",
+      "title": "Reflection ท้ายคาบ",
+      "tag": "Think Like Admin",
+      "items": [
+        "ตอบสั้น ๆ หลังทำ Lab:",
+        "1. ทำไม FTP ธรรมดาจึงไม่เหมาะกับการใช้งานบน Internet จริง?",
+        "2. Passive Mode ทำให้เราต้องเปิดพอร์ตเพิ่มช่วงใดใน UFW?",
+        "3. ถ้า FTP Login ได้แต่ Upload ไม่ได้ ควรตรวจ 3 จุดแรกอะไรบ้าง?",
+        "คำตอบต้องอธิบายเหตุผล ไม่ใช่ตอบเป็นคำสั่งอย่างเดียว"
+      ],
+      "speakerNotes": "ใช้ Reflection เพื่อย้ำความเข้าใจครับ คำตอบข้อ 1 คือ FTP ธรรมดาไม่เข้ารหัส ส่ง username/password และข้อมูลแบบอ่านได้บนเครือข่าย ข้อ 2 คือเราเปิด passive ports 40000-40100/tcp ตาม config ที่ตั้งไว้ ข้อ 3 ให้ตอบประมาณ write_enable, permission/owner ของโฟลเดอร์, และ chroot หรือ config ของ vsftpd การให้เด็กอธิบายเหตุผลจะช่วยให้เขาไม่จำแค่คำสั่งครับ"
+    },
+    {
+      "id": "w9b-ftp-s18",
       "type": "summary",
-      "title": "สรุปสัปดาห์ที่ 9",
+      "title": "สรุปสัปดาห์ที่ 9: FTP Server",
       "tag": "Week Summary",
       "items": [
-        "✅ ติดตั้งและบริหารเครื่องบริการ MariaDB Server ได้สำเร็จ",
-        "✅ จำกัดสิทธิ์บัญชีผู้ใช้ด้วยการระบุ Host และมอบสิทธิ์เฉพาะตารางที่เหมาะสม",
-        "📝 ส่งงาน: ผลลัพธ์การรัน SHOW DATABASES; ภายใต้สิทธิ์ผู้ใช้ dbadmin",
-        "📚 สัปดาห์หน้า: สถาปัตยกรรมเว็บแอปพลิเคชัน 3-Tier และการเขียนโค้ดเชื่อมต่อระบบ"
+        "✅ FTP ใช้รับ-ส่งไฟล์ผ่านเครือข่าย โดยพอร์ตหลักคือ TCP 21",
+        "✅ vsftpd คือ FTP Server ที่ใช้บน Ubuntu Container ได้",
+        "✅ local user เช่น `ftpstudent` สามารถใช้ Login FTP ได้",
+        "✅ `chroot_local_user=YES` ช่วยจำกัดผู้ใช้ให้อยู่ในพื้นที่ของตนเอง",
+        "✅ Passive Mode ต้องเปิดช่วงพอร์ตเพิ่มใน Firewall",
+        "✅ FTP ธรรมดาไม่เข้ารหัส Production ควรใช้ FTPS หรือ SFTP",
+        "📝 ส่งงาน: Screenshot 7 รายการ + Reflection 3 ข้อ"
       ],
-      "speakerNotes": "เน้นย้ำความปลอดภัยว่าในการทำโปรเจกต์จริงสัปดาห์หน้า ห้ามใช้ root ฐานข้อมูลในโค้ดอย่างเด็ดขาด"
+      "speakerNotes": "ปิดคาบด้วยการสรุปว่า วันนี้ทุกคนได้ทำ Server อีกชนิดหนึ่งคือ FTP Server จาก Container ของตัวเองแล้ว สิ่งสำคัญคือบริการหนึ่งตัวไม่ได้มีแค่ติดตั้งโปรแกรม แต่ต้องคิดครบทั้ง user, permission, config, firewall และการทดสอบจาก Client จริง ให้เชื่อมกับบทก่อนหน้าว่า Nginx ก็เป็น service, MariaDB ก็เป็น service, FTP ก็เป็น service หลักคิดของแอดมินเหมือนกันคือ ติดตั้ง ตรวจสถานะ เปิดพอร์ต ทดสอบ และเก็บหลักฐานครับ"
     }
   ]
 }

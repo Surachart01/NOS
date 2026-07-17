@@ -102,132 +102,13 @@
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 8: บริการแชร์ไฟล์และทรัพยากร (Samba & NFS Sharing)",
+    "weekLabel": "สัปดาห์ที่ 9: FTP Server บน Proxmox Container",
     "sessions": [
-      {
-        "id": "8b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการติดตั้ง Samba File Server และกำหนดสิทธิ์การเข้าถึงโฟลเดอร์",
-        "topic": "Samba Server Setup & Directory Sharing Lab"
-      }
-    ]
-  },
-  {
-    "weekLabel": "สัปดาห์ที่ 9: ระบบจัดการฐานข้อมูลเซิร์ฟเวอร์ (MariaDB)",
-    "sessions": [
-      {
-        "id": "9a",
-        "displayNum": "อ.",
-        "title": "การติดตั้งและทำความเข้าใจฐานข้อมูลเชิงสัมพันธ์ MariaDB",
-        "topic": "Database Server Setup & SQL Basics"
-      },
       {
         "id": "9b",
         "displayNum": "ศ.",
-        "title": "ปฏิบัติการจัดการสิทธิ์ผู้ใช้งานฐานข้อมูลและการล็อกความปลอดภัย",
-        "topic": "MariaDB User Privileges & Access Hardening"
-      }
-    ]
-  },
-  {
-    "weekLabel": "สัปดาห์ที่ 10: ระบบพร็อกซีย้อนกลับและการเข้ารหัส SSL/TLS (HTTPS)",
-    "sessions": [
-      {
-        "id": "10a",
-        "displayNum": "อ.",
-        "title": "สถาปัตยกรรม Nginx Reverse Proxy และแนวคิดการเข้ารหัสข้อมูล SSL/TLS",
-        "topic": "Nginx Reverse Proxy & SSL/TLS Concepts"
-      },
-      {
-        "id": "10b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการติดตั้ง HTTPS และการชี้ทางพอร์ต SSL อัตโนมัติ",
-        "topic": "HTTPS Enforcement & SSL Configurations"
-      }
-    ]
-  },
-  {
-    "weekLabel": "สัปดาห์ที่ 11: การจัดการ Container Platform (Proxmox LXC & Docker)",
-    "sessions": [
-      {
-        "id": "11a",
-        "displayNum": "อ.",
-        "title": "เทคโนโลยี Containerization, Proxmox Templates และการลง Docker Engine",
-        "topic": "Container Platform: LXC & Docker Engine"
-      },
-      {
-        "id": "11b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการสร้าง Golden Image Template และการจัดทำ Docker Containers",
-        "topic": "Container Provisioning & Cloning Lab"
-      }
-    ]
-  },
-  {
-    "weekLabel": "สัปดาห์ที่ 12: บริการเครือข่าย DNS และ DHCP Server ในระบบแล็บ",
-    "sessions": [
-      {
-        "id": "12a",
-        "displayNum": "อ.",
-        "title": "ระบบจัดสรรไอพี DHCP และบริการแปลชื่อโดเมน DNS ด้วย dnsmasq",
-        "topic": "DHCP & DNS Server Administrations"
-      },
-      {
-        "id": "12b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการตั้งค่าเครื่องบริการ DNS/DHCP กลางของวงเน็ตเวิร์กห้องเรียน",
-        "topic": "dnsmasq Lab for Local Domain Mapping"
-      }
-    ]
-  },
-  {
-    "weekLabel": "สัปดาห์ที่ 13: ระบบ IoT Platform การมอนิเตอร์เซิร์ฟเวอร์ และการเขียนสคริปต์",
-    "sessions": [
-      {
-        "id": "13a",
-        "displayNum": "อ.",
-        "title": "สถาปัตยกรรม IoT (MQTT Broker), การเขียนสคริปต์ Shell และเครื่องมือมอนิเตอร์",
-        "topic": "IoT Mosquitto, Shell Scripting & Server Monitoring"
-      },
-      {
-        "id": "13b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการติดตั้ง MQTT Broker การเขียนสคริปต์สำรองข้อมูล และเตรียมโครงการปลายภาค",
-        "topic": "IoT Mosquitto Setup & Shell Script Automation Lab"
-      }
-    ]
-  },
-  {
-    "weekLabel": "สัปดาห์ที่ 14: โปรเจกต์กลุ่ม (ตอนที่ 1): การวางระบบเครือข่ายและสร้างตู้คอนเทนเนอร์",
-    "sessions": [
-      {
-        "id": "14a",
-        "displayNum": "อ.",
-        "title": "ปฏิบัติการร่วมวางโครงข่าย Virtual Bridge และปล่อยตู้คอนเทนเนอร์รายคน",
-        "topic": "Project Day 1: Network Bridge & LXC Provisioning"
-      },
-      {
-        "id": "14b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการติดตั้งระบบ SSH Key ล็อกรหัสผ่าน และวาง UFW ขั้นพื้นฐาน",
-        "topic": "Project Day 2: SSH Key Deployment & Base Firewall"
-      }
-    ]
-  },
-  {
-    "weekLabel": "สัปดาห์ที่ 15: โปรเจกต์กลุ่ม (ตอนที่ 2): ติดตั้งแอปพลิเคชัน ฐานข้อมูล ความปลอดภัย และการนำเสนอ",
-    "sessions": [
-      {
-        "id": "15a",
-        "displayNum": "อ.",
-        "title": "ปฏิบัติการติดตั้งแอปพลิเคชัน LNMP, Samba, MQTT และ HTTPS",
-        "topic": "Project Day 3: Multi-Service Integration & HTTPS Setup"
-      },
-      {
-        "id": "15b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการตรวจสอบช่องโหว่ความปลอดภัยข้ามกลุ่ม (Audit) และการนำเสนอผลงานโครงการ",
-        "topic": "Project Day 4: Peer Security Audit & Presentation"
+        "title": "ปฏิบัติการติดตั้ง FTP Server บน Container ส่วนตัว",
+        "topic": "vsftpd, User, Permission, Passive Ports & Firewall"
       }
     ]
   }
