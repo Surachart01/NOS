@@ -9696,6 +9696,7 @@ export default function Home() {
   /* --- Normal View --- */
   return (
     <>
+      <ExamNotificationBanner />
       <div className="app-layout">
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "" : "collapsed"}`}>
