@@ -5525,6 +5525,7 @@ function DiagramSlide({ s }: { s: SlideData }) {
 
 function WaygroundSlide({ s }: { s: SlideData }) {
   const [downloading, setDownloading] = useState(false);
+  const isFtpPrePostTest = s.id.startsWith("w9b-");
 
   const w2Questions = [
     { q: "คำสั่งใดใช้แสดงตำแหน่งโฟลเดอร์ปัจจุบันที่กำลังทำงานอยู่?", a: "pwd", options: ["ls", "cd", "pwd", "mkdir"] },
@@ -5617,8 +5618,23 @@ function WaygroundSlide({ s }: { s: SlideData }) {
     { q: "ระบบ Firewall ส่วนใหญ่ทำงานในการกลั่นกรองอนุญาตหรือปิดกั้นข้อมูล โดยอิงจากข้อมูลหลักในข้อใด (OSI Layer 3-4)?", a: "หมายเลขไอพีเครื่องต้นทาง/ปลายทาง และหมายเลขพอร์ตบริการ", options: ["MAC Address ของตัวเครื่องและสายแลน", "หมายเลขไอพีเครื่องต้นทาง/ปลายทาง และหมายเลขพอร์ตบริการ", "HTTP Request Method และความยาวของไฟล์", "ชื่อบัญชีของระบบปฏิบัติการและระดับสิทธิ์ไฟล์"] }
   ];
 
+  const w9bQuestions = [
+    { q: "FTP มีหน้าที่หลักอย่างไร?", a: "รับส่งไฟล์ระหว่าง Client กับ Server", options: ["แจก IP Address ให้เครื่องในเครือข่าย", "รับส่งไฟล์ระหว่าง Client กับ Server", "แสดงหน้าเว็บไซต์ผ่าน HTTP", "จัดเก็บข้อมูลในฐานข้อมูล"] },
+    { q: "ข้อใดจับคู่บทบาทของโปรแกรมได้ถูกต้อง?", a: "FileZilla เป็น FTP Client และ vsftpd เป็น FTP Server", options: ["FileZilla เป็น Firewall และ vsftpd เป็น Web Server", "FileZilla เป็น FTP Server และ vsftpd เป็น FTP Client", "FileZilla เป็น FTP Client และ vsftpd เป็น FTP Server", "FileZilla และ vsftpd เป็นโปรแกรมฐานข้อมูล"] },
+    { q: "Port 21 ของ FTP ใช้สำหรับงานใด?", a: "ใช้ส่งคำสั่งและข้อมูล Login ผ่าน Control Connection", options: ["ใช้ส่งคำสั่งและข้อมูล Login ผ่าน Control Connection", "ใช้ส่งเนื้อไฟล์ทั้งหมดเพียงอย่างเดียว", "ใช้เปิดหน้า Proxmox Web UI", "ใช้เชื่อมต่อฐานข้อมูล MariaDB"] },
+    { q: "Passive Port มีหน้าที่อะไรในการทำงานของ FTP?", a: "ใช้สร้าง Data Connection สำหรับส่งรายชื่อไฟล์และเนื้อไฟล์จริง", options: ["ใช้แทนรหัสผ่านของผู้ใช้ FTP", "ใช้ติดตั้งโปรแกรม vsftpd", "ใช้เปิดหน้าเว็บไซต์ของ Server", "ใช้สร้าง Data Connection สำหรับส่งรายชื่อไฟล์และเนื้อไฟล์จริง"] },
+    { q: "หาก Firewall เปิดเฉพาะ Port 21 แต่ไม่เปิดช่วง Passive Port อาการใดมีโอกาสเกิดขึ้นมากที่สุด?", a: "Login ได้ แต่ดูรายชื่อไฟล์หรืออัปโหลดไฟล์ไม่ได้", options: ["Ubuntu จะเปิดเครื่องไม่ได้", "Login ได้ แต่ดูรายชื่อไฟล์หรืออัปโหลดไฟล์ไม่ได้", "FileZilla จะเปลี่ยน IP Address ของ Server", "MariaDB จะหยุดทำงานทันที"] },
+    { q: "คำสั่งใดใช้ติดตั้ง FTP Server vsftpd บน Ubuntu?", a: "sudo apt install vsftpd -y", options: ["sudo apt install vsftpd -y", "sudo apt install filezilla -y", "sudo systemctl install vsftpd", "sudo ufw install ftp"] },
+    { q: "เมื่อใช้ systemctl status vsftpd แล้วพบ active (running) หมายความว่าอย่างไร?", a: "บริการ vsftpd กำลังทำงาน", options: ["Firewall ปิด Port 21 แล้ว", "ผู้ใช้ FTP ถูกสร้างเรียบร้อยแล้ว", "บริการ vsftpd กำลังทำงาน", "FileZilla เชื่อมต่อสำเร็จแล้ว"] },
+    { q: "การตั้งค่า write_enable=YES ใน vsftpd.conf มีผลอย่างไร?", a: "อนุญาตให้ผู้ใช้เขียนหรืออัปโหลดไฟล์ได้", options: ["ปิดการ Login ของผู้ใช้ Linux", "บังคับให้ใช้ Port 22", "อนุญาตให้เข้าได้โดยไม่ใช้รหัสผ่าน", "อนุญาตให้ผู้ใช้เขียนหรืออัปโหลดไฟล์ได้"] },
+    { q: "การตั้งค่า chroot_local_user=YES มีจุดประสงค์ใด?", a: "จำกัดผู้ใช้ให้อยู่ภายในโฟลเดอร์ Home ของตนเอง", options: ["ให้ผู้ใช้ทุกคนเห็นไฟล์ทั้ง Server", "จำกัดผู้ใช้ให้อยู่ภายในโฟลเดอร์ Home ของตนเอง", "เปลี่ยนผู้ใช้ทั่วไปให้เป็น root", "ปิดการใช้ Username และ Password"] },
+    { q: "FileZilla แสดงข้อความ Failed to retrieve directory listing ควรตรวจสอบสิ่งใดก่อน?", a: "ตรวจการตั้งค่า Passive Port และกฎ Firewall", options: ["ตรวจว่า Nginx ใช้ Port 80 หรือไม่", "ตรวจพื้นที่ว่างของฐานข้อมูล MariaDB", "ตรวจการตั้งค่า Passive Port และกฎ Firewall", "เปลี่ยนชื่อ Container ใหม่"] }
+  ];
+
   let questions = w2Questions;
-  if (s.id.startsWith("w4a")) {
+  if (s.id.startsWith("w9b-")) {
+    questions = w9bQuestions;
+  } else if (s.id.startsWith("w4a")) {
     questions = w4aQuestions;
   } else if (s.id.startsWith("w4b")) {
     questions = w4bQuestions;
@@ -5672,12 +5688,12 @@ function WaygroundSlide({ s }: { s: SlideData }) {
                         fontSize: '11px', 
                         padding: '4px 8px', 
                         borderRadius: '4px', 
-                        background: isCorrect ? 'var(--accent-dim)' : 'var(--bg-elevated)', 
-                        border: isCorrect ? '1px solid var(--accent)' : '1px solid var(--border)',
-                        color: isCorrect ? 'var(--accent)' : 'var(--text-secondary)',
-                        fontWeight: isCorrect ? 'bold' : 'normal'
+                        background: isCorrect && !isFtpPrePostTest ? 'var(--accent-dim)' : 'var(--bg-elevated)', 
+                        border: isCorrect && !isFtpPrePostTest ? '1px solid var(--accent)' : '1px solid var(--border)',
+                        color: isCorrect && !isFtpPrePostTest ? 'var(--accent)' : 'var(--text-secondary)',
+                        fontWeight: isCorrect && !isFtpPrePostTest ? 'bold' : 'normal'
                       }}>
-                        {isCorrect ? '✓ ' : '• '} {opt}
+                        {isCorrect && !isFtpPrePostTest ? '✓ ' : '• '} {opt}
                       </span>
                     );
                   })}
@@ -5733,6 +5749,15 @@ function WaygroundSlide({ s }: { s: SlideData }) {
             </button>
           </div>
 
+          {isFtpPrePostTest && (
+            <div style={{ background: '#fff7ed', borderRadius: '8px', border: '1px solid #fb923c', padding: '12px 14px' }}>
+              <div style={{ color: '#9a3412', fontSize: '13px', fontWeight: 800, marginBottom: '4px' }}>ตั้งค่าก่อนเริ่มกิจกรรมทุกครั้ง</div>
+              <div style={{ color: '#7c2d12', fontSize: '12px', lineHeight: 1.5 }}>
+                เปิด <strong>Shuffle questions</strong> และ <strong>Shuffle answers</strong> เพื่อสุ่มลำดับข้อและตำแหน่งคำตอบ
+              </div>
+            </div>
+          )}
+
           {/* Import Guide Card */}
           <div style={{ background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)', padding: '16px', flex: 1, overflowY: 'auto' }}>
             <h4 style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-primary)' }}>
@@ -5741,10 +5766,12 @@ function WaygroundSlide({ s }: { s: SlideData }) {
             <ol style={{ fontSize: '12px', color: 'var(--text-secondary)', paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '8px', lineHeight: '1.5' }}>
               <li>คลิกปุ่ม <strong>ดาวน์โหลด Excel Template</strong> ด้านบนเพื่อรับไฟล์</li>
               <li>เปิดเบราว์เซอร์เข้าสู่ระบบผู้สอนที่ <a href="https://wayground.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>Wayground.com</a></li>
-              <li>ไปที่เมนู <strong>คลังข้อสอบ (Quiz Library)</strong> แล้วกดสร้างเกมใหม่</li>
-              <li>เลือกนำเข้าข้อมูลทางฝั่ง <strong>Import Spreadsheet (Excel/XLSX)</strong></li>
+              <li>กด <strong>Create</strong> แล้วเลือก <strong>Assessment</strong></li>
+              <li>เลือก <strong>Start from scratch</strong> แล้วเลื่อนไปที่ <strong>Import existing files</strong></li>
+              <li>เลือก <strong>Spreadsheet</strong> เพื่อนำเข้าข้อสอบจากไฟล์ Excel</li>
               <li>อัปโหลดไฟล์ <code>{downloadName}</code> ที่โหลดไปเข้าระบบ</li>
-              <li>ตรวจสอบเฉลยและกำหนดเวลา จากนั้นกด <strong>บันทึกเกม (Save)</strong> เพื่อเริ่มประลองความรู้ได้เลย!</li>
+              <li>ตรวจสอบคำถามและเฉลย จากนั้นกด <strong>Publish</strong></li>
+              {isFtpPrePostTest && <li>ก่อนเริ่มรอบก่อนเรียนและหลังเรียน ให้เปิด <strong>Shuffle questions</strong> และ <strong>Shuffle answers</strong></li>}
             </ol>
           </div>
         </div>
@@ -7998,6 +8025,307 @@ function ChmodChownVisualizer({ s }: { s: SlideData }) {
   );
 }
 
+function FTPFlowAnimation({ s }: { s: SlideData }) {
+  const steps = [
+    {
+      title: "Connect",
+      short: "กรอก IP / User / Password",
+      detail: "จุดเริ่มต้นคือเครื่องนักเรียนพยายามคุยกับ FTP Server ใน Container",
+      command: "Client -> Server : ขอเชื่อมต่อ",
+      active: ["control"]
+    },
+    {
+      title: "Login",
+      short: "คุยคำสั่งผ่าน port 21",
+      detail: "พอร์ต 21 ใช้คุยคำสั่ง เช่น login, list, upload, download แต่ยังไม่ใช่ทางวิ่งของไฟล์จริง",
+      command: "TCP 21 : USER / PASS / LIST",
+      active: ["control", "port21"]
+    },
+    {
+      title: "Passive",
+      short: "Server บอกพอร์ตส่งไฟล์",
+      detail: "Passive port คือพอร์ตเสริมชั่วคราวที่ Server เลือกไว้ให้ใช้ส่งไฟล์จริง เช่น 40000",
+      command: "Server -> Client : ใช้ port 40000 นะ",
+      active: ["reply", "passive"]
+    },
+    {
+      title: "Data",
+      short: "เปิด connection รอบที่สอง",
+      detail: "Client จะเปิดการเชื่อมต่อรอบที่สองไปยัง passive port นั้น เพื่อรับรายการไฟล์หรืออัปโหลด/ดาวน์โหลดไฟล์",
+      command: "Client -> Server : TCP 40000",
+      active: ["data", "passive"]
+    },
+    {
+      title: "Transfer",
+      short: "ส่ง test.txt ไปที่ /upload",
+      detail: "เมื่อ control และ data connection ผ่านแล้ว FileZilla จึงเห็นไฟล์ใน server และลากไฟล์อัปโหลดได้",
+      command: "STOR test.txt / RETR welcome.txt",
+      active: ["data", "file"]
+    },
+    {
+      title: "Firewall",
+      short: "ต้องเปิด 21 และ 40000-40100",
+      detail: "ถ้าเปิดแค่ 21 อาจ login ได้แต่ดูไฟล์ไม่ได้ เพราะ data connection ถูก UFW บล็อก",
+      command: "allow 21/tcp + allow 40000:40100/tcp",
+      active: ["firewall", "port21", "passive"]
+    }
+  ];
+
+  const [step, setStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const current = steps[step];
+  const isActive = (key: string) => current.active.includes(key);
+  const fileHasMoved = step >= 4;
+  const dataReady = step >= 3;
+  const controlReady = step >= 1;
+  const passiveReady = step >= 2;
+  const transferLogs = [
+    "Connecting to 192.168.1.120:21...",
+    "Response: 230 Login successful.",
+    "Response: 227 Entering Passive Mode (40000)",
+    "Data connection established.",
+    "Command: STOR test.txt",
+    "Transfer complete: /upload/test.txt"
+  ];
+  const visibleLogs = transferLogs.slice(0, Math.min(step + 1, transferLogs.length));
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const timer = window.setInterval(() => setStep(prev => (prev + 1) % steps.length), 2600);
+    return () => window.clearInterval(timer);
+  }, [isPlaying, steps.length]);
+
+  const panel = (color: string, active = false): React.CSSProperties => ({
+    borderRadius: "14px",
+    border: `1.5px solid ${active ? color : "rgba(148,163,184,0.20)"}`,
+    background: active ? `${color}14` : "rgba(15,23,42,0.72)",
+    boxShadow: active ? `0 0 24px ${color}24` : "none",
+    transition: "all 0.22s ease"
+  });
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "2.3% 3.2%",
+      background: "linear-gradient(135deg, #07101e 0%, #10243b 54%, #08111f 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "12px",
+      overflow: "hidden"
+    }}>
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes ftpPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.04); }
+        }
+        .ftp-pulse { animation: ftpPulse 1.4s ease-in-out infinite; }
+        @keyframes ftpFileFly {
+          0% { transform: translateX(0) scale(1); opacity: 1; }
+          50% { transform: translateX(50%) scale(1.08); opacity: 1; }
+          100% { transform: translateX(100%) scale(1); opacity: 0; }
+        }
+        @keyframes ftpSuccessPop {
+          0% { transform: scale(.94); opacity: 0; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .ftp-file-fly { animation: ftpFileFly 1.35s ease-in-out infinite; }
+        .ftp-success-pop { animation: ftpSuccessPop .25s ease-out both; }
+      `}} />
+
+      <div style={{ flexShrink: 0, display: "flex", justifyContent: "space-between", gap: "18px", alignItems: "flex-end" }}>
+        <div>
+        <span style={{ fontSize: "11px", color: "#38bdf8", fontWeight: 800, letterSpacing: "1px", textTransform: "uppercase" }}>
+          {s.tag}
+        </span>
+          <h2 style={{ margin: "4px 0 0", fontSize: "clamp(20px, 2.2vw, 28px)", fontWeight: 900 }}>
+          {s.title}
+        </h2>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
+          <div style={{ fontSize: "12px", color: "#cbd5e1", lineHeight: 1.5, maxWidth: "360px", textAlign: "right" }}>
+            ดูจากซ้ายไปขวา: เครื่องนักเรียนส่งไฟล์ผ่านพอร์ตที่ Server อนุญาต แล้วไฟล์ไปโผล่ฝั่ง Remote
+          </div>
+          <button
+            onClick={() => setIsPlaying(prev => !prev)}
+            style={{
+              flexShrink: 0, minWidth: "92px", height: "38px", borderRadius: "10px",
+              border: `1.5px solid ${isPlaying ? "rgba(248,113,113,0.65)" : "rgba(34,197,94,0.65)"}`,
+              background: isPlaying ? "rgba(248,113,113,0.14)" : "rgba(34,197,94,0.14)",
+              color: isPlaying ? "#fecaca" : "#bbf7d0", cursor: "pointer",
+              fontSize: "12px", fontWeight: 900
+            }}
+            title={isPlaying ? "หยุดแอนิเมชันไว้ที่ขั้นตอนนี้" : "เล่นแอนิเมชันต่ออัตโนมัติ"}
+          >
+            {isPlaying ? "หยุดเล่น" : "เล่นต่อ"}
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "8px", flexShrink: 0 }}>
+        {steps.map((item, index) => (
+          <button
+            key={item.title}
+            onClick={() => {
+              setStep(index);
+              setIsPlaying(false);
+            }}
+            style={{
+              minHeight: "58px", textAlign: "left", cursor: "pointer", borderRadius: "10px",
+              border: `1.5px solid ${step === index ? "#38bdf8" : "rgba(148,163,184,0.18)"}`,
+              background: step === index ? "rgba(56,189,248,0.16)" : "rgba(15,23,42,0.68)",
+              color: step === index ? "#e0f2fe" : "#cbd5e1", padding: "8px 10px",
+              boxShadow: step === index ? "0 0 18px rgba(56,189,248,0.18)" : "none"
+            }}
+          >
+            <div style={{ fontSize: "11px", fontWeight: 900 }}>{index + 1}. {item.title}</div>
+            <div style={{ fontSize: "10px", marginTop: "3px", lineHeight: 1.35, color: step === index ? "#bae6fd" : "#94a3b8" }}>
+              {item.short}
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1.38fr .82fr", gap: "12px", flex: 1, minHeight: 0 }}>
+        <div style={{ ...panel("#38bdf8", isActive("control") || isActive("data") || isActive("file")), padding: "14px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.35fr 1fr", gap: "12px", alignItems: "stretch", flex: 1, minHeight: 0 }}>
+            <div style={{ ...panel("#38bdf8", true), padding: "13px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ fontSize: "11px", fontWeight: 900, color: "#7dd3fc" }}>LOCAL SITE</div>
+                <div style={{ fontSize: "22px", fontWeight: 900, marginTop: "4px" }}>FileZilla</div>
+                <div style={{ fontSize: "11px", color: "#cbd5e1", marginTop: "2px" }}>Client: 192.168.1.50</div>
+              </div>
+              <div style={{
+                marginTop: "18px", padding: "10px", borderRadius: "10px",
+                border: "1px solid rgba(125,211,252,0.35)", background: "rgba(2,6,23,0.55)",
+                opacity: fileHasMoved ? .42 : 1
+              }}>
+                <div style={{ fontSize: "10px", color: "#94a3b8", fontWeight: 800 }}>ไฟล์บนเครื่องนักเรียน</div>
+                <div style={{ fontSize: "16px", color: "#e0f2fe", fontWeight: 900, marginTop: "4px" }}>test.txt</div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: "10px", minWidth: 0 }}>
+              <div style={{
+                ...panel("#38bdf8", controlReady), padding: "10px 12px",
+                display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: "10px"
+              }}>
+                <div style={{ color: "#7dd3fc", fontSize: "12px", fontWeight: 900 }}>PORT 21</div>
+                <div style={{ height: "7px", borderRadius: "999px", background: controlReady ? "linear-gradient(90deg,#38bdf8,#7dd3fc)" : "rgba(148,163,184,0.22)" }} />
+                <div style={{ gridColumn: "2", color: "#cbd5e1", fontSize: "11px" }}>Control Connection: login และคำสั่ง</div>
+              </div>
+
+              <div style={{
+                ...panel("#f59e0b", passiveReady), padding: "10px 12px",
+                display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: "10px"
+              }}>
+                <div style={{ color: "#fbbf24", fontSize: "12px", fontWeight: 900 }}>40000</div>
+                <div style={{ height: "7px", borderRadius: "999px", background: passiveReady ? "linear-gradient(90deg,#f59e0b,#fbbf24)" : "rgba(148,163,184,0.22)" }} />
+                <div style={{ gridColumn: "2", color: "#cbd5e1", fontSize: "11px" }}>Passive/Data Connection: ส่งไฟล์จริง</div>
+              </div>
+
+              <div style={{
+                position: "relative", minHeight: "72px", borderRadius: "12px",
+                border: `1.5px dashed ${dataReady ? "rgba(245,158,11,0.55)" : "rgba(148,163,184,0.20)"}`,
+                background: dataReady ? "rgba(245,158,11,0.08)" : "rgba(15,23,42,0.50)",
+                overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center"
+              }}>
+                {isActive("file") && (
+                  <div className="ftp-file-fly" style={{
+                    position: "absolute", left: "8px", width: "44%", padding: "10px 12px", borderRadius: "10px",
+                    background: "#f59e0b", color: "#111827", fontWeight: 900, textAlign: "center",
+                    boxShadow: "0 0 22px rgba(245,158,11,0.45)"
+                  }}>
+                    test.txt
+                  </div>
+                )}
+                <div style={{ color: dataReady ? "#fbbf24" : "#64748b", fontWeight: 900, fontSize: "13px" }}>
+                  {fileHasMoved ? "ส่งไฟล์ผ่าน DATA PORT แล้ว" : dataReady ? "พร้อมส่งไฟล์ผ่าน DATA PORT" : "รอ Passive Port"}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ ...panel("#22c55e", isActive("passive") || isActive("file")), padding: "13px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+              <div>
+                <div style={{ fontSize: "11px", fontWeight: 900, color: "#86efac" }}>REMOTE SITE</div>
+                <div style={{ fontSize: "22px", fontWeight: 900, marginTop: "4px" }}>vsftpd</div>
+                <div style={{ fontSize: "11px", color: "#cbd5e1", marginTop: "2px" }}>/home/ftpstudent/ftp/upload</div>
+              </div>
+              <div style={{
+                marginTop: "18px", padding: "10px", borderRadius: "10px",
+                border: `1px solid ${fileHasMoved ? "rgba(134,239,172,0.45)" : "rgba(148,163,184,0.16)"}`,
+                background: fileHasMoved ? "rgba(22,163,74,0.20)" : "rgba(2,6,23,0.45)"
+              }}>
+                <div style={{ fontSize: "10px", color: fileHasMoved ? "#86efac" : "#64748b", fontWeight: 800 }}>ไฟล์บน Server</div>
+                <div style={{ fontSize: "16px", color: fileHasMoved ? "#dcfce7" : "#64748b", fontWeight: 900, marginTop: "4px" }}>
+                  {fileHasMoved ? "test.txt uploaded" : "ยังไม่มีไฟล์ใหม่"}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", flexShrink: 0 }}>
+            <div style={{ ...panel("#38bdf8", controlReady), padding: "10px" }}>
+              <div style={{ color: "#7dd3fc", fontWeight: 900, fontSize: "11px" }}>Port 21</div>
+              <div style={{ color: "#e2e8f0", fontSize: "12px", marginTop: "4px" }}>ช่องคุยคำสั่ง</div>
+            </div>
+            <div style={{ ...panel("#f59e0b", passiveReady), padding: "10px" }}>
+              <div style={{ color: "#fbbf24", fontWeight: 900, fontSize: "11px" }}>Passive Port</div>
+              <div style={{ color: "#e2e8f0", fontSize: "12px", marginTop: "4px" }}>ช่องส่งไฟล์จริง</div>
+            </div>
+            <div style={{ ...panel("#22c55e", fileHasMoved), padding: "10px" }}>
+              <div style={{ color: "#86efac", fontWeight: 900, fontSize: "11px" }}>หลักฐาน</div>
+              <div style={{ color: "#e2e8f0", fontSize: "12px", marginTop: "4px" }}>{fileHasMoved ? "Server มีไฟล์ใหม่แล้ว" : "รอการ upload"}</div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
+          <div style={{ ...panel("#38bdf8", true), padding: "14px", flexShrink: 0 }}>
+            <div style={{ color: "#38bdf8", fontSize: "11px", fontWeight: 900, letterSpacing: ".5px" }}>กำลังอธิบายขั้นตอนที่ {step + 1}</div>
+            <div style={{ color: "#e0f2fe", fontSize: "20px", fontWeight: 900, marginTop: "5px" }}>{steps[step].title}</div>
+            <div style={{ color: "#dbeafe", fontSize: "13px", lineHeight: 1.65, marginTop: "8px" }}>{current.detail}</div>
+            <code style={{
+              display: "block", background: "#020617", color: "#7ee787", border: "1px solid rgba(126,231,135,0.22)",
+              borderRadius: "10px", padding: "9px 10px", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", marginTop: "10px"
+            }}>
+              {current.command}
+            </code>
+          </div>
+
+          <div style={{ ...panel("#22c55e", fileHasMoved), padding: "12px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <div style={{ color: "#38bdf8", fontWeight: 900, fontSize: "12px", marginBottom: "8px" }}>FileZilla Message Log</div>
+            <div style={{ background: "#020617", borderRadius: "10px", padding: "10px", flex: 1, minHeight: 0, overflow: "hidden", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px" }}>
+              {visibleLogs.map((log, index) => (
+                <div key={log} style={{
+                  color: index === visibleLogs.length - 1 ? (log.includes("complete") || log.includes("successful") ? "#86efac" : "#e2e8f0") : "#94a3b8",
+                  fontWeight: index === visibleLogs.length - 1 ? 800 : 500,
+                  marginBottom: "6px", whiteSpace: "nowrap"
+                }}>
+                  {log}
+                </div>
+              ))}
+            </div>
+            {fileHasMoved && (
+              <div className="ftp-success-pop" style={{
+                marginTop: "10px", padding: "9px 10px", borderRadius: "10px", background: "rgba(34,197,94,0.16)",
+                border: "1px solid rgba(134,239,172,0.30)", color: "#bbf7d0", fontSize: "12px", fontWeight: 900
+              }}>
+                ผลลัพธ์ที่ต้องเห็น: Remote site มีไฟล์ /upload/test.txt
+              </div>
+            )}
+          </div>
+
+          {s.speakerNotes && (
+            <div style={{
+              ...panel("#64748b", false), padding: "10px 12px", flexShrink: 0,
+              fontSize: "11px", color: "#cbd5e1", lineHeight: 1.55
+            }}>
+              <strong style={{ color: "#38bdf8" }}>บันทึกครู: </strong>{s.speakerNotes}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function SlideRenderer({ slide }: { slide: SlideData }) {
   switch (slide.type) {
     case "cover": return <CoverSlide s={slide} />;
@@ -8017,6 +8345,7 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "mariadb-query-anim":     return <MariaDBQueryAnimation s={slide} />;
     case "nodejs-request-anim":    return <NodeJSRequestAnimation s={slide} />;
     case "chmod-chown-visual":     return <ChmodChownVisualizer s={slide} />;
+    case "ftp-flow-anim":          return <FTPFlowAnimation s={slide} />;
     case "tcp-udp-anim":           return <TCPUDPAnimation s={slide} />;
     case "socket-binding-anim":    return <SocketBindingAnimation s={slide} />;
     case "port-scan-anim":         return <PortScanAnimation s={slide} />;
@@ -9696,7 +10025,6 @@ export default function Home() {
   /* --- Normal View --- */
   return (
     <>
-      <ExamNotificationBanner />
       <div className="app-layout">
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "" : "collapsed"}`}>
