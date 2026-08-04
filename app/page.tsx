@@ -29,13 +29,13 @@ interface SessionMeta { id: string; displayNum: string; title: string; topic: st
 interface WeekGroup { weekLabel: string; sessions: SessionMeta[]; }
 
 /* --- SVG Icons --- */
-const MenuIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>;
-const ChevLeft = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15,18 9,12 15,6"/></svg>;
-const ChevRight = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9,6 15,12 9,18"/></svg>;
-const MaxIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3"/></svg>;
-const MinIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 14h6v6m10-10h-6V4m0 6l7-7M3 21l7-7"/></svg>;
-const DownloadIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>;
-const NoteIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>;
+const MenuIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>;
+const ChevLeft = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15,18 9,12 15,6" /></svg>;
+const ChevRight = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9,6 15,12 9,18" /></svg>;
+const MaxIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" /></svg>;
+const MinIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 14h6v6m10-10h-6V4m0 6l7-7M3 21l7-7" /></svg>;
+const DownloadIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="7,10 12,15 17,10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>;
+const NoteIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14,2 14,8 20,8" /></svg>;
 
 /* --- Slide Renderers --- */
 function CoverSlide({ s }: { s: SlideData }) {
@@ -232,28 +232,28 @@ function NginxConfigSlide({ s }: { s: SlideData }) {
   };
 
   const configLines: ConfigLine[] = [
-    { line: 'server {',                                          type: 'block'    },
-    { line: '    listen 80;',                                    type: 'directive', icon: '🔌', color: '#60a5fa', label: 'รับ Request บนพอร์ต 80 (HTTP มาตรฐาน)' },
-    { line: '    server_name _;',                                type: 'directive', icon: '🏷️', color: '#34d399', label: 'รับทุก IP และทุกโดเมน (_ = wildcard)' },
-    { line: '',                                                  type: 'blank'    },
-    { line: '    location / {',                                  type: 'block',    icon: '📍', color: '#f59e0b', label: 'กฎสำหรับ URL ทุกรูปแบบ (เริ่มด้วย /)' },
-    { line: '        proxy_pass http://127.0.0.1:5173;',         type: 'key',      icon: '🚀', color: '#f87171', label: '⭐ ส่งต่อ Request ไปยัง Vite ที่พอร์ต 5173' },
-    { line: '        proxy_http_version 1.1;',                   type: 'directive', icon: '📡', color: '#818cf8', label: 'ใช้ HTTP/1.1 รองรับ WebSocket (Vite HMR)' },
-    { line: '        proxy_set_header Upgrade $http_upgrade;',   type: 'directive', icon: '🔄', color: '#94a3b8', label: 'ส่ง header สำหรับ WebSocket Upgrade' },
-    { line: "        proxy_set_header Connection 'upgrade';",    type: 'directive', icon: '🔄', color: '#94a3b8', label: 'ระบุว่าเป็นการเชื่อมต่อแบบ Upgrade' },
-    { line: '        proxy_set_header Host $host;',              type: 'directive', icon: '🏠', color: '#6ee7b7', label: 'ส่ง Host header ต้นฉบับไปด้วย' },
-    { line: '        proxy_cache_bypass $http_upgrade;',         type: 'directive', icon: '⚡', color: '#fbbf24', label: 'ไม่ใช้ cache เมื่อเป็น WebSocket' },
-    { line: '    }',                                             type: 'block'    },
-    { line: '}',                                                 type: 'block'    },
+    { line: 'server {', type: 'block' },
+    { line: '    listen 80;', type: 'directive', icon: '🔌', color: '#60a5fa', label: 'รับ Request บนพอร์ต 80 (HTTP มาตรฐาน)' },
+    { line: '    server_name _;', type: 'directive', icon: '🏷️', color: '#34d399', label: 'รับทุก IP และทุกโดเมน (_ = wildcard)' },
+    { line: '', type: 'blank' },
+    { line: '    location / {', type: 'block', icon: '📍', color: '#f59e0b', label: 'กฎสำหรับ URL ทุกรูปแบบ (เริ่มด้วย /)' },
+    { line: '        proxy_pass http://127.0.0.1:5173;', type: 'key', icon: '🚀', color: '#f87171', label: '⭐ ส่งต่อ Request ไปยัง Vite ที่พอร์ต 5173' },
+    { line: '        proxy_http_version 1.1;', type: 'directive', icon: '📡', color: '#818cf8', label: 'ใช้ HTTP/1.1 รองรับ WebSocket (Vite HMR)' },
+    { line: '        proxy_set_header Upgrade $http_upgrade;', type: 'directive', icon: '🔄', color: '#94a3b8', label: 'ส่ง header สำหรับ WebSocket Upgrade' },
+    { line: "        proxy_set_header Connection 'upgrade';", type: 'directive', icon: '🔄', color: '#94a3b8', label: 'ระบุว่าเป็นการเชื่อมต่อแบบ Upgrade' },
+    { line: '        proxy_set_header Host $host;', type: 'directive', icon: '🏠', color: '#6ee7b7', label: 'ส่ง Host header ต้นฉบับไปด้วย' },
+    { line: '        proxy_cache_bypass $http_upgrade;', type: 'directive', icon: '⚡', color: '#fbbf24', label: 'ไม่ใช้ cache เมื่อเป็น WebSocket' },
+    { line: '    }', type: 'block' },
+    { line: '}', type: 'block' },
   ];
 
   const annotatedLines = configLines.filter(cl => cl.label);
 
   const extraCmds = [
     { cmd: 'ln -s /etc/nginx/sites-available/webapp /etc/nginx/sites-enabled/', color: '#79c0ff', desc: 'เปิดใช้งาน config' },
-    { cmd: 'rm /etc/nginx/sites-enabled/default',                               color: '#ff7b72', desc: 'ลบ config เดิมทิ้ง' },
-    { cmd: 'nginx -t',                                                           color: '#7ee787', desc: 'ตรวจสอบ syntax' },
-    { cmd: 'systemctl reload nginx',                                             color: '#ffa657', desc: 'Reload Nginx' },
+    { cmd: 'rm /etc/nginx/sites-enabled/default', color: '#ff7b72', desc: 'ลบ config เดิมทิ้ง' },
+    { cmd: 'nginx -t', color: '#7ee787', desc: 'ตรวจสอบ syntax' },
+    { cmd: 'systemctl reload nginx', color: '#ffa657', desc: 'Reload Nginx' },
   ];
 
   const renderLine = (cl: ConfigLine, i: number) => {
@@ -323,7 +323,8 @@ function NginxConfigSlide({ s }: { s: SlideData }) {
 
   return (
     <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes ncfg-pulse {
           0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
           50%      { box-shadow: 0 0 12px 3px rgba(248,113,113,0.25); }
@@ -478,13 +479,14 @@ function NginxFlowAnimation({ s }: { s: SlideData }) {
 
   const nodes = [
     { id: 'browser', label: 'Browser', icon: '💻', sub: 'Client PC', color: '#3b82f6' },
-    { id: 'nginx',   label: 'Nginx',   icon: '🌐', sub: 'Port 80',  color: '#10b981' },
-    { id: 'disk',    label: 'Files',   icon: '📁', sub: '/var/www/html', color: '#8b5cf6' },
+    { id: 'nginx', label: 'Nginx', icon: '🌐', sub: 'Port 80', color: '#10b981' },
+    { id: 'disk', label: 'Files', icon: '📁', sub: '/var/www/html', color: '#8b5cf6' },
   ];
 
   return (
     <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes nginx-packet {
           0%   { transform: translateX(0)   translateY(0)   scale(1);   opacity: 0; }
           10%  { opacity: 1; }
@@ -673,7 +675,8 @@ function MariaDBQueryAnimation({ s }: { s: SlideData }) {
 
   return (
     <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes db-row-in {
           from { opacity: 0; transform: translateX(-12px); }
           to   { opacity: 1; transform: translateX(0); }
@@ -800,22 +803,23 @@ function NodeJSRequestAnimation({ s }: { s: SlideData }) {
   const current = steps[step];
   const nodesDef = [
     { id: 'browser', label: 'Browser', icon: '💻', color: '#3b82f6', sub: 'Client' },
-    { id: 'nodejs',  label: 'Node.js', icon: '🟢', color: '#f59e0b', sub: 'Port 3000' },
+    { id: 'nodejs', label: 'Node.js', icon: '🟢', color: '#f59e0b', sub: 'Port 3000' },
     { id: 'mariadb', label: 'MariaDB', icon: '🗄️', color: '#10b981', sub: 'Port 3306' },
   ];
 
   const arrowFromTo: Record<string, { x1: number; y1: number; x2: number; y2: number }> = {
-    'browser->nodejs':  { x1: 55,  y1: 40, x2: 155, y2: 40 },
-    'nodejs->mariadb':  { x1: 165, y1: 40, x2: 255, y2: 40 },
-    'mariadb->nodejs':  { x1: 255, y1: 45, x2: 165, y2: 45 },
-    'nodejs->browser':  { x1: 155, y1: 45, x2: 55,  y2: 45 },
+    'browser->nodejs': { x1: 55, y1: 40, x2: 155, y2: 40 },
+    'nodejs->mariadb': { x1: 165, y1: 40, x2: 255, y2: 40 },
+    'mariadb->nodejs': { x1: 255, y1: 45, x2: 165, y2: 45 },
+    'nodejs->browser': { x1: 155, y1: 45, x2: 55, y2: 45 },
   };
   const arrowKey = `${current.from}->${current.to}`;
   const arrow = arrowFromTo[arrowKey];
 
   return (
     <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes nj-log-in {
           from { opacity: 0; transform: translateY(5px); }
           to   { opacity: 1; transform: translateY(0); }
@@ -899,7 +903,7 @@ function NodeJSRequestAnimation({ s }: { s: SlideData }) {
               flex: 1, padding: '7px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px',
               background: isPlaying ? '#ef4444' : '#22c55e', color: 'white'
             }}>{isPlaying ? '❚❚ หยุด' : '▶ เล่น'}</button>
-            <button onClick={() => { const n = (step+1)%steps.length; setStep(n); setIsPlaying(false); setServerLogs(prev=>[...prev.slice(-6),`[${new Date().toLocaleTimeString()}] ${steps[n].log}`]); }} style={{
+            <button onClick={() => { const n = (step + 1) % steps.length; setStep(n); setIsPlaying(false); setServerLogs(prev => [...prev.slice(-6), `[${new Date().toLocaleTimeString()}] ${steps[n].log}`]); }} style={{
               flex: 1, padding: '7px', borderRadius: '8px', border: '1px solid var(--border)', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px',
               background: 'var(--bg-card)', color: 'var(--text-primary)'
             }}>ขั้นตอนถัดไป ▶</button>
@@ -987,7 +991,7 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
         const nextDev = queue[0];
         setCurrentDevice(nextDev);
         setQueue(queue.slice(1));
-        
+
         const freeRoomIndex = rooms.findIndex(r => r.occupiedBy === null);
         if (freeRoomIndex === -1) {
           setIsPlaying(false);
@@ -1037,21 +1041,22 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
   }, [isPlaying, handleNextStep]);
 
   // CSS animations
-  const packetAnimation = activeStep === 'D' || activeStep === 'R' 
+  const packetAnimation = activeStep === 'D' || activeStep === 'R'
     ? 'travel-to-server-anim 2s infinite ease-in-out'
     : activeStep === 'O' || activeStep === 'A'
-    ? 'travel-to-client-anim 2s infinite ease-in-out'
-    : 'none';
+      ? 'travel-to-client-anim 2s infinite ease-in-out'
+      : 'none';
 
-  const packetEmoji = activeStep === 'D' ? '📣' 
-    : activeStep === 'O' ? '🛌' 
-    : activeStep === 'R' ? '✉️' 
-    : activeStep === 'A' ? '🔑' 
-    : '';
+  const packetEmoji = activeStep === 'D' ? '📣'
+    : activeStep === 'O' ? '🛌'
+      : activeStep === 'R' ? '✉️'
+        : activeStep === 'A' ? '🔑'
+          : '';
 
   return (
     <div className="slide slide-content slide-dhcp-hotel" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes pulse-box {
           0% { transform: scale(1); }
           50% { transform: scale(1.02); }
@@ -1082,7 +1087,7 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
       `}} />
       <div className="slide-tag">{s.tag}</div>
       <h2>{s.title}</h2>
-      
+
       <div style={{ display: 'flex', gap: '25px', flex: 1, overflow: 'visible', marginTop: '5px', minHeight: '0' }}>
         {/* Left Column: Theory Text & DORA active pipeline */}
         <div style={{ flex: 0.9, minWidth: '340px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflowY: 'auto', maxHeight: '100%', paddingRight: '5px' }}>
@@ -1090,7 +1095,7 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
             {s.items?.map((item, i) => {
               const isSubItem = item.trim().startsWith("-");
               return (
-                <div key={i} style={{ 
+                <div key={i} style={{
                   lineHeight: '1.4',
                   paddingLeft: isSubItem ? '15px' : '0',
                   color: isSubItem ? 'var(--text-secondary)' : 'var(--text-primary)',
@@ -1103,10 +1108,10 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
           </div>
 
           {/* DORA Pipeline visualizer */}
-          <div style={{ 
-            background: 'var(--bg-card)', 
-            padding: '12px', 
-            borderRadius: '8px', 
+          <div style={{
+            background: 'var(--bg-card)',
+            padding: '12px',
+            borderRadius: '8px',
             border: '1px solid var(--border)',
             marginTop: '10px'
           }}>
@@ -1114,11 +1119,11 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
               ขั้นตอน DORA ที่กำลังทำงาน
             </div>
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px' }}>
-              <div style={{ 
-                flex: 1, 
-                padding: '6px 4px', 
-                borderRadius: '4px', 
-                textAlign: 'center', 
+              <div style={{
+                flex: 1,
+                padding: '6px 4px',
+                borderRadius: '4px',
+                textAlign: 'center',
                 fontWeight: 'bold',
                 transition: 'all 0.3s ease',
                 background: activeStep === 'D' ? 'var(--accent)' : 'var(--bg-elevated)',
@@ -1129,11 +1134,11 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
                 1. Discover
               </div>
               <span style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>➔</span>
-              <div style={{ 
-                flex: 1, 
-                padding: '6px 4px', 
-                borderRadius: '4px', 
-                textAlign: 'center', 
+              <div style={{
+                flex: 1,
+                padding: '6px 4px',
+                borderRadius: '4px',
+                textAlign: 'center',
                 fontWeight: 'bold',
                 transition: 'all 0.3s ease',
                 background: activeStep === 'O' ? 'var(--accent)' : 'var(--bg-elevated)',
@@ -1144,11 +1149,11 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
                 2. Offer
               </div>
               <span style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>➔</span>
-              <div style={{ 
-                flex: 1, 
-                padding: '6px 4px', 
-                borderRadius: '4px', 
-                textAlign: 'center', 
+              <div style={{
+                flex: 1,
+                padding: '6px 4px',
+                borderRadius: '4px',
+                textAlign: 'center',
                 fontWeight: 'bold',
                 transition: 'all 0.3s ease',
                 background: activeStep === 'R' ? 'var(--accent)' : 'var(--bg-elevated)',
@@ -1159,11 +1164,11 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
                 3. Request
               </div>
               <span style={{ color: 'var(--text-secondary)', opacity: 0.5 }}>➔</span>
-              <div style={{ 
-                flex: 1, 
-                padding: '6px 4px', 
-                borderRadius: '4px', 
-                textAlign: 'center', 
+              <div style={{
+                flex: 1,
+                padding: '6px 4px',
+                borderRadius: '4px',
+                textAlign: 'center',
                 fontWeight: 'bold',
                 transition: 'all 0.3s ease',
                 background: activeStep === 'A' ? 'var(--accent)' : 'var(--bg-elevated)',
@@ -1194,7 +1199,7 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <span style={{ fontWeight: 'bold', color: 'var(--accent)', fontSize: '15px' }}>แอนิเมชันจำลองโรงแรม DHCP</span>
             <div style={{ display: 'flex', gap: '6px' }}>
-              <button 
+              <button
                 onClick={() => setIsPlaying(!isPlaying)}
                 style={{
                   background: isPlaying ? '#ef4444' : '#22c55e',
@@ -1221,9 +1226,9 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
                   </>
                 )}
               </button>
-              
+
               {!isPlaying && (
-                <button 
+                <button
                   onClick={handleNextStep}
                   disabled={queue.length === 0 && !activeStep}
                   style={{
@@ -1242,7 +1247,7 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
                 </button>
               )}
 
-              <button 
+              <button
                 onClick={resetSimulation}
                 style={{
                   background: 'var(--bg-card)',
@@ -1262,10 +1267,10 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
 
           {/* Hotel Grid Area */}
           <div style={{ display: 'flex', flex: 1, gap: '10px', alignItems: 'stretch', margin: '5px 0', position: 'relative' }}>
-            
+
             {/* Left side of simulation: Client devices queue */}
             <div style={{ flex: 1.1, display: 'flex', flexDirection: 'column', gap: '8px', justifyContent: 'center', zIndex: 2 }}>
-              
+
               {/* Active check-in device */}
               {currentDevice ? (
                 <div className="animate-pulse-box" style={{
@@ -1294,9 +1299,9 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
                   <div style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '4px', textAlign: 'center' }}>คิวอุปกรณ์ถัดไป</div>
                   <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
                     {queue.map((q, idx) => (
-                      <div key={idx} style={{ 
-                        background: 'var(--bg-elevated)', 
-                        padding: '4px 8px', 
+                      <div key={idx} style={{
+                        background: 'var(--bg-elevated)',
+                        padding: '4px 8px',
                         borderRadius: '6px',
                         border: '1px solid var(--border)',
                         textAlign: 'center'
@@ -1337,11 +1342,11 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
             </div>
 
             {/* Middle side: The receptionist / DHCP Server & Traveling packet */}
-            <div style={{ 
-              flex: 0.9, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center', 
+            <div style={{
+              flex: 0.9,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
               justifyContent: 'center',
               borderLeft: '1px dashed var(--border)',
               borderRight: '1px dashed var(--border)',
@@ -1466,13 +1471,13 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
               })}
             </div>
           </div>
-          
+
           {/* Step description helper */}
           {activeStep ? (
-            <div style={{ 
-              background: 'var(--bg-card)', 
-              padding: '6px 10px', 
-              borderRadius: '6px', 
+            <div style={{
+              background: 'var(--bg-card)',
+              padding: '6px 10px',
+              borderRadius: '6px',
               fontSize: '11px',
               border: '1px solid var(--border)',
               textAlign: 'center',
@@ -1484,10 +1489,10 @@ function DhcpHotelAnimation({ s }: { s: SlideData }) {
               {activeStep === 'A' && <span><strong>ขั้นตอนที่ 4 (Acknowledge):</strong> Server ส่งมอบกุญแจ 🔑 มอบ IP ให้ไปใช้เชื่อมต่อเน็ต</span>}
             </div>
           ) : (
-            <div style={{ 
-              background: 'var(--bg-card)', 
-              padding: '6px 10px', 
-              borderRadius: '6px', 
+            <div style={{
+              background: 'var(--bg-card)',
+              padding: '6px 10px',
+              borderRadius: '6px',
               fontSize: '11px',
               border: '1px solid var(--border)',
               textAlign: 'center',
@@ -1516,7 +1521,7 @@ function StackInstallerAnimation({ s }: { s: SlideData }) {
     nodejs: false,
     git: false
   });
-  
+
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
     "student@lxc-container-std01:~$ "
   ]);
@@ -1656,7 +1661,7 @@ function StackInstallerAnimation({ s }: { s: SlideData }) {
     if (isRunning) return;
     setIsRunning(true);
     const item = itemsInfo[activeItem];
-    
+
     // Add command to log
     setTerminalLogs(prev => [...prev, `${item.installCmd}`]);
     setProgress(0);
@@ -1685,13 +1690,13 @@ function StackInstallerAnimation({ s }: { s: SlideData }) {
     if (isRunning) return;
     setIsRunning(true);
     const item = itemsInfo[activeItem];
-    
+
     setTerminalLogs(prev => [...prev, `${item.checkCmd}`]);
-    
+
     setTimeout(() => {
       if (!installed[activeItem]) {
         setTerminalLogs(prev => [
-          ...prev, 
+          ...prev,
           `bash: ${item.checkCmd.split(' ')[0]}: command not found`,
           "student@lxc-container-std01:~$ "
         ]);
@@ -1714,7 +1719,7 @@ function StackInstallerAnimation({ s }: { s: SlideData }) {
       alert("กรุณาติดตั้งและตรวจเช็คสถานะซอฟต์แวร์ให้เสร็จสิ้นก่อนส่งคำขอทดสอบ!");
       return;
     }
-    
+
     setTestResult("requesting");
     setShowTestWindow(true);
 
@@ -1727,7 +1732,8 @@ function StackInstallerAnimation({ s }: { s: SlideData }) {
 
   return (
     <div className="slide slide-content slide-stack-installer" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes flow-left-right {
           0% { stroke-dashoffset: 20; opacity: 0.3; }
           50% { opacity: 1; }
@@ -1744,9 +1750,9 @@ function StackInstallerAnimation({ s }: { s: SlideData }) {
       `}} />
       <div className="slide-tag">{s.tag}</div>
       <h2>{s.title}</h2>
-      
+
       <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: '0', marginTop: '10px' }}>
-        
+
         {/* Left Column: Stack Selector & Info */}
         <div style={{ width: '30%', display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
@@ -1859,7 +1865,7 @@ function StackInstallerAnimation({ s }: { s: SlideData }) {
               {terminalLogs.map((log, idx) => {
                 const isCmd = log.startsWith("sudo ") || log.startsWith("curl ") || log.includes("apt ") || log.includes("-v");
                 return (
-                  <div key={idx} style={{ 
+                  <div key={idx} style={{
                     color: isCmd ? '#f43f5e' : log.includes("active (running)") ? '#4ade80' : log.includes("student@lxc-container") ? '#a855f7' : '#94a3b8',
                     whiteSpace: 'pre-wrap'
                   }}>
@@ -2125,12 +2131,12 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
   const [revealedAct3, setRevealedAct3] = useState<boolean>(false);
   const [act5QuestionIdx, setAct5QuestionIdx] = useState<number>(0);
   const [selectedOptionAct5, setSelectedOptionAct5] = useState<string | null>(null);
-  const [act6Answers, setAct6Answers] = useState<{[key: number]: boolean}>({});
+  const [act6Answers, setAct6Answers] = useState<{ [key: number]: boolean }>({});
 
   // New Week 3b States
   const [w3bAct1Path, setW3bAct1Path] = useState<string>("/home/student");
   const [w3bAct1Error, setW3bAct1Error] = useState<string | null>(null);
-  const [w3bAct2Matches, setW3bAct2Matches] = useState<{[key: string]: string}>({});
+  const [w3bAct2Matches, setW3bAct2Matches] = useState<{ [key: string]: string }>({});
   const [w3bAct2SelectedLeft, setW3bAct2SelectedLeft] = useState<string | null>(null);
   const [w3bAct3Tab, setW3bAct3Tab] = useState<number>(1);
 
@@ -2142,7 +2148,7 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
     setAct5QuestionIdx(0);
     setSelectedOptionAct5(null);
     setAct6Answers({});
-    
+
     // Reset Week 3b States
     setW3bAct1Path("/home/student");
     setW3bAct1Error(null);
@@ -2381,7 +2387,7 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
           >
             ล้างลำดับ
           </button>
-          
+
           <button
             onClick={() => setAct2Order([2, 4, 1, 3])}
             style={{
@@ -2911,7 +2917,7 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
             <div style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '8px', minHeight: '140px' }}>
               <div>student@ubuntu-server:~$ pwd</div>
               <div style={{ color: '#8b949e' }}>/home/student</div>
-              
+
               {w3bAct1Path !== "/home/student" && (
                 <>
                   <div>student@ubuntu-server:~$ cd ...</div>
@@ -3008,8 +3014,8 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
             color: 'var(--text-primary)',
             lineHeight: '1.4'
           }}>
-            <strong>คำอธิบายสรุป:</strong> คุณสามารถย้ายไดเรกทอรีได้ 2 วิธี คือ 
-            (1) <strong>Absolute Path (พิกัดสมบูรณ์):</strong> ใช้ <code>cd /var/log</code> เพื่อข้ามไปยังจุดหมายทันที 
+            <strong>คำอธิบายสรุป:</strong> คุณสามารถย้ายไดเรกทอรีได้ 2 วิธี คือ
+            (1) <strong>Absolute Path (พิกัดสมบูรณ์):</strong> ใช้ <code>cd /var/log</code> เพื่อข้ามไปยังจุดหมายทันที
             หรือ (2) <strong>Relative Path (พิกัดสัมพัทธ์):</strong> ถอยกลับไปยัง root ก่อนด้วย <code>cd ..</code> และ <code>cd ..</code> จากนั้นค่อยเดินต่อไปยัง <code>cd var</code> และ <code>cd log</code> ครับ
           </div>
         )}
@@ -3032,7 +3038,7 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
       { key: "ctrlO_desc", text: "บันทึกข้อมูล/เขียนข้อความลงไฟล์ใน nano" }
     ];
 
-    const matchesMap: {[key: string]: string} = {
+    const matchesMap: { [key: string]: string } = {
       "la": "la_desc",
       "r": "r_desc",
       "ctrlO": "ctrlO_desc",
@@ -3185,20 +3191,20 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
         {w3bAct3Tab === 1 && (
           <div className="animate-fade-in-box" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ff5f56' }}>สถานการณ์ข้อผิดพลาด: พิมพ์ cd.. แล้วไม่ทำงาน</div>
-            
+
             <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
               <div>student@ubuntu-server:~$ cd..</div>
               <div style={{ color: '#f85149' }}>-bash: cd..: command not found</div>
             </div>
 
             <div style={{ fontSize: '12px', lineHeight: '1.5' }}>
-              <strong>สาเหตุของปัญหา:</strong> ลินุกซ์ต้องการการแยกวิเคราะห์คำสั่งด้วย 
-              <strong>เครื่องหมายเว้นวรรค (Space)</strong> อย่างเคร่งครัด ระบบจะมองคำว่า <code>cd..</code> เป็นชื่อคำสั่งใหม่ทั้งหมด 
+              <strong>สาเหตุของปัญหา:</strong> ลินุกซ์ต้องการการแยกวิเคราะห์คำสั่งด้วย
+              <strong>เครื่องหมายเว้นวรรค (Space)</strong> อย่างเคร่งครัด ระบบจะมองคำว่า <code>cd..</code> เป็นชื่อคำสั่งใหม่ทั้งหมด
               ซึ่งไม่มีคำสั่งชื่อนี้ในระบบปฏิบัติการ (แตกต่างจาก Windows ที่อนุโลมให้พิมพ์ติดกันได้)
             </div>
 
             <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#27c93f', marginTop: '5px' }}>วิธีพิมพ์ที่ถูกต้อง:</div>
-            
+
             <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
               <div>student@ubuntu-server:~$ cd ..</div>
               <div>student@ubuntu-server:/home$ </div>
@@ -3209,7 +3215,7 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
         {w3bAct3Tab === 2 && (
           <div className="animate-fade-in-box" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ff5f56' }}>สถานการณ์ข้อผิดพลาด: ตั้งชื่อโฟลเดอร์เว้นวรรคแล้วได้โฟลเดอร์แยกกัน</div>
-            
+
             <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
               <div>student@ubuntu-server:~$ mkdir my labs</div>
               <div>student@ubuntu-server:~$ ls</div>
@@ -3217,12 +3223,12 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
             </div>
 
             <div style={{ fontSize: '12px', lineHeight: '1.5' }}>
-              <strong>สาเหตุของปัญหา:</strong> คำสั่ง <code>mkdir</code> มองช่องว่างเว้นวรรคเป็นตัวแบ่งตัวแปรเป้าหมาย (Arguments) 
+              <strong>สาเหตุของปัญหา:</strong> คำสั่ง <code>mkdir</code> มองช่องว่างเว้นวรรคเป็นตัวแบ่งตัวแปรเป้าหมาย (Arguments)
               ทำให้ระบุเป้าหมายกลายเป็นสร้าง 2 โฟลเดอร์แยกขาดจากกัน (คือ โฟลเดอร์ชื่อ my และ โฟลเดอร์ชื่อ labs)
             </div>
 
             <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#27c93f', marginTop: '5px' }}>วิธีพิมพ์ที่ถูกต้อง (ครอบด้วยอัญประกาศหรือใช้ขีดล่าง):</div>
-            
+
             <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
               <div>student@ubuntu-server:~$ mkdir "my labs"</div>
               <div># หรือใช้ขีดล่าง: mkdir my_labs</div>
@@ -3233,19 +3239,19 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
         {w3bAct3Tab === 3 && (
           <div className="animate-fade-in-box" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#ff5f56' }}>สถานการณ์ข้อผิดพลาด: สั่งลบโฟลเดอร์แต่ขึ้นเตือนว่า Is a directory</div>
-            
+
             <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
               <div>student@ubuntu-server:~$ rm my_labs</div>
               <div style={{ color: '#f85149' }}>rm: cannot remove 'my_labs': Is a directory</div>
             </div>
 
             <div style={{ fontSize: '12px', lineHeight: '1.5' }}>
-              <strong>สาเหตุของปัญหา:</strong> คำสั่ง <code>rm</code> ตัวปกติใช้สำหรับทำลายไฟล์เดี่ยวๆ เท่านั้น 
+              <strong>สาเหตุของปัญหา:</strong> คำสั่ง <code>rm</code> ตัวปกติใช้สำหรับทำลายไฟล์เดี่ยวๆ เท่านั้น
               และเพื่อความปลอดภัยระดับแกนระบบ ลินุกซ์จะไม่ยอมให้ลบโฟลเดอร์/ไดเรกทอรีแบบลอยๆ เพราะอาจมีโครงสร้างไฟล์ซับซ้อนด้านใน
             </div>
 
             <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#27c93f', marginTop: '5px' }}>วิธีพิมพ์ที่ถูกต้อง (ใช้ออปชัน -r ย่อมาจาก recursive เพื่อสั่งลบซ้ำลึกเข้าไปข้างใน):</div>
-            
+
             <div style={{ background: '#0c1017', padding: '12px', borderRadius: '8px', fontFamily: 'monospace', fontSize: '11px', color: '#e6edf3', border: '1px solid #30363d' }}>
               <div>student@ubuntu-server:~$ rm -r my_labs</div>
               <div>student@ubuntu-server:~$ </div>
@@ -3319,8 +3325,8 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
             }
 
             return (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 style={optStyle}
                 onClick={() => {
                   if (selectedOption === null) {
@@ -3386,8 +3392,8 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
             let bg = 'var(--bg-card)', border = '1px solid var(--border)', color = 'var(--text-primary)';
             let suffix: React.ReactNode = null;
             if (hasAnswered) {
-              if (isCorrect) { bg = 'rgba(34,197,94,0.10)'; border = '2px solid #22c55e'; color = '#22c55e'; suffix = <span style={{ color:'#22c55e', fontSize:'12px', fontWeight:'bold' }}>✓ ถูกต้อง</span>; }
-              else if (isSelected) { bg = 'rgba(239,68,68,0.10)'; border = '2px solid #ef4444'; color = '#ef4444'; suffix = <span style={{ color:'#ef4444', fontSize:'12px', fontWeight:'bold' }}>✗ ผิด</span>; }
+              if (isCorrect) { bg = 'rgba(34,197,94,0.10)'; border = '2px solid #22c55e'; color = '#22c55e'; suffix = <span style={{ color: '#22c55e', fontSize: '12px', fontWeight: 'bold' }}>✓ ถูกต้อง</span>; }
+              else if (isSelected) { bg = 'rgba(239,68,68,0.10)'; border = '2px solid #ef4444'; color = '#ef4444'; suffix = <span style={{ color: '#ef4444', fontSize: '12px', fontWeight: 'bold' }}>✗ ผิด</span>; }
             }
             return (
               <div key={i} onClick={() => { if (!hasAnswered) setSelectedOption(opt); }} style={{
@@ -3427,7 +3433,7 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
     <div className="slide slide-content slide-interactive-act" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto' }}>
       <div className="slide-tag">{s.tag}</div>
       <h2>{s.title}</h2>
-      
+
       <div style={{ display: 'flex', gap: '30px', flex: 1, overflow: 'visible', marginTop: '10px', minHeight: '0' }}>
         {/* Left Column: Speaker Instruction / Notes */}
         <div style={{ flex: 0.8, minWidth: '280px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', overflowY: 'auto', maxHeight: '100%' }}>
@@ -3458,7 +3464,7 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
               </div>
             </div>
           </div>
-          
+
           <div style={{
             fontSize: '11px',
             color: 'var(--text-secondary)',
@@ -3496,9 +3502,9 @@ function InteractiveActivitySlide({ s }: { s: SlideData }) {
           {s.id === 'w3b-act3' && renderW3bAct3()}
           {s.id?.startsWith('w3b-cmd-') && renderW3bCommandQuiz()}
           {/* Generic quiz renderer for all other weeks */}
-          {!['w3a-act1','w3a-act2','w3a-act3','w3a-act4','w3a-act5','w3a-act6','w3b-act1','w3b-act2','w3b-act3'].includes(s.id ?? '') &&
-           !s.id?.startsWith('w3b-cmd-') &&
-           s.question && s.options && renderGenericQuiz()}
+          {!['w3a-act1', 'w3a-act2', 'w3a-act3', 'w3a-act4', 'w3a-act5', 'w3a-act6', 'w3b-act1', 'w3b-act2', 'w3b-act3'].includes(s.id ?? '') &&
+            !s.id?.startsWith('w3b-cmd-') &&
+            s.question && s.options && renderGenericQuiz()}
         </div>
       </div>
     </div>
@@ -3510,7 +3516,7 @@ function HomeworkSlide({ s }: { s: SlideData }) {
   const isW6a = s.id?.startsWith('w6a');
 
   const scenarioTitle = isW3b ? '🏠 สถานการณ์จำลองในการฝึกปฏิบัติ' : '🏠 สถานการณ์จำลองในโจทย์';
-  
+
   let scenarioDesc = '';
   if (isW3b) {
     scenarioDesc = 'นักเรียนล็อกอินเข้าระบบ Linux Server และต้องการเตรียมความพร้อมสร้างสภาพแวดล้อมไดเรกทอรีทำงาน พร้อมทดสอบความเข้าใจเกี่ยวกับการจัดการไฟล์และการนำทาง';
@@ -3684,15 +3690,15 @@ function HomeworkSlide({ s }: { s: SlideData }) {
         </div>
 
         {/* Right Column: Assignment Tasks List */}
-        <div style={{ 
-          flex: 1.2, 
-          minWidth: '360px', 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: '8px', 
-          overflowY: 'auto', 
-          maxHeight: '330px', 
-          paddingRight: '5px' 
+        <div style={{
+          flex: 1.2,
+          minWidth: '360px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px',
+          overflowY: 'auto',
+          maxHeight: '330px',
+          paddingRight: '5px'
         }}>
           <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '2px' }}>
             {tasksHeader}
@@ -3759,7 +3765,7 @@ function HomeworkSlide({ s }: { s: SlideData }) {
           fontWeight: 'bold',
           fontSize: '10px'
         }}>
-          ห้ามลอกเลียนผลงานกันโดยเด็ดขาด 
+          ห้ามลอกเลียนผลงานกันโดยเด็ดขาด
         </span>
       </div>
     </div>
@@ -3816,13 +3822,13 @@ function LabSlide({ s }: { s: SlideData }) {
                       {renderFormattedText(text)}
                     </div>
                     {cmds.length > 0 && (
-                      <div style={{ 
-                        background: '#0d1117', 
-                        borderRadius: '10px', 
-                        overflow: 'hidden', 
-                        border: '1px solid #30363d', 
-                        boxShadow: '0 4px 16px rgba(0,0,0,0.25)', 
-                        width: '100%', 
+                      <div style={{
+                        background: '#0d1117',
+                        borderRadius: '10px',
+                        overflow: 'hidden',
+                        border: '1px solid #30363d',
+                        boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
+                        width: '100%',
                         marginTop: '6px',
                         display: 'block'
                       }}>
@@ -3836,13 +3842,13 @@ function LabSlide({ s }: { s: SlideData }) {
                           </span>
                         </div>
                         {/* Command lines */}
-                        <div style={{ 
-                          padding: '10px 14px', 
-                          fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace", 
-                          fontSize: '12px', 
-                          lineHeight: '1.7', 
-                          display: 'flex', 
-                          flexDirection: 'column', 
+                        <div style={{
+                          padding: '10px 14px',
+                          fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace",
+                          fontSize: '12px',
+                          lineHeight: '1.7',
+                          display: 'flex',
+                          flexDirection: 'column',
                           gap: '2px',
                           background: '#0d1117'
                         }}>
@@ -3940,7 +3946,7 @@ function DiagramDORA() {
             <text x={cx} y={82} textAnchor="middle" fontSize={10} fill={colors[i]} fontWeight={700}>{lbl}</text>
             <text x={cx} y={126} textAnchor="middle" fontSize={9} fill="#8892a4">{descs[i]}</text>
             {i < 3 && <line x1={cx + 38} y1={70} x2={cx + 92} y2={70} stroke={colors[i]} strokeWidth={1.5} />}
-            {i < 3 && <polygon points={`${cx+92},65 ${cx+102},70 ${cx+92},75`} fill={colors[i+1]} />}
+            {i < 3 && <polygon points={`${cx + 92},65 ${cx + 102},70 ${cx + 92},75`} fill={colors[i + 1]} />}
           </g>
         );
       })}
@@ -3950,27 +3956,27 @@ function DiagramDORA() {
 }
 
 function DiagramDNS() {
-  const box = (x:number,y:number,w:number,color:string,label:string,sub:string) => (
+  const box = (x: number, y: number, w: number, color: string, label: string, sub: string) => (
     <g>
-      <rect x={x} y={y} width={w} height={50} rx={8} fill="#191d29" stroke={color} strokeWidth={1.5}/>
-      <text x={x+w/2} y={y+22} textAnchor="middle" fontSize={12} fill="#e8eaf0" fontFamily="Inter,sans-serif">{label}</text>
-      <text x={x+w/2} y={y+38} textAnchor="middle" fontSize={9} fill="#8892a4" fontFamily="Inter,sans-serif">{sub}</text>
+      <rect x={x} y={y} width={w} height={50} rx={8} fill="#191d29" stroke={color} strokeWidth={1.5} />
+      <text x={x + w / 2} y={y + 22} textAnchor="middle" fontSize={12} fill="#e8eaf0" fontFamily="Inter,sans-serif">{label}</text>
+      <text x={x + w / 2} y={y + 38} textAnchor="middle" fontSize={9} fill="#8892a4" fontFamily="Inter,sans-serif">{sub}</text>
     </g>
   );
   return (
     <svg viewBox="0 0 560 200" style={{ width: "100%", height: "100%" }}>
-      {box(20,20,150,"#22d3ee","💻 Browser","พิมพ์ google.com")}
-      <line x1="170" y1="45" x2="205" y2="45" stroke="#22d3ee" strokeWidth={1.5}/>
-      <polygon points="205,40 215,45 205,50" fill="#22d3ee"/>
-      {box(215,20,130,"#a78bfa","🌍 Root DNS","ชี้ไปยัง .com TLD")}
-      <line x1="345" y1="45" x2="380" y2="45" stroke="#a78bfa" strokeWidth={1.5}/>
-      <polygon points="380,40 390,45 380,50" fill="#a78bfa"/>
-      {box(390,20,150,"#f59e0b","📂 .com TLD","ชี้ไปยัง google.com")}
-      <line x1="465" y1="70" x2="465" y2="105" stroke="#f59e0b" strokeWidth={1.5}/>
-      <polygon points="460,105 465,115 470,105" fill="#22c55e"/>
-      {box(390,115,150,"#22c55e","🎯 Authoritative","google.com = 142.250.x.x")}
-      <line x1="390" y1="140" x2="170" y2="140" stroke="#22c55e" strokeWidth={1.5} strokeDasharray="5,3"/>
-      <polygon points="170,135 160,140 170,145" fill="#22c55e"/>
+      {box(20, 20, 150, "#22d3ee", "💻 Browser", "พิมพ์ google.com")}
+      <line x1="170" y1="45" x2="205" y2="45" stroke="#22d3ee" strokeWidth={1.5} />
+      <polygon points="205,40 215,45 205,50" fill="#22d3ee" />
+      {box(215, 20, 130, "#a78bfa", "🌍 Root DNS", "ชี้ไปยัง .com TLD")}
+      <line x1="345" y1="45" x2="380" y2="45" stroke="#a78bfa" strokeWidth={1.5} />
+      <polygon points="380,40 390,45 380,50" fill="#a78bfa" />
+      {box(390, 20, 150, "#f59e0b", "📂 .com TLD", "ชี้ไปยัง google.com")}
+      <line x1="465" y1="70" x2="465" y2="105" stroke="#f59e0b" strokeWidth={1.5} />
+      <polygon points="460,105 465,115 470,105" fill="#22c55e" />
+      {box(390, 115, 150, "#22c55e", "🎯 Authoritative", "google.com = 142.250.x.x")}
+      <line x1="390" y1="140" x2="170" y2="140" stroke="#22c55e" strokeWidth={1.5} strokeDasharray="5,3" />
+      <polygon points="170,135 160,140 170,145" fill="#22c55e" />
       <text x="280" y="180" textAnchor="middle" fontSize={10} fill="#4a5568" fontFamily="Inter,sans-serif">DNS Resolution แปลงชื่อ → IP Address</text>
     </svg>
   );
@@ -3980,16 +3986,16 @@ function DiagramNOSvsDesktop() {
   return (
     <svg viewBox="0 0 560 200" style={{ width: "100%", height: "100%" }}>
       {/* NOS Side */}
-      <rect x="20" y="20" width="240" height="160" rx={10} fill="#0c1a2e" stroke="#22d3ee" strokeWidth={2}/>
+      <rect x="20" y="20" width="240" height="160" rx={10} fill="#0c1a2e" stroke="#22d3ee" strokeWidth={2} />
       <text x="140" y="46" textAnchor="middle" fontSize={13} fill="#22d3ee" fontWeight={700} fontFamily="Inter,sans-serif">🌐 Network OS (NOS)</text>
-      {["Multi-user: 100+ คน พร้อมกัน","CLI เป็นหลัก (ประสิทธิภาพสูง)","Uptime 99.999% (Five Nines)","Daemon / Background Services","RAM เน้น Cache ข้อมูล"].map((t,i)=>(
-        <text key={i} x="36" y={68+i*20} fontSize={10} fill="#8892a4" fontFamily="Inter,sans-serif">▸ {t}</text>
+      {["Multi-user: 100+ คน พร้อมกัน", "CLI เป็นหลัก (ประสิทธิภาพสูง)", "Uptime 99.999% (Five Nines)", "Daemon / Background Services", "RAM เน้น Cache ข้อมูล"].map((t, i) => (
+        <text key={i} x="36" y={68 + i * 20} fontSize={10} fill="#8892a4" fontFamily="Inter,sans-serif">▸ {t}</text>
       ))}
       {/* Desktop Side */}
-      <rect x="300" y="20" width="240" height="160" rx={10} fill="#1a1200" stroke="#f59e0b" strokeWidth={2}/>
+      <rect x="300" y="20" width="240" height="160" rx={10} fill="#1a1200" stroke="#f59e0b" strokeWidth={2} />
       <text x="420" y="46" textAnchor="middle" fontSize={13} fill="#f59e0b" fontWeight={700} fontFamily="Inter,sans-serif">💻 Desktop OS</text>
-      {["Single-user: ใช้งานคนเดียว","GUI เป็นหลัก (ใช้งานง่าย)","ปิด-เปิด รายวัน","Foreground Applications","RAM เน้นโปรแกรมที่เปิดอยู่"].map((t,i)=>(
-        <text key={i} x="316" y={68+i*20} fontSize={10} fill="#8892a4" fontFamily="Inter,sans-serif">▸ {t}</text>
+      {["Single-user: ใช้งานคนเดียว", "GUI เป็นหลัก (ใช้งานง่าย)", "ปิด-เปิด รายวัน", "Foreground Applications", "RAM เน้นโปรแกรมที่เปิดอยู่"].map((t, i) => (
+        <text key={i} x="316" y={68 + i * 20} fontSize={10} fill="#8892a4" fontFamily="Inter,sans-serif">▸ {t}</text>
       ))}
       <text x="280" y="196" textAnchor="middle" fontSize={10} fill="#4a5568" fontFamily="Inter,sans-serif">NOS ถูกออกแบบมาสำหรับรองรับผู้ใช้หลายคน Desktop OS เพื่อผู้ใช้คนเดียว</text>
     </svg>
@@ -3997,50 +4003,50 @@ function DiagramNOSvsDesktop() {
 }
 
 function DiagramHypervisor() {
-  const lyr = (x:number,y:number,w:number,h:number,color:string,lbl:string,sub:string="") => (
+  const lyr = (x: number, y: number, w: number, h: number, color: string, lbl: string, sub: string = "") => (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={6} fill="#191d29" stroke={color} strokeWidth={1.5}/>
-      <text x={x+w/2} y={y+h/2-4} textAnchor="middle" fontSize={12} fill={color} fontFamily="Inter,sans-serif" fontWeight={600}>{lbl}</text>
-      {sub && <text x={x+w/2} y={y+h/2+12} textAnchor="middle" fontSize={9} fill="#8892a4" fontFamily="Inter,sans-serif">{sub}</text>}
+      <rect x={x} y={y} width={w} height={h} rx={6} fill="#191d29" stroke={color} strokeWidth={1.5} />
+      <text x={x + w / 2} y={y + h / 2 - 4} textAnchor="middle" fontSize={12} fill={color} fontFamily="Inter,sans-serif" fontWeight={600}>{lbl}</text>
+      {sub && <text x={x + w / 2} y={y + h / 2 + 12} textAnchor="middle" fontSize={9} fill="#8892a4" fontFamily="Inter,sans-serif">{sub}</text>}
     </g>
   );
   return (
     <svg viewBox="0 0 560 200" style={{ width: "100%", height: "100%" }}>
       <text x="130" y="18" textAnchor="middle" fontSize={11} fill="#22d3ee" fontFamily="Inter,sans-serif" fontWeight={700}>Type 1 — Bare Metal</text>
-      {lyr(20,25,220,30,"#a78bfa","VM1 (Win)")}
-      <rect x={125} y={25} width={2} height={30} fill="#22d3ee" opacity={0.3}/>
-      {lyr(125,25,115,30,"#a78bfa","VM2 (Linux)")}
-      {lyr(20,60,220,30,"#22d3ee","Hypervisor","VMware ESXi / KVM")}
-      {lyr(20,95,220,30,"#f59e0b","Hardware","CPU / RAM / Disk")}
+      {lyr(20, 25, 220, 30, "#a78bfa", "VM1 (Win)")}
+      <rect x={125} y={25} width={2} height={30} fill="#22d3ee" opacity={0.3} />
+      {lyr(125, 25, 115, 30, "#a78bfa", "VM2 (Linux)")}
+      {lyr(20, 60, 220, 30, "#22d3ee", "Hypervisor", "VMware ESXi / KVM")}
+      {lyr(20, 95, 220, 30, "#f59e0b", "Hardware", "CPU / RAM / Disk")}
       <text x="130" y="145" textAnchor="middle" fontSize={9} fill="#22c55e" fontFamily="Inter,sans-serif">✅ ประสิทธิภาพสูงสุด (Production)</text>
       <text x="420" y="18" textAnchor="middle" fontSize={11} fill="#f59e0b" fontFamily="Inter,sans-serif" fontWeight={700}>Type 2 — Hosted</text>
-      {lyr(320,25,200,30,"#a78bfa","VM (Ubuntu)")}
-      {lyr(320,60,200,30,"#f59e0b","VirtualBox / VMware WS","")}
-      {lyr(320,95,200,30,"#22d3ee","Host OS (Windows/macOS)")}
-      {lyr(320,130,200,25,"#f59e0b","Hardware")}
+      {lyr(320, 25, 200, 30, "#a78bfa", "VM (Ubuntu)")}
+      {lyr(320, 60, 200, 30, "#f59e0b", "VirtualBox / VMware WS", "")}
+      {lyr(320, 95, 200, 30, "#22d3ee", "Host OS (Windows/macOS)")}
+      {lyr(320, 130, 200, 25, "#f59e0b", "Hardware")}
       <text x="420" y="170" textAnchor="middle" fontSize={9} fill="#22d3ee" fontFamily="Inter,sans-serif">🔵 ใช้ทำแล็บ (Development)</text>
     </svg>
   );
 }
 
 function DiagramNTier() {
-  const row = (y:number,color:string,icon:string,lbl:string,sub:string) => (
+  const row = (y: number, color: string, icon: string, lbl: string, sub: string) => (
     <g>
-      <rect x={160} y={y} width={240} height={36} rx={8} fill="#191d29" stroke={color} strokeWidth={1.5}/>
-      <text x={180} y={y+22} fontSize={14}>{icon}</text>
-      <text x={204} y={y+15} fontSize={12} fill={color} fontFamily="Inter,sans-serif" fontWeight={600}>{lbl}</text>
-      <text x={204} y={y+30} fontSize={9} fill="#8892a4" fontFamily="Inter,sans-serif">{sub}</text>
+      <rect x={160} y={y} width={240} height={36} rx={8} fill="#191d29" stroke={color} strokeWidth={1.5} />
+      <text x={180} y={y + 22} fontSize={14}>{icon}</text>
+      <text x={204} y={y + 15} fontSize={12} fill={color} fontFamily="Inter,sans-serif" fontWeight={600}>{lbl}</text>
+      <text x={204} y={y + 30} fontSize={9} fill="#8892a4" fontFamily="Inter,sans-serif">{sub}</text>
     </g>
   );
   return (
     <svg viewBox="0 0 560 210" style={{ width: "100%", height: "100%" }}>
-      {row(20,"#22d3ee","💻","Presentation Layer","Browser / Mobile App — ส่วนที่ผู้ใช้เห็น")}
-      <line x1="280" y1="56" x2="280" y2="76" stroke="#22d3ee" strokeWidth={1.5}/>
-      <polygon points="275,76 280,86 285,76" fill="#a78bfa"/>
-      {row(86,"#a78bfa","⚙️","Application Layer","Business Logic / API Server — ประมวลผล")}
-      <line x1="280" y1="122" x2="280" y2="142" stroke="#a78bfa" strokeWidth={1.5}/>
-      <polygon points="275,142 280,152 285,142" fill="#22c55e"/>
-      {row(152,"#22c55e","🗄️","Data Layer","Database Server — จัดเก็บข้อมูล")}
+      {row(20, "#22d3ee", "💻", "Presentation Layer", "Browser / Mobile App — ส่วนที่ผู้ใช้เห็น")}
+      <line x1="280" y1="56" x2="280" y2="76" stroke="#22d3ee" strokeWidth={1.5} />
+      <polygon points="275,76 280,86 285,76" fill="#a78bfa" />
+      {row(86, "#a78bfa", "⚙️", "Application Layer", "Business Logic / API Server — ประมวลผล")}
+      <line x1="280" y1="122" x2="280" y2="142" stroke="#a78bfa" strokeWidth={1.5} />
+      <polygon points="275,142 280,152 285,142" fill="#22c55e" />
+      {row(152, "#22c55e", "🗄️", "Data Layer", "Database Server — จัดเก็บข้อมูล")}
       <text x="280" y="202" textAnchor="middle" fontSize={10} fill="#4a5568" fontFamily="Inter,sans-serif">3-Tier Architecture: แยกส่วนทำให้ขยายระบบง่ายและปลอดภัยขึ้น</text>
     </svg>
   );
@@ -4063,8 +4069,8 @@ function DiagramAnimOSI() {
       <text x="100" y="15" textAnchor="middle" fill="#e8eaf0" fontSize="12" fontWeight="bold">เครื่องต้นทาง (ผู้ส่ง)</text>
       {layers.map((l, i) => (
         <g key={`sender-${i}`}>
-          <rect x="20" y={25 + i*24} width="160" height="20" rx="3" fill="#191d29" stroke={l.color} strokeWidth="1.5" />
-          <text x="100" y={39 + i*24} textAnchor="middle" fill={l.color} fontSize="11" fontWeight="bold">{l.name}</text>
+          <rect x="20" y={25 + i * 24} width="160" height="20" rx="3" fill="#191d29" stroke={l.color} strokeWidth="1.5" />
+          <text x="100" y={39 + i * 24} textAnchor="middle" fill={l.color} fontSize="11" fontWeight="bold">{l.name}</text>
         </g>
       ))}
 
@@ -4072,14 +4078,14 @@ function DiagramAnimOSI() {
       <text x="460" y="15" textAnchor="middle" fill="#e8eaf0" fontSize="12" fontWeight="bold">เครื่องปลายทาง (ผู้รับ)</text>
       {layers.map((l, i) => (
         <g key={`receiver-${i}`}>
-          <rect x="380" y={25 + i*24} width="160" height="20" rx="3" fill="#191d29" stroke={l.color} strokeWidth="1.5" />
-          <text x="460" y={39 + i*24} textAnchor="middle" fill={l.color} fontSize="11" fontWeight="bold">{l.name}</text>
+          <rect x="380" y={25 + i * 24} width="160" height="20" rx="3" fill="#191d29" stroke={l.color} strokeWidth="1.5" />
+          <text x="460" y={39 + i * 24} textAnchor="middle" fill={l.color} fontSize="11" fontWeight="bold">{l.name}</text>
         </g>
       ))}
 
       {/* Center Descriptions */}
       {layers.map((l, i) => (
-        <text key={`desc-${i}`} x="280" y={39 + i*24} textAnchor="middle" fill="#8892a4" fontSize="10">{l.desc}</text>
+        <text key={`desc-${i}`} x="280" y={39 + i * 24} textAnchor="middle" fill="#8892a4" fontSize="10">{l.desc}</text>
       ))}
 
       {/* Data Packet Animation */}
@@ -4088,7 +4094,7 @@ function DiagramAnimOSI() {
         <animate attributeName="cy" values="35;180;180" keyTimes="0;0.4;1" dur="4s" repeatCount="indefinite" />
         <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.4;1" dur="4s" repeatCount="indefinite" />
       </circle>
-      
+
       {/* Across Network (L1 to L1) */}
       <line x1="180" y1="180" x2="380" y2="180" stroke="#10b981" strokeWidth="2" strokeDasharray="4 2" />
       <circle cx="180" cy="180" r="4" fill="#10b981" opacity="0">
@@ -4112,12 +4118,12 @@ function DiagramAnimL7() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="16" fontWeight="bold">จุดเชื่อมต่อกับผู้ใช้งาน (Layer 7: Application)</text>
-      
+
       {/* Web Browser */}
       <rect x="80" y="60" width="140" height="80" rx="4" fill="#1e293b" stroke="#f43f5e" strokeWidth="2" />
       <text x="150" y="90" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="bold">Web Browser</text>
       <text x="150" y="110" textAnchor="middle" fill="#f43f5e" fontSize="10">HTTP / HTTPS</text>
-      
+
       {/* Email Client */}
       <rect x="340" y="60" width="140" height="80" rx="4" fill="#1e293b" stroke="#f43f5e" strokeWidth="2" />
       <text x="410" y="90" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="bold">Email App</text>
@@ -4143,7 +4149,7 @@ function DiagramAnimL6() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="16" fontWeight="bold">การแปลภาษาและเข้ารหัส (Layer 6: Presentation)</text>
-      
+
       {/* Plain Text */}
       <rect x="60" y="80" width="100" height="40" rx="4" fill="#1e293b" stroke="#94a3b8" strokeWidth="2" />
       <text x="110" y="105" textAnchor="middle" fill="#fff" fontSize="12">"PASSWORD"</text>
@@ -4174,11 +4180,11 @@ function DiagramAnimL5() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="16" fontWeight="bold">การจัดการการเชื่อมต่อ (Layer 5: Session)</text>
-      
+
       {/* PC 1 */}
       <rect x="60" y="80" width="60" height="40" rx="4" fill="#64748b" />
       <text x="90" y="105" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="bold">Client</text>
-      
+
       {/* Server */}
       <rect x="440" y="60" width="60" height="80" rx="4" fill="#3b82f6" />
       <text x="470" y="105" textAnchor="middle" fill="#fff" fontSize="12" fontWeight="bold">Server</text>
@@ -4187,7 +4193,7 @@ function DiagramAnimL5() {
       <rect x="130" y="90" width="300" height="20" rx="10" fill="none" stroke="#d946ef" strokeWidth="2" strokeDasharray="5 5">
         <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.2;0.8;1" dur="4s" repeatCount="indefinite" />
       </rect>
-      
+
       {/* Session State Text */}
       <text x="280" y="80" textAnchor="middle" fill="#d946ef" fontSize="12" fontWeight="bold">
         <tspan opacity="0"><animate attributeName="opacity" values="1;1;0" keyTimes="0;0.1;0.2" dur="4s" repeatCount="indefinite" />1. สร้าง Session</tspan>
@@ -4197,8 +4203,8 @@ function DiagramAnimL5() {
 
       {/* Data Syncing */}
       <circle cx="140" cy="100" r="4" fill="#fff" opacity="0">
-         <animate attributeName="cx" values="140;420" dur="1s" begin="0.8s" repeatCount="3" />
-         <animate attributeName="opacity" values="0;1;0" keyTimes="0;0.5;1" dur="1s" begin="0.8s" repeatCount="3" />
+        <animate attributeName="cx" values="140;420" dur="1s" begin="0.8s" repeatCount="3" />
+        <animate attributeName="opacity" values="0;1;0" keyTimes="0;0.5;1" dur="1s" begin="0.8s" repeatCount="3" />
       </circle>
 
       <text x="280" y="200" textAnchor="middle" fill="#8892a4" fontSize="12">L5 คอยเปิด, ควบคุม, และปิดช่องทางการสนทนา (Session) ระหว่างสองเครื่อง เช่น การล็อกอินเว็บ</text>
@@ -4211,11 +4217,11 @@ function DiagramAnimL4() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="30" textAnchor="middle" fill="#e8eaf0" fontSize="16" fontWeight="bold">การแบ่งข้อมูลเป็น Segment (Layer 4)</text>
-      
+
       {/* Big Data Chunk */}
       <rect x="50" y="80" width="120" height="60" rx="4" fill="#f43f5e" />
       <text x="110" y="115" textAnchor="middle" fill="#fff" fontSize="14" fontWeight="bold">Data ก้อนใหญ่</text>
-      
+
       {/* Knife / Slicing */}
       <line x1="190" y1="110" x2="220" y2="110" stroke="#8b5cf6" strokeWidth="3" strokeDasharray="4 2">
         <animate attributeName="x2" values="190;240;190" dur="2s" repeatCount="indefinite" />
@@ -4229,13 +4235,13 @@ function DiagramAnimL4() {
         </rect>
         <text x="15" y="115" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">S1</text>
         <rect x="40" y="80" width="30" height="60" rx="4" fill="#8b5cf6">
-           <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.3;0.8;1" dur="2s" repeatCount="indefinite" />
-           <animate attributeName="x" values="40;60;60" keyTimes="0;0.3;1" dur="2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0;0;1;1" keyTimes="0;0.3;0.8;1" dur="2s" repeatCount="indefinite" />
+          <animate attributeName="x" values="40;60;60" keyTimes="0;0.3;1" dur="2s" repeatCount="indefinite" />
         </rect>
         <text x="55" y="115" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">S2</text>
         <rect x="80" y="80" width="30" height="60" rx="4" fill="#8b5cf6">
-           <animate attributeName="opacity" values="0;0;0;1" keyTimes="0;0.5;0.9;1" dur="2s" repeatCount="indefinite" />
-           <animate attributeName="x" values="80;100;100" keyTimes="0;0.5;1" dur="2s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0;0;0;1" keyTimes="0;0.5;0.9;1" dur="2s" repeatCount="indefinite" />
+          <animate attributeName="x" values="80;100;100" keyTimes="0;0.5;1" dur="2s" repeatCount="indefinite" />
         </rect>
         <text x="95" y="115" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="bold">S3</text>
       </g>
@@ -4250,11 +4256,11 @@ function DiagramAnimL3() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="16" fontWeight="bold">การหาเส้นทางข้ามเครือข่ายด้วย IP (Layer 3)</text>
-      
+
       {/* PC 1 */}
       <rect x="30" y="80" width="40" height="30" rx="4" fill="#64748b" />
       <text x="50" y="130" textAnchor="middle" fill="#94a3b8" fontSize="10">IP: 10.0.0.1</text>
-      
+
       {/* Routers */}
       <circle cx="150" cy="95" r="20" fill="#1e293b" stroke="#3b82f6" strokeWidth="2" />
       <text x="150" y="130" textAnchor="middle" fill="#3b82f6" fontSize="10" fontWeight="bold">Router A</text>
@@ -4297,11 +4303,11 @@ function DiagramAnimL2() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="16" fontWeight="bold">การส่งข้อมูลในวง LAN เดียวกัน (Layer 2)</text>
-      
+
       {/* Switch */}
       <rect x="200" y="80" width="160" height="40" rx="6" fill="#1e293b" stroke="#06b6d4" strokeWidth="2" />
       <text x="280" y="105" textAnchor="middle" fill="#06b6d4" fontSize="14" fontWeight="bold">Switch</text>
-      
+
       {/* PCs */}
       <rect x="40" y="30" width="40" height="30" rx="4" fill="#64748b" />
       <text x="60" y="75" textAnchor="middle" fill="#94a3b8" fontSize="10">MAC: AA:BB...</text>
@@ -4338,17 +4344,17 @@ function DiagramAnimL1() {
   return (
     <svg viewBox="0 0 560 220" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="16" fontWeight="bold">การแปลงข้อมูลเป็นสัญญาณ (Layer 1)</text>
-      
+
       {/* Bit stream */}
       <text x="120" y="110" textAnchor="middle" fill="#94a3b8" fontSize="16" fontWeight="bold" letterSpacing="4">0101101</text>
-      
+
       {/* Conversion Process */}
       <rect x="230" y="80" width="100" height="50" rx="4" fill="#1e293b" stroke="#10b981" strokeWidth="2" />
       <text x="280" y="110" textAnchor="middle" fill="#10b981" fontSize="12" fontWeight="bold">Transceiver</text>
-      
+
       {/* Waves output */}
       <path d="M 350 105 Q 365 70, 380 105 T 410 105 T 440 105 T 470 105" fill="none" stroke="#10b981" strokeWidth="3">
-        <animate attributeName="d" 
+        <animate attributeName="d"
           values="M 350 105 Q 365 70, 380 105 T 410 105 T 440 105 T 470 105;
                   M 350 105 Q 365 140, 380 105 T 410 105 T 440 105 T 470 105;
                   M 350 105 Q 365 70, 380 105 T 410 105 T 440 105 T 470 105"
@@ -4376,12 +4382,12 @@ function DiagramAnimSwitch() {
       {/* Central Switch */}
       <rect x="220" y="80" width="120" height="40" rx="4" fill="#191d29" stroke="#22d3ee" strokeWidth="2" />
       <text x="280" y="104" textAnchor="middle" fill="#22d3ee" fontSize="14" fontWeight="bold">SWITCH</text>
-      
+
       {/* PC 1 (Top Left) */}
       <rect x="80" y="20" width="40" height="30" rx="2" fill="#12151d" stroke="#8892a4" strokeWidth="1.5" />
       <text x="100" y="40" textAnchor="middle" fill="#e8eaf0" fontSize="12">PC 1</text>
       <line x1="120" y1="50" x2="220" y2="90" stroke="#4a5568" strokeWidth="2" strokeDasharray="4 2" />
-      
+
       {/* PC 2 (Bottom Left) */}
       <rect x="80" y="150" width="40" height="30" rx="2" fill="#12151d" stroke="#8892a4" strokeWidth="1.5" />
       <text x="100" y="170" textAnchor="middle" fill="#e8eaf0" fontSize="12">PC 2</text>
@@ -4410,7 +4416,7 @@ function DiagramAnimSwitch() {
         <animate attributeName="cy" values="150;100;100;50" keyTimes="0;0.4;0.6;1" dur="3s" begin="1.5s" repeatCount="indefinite" />
         <animate attributeName="opacity" values="0;1;1;1;0" keyTimes="0;0.1;0.8;0.9;1" dur="3s" begin="1.5s" repeatCount="indefinite" />
       </circle>
-      
+
       <text x="280" y="190" textAnchor="middle" fontSize="10" fill="#4a5568">Switch ส่งข้อมูลเฉพาะเครื่องปลายทาง (Unicast) ตาม MAC Address</text>
     </svg>
   );
@@ -4422,7 +4428,7 @@ function DiagramAnimRouter() {
       {/* Network A */}
       <ellipse cx="120" cy="100" rx="80" ry="60" fill="#22d3ee" fillOpacity="0.1" stroke="#22d3ee" strokeWidth="1" strokeDasharray="5 5" />
       <text x="120" y="55" textAnchor="middle" fill="#22d3ee" fontSize="12" fontWeight="bold">Subnet A (192.168.1.0)</text>
-      
+
       {/* Network B */}
       <ellipse cx="440" cy="100" rx="80" ry="60" fill="#a78bfa" fillOpacity="0.1" stroke="#a78bfa" strokeWidth="1" strokeDasharray="5 5" />
       <text x="440" y="55" textAnchor="middle" fill="#a78bfa" fontSize="12" fontWeight="bold">Subnet B (10.0.0.0)</text>
@@ -4430,7 +4436,7 @@ function DiagramAnimRouter() {
       {/* Router */}
       <circle cx="280" cy="100" r="30" fill="#191d29" stroke="#f59e0b" strokeWidth="2" />
       <text x="280" y="104" textAnchor="middle" fill="#f59e0b" fontSize="14" fontWeight="bold">ROUTER</text>
-      
+
       {/* Connections */}
       <line x1="200" y1="100" x2="250" y2="100" stroke="#4a5568" strokeWidth="2" />
       <line x1="310" y1="100" x2="360" y2="100" stroke="#4a5568" strokeWidth="2" />
@@ -4461,7 +4467,7 @@ function DiagramAnimGateway() {
       {/* Internal Network */}
       <rect x="40" y="60" width="140" height="80" rx="8" fill="#191d29" stroke="#22d3ee" strokeWidth="1.5" />
       <text x="110" y="104" textAnchor="middle" fill="#e8eaf0" fontSize="14">Local Network</text>
-      
+
       {/* Gateway */}
       <polygon points="240,60 320,60 300,140 260,140" fill="#191d29" stroke="#f59e0b" strokeWidth="2" />
       <text x="280" y="104" textAnchor="middle" fill="#f59e0b" fontSize="12" fontWeight="bold">GATEWAY</text>
@@ -4479,7 +4485,7 @@ function DiagramAnimGateway() {
         <animate attributeName="x" values="180;260" dur="2s" repeatCount="indefinite" />
         <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.4;0.5;1" dur="2s" repeatCount="indefinite" />
       </rect>
-      
+
       <circle cy="100" r="8" fill="#a78bfa" opacity="0">
         <animate attributeName="cx" values="300;410" dur="2s" repeatCount="indefinite" />
         <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.4;0.5;0.9;1" dur="2s" repeatCount="indefinite" />
@@ -4535,11 +4541,11 @@ function DiagramAnimAP() {
 function DiagramUTPAnatomy() {
   const colors = [
     { wire: "#f97316", label: "ขาวส้ม", cx: 200 },
-    { wire: "#fb923c", label: "ส้ม",    cx: 220 },
+    { wire: "#fb923c", label: "ส้ม", cx: 220 },
     { wire: "#4ade80", label: "ขาวเขียว", cx: 240 },
     { wire: "#3b82f6", label: "น้ำเงิน", cx: 260 },
     { wire: "#93c5fd", label: "ขาวน้ำเงิน", cx: 280 },
-    { wire: "#22c55e", label: "เขียว",  cx: 300 },
+    { wire: "#22c55e", label: "เขียว", cx: 300 },
     { wire: "#c8a285", label: "ขาวน้ำตาล", cx: 320 },
     { wire: "#92400e", label: "น้ำตาล", cx: 340 },
   ];
@@ -4547,25 +4553,25 @@ function DiagramUTPAnatomy() {
     <svg viewBox="0 0 560 230" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="15" fontWeight="bold">โครงสร้างภายในสาย UTP (Unshielded Twisted Pair)</text>
       {/* Outer jacket */}
-      <rect x="60" y="50" width="440" height="90" rx="45" fill="none" stroke="#4a5568" strokeWidth="4"/>
-      <rect x="60" y="50" width="440" height="90" rx="45" fill="#1e293b" opacity="0.8"/>
+      <rect x="60" y="50" width="440" height="90" rx="45" fill="none" stroke="#4a5568" strokeWidth="4" />
+      <rect x="60" y="50" width="440" height="90" rx="45" fill="#1e293b" opacity="0.8" />
       {/* Cut-away label */}
-      <line x1="185" y1="50" x2="185" y2="140" stroke="#ef4444" strokeWidth="2" strokeDasharray="4 2"/>
+      <line x1="185" y1="50" x2="185" y2="140" stroke="#ef4444" strokeWidth="2" strokeDasharray="4 2" />
       <text x="122" y="46" textAnchor="middle" fill="#ef4444" fontSize="11">ตัดเปลือกนอกออก</text>
       {/* Twisted pairs (left intact side) */}
-      {[["#f97316","#fb923c"],["#4ade80","#22c55e"],["#3b82f6","#93c5fd"],["#c8a285","#92400e"]].map(([c1,c2], pi) => (
+      {[["#f97316", "#fb923c"], ["#4ade80", "#22c55e"], ["#3b82f6", "#93c5fd"], ["#c8a285", "#92400e"]].map(([c1, c2], pi) => (
         <g key={pi}>
-          <ellipse cx={90 + pi * 22} cy={95} rx="8" ry="36" fill="#12151d" stroke={c1} strokeWidth="2"/>
-          <path d={`M${80+pi*22},75 Q${88+pi*22},95 ${80+pi*22},115`} fill="none" stroke={c1} strokeWidth="2"/>
-          <path d={`M${100+pi*22},75 Q${92+pi*22},95 ${100+pi*22},115`} fill="none" stroke={c2} strokeWidth="2"/>
+          <ellipse cx={90 + pi * 22} cy={95} rx="8" ry="36" fill="#12151d" stroke={c1} strokeWidth="2" />
+          <path d={`M${80 + pi * 22},75 Q${88 + pi * 22},95 ${80 + pi * 22},115`} fill="none" stroke={c1} strokeWidth="2" />
+          <path d={`M${100 + pi * 22},75 Q${92 + pi * 22},95 ${100 + pi * 22},115`} fill="none" stroke={c2} strokeWidth="2" />
         </g>
       ))}
       {/* Exposed wires (right cut-away side) */}
       {colors.map((c, i) => (
         <g key={i}>
           <line x1="190" y1={95} x2="490" y2={95} stroke={c.wire} strokeWidth="6" strokeDasharray="0"
-            transform={`translate(0, ${(i - 3.5) * 9})`}/>
-          <circle cx="492" cy={95 + (i - 3.5) * 9} r="5" fill={c.wire}/>
+            transform={`translate(0, ${(i - 3.5) * 9})`} />
+          <circle cx="492" cy={95 + (i - 3.5) * 9} r="5" fill={c.wire} />
           <text x="506" y={99 + (i - 3.5) * 9} fill={c.wire} fontSize="9" fontFamily="Inter,sans-serif">{c.label}</text>
         </g>
       ))}
@@ -4578,23 +4584,23 @@ function DiagramUTPAnatomy() {
 /* --- T568A / T568B Color Coding Comparison --- */
 function DiagramColorCode() {
   const t568b = [
-    { color: "#fb923c", stripe: true,  label: "ขาวส้ม" },
+    { color: "#fb923c", stripe: true, label: "ขาวส้ม" },
     { color: "#fb923c", stripe: false, label: "ส้ม" },
-    { color: "#22c55e", stripe: true,  label: "ขาวเขียว" },
+    { color: "#22c55e", stripe: true, label: "ขาวเขียว" },
     { color: "#3b82f6", stripe: false, label: "น้ำเงิน" },
-    { color: "#3b82f6", stripe: true,  label: "ขาวน้ำเงิน" },
+    { color: "#3b82f6", stripe: true, label: "ขาวน้ำเงิน" },
     { color: "#22c55e", stripe: false, label: "เขียว" },
-    { color: "#92400e", stripe: true,  label: "ขาวน้ำตาล" },
+    { color: "#92400e", stripe: true, label: "ขาวน้ำตาล" },
     { color: "#92400e", stripe: false, label: "น้ำตาล" },
   ];
   const t568a = [
-    { color: "#22c55e", stripe: true,  label: "ขาวเขียว" },
+    { color: "#22c55e", stripe: true, label: "ขาวเขียว" },
     { color: "#22c55e", stripe: false, label: "เขียว" },
-    { color: "#fb923c", stripe: true,  label: "ขาวส้ม" },
+    { color: "#fb923c", stripe: true, label: "ขาวส้ม" },
     { color: "#3b82f6", stripe: false, label: "น้ำเงิน" },
-    { color: "#3b82f6", stripe: true,  label: "ขาวน้ำเงิน" },
+    { color: "#3b82f6", stripe: true, label: "ขาวน้ำเงิน" },
     { color: "#fb923c", stripe: false, label: "ส้ม" },
-    { color: "#92400e", stripe: true,  label: "ขาวน้ำตาล" },
+    { color: "#92400e", stripe: true, label: "ขาวน้ำตาล" },
     { color: "#92400e", stripe: false, label: "น้ำตาล" },
   ];
 
@@ -4687,7 +4693,7 @@ function DiagramColorCode() {
 
       {/* --- Middle Connections & Crossover Paths --- */}
       <text x="280" y="136" textAnchor="middle" fill="#f59e0b" fontSize="10.5" fontWeight="bold">🔄 Crossover (สูตรลัดการสลับคู่สาย)</text>
-      
+
       {t568a.map((w, i) => {
         const yStart = 145 + i * 26 + 7;
         const j = targetB[i];
@@ -4698,7 +4704,7 @@ function DiagramColorCode() {
           // Green or orange crossover curves
           const strokeColor = w.color;
           const markerName = strokeColor === "#22c55e" ? "arrow-green" : "arrow-orange";
-          
+
           return (
             <g key={i}>
               {/* Left connection node */}
@@ -4752,18 +4758,18 @@ function DiagramCableType() {
       <text x="140" y="44" textAnchor="middle" fill="#22d3ee" fontSize="12" fontWeight="bold">✅ สายตรง (Straight-Through)</text>
       <text x="140" y="58" textAnchor="middle" fill="#4a5568" fontSize="10">T568B ↔ T568B (เหมือนกัน)</text>
       {/* Left RJ45 */}
-      <rect x="30" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#22d3ee" strokeWidth="2"/>
-      {["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"].map((c, i) => (
-        <rect key={i} x={33 + i * 3} y="70" width="2.5" height="70" fill={c}/>
+      <rect x="30" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#22d3ee" strokeWidth="2" />
+      {["#fb923c", "#fb923c", "#22c55e", "#3b82f6", "#3b82f6", "#22c55e", "#c8a285", "#92400e"].map((c, i) => (
+        <rect key={i} x={33 + i * 3} y="70" width="2.5" height="70" fill={c} />
       ))}
       {/* Wires going straight */}
-      {["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"].map((c, i) => (
-        <line key={i} x1="58" y1={72 + i * 8.5} x2="192" y2={72 + i * 8.5} stroke={c} strokeWidth="1.5"/>
+      {["#fb923c", "#fb923c", "#22c55e", "#3b82f6", "#3b82f6", "#22c55e", "#c8a285", "#92400e"].map((c, i) => (
+        <line key={i} x1="58" y1={72 + i * 8.5} x2="192" y2={72 + i * 8.5} stroke={c} strokeWidth="1.5" />
       ))}
       {/* Right RJ45 */}
-      <rect x="192" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#22d3ee" strokeWidth="2"/>
-      {["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"].map((c, i) => (
-        <rect key={i} x={195 + i * 3} y="70" width="2.5" height="70" fill={c}/>
+      <rect x="192" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#22d3ee" strokeWidth="2" />
+      {["#fb923c", "#fb923c", "#22c55e", "#3b82f6", "#3b82f6", "#22c55e", "#c8a285", "#92400e"].map((c, i) => (
+        <rect key={i} x={195 + i * 3} y="70" width="2.5" height="70" fill={c} />
       ))}
       {/* Use case icons */}
       <text x="50" y="162" textAnchor="middle" fill="#94a3b8" fontSize="18">💻</text>
@@ -4774,22 +4780,22 @@ function DiagramCableType() {
       <text x="420" y="44" textAnchor="middle" fill="#f59e0b" fontSize="12" fontWeight="bold">⚡ สายไขว้ (Crossover)</text>
       <text x="420" y="58" textAnchor="middle" fill="#4a5568" fontSize="10">T568A ↔ T568B (ต่างกัน)</text>
       {/* Left RJ45 A */}
-      <rect x="310" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#f59e0b" strokeWidth="2"/>
-      {["#22c55e","#22c55e","#fb923c","#3b82f6","#3b82f6","#fb923c","#c8a285","#92400e"].map((c, i) => (
-        <rect key={i} x={313 + i * 3} y="70" width="2.5" height="70" fill={c}/>
+      <rect x="310" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#f59e0b" strokeWidth="2" />
+      {["#22c55e", "#22c55e", "#fb923c", "#3b82f6", "#3b82f6", "#fb923c", "#c8a285", "#92400e"].map((c, i) => (
+        <rect key={i} x={313 + i * 3} y="70" width="2.5" height="70" fill={c} />
       ))}
       {/* Crossover wires (pin 1↔3, 2↔6 crossed) */}
-      <line x1="338" y1="72" x2="472" y2="97" stroke="#22c55e" strokeWidth="1.5"/>
-      <line x1="338" y1="80" x2="472" y2="122" stroke="#22c55e" strokeWidth="1.5"/>
-      <line x1="338" y1="89" x2="472" y2="72" stroke="#fb923c" strokeWidth="1.5"/>
-      <line x1="338" y1="97" x2="472" y2="80" stroke="#fb923c" strokeWidth="1.5"/>
-      {["#3b82f6","#3b82f6","#c8a285","#92400e"].map((c, i) => (
-        <line key={i} x1="338" y1={106 + i * 8.5} x2="472" y2={106 + i * 8.5} stroke={c} strokeWidth="1.5"/>
+      <line x1="338" y1="72" x2="472" y2="97" stroke="#22c55e" strokeWidth="1.5" />
+      <line x1="338" y1="80" x2="472" y2="122" stroke="#22c55e" strokeWidth="1.5" />
+      <line x1="338" y1="89" x2="472" y2="72" stroke="#fb923c" strokeWidth="1.5" />
+      <line x1="338" y1="97" x2="472" y2="80" stroke="#fb923c" strokeWidth="1.5" />
+      {["#3b82f6", "#3b82f6", "#c8a285", "#92400e"].map((c, i) => (
+        <line key={i} x1="338" y1={106 + i * 8.5} x2="472" y2={106 + i * 8.5} stroke={c} strokeWidth="1.5" />
       ))}
       {/* Right RJ45 B */}
-      <rect x="472" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#f59e0b" strokeWidth="2"/>
-      {["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"].map((c, i) => (
-        <rect key={i} x={475 + i * 3} y="70" width="2.5" height="70" fill={c}/>
+      <rect x="472" y="65" width="28" height="80" rx="4" fill="#1e293b" stroke="#f59e0b" strokeWidth="2" />
+      {["#fb923c", "#fb923c", "#22c55e", "#3b82f6", "#3b82f6", "#22c55e", "#c8a285", "#92400e"].map((c, i) => (
+        <rect key={i} x={475 + i * 3} y="70" width="2.5" height="70" fill={c} />
       ))}
       <text x="330" y="162" textAnchor="middle" fill="#94a3b8" fontSize="18">💻</text>
       <text x="490" y="162" textAnchor="middle" fill="#94a3b8" fontSize="18">💻</text>
@@ -4821,12 +4827,12 @@ function DiagramCrimpSteps() {
             {/* Connector line */}
             {i < steps.length - 1 && (
               <line x1={cx + 28} y1={cy} x2={cx + 72 - 28} y2={cy} stroke="#334155" strokeWidth="2" strokeDasharray="4 2">
-                <animate attributeName="opacity" values="0.3;1;0.3" dur={`${1 + i * 0.2}s`} repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.3;1;0.3" dur={`${1 + i * 0.2}s`} repeatCount="indefinite" />
               </line>
             )}
             {/* Circle */}
             <circle cx={cx} cy={cy} r="28" fill="#1e293b" stroke={s.color} strokeWidth="2">
-              <animate attributeName="r" values="27;29;27" dur="2s" begin={`${i * 0.3}s`} repeatCount="indefinite"/>
+              <animate attributeName="r" values="27;29;27" dur="2s" begin={`${i * 0.3}s`} repeatCount="indefinite" />
             </circle>
             <text x={cx} y={cy - 4} textAnchor="middle" fontSize="18">{s.icon}</text>
             <text x={cx} y={cy + 15} textAnchor="middle" fill={s.color} fontSize="9" fontWeight="bold">{s.num}</text>
@@ -4839,9 +4845,9 @@ function DiagramCrimpSteps() {
       })}
       {/* Animated packet */}
       <circle r="6" fill="#facc15" opacity="0">
-        <animate attributeName="cx" values="42;114;186;258;330;402;474" calcMode="discrete" dur="3.5s" repeatCount="indefinite"/>
-        <animate attributeName="cy" values="110;110;110;110;110;110;110" dur="3.5s" repeatCount="indefinite"/>
-        <animate attributeName="opacity" values="1;1;1;1;1;1;1;0" keyTimes="0;0.14;0.28;0.43;0.57;0.71;0.86;1" dur="3.5s" repeatCount="indefinite"/>
+        <animate attributeName="cx" values="42;114;186;258;330;402;474" calcMode="discrete" dur="3.5s" repeatCount="indefinite" />
+        <animate attributeName="cy" values="110;110;110;110;110;110;110" dur="3.5s" repeatCount="indefinite" />
+        <animate attributeName="opacity" values="1;1;1;1;1;1;1;0" keyTimes="0;0.14;0.28;0.43;0.57;0.71;0.86;1" dur="3.5s" repeatCount="indefinite" />
       </circle>
       <text x="280" y="185" textAnchor="middle" fill="#8892a4" fontSize="11">ทำตามลำดับครบทั้ง 7 ขั้นตอน เพื่อให้สายแลนมีคุณภาพและผ่านการทดสอบ</text>
       <text x="280" y="200" textAnchor="middle" fill="#4a5568" fontSize="10">⚠️ ระวัง: สอดสายให้ทองแดงชนสุดก่อนย้ำ และตรวจสีก่อนทุกครั้ง</text>
@@ -4856,14 +4862,14 @@ function DiagramLANTester() {
     <svg viewBox="0 0 560 240" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="15" fontWeight="bold">การทดสอบสายแลนด้วย LAN Tester</text>
       {/* Tester Left (Master) */}
-      <rect x="60" y="50" width="90" height="130" rx="8" fill="#1e293b" stroke="#22d3ee" strokeWidth="2"/>
+      <rect x="60" y="50" width="90" height="130" rx="8" fill="#1e293b" stroke="#22d3ee" strokeWidth="2" />
       <text x="105" y="72" textAnchor="middle" fill="#22d3ee" fontSize="11" fontWeight="bold">MASTER</text>
       {straight.map((n, i) => {
-        const pinsColor = ["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"][i];
+        const pinsColor = ["#fb923c", "#fb923c", "#22c55e", "#3b82f6", "#3b82f6", "#22c55e", "#c8a285", "#92400e"][i];
         return (
           <g key={i}>
             <circle cx="135" cy={83 + i * 12} r="4" fill="#0f172a" stroke={pinsColor} strokeWidth="1.5">
-              <animate attributeName="fill" values={`#0f172a;${pinsColor};#0f172a`} dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite"/>
+              <animate attributeName="fill" values={`#0f172a;${pinsColor};#0f172a`} dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite" />
             </circle>
             <text x="75" y={87 + i * 12} textAnchor="middle" fill={pinsColor} fontSize="9">Pin {n}</text>
           </g>
@@ -4872,25 +4878,25 @@ function DiagramLANTester() {
       {/* Cable Line */}
       {straight.map((_, i) => (
         <line key={i} x1="135" y1={83 + i * 12} x2="365" y2={83 + i * 12} stroke="#334155" strokeWidth="1.5" strokeDasharray="4 2">
-          <animate attributeName="stroke" values={["#334155","#22c55e","#334155"].join(";")} dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite"/>
+          <animate attributeName="stroke" values={["#334155", "#22c55e", "#334155"].join(";")} dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite" />
         </line>
       ))}
       {/* Light Animation Ball */}
       {straight.map((_, i) => (
         <circle key={i} cx="135" cy={83 + i * 12} r="3" fill="#22c55e" opacity="0">
-          <animate attributeName="cx" values="135;365" dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite"/>
-          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite"/>
+          <animate attributeName="cx" values="135;365" dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite" />
+          <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="1s" begin={`${i * 0.12}s`} repeatCount="indefinite" />
         </circle>
       ))}
       {/* Tester Right (Remote) */}
-      <rect x="365" y="50" width="90" height="130" rx="8" fill="#1e293b" stroke="#22c55e" strokeWidth="2"/>
+      <rect x="365" y="50" width="90" height="130" rx="8" fill="#1e293b" stroke="#22c55e" strokeWidth="2" />
       <text x="410" y="72" textAnchor="middle" fill="#22c55e" fontSize="11" fontWeight="bold">REMOTE</text>
       {straight.map((n, i) => {
-        const pinsColor = ["#fb923c","#fb923c","#22c55e","#3b82f6","#3b82f6","#22c55e","#c8a285","#92400e"][i];
+        const pinsColor = ["#fb923c", "#fb923c", "#22c55e", "#3b82f6", "#3b82f6", "#22c55e", "#c8a285", "#92400e"][i];
         return (
           <g key={i}>
             <circle cx="370" cy={83 + i * 12} r="4" fill="#0f172a" stroke={pinsColor} strokeWidth="1.5">
-              <animate attributeName="fill" values={`#0f172a;${pinsColor};#0f172a`} dur="1s" begin={`${i * 0.12 + 0.6}s`} repeatCount="indefinite"/>
+              <animate attributeName="fill" values={`#0f172a;${pinsColor};#0f172a`} dur="1s" begin={`${i * 0.12 + 0.6}s`} repeatCount="indefinite" />
             </circle>
             <text x="440" y={87 + i * 12} textAnchor="middle" fill={pinsColor} fontSize="9">Pin {n}</text>
           </g>
@@ -4908,7 +4914,7 @@ function DiagramAnimNetworkFull() {
   return (
     <svg viewBox="0 0 560 260" style={{ width: "100%", height: "100%" }}>
       <text x="280" y="20" textAnchor="middle" fill="#e8eaf0" fontSize="16" fontWeight="bold">สรุปการเชื่อมต่อระบบเครือข่ายองค์กร (Network Topology)</text>
-      
+
       {/* The Internet (Cloud) */}
       <path d="M 50 100 Q 50 70 80 70 Q 100 40 130 60 Q 160 40 170 70 Q 200 80 180 110 Q 200 130 160 140 Q 120 160 80 140 Q 40 130 50 100 Z" fill="#1e293b" stroke="#3b82f6" strokeWidth="2" />
       <text x="115" y="105" textAnchor="middle" fill="#3b82f6" fontSize="14" fontWeight="bold">Internet</text>
@@ -4916,7 +4922,7 @@ function DiagramAnimNetworkFull() {
       {/* Gateway / Router */}
       <rect x="230" y="70" width="60" height="60" rx="30" fill="#1e293b" stroke="#ef4444" strokeWidth="2" />
       <text x="260" y="105" textAnchor="middle" fill="#ef4444" fontSize="12" fontWeight="bold">Router</text>
-      
+
       {/* Internet to Router link */}
       <line x1="175" y1="100" x2="230" y2="100" stroke="#ef4444" strokeWidth="2" strokeDasharray="4 2">
         <animate attributeName="stroke-dashoffset" values="20;0" dur="1s" repeatCount="indefinite" />
@@ -4925,28 +4931,28 @@ function DiagramAnimNetworkFull() {
       {/* Core Switch */}
       <rect x="340" y="80" width="80" height="40" rx="4" fill="#1e293b" stroke="#8b5cf6" strokeWidth="2" />
       <text x="380" y="105" textAnchor="middle" fill="#8b5cf6" fontSize="12" fontWeight="bold">Switch</text>
-      
+
       {/* Router to Switch link */}
       <line x1="290" y1="100" x2="340" y2="100" stroke="#8b5cf6" strokeWidth="2" />
 
       {/* PC 1 (Wired) */}
       <rect x="470" y="40" width="50" height="30" rx="2" fill="#1e293b" stroke="#10b981" strokeWidth="2" />
       <text x="495" y="60" textAnchor="middle" fill="#10b981" fontSize="10">PC (LAN)</text>
-      
+
       {/* Switch to PC link */}
       <line x1="420" y1="90" x2="470" y2="55" stroke="#10b981" strokeWidth="2" />
 
       {/* Server (Wired) */}
       <rect x="470" y="90" width="50" height="40" rx="2" fill="#1e293b" stroke="#f59e0b" strokeWidth="2" />
       <text x="495" y="115" textAnchor="middle" fill="#f59e0b" fontSize="10">Server</text>
-      
+
       {/* Switch to Server link */}
       <line x1="420" y1="100" x2="470" y2="110" stroke="#f59e0b" strokeWidth="2" />
 
       {/* Access Point */}
       <circle cx="380" cy="180" r="20" fill="#1e293b" stroke="#06b6d4" strokeWidth="2" />
       <text x="380" y="184" textAnchor="middle" fill="#06b6d4" fontSize="10" fontWeight="bold">AP</text>
-      
+
       {/* Switch to AP link */}
       <line x1="380" y1="120" x2="380" y2="160" stroke="#06b6d4" strokeWidth="2" />
 
@@ -4963,7 +4969,7 @@ function DiagramAnimNetworkFull() {
         <path d="M 425 160 A 40 40 0 0 1 425 200" />
         <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0.5s" repeatCount="indefinite" />
       </g>
-      
+
       {/* Data packet traveling from PC to Internet */}
       <circle cx="470" cy="55" r="4" fill="#10b981">
         <animate attributeName="cx" values="470;380;260;115" keyTimes="0;0.3;0.6;1" dur="3s" repeatCount="indefinite" />
@@ -5182,7 +5188,7 @@ function DiagramTerminalSim() {
           <span style={{ color: "#e2e8f0" }}>:</span>
           <span style={{ color: "#38bdf8", fontWeight: "bold" }}>~</span>
           <span style={{ color: "#e2e8f0" }}>$ </span>
-          
+
           {/* Main command with formatting */}
           {!isTypingComplete ? (
             <span style={{ color: "#f472b6", fontWeight: "bold" }}>{typedText}</span>
@@ -5308,26 +5314,26 @@ function DiagramInstallationSteps() {
 
       {/* Staggered Animated Flow Packets moving along the exact steps path */}
       <circle cx="0" cy="0" r="4" fill="var(--green)" opacity="0.9">
-        <animateMotion 
-          path="M 90 52.5 L 270 52.5 L 450 52.5 L 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5 L 450 132.5 L 270 132.5 L 90 132.5 Z" 
-          dur="6s" 
-          repeatCount="indefinite" 
+        <animateMotion
+          path="M 90 52.5 L 270 52.5 L 450 52.5 L 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5 L 450 132.5 L 270 132.5 L 90 132.5 Z"
+          dur="6s"
+          repeatCount="indefinite"
           begin="0s"
         />
       </circle>
       <circle cx="0" cy="0" r="4" fill="var(--green)" opacity="0.6">
-        <animateMotion 
-          path="M 90 52.5 L 270 52.5 L 450 52.5 L 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5 L 450 132.5 L 270 132.5 L 90 132.5 Z" 
-          dur="6s" 
-          repeatCount="indefinite" 
+        <animateMotion
+          path="M 90 52.5 L 270 52.5 L 450 52.5 L 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5 L 450 132.5 L 270 132.5 L 90 132.5 Z"
+          dur="6s"
+          repeatCount="indefinite"
           begin="2s"
         />
       </circle>
       <circle cx="0" cy="0" r="4" fill="var(--green)" opacity="0.3">
-        <animateMotion 
-          path="M 90 52.5 L 270 52.5 L 450 52.5 L 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5 L 450 132.5 L 270 132.5 L 90 132.5 Z" 
-          dur="6s" 
-          repeatCount="indefinite" 
+        <animateMotion
+          path="M 90 52.5 L 270 52.5 L 450 52.5 L 530 52.5 L 545 52.5 L 545 132.5 L 530 132.5 L 450 132.5 L 270 132.5 L 90 132.5 Z"
+          dur="6s"
+          repeatCount="indefinite"
           begin="4s"
         />
       </circle>
@@ -5391,34 +5397,34 @@ function DiagramLinuxDir() {
 
       {/* Animated Flow Packets from Root (/) down the paths with staggered delay offsets */}
       <circle cx="0" cy="0" r="4.5" fill="var(--green)" opacity="0.9">
-        <animateMotion 
-          path="M 280 51 L 280 75 L 80 75 L 80 110" 
-          dur="3.2s" 
-          repeatCount="indefinite" 
+        <animateMotion
+          path="M 280 51 L 280 75 L 80 75 L 80 110"
+          dur="3.2s"
+          repeatCount="indefinite"
           begin="0s"
         />
       </circle>
       <circle cx="0" cy="0" r="4.5" fill="var(--green)" opacity="0.9">
-        <animateMotion 
-          path="M 280 51 L 280 75 L 210 75 L 210 110" 
-          dur="3.2s" 
-          repeatCount="indefinite" 
+        <animateMotion
+          path="M 280 51 L 280 75 L 210 75 L 210 110"
+          dur="3.2s"
+          repeatCount="indefinite"
           begin="0.8s"
         />
       </circle>
       <circle cx="0" cy="0" r="4.5" fill="var(--green)" opacity="0.9">
-        <animateMotion 
-          path="M 280 51 L 280 75 L 350 75 L 350 110" 
-          dur="3.2s" 
-          repeatCount="indefinite" 
+        <animateMotion
+          path="M 280 51 L 280 75 L 350 75 L 350 110"
+          dur="3.2s"
+          repeatCount="indefinite"
           begin="1.6s"
         />
       </circle>
       <circle cx="0" cy="0" r="4.5" fill="var(--green)" opacity="0.9">
-        <animateMotion 
-          path="M 280 51 L 280 75 L 480 75 L 480 110" 
-          dur="3.2s" 
-          repeatCount="indefinite" 
+        <animateMotion
+          path="M 280 51 L 280 75 L 480 75 L 480 110"
+          dur="3.2s"
+          repeatCount="indefinite"
           begin="2.4s"
         />
       </circle>
@@ -5510,7 +5516,7 @@ function DiagramSlide({ s }: { s: SlideData }) {
         <div className="diagram-svg-wrap">
           {s.image && <div className="diagram-img"><img src={s.image} alt="" /></div>}
           {Diagram && <div className="diagram-svg"><Diagram /></div>}
-          {!s.image && !Diagram && <div style={{color:"var(--text-muted)",fontSize:12}}>ไม่พบเนื้อหา</div>}
+          {!s.image && !Diagram && <div style={{ color: "var(--text-muted)", fontSize: 12 }}>ไม่พบเนื้อหา</div>}
         </div>
         {s.description && <p className="diagram-desc" style={{ whiteSpace: "pre-line" }}>{s.description}</p>}
         {s.items && s.items.length > 0 && (
@@ -5525,7 +5531,6 @@ function DiagramSlide({ s }: { s: SlideData }) {
 
 function WaygroundSlide({ s }: { s: SlideData }) {
   const [downloading, setDownloading] = useState(false);
-  const isFtpPrePostTest = s.id.startsWith("w9b-");
 
   const w2Questions = [
     { q: "คำสั่งใดใช้แสดงตำแหน่งโฟลเดอร์ปัจจุบันที่กำลังทำงานอยู่?", a: "pwd", options: ["ls", "cd", "pwd", "mkdir"] },
@@ -5618,23 +5623,8 @@ function WaygroundSlide({ s }: { s: SlideData }) {
     { q: "ระบบ Firewall ส่วนใหญ่ทำงานในการกลั่นกรองอนุญาตหรือปิดกั้นข้อมูล โดยอิงจากข้อมูลหลักในข้อใด (OSI Layer 3-4)?", a: "หมายเลขไอพีเครื่องต้นทาง/ปลายทาง และหมายเลขพอร์ตบริการ", options: ["MAC Address ของตัวเครื่องและสายแลน", "หมายเลขไอพีเครื่องต้นทาง/ปลายทาง และหมายเลขพอร์ตบริการ", "HTTP Request Method และความยาวของไฟล์", "ชื่อบัญชีของระบบปฏิบัติการและระดับสิทธิ์ไฟล์"] }
   ];
 
-  const w9bQuestions = [
-    { q: "FTP มีหน้าที่หลักอย่างไร?", a: "รับส่งไฟล์ระหว่าง Client กับ Server", options: ["แจก IP Address ให้เครื่องในเครือข่าย", "รับส่งไฟล์ระหว่าง Client กับ Server", "แสดงหน้าเว็บไซต์ผ่าน HTTP", "จัดเก็บข้อมูลในฐานข้อมูล"] },
-    { q: "ข้อใดจับคู่บทบาทของโปรแกรมได้ถูกต้อง?", a: "FileZilla เป็น FTP Client และ vsftpd เป็น FTP Server", options: ["FileZilla เป็น Firewall และ vsftpd เป็น Web Server", "FileZilla เป็น FTP Server และ vsftpd เป็น FTP Client", "FileZilla เป็น FTP Client และ vsftpd เป็น FTP Server", "FileZilla และ vsftpd เป็นโปรแกรมฐานข้อมูล"] },
-    { q: "Port 21 ของ FTP ใช้สำหรับงานใด?", a: "ใช้ส่งคำสั่งและข้อมูล Login ผ่าน Control Connection", options: ["ใช้ส่งคำสั่งและข้อมูล Login ผ่าน Control Connection", "ใช้ส่งเนื้อไฟล์ทั้งหมดเพียงอย่างเดียว", "ใช้เปิดหน้า Proxmox Web UI", "ใช้เชื่อมต่อฐานข้อมูล MariaDB"] },
-    { q: "Passive Port มีหน้าที่อะไรในการทำงานของ FTP?", a: "ใช้สร้าง Data Connection สำหรับส่งรายชื่อไฟล์และเนื้อไฟล์จริง", options: ["ใช้แทนรหัสผ่านของผู้ใช้ FTP", "ใช้ติดตั้งโปรแกรม vsftpd", "ใช้เปิดหน้าเว็บไซต์ของ Server", "ใช้สร้าง Data Connection สำหรับส่งรายชื่อไฟล์และเนื้อไฟล์จริง"] },
-    { q: "หาก Firewall เปิดเฉพาะ Port 21 แต่ไม่เปิดช่วง Passive Port อาการใดมีโอกาสเกิดขึ้นมากที่สุด?", a: "Login ได้ แต่ดูรายชื่อไฟล์หรืออัปโหลดไฟล์ไม่ได้", options: ["Ubuntu จะเปิดเครื่องไม่ได้", "Login ได้ แต่ดูรายชื่อไฟล์หรืออัปโหลดไฟล์ไม่ได้", "FileZilla จะเปลี่ยน IP Address ของ Server", "MariaDB จะหยุดทำงานทันที"] },
-    { q: "คำสั่งใดใช้ติดตั้ง FTP Server vsftpd บน Ubuntu?", a: "sudo apt install vsftpd -y", options: ["sudo apt install vsftpd -y", "sudo apt install filezilla -y", "sudo systemctl install vsftpd", "sudo ufw install ftp"] },
-    { q: "เมื่อใช้ systemctl status vsftpd แล้วพบ active (running) หมายความว่าอย่างไร?", a: "บริการ vsftpd กำลังทำงาน", options: ["Firewall ปิด Port 21 แล้ว", "ผู้ใช้ FTP ถูกสร้างเรียบร้อยแล้ว", "บริการ vsftpd กำลังทำงาน", "FileZilla เชื่อมต่อสำเร็จแล้ว"] },
-    { q: "การตั้งค่า write_enable=YES ใน vsftpd.conf มีผลอย่างไร?", a: "อนุญาตให้ผู้ใช้เขียนหรืออัปโหลดไฟล์ได้", options: ["ปิดการ Login ของผู้ใช้ Linux", "บังคับให้ใช้ Port 22", "อนุญาตให้เข้าได้โดยไม่ใช้รหัสผ่าน", "อนุญาตให้ผู้ใช้เขียนหรืออัปโหลดไฟล์ได้"] },
-    { q: "การตั้งค่า chroot_local_user=YES มีจุดประสงค์ใด?", a: "จำกัดผู้ใช้ให้อยู่ภายในโฟลเดอร์ Home ของตนเอง", options: ["ให้ผู้ใช้ทุกคนเห็นไฟล์ทั้ง Server", "จำกัดผู้ใช้ให้อยู่ภายในโฟลเดอร์ Home ของตนเอง", "เปลี่ยนผู้ใช้ทั่วไปให้เป็น root", "ปิดการใช้ Username และ Password"] },
-    { q: "FileZilla แสดงข้อความ Failed to retrieve directory listing ควรตรวจสอบสิ่งใดก่อน?", a: "ตรวจการตั้งค่า Passive Port และกฎ Firewall", options: ["ตรวจว่า Nginx ใช้ Port 80 หรือไม่", "ตรวจพื้นที่ว่างของฐานข้อมูล MariaDB", "ตรวจการตั้งค่า Passive Port และกฎ Firewall", "เปลี่ยนชื่อ Container ใหม่"] }
-  ];
-
   let questions = w2Questions;
-  if (s.id.startsWith("w9b-")) {
-    questions = w9bQuestions;
-  } else if (s.id.startsWith("w4a")) {
+  if (s.id.startsWith("w4a")) {
     questions = w4aQuestions;
   } else if (s.id.startsWith("w4b")) {
     questions = w4bQuestions;
@@ -5667,7 +5657,7 @@ function WaygroundSlide({ s }: { s: SlideData }) {
       <div className="slide-tag">{s.tag}</div>
       <h2>{s.title}</h2>
       {s.body && <p style={{ fontSize: '15px', color: 'var(--text-secondary)', marginBottom: 15 }}>{s.body}</p>}
-      
+
       <div style={{ display: 'flex', gap: '20px', flex: 1, minHeight: 0 }}>
         {/* Left Side: Question Preview */}
         <div style={{ flex: 1.2, display: 'flex', flexDirection: 'column', background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)', padding: '16px', overflowY: 'auto' }}>
@@ -5684,16 +5674,16 @@ function WaygroundSlide({ s }: { s: SlideData }) {
                   {q.options.map((opt, oIdx) => {
                     const isCorrect = opt === q.a;
                     return (
-                      <span key={oIdx} style={{ 
-                        fontSize: '11px', 
-                        padding: '4px 8px', 
-                        borderRadius: '4px', 
-                        background: isCorrect && !isFtpPrePostTest ? 'var(--accent-dim)' : 'var(--bg-elevated)', 
-                        border: isCorrect && !isFtpPrePostTest ? '1px solid var(--accent)' : '1px solid var(--border)',
-                        color: isCorrect && !isFtpPrePostTest ? 'var(--accent)' : 'var(--text-secondary)',
-                        fontWeight: isCorrect && !isFtpPrePostTest ? 'bold' : 'normal'
+                      <span key={oIdx} style={{
+                        fontSize: '11px',
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        background: isCorrect ? 'var(--accent-dim)' : 'var(--bg-elevated)',
+                        border: isCorrect ? '1px solid var(--accent)' : '1px solid var(--border)',
+                        color: isCorrect ? 'var(--accent)' : 'var(--text-secondary)',
+                        fontWeight: isCorrect ? 'bold' : 'normal'
                       }}>
-                        {isCorrect && !isFtpPrePostTest ? '✓ ' : '• '} {opt}
+                        {isCorrect ? '✓ ' : '• '} {opt}
                       </span>
                     );
                   })}
@@ -5706,14 +5696,14 @@ function WaygroundSlide({ s }: { s: SlideData }) {
         {/* Right Side: Action and Guides */}
         <div style={{ flex: 0.8, display: 'flex', flexDirection: 'column', gap: '16px' }}>
           {/* Brand/Download Card */}
-          <div style={{ 
-            background: 'linear-gradient(135deg, #090d16 0%, #111a2e 50%, #1e1b4b 100%)', 
-            borderRadius: '12px', 
-            padding: '24px', 
-            color: '#ffffff', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
+          <div style={{
+            background: 'linear-gradient(135deg, #090d16 0%, #111a2e 50%, #1e1b4b 100%)',
+            borderRadius: '12px',
+            padding: '24px',
+            color: '#ffffff',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             justifyContent: 'center',
             textAlign: 'center',
             border: '1px solid rgba(99, 102, 241, 0.2)',
@@ -5724,7 +5714,7 @@ function WaygroundSlide({ s }: { s: SlideData }) {
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginBottom: '20px', maxWidth: '280px' }}>
               พร้อมนำไปอัปโหลดเข้าคลังข้อสอบใน Wayground ได้ทันทีเพื่อประเมินผลผู้เรียน
             </p>
-            <button 
+            <button
               onClick={handleDownload}
               style={{
                 background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
@@ -5749,15 +5739,6 @@ function WaygroundSlide({ s }: { s: SlideData }) {
             </button>
           </div>
 
-          {isFtpPrePostTest && (
-            <div style={{ background: '#fff7ed', borderRadius: '8px', border: '1px solid #fb923c', padding: '12px 14px' }}>
-              <div style={{ color: '#9a3412', fontSize: '13px', fontWeight: 800, marginBottom: '4px' }}>ตั้งค่าก่อนเริ่มกิจกรรมทุกครั้ง</div>
-              <div style={{ color: '#7c2d12', fontSize: '12px', lineHeight: 1.5 }}>
-                เปิด <strong>Shuffle questions</strong> และ <strong>Shuffle answers</strong> เพื่อสุ่มลำดับข้อและตำแหน่งคำตอบ
-              </div>
-            </div>
-          )}
-
           {/* Import Guide Card */}
           <div style={{ background: 'var(--bg-elevated)', borderRadius: '12px', border: '1px solid var(--border)', padding: '16px', flex: 1, overflowY: 'auto' }}>
             <h4 style={{ fontSize: '13px', fontWeight: 'bold', marginBottom: '10px', color: 'var(--text-primary)' }}>
@@ -5766,12 +5747,10 @@ function WaygroundSlide({ s }: { s: SlideData }) {
             <ol style={{ fontSize: '12px', color: 'var(--text-secondary)', paddingLeft: '16px', display: 'flex', flexDirection: 'column', gap: '8px', lineHeight: '1.5' }}>
               <li>คลิกปุ่ม <strong>ดาวน์โหลด Excel Template</strong> ด้านบนเพื่อรับไฟล์</li>
               <li>เปิดเบราว์เซอร์เข้าสู่ระบบผู้สอนที่ <a href="https://wayground.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>Wayground.com</a></li>
-              <li>กด <strong>Create</strong> แล้วเลือก <strong>Assessment</strong></li>
-              <li>เลือก <strong>Start from scratch</strong> แล้วเลื่อนไปที่ <strong>Import existing files</strong></li>
-              <li>เลือก <strong>Spreadsheet</strong> เพื่อนำเข้าข้อสอบจากไฟล์ Excel</li>
+              <li>ไปที่เมนู <strong>คลังข้อสอบ (Quiz Library)</strong> แล้วกดสร้างเกมใหม่</li>
+              <li>เลือกนำเข้าข้อมูลทางฝั่ง <strong>Import Spreadsheet (Excel/XLSX)</strong></li>
               <li>อัปโหลดไฟล์ <code>{downloadName}</code> ที่โหลดไปเข้าระบบ</li>
-              <li>ตรวจสอบคำถามและเฉลย จากนั้นกด <strong>Publish</strong></li>
-              {isFtpPrePostTest && <li>ก่อนเริ่มรอบก่อนเรียนและหลังเรียน ให้เปิด <strong>Shuffle questions</strong> และ <strong>Shuffle answers</strong></li>}
+              <li>ตรวจสอบเฉลยและกำหนดเวลา จากนั้นกด <strong>บันทึกเกม (Save)</strong> เพื่อเริ่มประลองความรู้ได้เลย!</li>
             </ol>
           </div>
         </div>
@@ -5798,7 +5777,7 @@ function ProxmoxGuideDocument() {
   const [rootPass, setRootPass] = useState("RootAdmin@123");
   const [mgmtIP, setMgmtIP] = useState("192.168.10.50/24");
   const [installProgress, setInstallProgress] = useState(0);
-  
+
   // Containers state for Web UI simulator
   const [containers, setContainers] = useState<ContainerType[]>([
     {
@@ -5828,7 +5807,7 @@ function ProxmoxGuideDocument() {
   const [nanoText, setNanoText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [selectedHost, setSelectedHost] = useState(true);
-  
+
   // Interactive Network Topology state
   const [topoMode, setTopoMode] = useState<"overview" | "ssh" | "web">("overview");
   const [sshTerminalStep, setSshTerminalStep] = useState(0); // 0: idle, 1: typing, 2: ready
@@ -5870,7 +5849,7 @@ function ProxmoxGuideDocument() {
     const padNum = String(num).padStart(2, "0");
     const containerId = String(100 + num);
     const newIp = `192.168.10.1${padNum}`;
-    
+
     setContainers([
       ...containers,
       {
@@ -5899,7 +5878,7 @@ function ProxmoxGuideDocument() {
 
     setIsTyping(true);
     let logs = [...terminalLogs];
-    
+
     if (cmd === "update") {
       logs.push(`apt update`);
       setTerminalLogs(logs);
@@ -5978,7 +5957,7 @@ function ProxmoxGuideDocument() {
     setSshTyping(true);
     setSshTerminalStep(1);
     setSshLogs(["$ ssh root@192.168.10.101"]);
-    
+
     setTimeout(() => {
       setSshLogs(prev => [
         ...prev,
@@ -5988,7 +5967,7 @@ function ProxmoxGuideDocument() {
         "Are you sure you want to continue connecting (yes/no)?"
       ]);
       setSshTerminalStep(2);
-      
+
       setTimeout(() => {
         setSshLogs(prev => [
           ...prev,
@@ -5996,7 +5975,7 @@ function ProxmoxGuideDocument() {
           "Warning: Permanently added '192.168.10.101' to the list of known hosts.",
           "root@192.168.10.101's password: *********"
         ]);
-        
+
         setTimeout(() => {
           setSshLogs(prev => [
             ...prev,
@@ -6038,7 +6017,8 @@ function ProxmoxGuideDocument() {
       lineHeight: '1.7',
       fontFamily: 'Inter, sans-serif'
     }}>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes packetFlowDash {
           from { stroke-dashoffset: 24; }
           to { stroke-dashoffset: 0; }
@@ -6234,7 +6214,7 @@ function ProxmoxGuideDocument() {
 
         {/* SVG Diagram and Interactive Details Split Row */}
         <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '20px', minHeight: '340px' }}>
-          
+
           {/* SVG Container */}
           <div style={{
             background: '#040815',
@@ -6265,7 +6245,7 @@ function ProxmoxGuideDocument() {
                 <rect x="-30" y="20" width="60" height="6" rx="2" fill="#475569" />
                 <text x="0" y="2" textAnchor="middle" fill="#f8fafc" fontSize="10px" fontWeight="bold">💻 PC นักเรียน</text>
                 <text x="0" y="14" textAnchor="middle" fill="#94a3b8" fontSize="8px">IP: 192.168.10.12</text>
-                
+
                 {/* Active node glow */}
                 {(topoMode === "ssh" || topoMode === "web") && (
                   <>
@@ -6292,7 +6272,7 @@ function ProxmoxGuideDocument() {
                 <rect x="-95" y="-105" width="190" height="210" rx="8" fill="url(#serverGrad)" stroke="#1d4ed8" strokeWidth="2" />
                 <rect x="-85" y="-95" width="170" height="26" rx="4" fill="#1e40af" />
                 <text x="0" y="-78" textAnchor="middle" fill="#ffffff" fontSize="10px" fontWeight="bold">🛡️ PHYSICAL SERVER (แม่ข่าย)</text>
-                
+
                 {/* Proxmox Hypervisor Layer */}
                 <rect x="-85" y="-60" width="170" height="42" rx="4" fill="url(#pveLayerGrad)" stroke="#ea580c" strokeWidth="1.5" />
                 <text x="0" y="-44" textAnchor="middle" fill="#f97316" fontSize="9px" fontWeight="bold">💿 Proxmox VE (Type-1)</text>
@@ -6301,7 +6281,7 @@ function ProxmoxGuideDocument() {
                 {/* LXC Containers Box */}
                 <rect x="-85" y="-8" width="170" height="85" rx="5" fill="#030712" stroke="#10b981" strokeWidth="1.5" strokeDasharray="3,2" />
                 <text x="0" y="8" textAnchor="middle" fill="#10b981" fontSize="9px" fontWeight="bold">📦 isolated LXC Containers</text>
-                
+
                 {/* Container 101 */}
                 <g transform="translate(-40, 42)">
                   <rect x="-35" y="-20" width="70" height="32" rx="4" fill={topoMode === "ssh" ? "#1e3a5f" : topoMode === "web" ? "#064e3b" : "#111827"} stroke={topoMode === "ssh" ? "#0ea5e9" : topoMode === "web" ? "#10b981" : "#374151"} strokeWidth="1.5" />
@@ -6326,7 +6306,7 @@ function ProxmoxGuideDocument() {
               <path d="M 100 140 L 175 140" fill="none" stroke="#334155" strokeWidth="2" />
               {/* Switch to Server */}
               <path d="M 245 140 L 325 140" fill="none" stroke="#334155" strokeWidth="2" />
-              
+
               {/* Animated Flows */}
               {topoMode === "ssh" && (
                 <>
@@ -6502,7 +6482,7 @@ function ProxmoxGuideDocument() {
             display: 'flex',
             flexDirection: 'column'
           }}>
-            
+
             {/* Top Installer Header */}
             <div style={{
               background: '#ea580c',
@@ -6521,7 +6501,7 @@ function ProxmoxGuideDocument() {
 
             {/* Split Content: Left Info Column, Right Form Config Column */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 2fr', flexGrow: 1, minHeight: '280px' }}>
-              
+
               {/* Left Column (Installer Help Panel) */}
               <div style={{
                 background: '#1f2937',
@@ -6550,34 +6530,34 @@ function ProxmoxGuideDocument() {
                   <div>
                     <p><strong>การตั้งค่า Target Harddisk</strong></p>
                     <p style={{ marginTop: '6px' }}>ระบุไดรฟ์ดิสก์หลักที่จะใช้ลงระบบปฏิบัติการหลัก:
-                    <br />- แนะนำ SSD สำหรับระบบ PVE
-                    <br />- ข้อมูลในดิสก์ที่ถูกเลือกจะโดนล้างฟอร์แมตเขียนทับระบบไฟล์ทั้งหมด</p>
+                      <br />- แนะนำ SSD สำหรับระบบ PVE
+                      <br />- ข้อมูลในดิสก์ที่ถูกเลือกจะโดนล้างฟอร์แมตเขียนทับระบบไฟล์ทั้งหมด</p>
                   </div>
                 )}
                 {step === 3 && (
                   <div>
                     <p><strong>Location & Time Zone</strong></p>
                     <p style={{ marginTop: '6px' }}>ระบุที่ตั้งเพื่อซิงค์เวลาของเครื่องเซิร์ฟเวอร์กับเครือข่ายอินเทอร์เน็ต (NTP):
-                    <br />- Country: Thailand
-                    <br />- Timezone: Asia/Bangkok
-                    <br />- การตั้งเวลาที่ถูกต้องจำเป็นสำหรับเวลาของ LOG เหตุการณ์ความผิดปกติ</p>
+                      <br />- Country: Thailand
+                      <br />- Timezone: Asia/Bangkok
+                      <br />- การตั้งเวลาที่ถูกต้องจำเป็นสำหรับเวลาของ LOG เหตุการณ์ความผิดปกติ</p>
                   </div>
                 )}
                 {step === 4 && (
                   <div>
                     <p><strong>รหัสผ่าน root แอดมินหลัก</strong></p>
                     <p style={{ marginTop: '6px' }}>ตั้งรหัสผ่านสำหรับผู้ใช้ <code>root</code> ซึ่งเป็นบัญชีสูงสุดในระบบ:
-                    <br />- ใช้สำหรับการล็อกอินผ่าน SSH, SFTP
-                    <br />- ใช้ควบคุมหน้าจัดการเว็บเบราว์เซอร์ PVE Web Console
-                    <br />- ห้ามทำหายหรือตั้งรหัสผ่านเดาได้ง่ายเกินไป</p>
+                      <br />- ใช้สำหรับการล็อกอินผ่าน SSH, SFTP
+                      <br />- ใช้ควบคุมหน้าจัดการเว็บเบราว์เซอร์ PVE Web Console
+                      <br />- ห้ามทำหายหรือตั้งรหัสผ่านเดาได้ง่ายเกินไป</p>
                   </div>
                 )}
                 {step === 5 && (
                   <div>
                     <p><strong>Management Network</strong></p>
                     <p style={{ marginTop: '6px' }}>ตั้งค่าการเชื่อมต่อไอพีและช่องสื่อสารหลัก:
-                    <br />- IP Address: ต้องใช้ Static IP คงที่ ห้ามใช้ไอพีแบบสุ่ม (DHCP) เพื่อไม่ให้หมายเลขควบคุมระบบหลุดเปลี่ยนระหว่างใช้งาน
-                    <br />- Hostname: ตั้งเป็นรูปแบบ FQDN เช่น <code>pve-server.local</code></p>
+                      <br />- IP Address: ต้องใช้ Static IP คงที่ ห้ามใช้ไอพีแบบสุ่ม (DHCP) เพื่อไม่ให้หมายเลขควบคุมระบบหลุดเปลี่ยนระหว่างใช้งาน
+                      <br />- Hostname: ตั้งเป็นรูปแบบ FQDN เช่น <code>pve-server.local</code></p>
                   </div>
                 )}
                 {step === 6 && (
@@ -6596,8 +6576,8 @@ function ProxmoxGuideDocument() {
                   <div>
                     <p><strong>ติดตั้งเสร็จสมบูรณ์!</strong></p>
                     <p style={{ marginTop: '6px' }}>คอมพิวเตอร์สั่ง Reboot เรียบร้อย หน้าจอแสดง URL หมายเลขไอพีควบคุมทางไกลผ่านพอร์ต 8006:
-                    <br />- <code>https://192.168.10.50:8006/</code>
-                    <br />- สังเกตสัญลักษณ์ความปลอดภัยแบบ HTTPS และหมายเลขพอร์ต 8006 เสมอ</p>
+                      <br />- <code>https://192.168.10.50:8006/</code>
+                      <br />- สังเกตสัญลักษณ์ความปลอดภัยแบบ HTTPS และหมายเลขพอร์ต 8006 เสมอ</p>
                   </div>
                 )}
               </div>
@@ -7006,7 +6986,7 @@ function ProxmoxGuideDocument() {
             fontFamily: 'sans-serif',
             color: '#e2e8f0'
           }}>
-            
+
             {/* Tree Sidebar Menu */}
             <div style={{
               width: '180px',
@@ -7035,7 +7015,7 @@ function ProxmoxGuideDocument() {
                 >
                   <span>🌐</span> Datacenter
                 </div>
-                
+
                 <div style={{ paddingLeft: '10px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <div
                     onClick={() => setSelectedHost(true)}
@@ -7052,7 +7032,7 @@ function ProxmoxGuideDocument() {
                   >
                     <span>🖥️</span> pve-server
                   </div>
-                  
+
                   {/* Container nodes list */}
                   <div style={{ paddingLeft: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     {containers.map(c => {
@@ -7127,7 +7107,7 @@ function ProxmoxGuideDocument() {
 
             {/* Right Dashboard panel */}
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: '#090d16', overflow: 'hidden' }}>
-              
+
               {/* Header inside Panel */}
               <div style={{
                 background: '#1e293b',
@@ -7330,7 +7310,7 @@ function ProxmoxGuideDocument() {
 
                     {/* Tab panels details switcher */}
                     <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-                      
+
                       {/* Summary Tab */}
                       {activeTab === "summary" && (
                         <div style={{ background: '#020617', border: '1px solid #1e293b', padding: '12px', borderRadius: '6px', fontSize: '11.5px', lineHeight: '1.6' }}>
@@ -7353,7 +7333,7 @@ function ProxmoxGuideDocument() {
                       {/* Console Tab */}
                       {activeTab === "console" && (
                         <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
-                          
+
                           {/* Nano Text Editor Popup inside Console Container */}
                           {showNanoEditor ? (
                             <div style={{
@@ -7494,7 +7474,7 @@ function ProxmoxGuideDocument() {
                           flexDirection: 'column',
                           minHeight: '200px'
                         }}>
-                          
+
                           {/* Browser address bar */}
                           <div style={{
                             background: '#f1f5f9',
@@ -7693,7 +7673,8 @@ function ChmodChownVisualizer({ s }: { s: SlideData }) {
 
   return (
     <div className="slide slide-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes chmod-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         @keyframes chmod-glow { 0%,100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 20px 4px rgba(99,102,241,0.4); } }
         @keyframes chown-fly { 0% { transform: translateY(0) scale(1); opacity: 1; } 50% { transform: translateY(-20px) scale(1.15); opacity: 0.6; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
@@ -8003,8 +7984,8 @@ function ChmodChownVisualizer({ s }: { s: SlideData }) {
             <div style={{ background: 'rgba(34,197,94,0.08)', border: '1px solid #22c55e44', borderRadius: '10px', padding: '10px 12px' }}>
               <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#22c55e', marginBottom: '4px' }}>💡 จำง่ายๆ</div>
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                <strong style={{ color: '#60a5fa' }}>chmod</strong> = เปลี่ยน <strong>สิทธิ์</strong> (ทำอะไรได้บ้าง?)<br/>
-                <strong style={{ color: '#a78bfa' }}>chown</strong> = เปลี่ยน <strong>เจ้าของ</strong> (ของใคร?)<br/>
+                <strong style={{ color: '#60a5fa' }}>chmod</strong> = เปลี่ยน <strong>สิทธิ์</strong> (ทำอะไรได้บ้าง?)<br />
+                <strong style={{ color: '#a78bfa' }}>chown</strong> = เปลี่ยน <strong>เจ้าของ</strong> (ของใคร?)<br />
                 <strong style={{ color: '#f97316' }}>chgrp</strong> = เปลี่ยนแค่ <strong>กลุ่ม</strong> อย่างเดียว
               </div>
             </div>
@@ -8012,7 +7993,7 @@ function ChmodChownVisualizer({ s }: { s: SlideData }) {
             <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '10px', padding: '10px 12px', flex: 1 }}>
               <div style={{ fontSize: '11px', fontWeight: 'bold', color: 'var(--text-secondary)', marginBottom: '4px' }}>🔄 ออปชัน -R (Recursive)</div>
               <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-                เปลี่ยนทั้งโฟลเดอร์และไฟล์ลูกข้างในทั้งหมดทีเดียว:<br/>
+                เปลี่ยนทั้งโฟลเดอร์และไฟล์ลูกข้างในทั้งหมดทีเดียว:<br />
                 <code style={{ color: '#7ee787', background: '#0d1117', padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
                   chown -R student01:www-data /var/www/
                 </code>
@@ -8021,307 +8002,6 @@ function ChmodChownVisualizer({ s }: { s: SlideData }) {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function FTPFlowAnimation({ s }: { s: SlideData }) {
-  const steps = [
-    {
-      title: "Connect",
-      short: "กรอก IP / User / Password",
-      detail: "จุดเริ่มต้นคือเครื่องนักเรียนพยายามคุยกับ FTP Server ใน Container",
-      command: "Client -> Server : ขอเชื่อมต่อ",
-      active: ["control"]
-    },
-    {
-      title: "Login",
-      short: "คุยคำสั่งผ่าน port 21",
-      detail: "พอร์ต 21 ใช้คุยคำสั่ง เช่น login, list, upload, download แต่ยังไม่ใช่ทางวิ่งของไฟล์จริง",
-      command: "TCP 21 : USER / PASS / LIST",
-      active: ["control", "port21"]
-    },
-    {
-      title: "Passive",
-      short: "Server บอกพอร์ตส่งไฟล์",
-      detail: "Passive port คือพอร์ตเสริมชั่วคราวที่ Server เลือกไว้ให้ใช้ส่งไฟล์จริง เช่น 40000",
-      command: "Server -> Client : ใช้ port 40000 นะ",
-      active: ["reply", "passive"]
-    },
-    {
-      title: "Data",
-      short: "เปิด connection รอบที่สอง",
-      detail: "Client จะเปิดการเชื่อมต่อรอบที่สองไปยัง passive port นั้น เพื่อรับรายการไฟล์หรืออัปโหลด/ดาวน์โหลดไฟล์",
-      command: "Client -> Server : TCP 40000",
-      active: ["data", "passive"]
-    },
-    {
-      title: "Transfer",
-      short: "ส่ง test.txt ไปที่ /upload",
-      detail: "เมื่อ control และ data connection ผ่านแล้ว FileZilla จึงเห็นไฟล์ใน server และลากไฟล์อัปโหลดได้",
-      command: "STOR test.txt / RETR welcome.txt",
-      active: ["data", "file"]
-    },
-    {
-      title: "Firewall",
-      short: "ต้องเปิด 21 และ 40000-40100",
-      detail: "ถ้าเปิดแค่ 21 อาจ login ได้แต่ดูไฟล์ไม่ได้ เพราะ data connection ถูก UFW บล็อก",
-      command: "allow 21/tcp + allow 40000:40100/tcp",
-      active: ["firewall", "port21", "passive"]
-    }
-  ];
-
-  const [step, setStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const current = steps[step];
-  const isActive = (key: string) => current.active.includes(key);
-  const fileHasMoved = step >= 4;
-  const dataReady = step >= 3;
-  const controlReady = step >= 1;
-  const passiveReady = step >= 2;
-  const transferLogs = [
-    "Connecting to 192.168.1.120:21...",
-    "Response: 230 Login successful.",
-    "Response: 227 Entering Passive Mode (40000)",
-    "Data connection established.",
-    "Command: STOR test.txt",
-    "Transfer complete: /upload/test.txt"
-  ];
-  const visibleLogs = transferLogs.slice(0, Math.min(step + 1, transferLogs.length));
-
-  useEffect(() => {
-    if (!isPlaying) return;
-    const timer = window.setInterval(() => setStep(prev => (prev + 1) % steps.length), 2600);
-    return () => window.clearInterval(timer);
-  }, [isPlaying, steps.length]);
-
-  const panel = (color: string, active = false): React.CSSProperties => ({
-    borderRadius: "14px",
-    border: `1.5px solid ${active ? color : "rgba(148,163,184,0.20)"}`,
-    background: active ? `${color}14` : "rgba(15,23,42,0.72)",
-    boxShadow: active ? `0 0 24px ${color}24` : "none",
-    transition: "all 0.22s ease"
-  });
-
-  return (
-    <div className="slide slide-content" style={{
-      display: "flex", flexDirection: "column", height: "100%", padding: "2.3% 3.2%",
-      background: "linear-gradient(135deg, #07101e 0%, #10243b 54%, #08111f 100%)",
-      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "12px",
-      overflow: "hidden"
-    }}>
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes ftpPulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.04); }
-        }
-        .ftp-pulse { animation: ftpPulse 1.4s ease-in-out infinite; }
-        @keyframes ftpFileFly {
-          0% { transform: translateX(0) scale(1); opacity: 1; }
-          50% { transform: translateX(50%) scale(1.08); opacity: 1; }
-          100% { transform: translateX(100%) scale(1); opacity: 0; }
-        }
-        @keyframes ftpSuccessPop {
-          0% { transform: scale(.94); opacity: 0; }
-          100% { transform: scale(1); opacity: 1; }
-        }
-        .ftp-file-fly { animation: ftpFileFly 1.35s ease-in-out infinite; }
-        .ftp-success-pop { animation: ftpSuccessPop .25s ease-out both; }
-      `}} />
-
-      <div style={{ flexShrink: 0, display: "flex", justifyContent: "space-between", gap: "18px", alignItems: "flex-end" }}>
-        <div>
-        <span style={{ fontSize: "11px", color: "#38bdf8", fontWeight: 800, letterSpacing: "1px", textTransform: "uppercase" }}>
-          {s.tag}
-        </span>
-          <h2 style={{ margin: "4px 0 0", fontSize: "clamp(20px, 2.2vw, 28px)", fontWeight: 900 }}>
-          {s.title}
-        </h2>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "flex-end" }}>
-          <div style={{ fontSize: "12px", color: "#cbd5e1", lineHeight: 1.5, maxWidth: "360px", textAlign: "right" }}>
-            ดูจากซ้ายไปขวา: เครื่องนักเรียนส่งไฟล์ผ่านพอร์ตที่ Server อนุญาต แล้วไฟล์ไปโผล่ฝั่ง Remote
-          </div>
-          <button
-            onClick={() => setIsPlaying(prev => !prev)}
-            style={{
-              flexShrink: 0, minWidth: "92px", height: "38px", borderRadius: "10px",
-              border: `1.5px solid ${isPlaying ? "rgba(248,113,113,0.65)" : "rgba(34,197,94,0.65)"}`,
-              background: isPlaying ? "rgba(248,113,113,0.14)" : "rgba(34,197,94,0.14)",
-              color: isPlaying ? "#fecaca" : "#bbf7d0", cursor: "pointer",
-              fontSize: "12px", fontWeight: 900
-            }}
-            title={isPlaying ? "หยุดแอนิเมชันไว้ที่ขั้นตอนนี้" : "เล่นแอนิเมชันต่ออัตโนมัติ"}
-          >
-            {isPlaying ? "หยุดเล่น" : "เล่นต่อ"}
-          </button>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: "8px", flexShrink: 0 }}>
-        {steps.map((item, index) => (
-          <button
-            key={item.title}
-            onClick={() => {
-              setStep(index);
-              setIsPlaying(false);
-            }}
-            style={{
-              minHeight: "58px", textAlign: "left", cursor: "pointer", borderRadius: "10px",
-              border: `1.5px solid ${step === index ? "#38bdf8" : "rgba(148,163,184,0.18)"}`,
-              background: step === index ? "rgba(56,189,248,0.16)" : "rgba(15,23,42,0.68)",
-              color: step === index ? "#e0f2fe" : "#cbd5e1", padding: "8px 10px",
-              boxShadow: step === index ? "0 0 18px rgba(56,189,248,0.18)" : "none"
-            }}
-          >
-            <div style={{ fontSize: "11px", fontWeight: 900 }}>{index + 1}. {item.title}</div>
-            <div style={{ fontSize: "10px", marginTop: "3px", lineHeight: 1.35, color: step === index ? "#bae6fd" : "#94a3b8" }}>
-              {item.short}
-            </div>
-          </button>
-        ))}
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "1.38fr .82fr", gap: "12px", flex: 1, minHeight: 0 }}>
-        <div style={{ ...panel("#38bdf8", isActive("control") || isActive("data") || isActive("file")), padding: "14px", display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1.35fr 1fr", gap: "12px", alignItems: "stretch", flex: 1, minHeight: 0 }}>
-            <div style={{ ...panel("#38bdf8", true), padding: "13px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-              <div>
-                <div style={{ fontSize: "11px", fontWeight: 900, color: "#7dd3fc" }}>LOCAL SITE</div>
-                <div style={{ fontSize: "22px", fontWeight: 900, marginTop: "4px" }}>FileZilla</div>
-                <div style={{ fontSize: "11px", color: "#cbd5e1", marginTop: "2px" }}>Client: 192.168.1.50</div>
-              </div>
-              <div style={{
-                marginTop: "18px", padding: "10px", borderRadius: "10px",
-                border: "1px solid rgba(125,211,252,0.35)", background: "rgba(2,6,23,0.55)",
-                opacity: fileHasMoved ? .42 : 1
-              }}>
-                <div style={{ fontSize: "10px", color: "#94a3b8", fontWeight: 800 }}>ไฟล์บนเครื่องนักเรียน</div>
-                <div style={{ fontSize: "16px", color: "#e0f2fe", fontWeight: 900, marginTop: "4px" }}>test.txt</div>
-              </div>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: "10px", minWidth: 0 }}>
-              <div style={{
-                ...panel("#38bdf8", controlReady), padding: "10px 12px",
-                display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: "10px"
-              }}>
-                <div style={{ color: "#7dd3fc", fontSize: "12px", fontWeight: 900 }}>PORT 21</div>
-                <div style={{ height: "7px", borderRadius: "999px", background: controlReady ? "linear-gradient(90deg,#38bdf8,#7dd3fc)" : "rgba(148,163,184,0.22)" }} />
-                <div style={{ gridColumn: "2", color: "#cbd5e1", fontSize: "11px" }}>Control Connection: login และคำสั่ง</div>
-              </div>
-
-              <div style={{
-                ...panel("#f59e0b", passiveReady), padding: "10px 12px",
-                display: "grid", gridTemplateColumns: "82px 1fr", alignItems: "center", gap: "10px"
-              }}>
-                <div style={{ color: "#fbbf24", fontSize: "12px", fontWeight: 900 }}>40000</div>
-                <div style={{ height: "7px", borderRadius: "999px", background: passiveReady ? "linear-gradient(90deg,#f59e0b,#fbbf24)" : "rgba(148,163,184,0.22)" }} />
-                <div style={{ gridColumn: "2", color: "#cbd5e1", fontSize: "11px" }}>Passive/Data Connection: ส่งไฟล์จริง</div>
-              </div>
-
-              <div style={{
-                position: "relative", minHeight: "72px", borderRadius: "12px",
-                border: `1.5px dashed ${dataReady ? "rgba(245,158,11,0.55)" : "rgba(148,163,184,0.20)"}`,
-                background: dataReady ? "rgba(245,158,11,0.08)" : "rgba(15,23,42,0.50)",
-                overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center"
-              }}>
-                {isActive("file") && (
-                  <div className="ftp-file-fly" style={{
-                    position: "absolute", left: "8px", width: "44%", padding: "10px 12px", borderRadius: "10px",
-                    background: "#f59e0b", color: "#111827", fontWeight: 900, textAlign: "center",
-                    boxShadow: "0 0 22px rgba(245,158,11,0.45)"
-                  }}>
-                    test.txt
-                  </div>
-                )}
-                <div style={{ color: dataReady ? "#fbbf24" : "#64748b", fontWeight: 900, fontSize: "13px" }}>
-                  {fileHasMoved ? "ส่งไฟล์ผ่าน DATA PORT แล้ว" : dataReady ? "พร้อมส่งไฟล์ผ่าน DATA PORT" : "รอ Passive Port"}
-                </div>
-              </div>
-            </div>
-
-            <div style={{ ...panel("#22c55e", isActive("passive") || isActive("file")), padding: "13px", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
-              <div>
-                <div style={{ fontSize: "11px", fontWeight: 900, color: "#86efac" }}>REMOTE SITE</div>
-                <div style={{ fontSize: "22px", fontWeight: 900, marginTop: "4px" }}>vsftpd</div>
-                <div style={{ fontSize: "11px", color: "#cbd5e1", marginTop: "2px" }}>/home/ftpstudent/ftp/upload</div>
-              </div>
-              <div style={{
-                marginTop: "18px", padding: "10px", borderRadius: "10px",
-                border: `1px solid ${fileHasMoved ? "rgba(134,239,172,0.45)" : "rgba(148,163,184,0.16)"}`,
-                background: fileHasMoved ? "rgba(22,163,74,0.20)" : "rgba(2,6,23,0.45)"
-              }}>
-                <div style={{ fontSize: "10px", color: fileHasMoved ? "#86efac" : "#64748b", fontWeight: 800 }}>ไฟล์บน Server</div>
-                <div style={{ fontSize: "16px", color: fileHasMoved ? "#dcfce7" : "#64748b", fontWeight: 900, marginTop: "4px" }}>
-                  {fileHasMoved ? "test.txt uploaded" : "ยังไม่มีไฟล์ใหม่"}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", flexShrink: 0 }}>
-            <div style={{ ...panel("#38bdf8", controlReady), padding: "10px" }}>
-              <div style={{ color: "#7dd3fc", fontWeight: 900, fontSize: "11px" }}>Port 21</div>
-              <div style={{ color: "#e2e8f0", fontSize: "12px", marginTop: "4px" }}>ช่องคุยคำสั่ง</div>
-            </div>
-            <div style={{ ...panel("#f59e0b", passiveReady), padding: "10px" }}>
-              <div style={{ color: "#fbbf24", fontWeight: 900, fontSize: "11px" }}>Passive Port</div>
-              <div style={{ color: "#e2e8f0", fontSize: "12px", marginTop: "4px" }}>ช่องส่งไฟล์จริง</div>
-            </div>
-            <div style={{ ...panel("#22c55e", fileHasMoved), padding: "10px" }}>
-              <div style={{ color: "#86efac", fontWeight: 900, fontSize: "11px" }}>หลักฐาน</div>
-              <div style={{ color: "#e2e8f0", fontSize: "12px", marginTop: "4px" }}>{fileHasMoved ? "Server มีไฟล์ใหม่แล้ว" : "รอการ upload"}</div>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
-          <div style={{ ...panel("#38bdf8", true), padding: "14px", flexShrink: 0 }}>
-            <div style={{ color: "#38bdf8", fontSize: "11px", fontWeight: 900, letterSpacing: ".5px" }}>กำลังอธิบายขั้นตอนที่ {step + 1}</div>
-            <div style={{ color: "#e0f2fe", fontSize: "20px", fontWeight: 900, marginTop: "5px" }}>{steps[step].title}</div>
-            <div style={{ color: "#dbeafe", fontSize: "13px", lineHeight: 1.65, marginTop: "8px" }}>{current.detail}</div>
-            <code style={{
-              display: "block", background: "#020617", color: "#7ee787", border: "1px solid rgba(126,231,135,0.22)",
-              borderRadius: "10px", padding: "9px 10px", fontFamily: "'JetBrains Mono', monospace", fontSize: "12px", marginTop: "10px"
-            }}>
-              {current.command}
-            </code>
-          </div>
-
-          <div style={{ ...panel("#22c55e", fileHasMoved), padding: "12px", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-            <div style={{ color: "#38bdf8", fontWeight: 900, fontSize: "12px", marginBottom: "8px" }}>FileZilla Message Log</div>
-            <div style={{ background: "#020617", borderRadius: "10px", padding: "10px", flex: 1, minHeight: 0, overflow: "hidden", fontFamily: "'JetBrains Mono', monospace", fontSize: "11px" }}>
-              {visibleLogs.map((log, index) => (
-                <div key={log} style={{
-                  color: index === visibleLogs.length - 1 ? (log.includes("complete") || log.includes("successful") ? "#86efac" : "#e2e8f0") : "#94a3b8",
-                  fontWeight: index === visibleLogs.length - 1 ? 800 : 500,
-                  marginBottom: "6px", whiteSpace: "nowrap"
-                }}>
-                  {log}
-                </div>
-              ))}
-            </div>
-            {fileHasMoved && (
-              <div className="ftp-success-pop" style={{
-                marginTop: "10px", padding: "9px 10px", borderRadius: "10px", background: "rgba(34,197,94,0.16)",
-                border: "1px solid rgba(134,239,172,0.30)", color: "#bbf7d0", fontSize: "12px", fontWeight: 900
-              }}>
-                ผลลัพธ์ที่ต้องเห็น: Remote site มีไฟล์ /upload/test.txt
-              </div>
-            )}
-          </div>
-
-          {s.speakerNotes && (
-            <div style={{
-              ...panel("#64748b", false), padding: "10px 12px", flexShrink: 0,
-              fontSize: "11px", color: "#cbd5e1", lineHeight: 1.55
-            }}>
-              <strong style={{ color: "#38bdf8" }}>บันทึกครู: </strong>{s.speakerNotes}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   );
 }
@@ -8339,35 +8019,34 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "dhcp-hotel": return <DhcpHotelAnimation s={slide} />;
     case "interactive-act": return <InteractiveActivitySlide s={slide} />;
     case "homework": return <HomeworkSlide s={slide} />;
-    case "stack-installer-anim":  return <StackInstallerAnimation s={slide} />;
-    case "nginx-config":            return <NginxConfigSlide s={slide} />;
-    case "nginx-flow-anim":        return <NginxFlowAnimation s={slide} />;
-    case "mariadb-query-anim":     return <MariaDBQueryAnimation s={slide} />;
-    case "nodejs-request-anim":    return <NodeJSRequestAnimation s={slide} />;
-    case "chmod-chown-visual":     return <ChmodChownVisualizer s={slide} />;
-    case "ftp-flow-anim":          return <FTPFlowAnimation s={slide} />;
-    case "tcp-udp-anim":           return <TCPUDPAnimation s={slide} />;
-    case "socket-binding-anim":    return <SocketBindingAnimation s={slide} />;
-    case "port-scan-anim":         return <PortScanAnimation s={slide} />;
-    case "ip-infographic":         return <IPAddressInfographic s={slide} />;
-    case "packet-flow-anim":       return <PacketFlowAnimation s={slide} />;
-    case "ufw-rules-visualizer":   return <UFWRulesVisualizer s={slide} />;
-    case "nmap-handshake-anim":    return <NmapHandshakeAnim s={slide} />;
-    case "ufw-log-analyzer":       return <UFWLogAnalyzer s={slide} />;
-    case "firewall-attack-sim":    return <FirewallAttackSim s={slide} />;
-    case "nmap-recon-mission":     return <NmapReconMission s={slide} />;
-    case "network-topology-anim":  return <NetworkTopologyAnim s={slide} />;
-    case "osi-layer-drill":        return <OSILayerDrill s={slide} />;
-    case "tcp-state-machine":      return <TCPStateMachine s={slide} />;
-    case "subnetting-calculator":  return <SubnettingCalculator s={slide} />;
+    case "stack-installer-anim": return <StackInstallerAnimation s={slide} />;
+    case "nginx-config": return <NginxConfigSlide s={slide} />;
+    case "nginx-flow-anim": return <NginxFlowAnimation s={slide} />;
+    case "mariadb-query-anim": return <MariaDBQueryAnimation s={slide} />;
+    case "nodejs-request-anim": return <NodeJSRequestAnimation s={slide} />;
+    case "chmod-chown-visual": return <ChmodChownVisualizer s={slide} />;
+    case "tcp-udp-anim": return <TCPUDPAnimation s={slide} />;
+    case "socket-binding-anim": return <SocketBindingAnimation s={slide} />;
+    case "port-scan-anim": return <PortScanAnimation s={slide} />;
+    case "ip-infographic": return <IPAddressInfographic s={slide} />;
+    case "packet-flow-anim": return <PacketFlowAnimation s={slide} />;
+    case "ufw-rules-visualizer": return <UFWRulesVisualizer s={slide} />;
+    case "nmap-handshake-anim": return <NmapHandshakeAnim s={slide} />;
+    case "ufw-log-analyzer": return <UFWLogAnalyzer s={slide} />;
+    case "firewall-attack-sim": return <FirewallAttackSim s={slide} />;
+    case "nmap-recon-mission": return <NmapReconMission s={slide} />;
+    case "network-topology-anim": return <NetworkTopologyAnim s={slide} />;
+    case "osi-layer-drill": return <OSILayerDrill s={slide} />;
+    case "tcp-state-machine": return <TCPStateMachine s={slide} />;
+    case "subnetting-calculator": return <SubnettingCalculator s={slide} />;
     case "service-hardening-quiz": return <ServiceHardeningQuiz s={slide} />;
-    case "ufw-netfilter-arch":     return <UFWNetfilterArchitecture s={slide} />;
+    case "ufw-netfilter-arch": return <UFWNetfilterArchitecture s={slide} />;
     case "stateful-conn-tracking": return <StatefulConnectionTracking s={slide} />;
     case "network-attacks-defenses": return <NetworkAttacksDefenses s={slide} />;
-    case "ufw-log-dissector":      return <UFWLogDissector s={slide} />;
-    case "ufw-log-homework":       return <UFWLogHomework s={slide} />;
+    case "ufw-log-dissector": return <UFWLogDissector s={slide} />;
+    case "ufw-log-homework": return <UFWLogHomework s={slide} />;
     case "nmap-handshake-diagram": return <NmapHandshakeDiagram s={slide} />;
-    case "workshop-architecture":  return <WorkshopArchitecture s={slide} />;
+    case "workshop-architecture": return <WorkshopArchitecture s={slide} />;
     default: return <ContentSlide s={slide} />;
   }
 }
@@ -9265,7 +8944,7 @@ function DockerGuideDocument() {
         <h2 style={{ fontSize: '20px', fontWeight: '700', color: 'var(--green)', marginBottom: '20px', borderLeft: '4px solid var(--green)', paddingLeft: '12px' }}>
           🏁 แผนปฏิบัติงานและเกณฑ์การทดสอบสำหรับนักศึกษา (Lab Steps & Evaluation Rubrics)
         </h2>
-        
+
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '24px' }}>
           <div style={{ background: 'var(--bg-elevated)', padding: '20px', borderRadius: '8px' }}>
             <span style={{ fontSize: '20px' }}>🎯</span> <strong style={{ fontSize: '15px', display: 'block', margin: '8px 0 4px' }}>วัตถุประสงค์หลักแล็บ</strong>
@@ -9276,7 +8955,7 @@ function DockerGuideDocument() {
               <li>Deploy แอปพลิเคชันจริงผ่านคำสั่ง docker compose up คอนเทนเนอร์ชื่อ website ได้สมบูรณ์.</li>
             </ul>
           </div>
-          
+
           <div style={{ background: 'var(--bg-elevated)', padding: '20px', borderRadius: '8px' }}>
             <span style={{ fontSize: '20px' }}>📋</span> <strong style={{ fontSize: '15px', display: 'block', margin: '8px 0 4px' }}>ขั้นตอนเช็คคะแนนสำหรับส่งงาน</strong>
             <ul style={{ fontSize: '13px', color: 'var(--text-secondary)', paddingLeft: '20px' }}>
@@ -9631,313 +9310,9 @@ sudo ss -tulpn`}</Code>
 /* ======================================= */
 /* --- MAIN APP --- */
 /* ======================================= */
-/* ===== EXAM NOTIFICATION BANNER ===== */
-function ExamNotificationBanner() {
-  const [showPanel, setShowPanel] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-
-  // === DATE CONTROL ===
-  // ตั้งค่าให้แสดงเฉพาะวันที่ 14 กรกฎาคม 2569 (2026 CE)
-  // เปลี่ยน forceVisible = false เมื่อต้องการให้ทำงานตามวันจริง
-  const forceVisible = true; // ← เปลี่ยนเป็น false เมื่อต้องการให้แสดงเฉพาะวันสอบ
-
-  const isExamDay = () => {
-    if (forceVisible) return true;
-    const now = new Date();
-    const day = now.getDate();
-    const month = now.getMonth(); // 0-indexed, July = 6
-    const year = now.getFullYear();
-    return day === 14 && month === 6 && year === 2026;
-  };
-
-  if (!isExamDay() || dismissed) return null;
-
-  return (
-    <>
-      {/* Top Banner Bar */}
-      <div className="exam-notification-wrapper">
-        <div className="exam-notification-bar" onClick={() => setShowPanel(!showPanel)}>
-          <span className="exam-badge">📋 สอบ</span>
-          <span className="exam-notification-text">
-            🔔 สอบปฏิบัติ NOS — วันอังคารที่ 14 กรกฎาคม 2569 | คลิกเพื่อดูโจทย์สอบ
-          </span>
-          <span className="exam-notification-arrow">{showPanel ? '▲' : '▼'}</span>
-        </div>
-      </div>
-
-      {/* Expanded Exam Panel */}
-      {showPanel && (
-        <>
-          <div className="exam-panel-overlay" onClick={() => setShowPanel(false)} />
-          <div className="exam-panel">
-            <div className="exam-panel-header">
-              <h2>📝 โจทย์สอบปฏิบัติ — วิชา NOS</h2>
-              <p>วันอังคารที่ 14 กรกฎาคม พ.ศ. 2569 | สอบบน Proxmox (Ubuntu Server)</p>
-              <button className="exam-panel-close" onClick={() => setShowPanel(false)}>✕</button>
-            </div>
-
-            <div className="exam-panel-body">
-              {/* ===== ส่วนที่ 1: Nginx ===== */}
-              <div className="exam-section">
-                <div className="exam-section-header">
-                  <div className="exam-section-icon nginx">🌐</div>
-                  <div className="exam-section-title">ส่วนที่ 1 — Nginx Web Server</div>
-                  <span className="exam-section-score nginx">30 คะแนน</span>
-                </div>
-                <div className="exam-section-body">
-                  <ul className="exam-task-list">
-                    <li>ติดตั้ง Nginx บน Ubuntu Server ให้สามารถใช้งานได้</li>
-                    <li>สร้างหน้าเว็บ <strong>Portfolio แนะนำตัวเอง</strong> ที่มีองค์ประกอบดังนี้:</li>
-                    <li style={{ paddingLeft: '24px' }}>มี <strong>หัวข้อ (Heading)</strong> ที่แสดงชื่อ-นามสกุลของนักเรียน</li>
-                    <li style={{ paddingLeft: '24px' }}>มี <strong>ข้อมูลส่วนตัว</strong> เช่น ชื่อเล่น, อายุ, สาขาที่เรียน, งานอดิเรก ฯลฯ</li>
-                    <li style={{ paddingLeft: '24px' }}>⭐ มี <strong style={{ color: '#dc2626' }}>สโลแกนของตัวเอง</strong> — ห้ามขาด!</li>
-                    <li style={{ paddingLeft: '24px' }}>มี <strong>ตาราง (Table)</strong> อย่างน้อย 1 ตาราง แสดงข้อมูลอะไรก็ได้</li>
-                    <li style={{ paddingLeft: '24px' }}>มี <strong>ลิงก์ (Link)</strong> อย่างน้อย 1 ลิงก์ ที่สามารถคลิกไปยังเว็บอื่นได้</li>
-                    <li>เว็บไซต์ต้องสามารถเข้าถึงได้ผ่าน <strong>วง LAN</strong> (เครื่องอื่นในห้องเข้าดูได้)</li>
-                  </ul>
-
-                  {/* --- ตัวอย่างผลลัพธ์ --- */}
-                  <div style={{ marginTop: '16px', marginBottom: '12px', fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
-                    📺 ตัวอย่างผลลัพธ์ที่ต้องการ (ไม่จำเป็นต้องเหมือนทุกอย่าง ขอให้มีองค์ประกอบครบ)
-                  </div>
-                  <div style={{
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '10px',
-                    overflow: 'hidden',
-                    background: '#fff',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-                  }}>
-                    {/* Browser Chrome Bar */}
-                    <div style={{
-                      background: '#f1f5f9',
-                      padding: '8px 12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      borderBottom: '1px solid #e2e8f0'
-                    }}>
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#eab308' }} />
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e' }} />
-                      <div style={{
-                        flex: 1,
-                        marginLeft: '8px',
-                        background: '#fff',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '6px',
-                        padding: '4px 10px',
-                        fontSize: '11px',
-                        color: '#64748b',
-                        fontFamily: "'JetBrains Mono', monospace"
-                      }}>
-                        http://192.168.x.x
-                      </div>
-                    </div>
-
-                    {/* Page Content Preview - Portfolio */}
-                    <div style={{ padding: '20px 24px', fontFamily: 'sans-serif' }}>
-                      {/* Heading */}
-                      <h3 style={{
-                        fontSize: '18px',
-                        fontWeight: 700,
-                        color: '#1e293b',
-                        marginBottom: '4px'
-                      }}>
-                        👤 นาย สมชาย ใจดี
-                        <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 400, marginLeft: '8px' }}>← Heading ชื่อ-นามสกุล</span>
-                      </h3>
-
-                      {/* Slogan */}
-                      <div style={{
-                        fontSize: '13px',
-                        color: '#6366f1',
-                        fontStyle: 'italic',
-                        marginBottom: '14px',
-                        paddingLeft: '2px'
-                      }}>
-                        &quot;ทำวันนี้ให้ดีที่สุด เพราะวันพรุ่งนี้ยังมาไม่ถึง&quot;
-                        <span style={{ fontSize: '10px', color: '#dc2626', fontStyle: 'normal', fontWeight: 700, marginLeft: '6px' }}>← ⭐ สโลแกน (ห้ามขาด!)</span>
-                      </div>
-
-                      {/* Personal Info */}
-                      <div style={{
-                        background: '#f8fafc',
-                        border: '1px solid #e2e8f0',
-                        borderRadius: '8px',
-                        padding: '12px 14px',
-                        marginBottom: '14px',
-                        fontSize: '12px',
-                        color: '#334155',
-                        lineHeight: 1.8
-                      }}>
-                        <div>🎈 <strong>ชื่อเล่น:</strong> เก่ง</div>
-                        <div>🎂 <strong>อายุ:</strong> 19 ปี</div>
-                        <div>📚 <strong>สาขา:</strong> เทคโนโลยีสารสนเทศ</div>
-                        <div>🎮 <strong>งานอดิเรก:</strong> เล่นเกม, เขียนโค้ด</div>
-                        <span style={{ fontSize: '10px', color: '#94a3b8' }}>↑ ข้อมูลส่วนตัว (ใส่กี่อย่างก็ได้)</span>
-                      </div>
-
-                      {/* Table */}
-                      <table style={{
-                        width: '100%',
-                        borderCollapse: 'collapse',
-                        fontSize: '12px',
-                        marginBottom: '4px'
-                      }}>
-                        <thead>
-                          <tr style={{ background: '#f1f5f9' }}>
-                            <th style={{ padding: '7px 10px', textAlign: 'left', borderBottom: '2px solid #cbd5e1', color: '#475569', fontWeight: 600 }}>วิชาที่ชอบ</th>
-                            <th style={{ padding: '7px 10px', textAlign: 'left', borderBottom: '2px solid #cbd5e1', color: '#475569', fontWeight: 600 }}>เหตุผล</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>NOS</td>
-                            <td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>ได้ลงมือทำจริง</td>
-                          </tr>
-                          <tr>
-                            <td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>Network</td>
-                            <td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>ชอบเรื่อง Server</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                      <div style={{ fontSize: '10px', color: '#94a3b8', marginBottom: '10px' }}>↑ Table แสดงข้อมูลอะไรก็ได้</div>
-
-                      {/* Link */}
-                      <div style={{ fontSize: '12px', color: '#334155' }}>
-                        🔗 เว็บที่ชอบ:{' '}
-                        <span style={{ color: '#2563eb', textDecoration: 'underline' }}>https://www.google.com</span>
-                        <span style={{ fontSize: '10px', color: '#94a3b8', marginLeft: '6px' }}>← Link ไปเว็บอื่น</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="exam-note" style={{ marginTop: '12px' }}>
-                    <strong>💡 หมายเหตุ:</strong> ยังไม่ต้องทำ Reverse Proxy — ขอแค่ใช้ Nginx เสิร์ฟหน้าเว็บได้ก็พอ 
-                    สามารถตกแต่งเพิ่มเติมได้ตามใจชอบ แต่ต้องมีองค์ประกอบครบตามที่กำหนด
-                  </div>
-                </div>
-              </div>
-
-              {/* ===== ส่วนที่ 2: MariaDB ===== */}
-              <div className="exam-section">
-                <div className="exam-section-header">
-                  <div className="exam-section-icon mariadb">🗄️</div>
-                  <div className="exam-section-title">ส่วนที่ 2 — MariaDB Database</div>
-                  <span className="exam-section-score mariadb">30 คะแนน</span>
-                </div>
-                <div className="exam-section-body">
-                  <ul className="exam-task-list">
-                    <li>ติดตั้ง MariaDB Server บน Ubuntu Server ให้สำเร็จ</li>
-                    <li>ตรวจสอบว่า MariaDB Service ทำงานอยู่</li>
-                    <li>เข้าหน้า MariaDB ให้ได้ แล้วแสดงให้อาจารย์ดู</li>
-                  </ul>
-                  <div className="exam-note">
-                    <strong>💡 หมายเหตุ:</strong> ขอแค่เข้าหน้า MariaDB ได้ก็ผ่าน — ยังไม่ต้องสร้าง Database หรือตาราง
-                  </div>
-                </div>
-              </div>
-
-              {/* ===== ส่วนที่ 3: Firewall ===== */}
-              <div className="exam-section">
-                <div className="exam-section-header">
-                  <div className="exam-section-icon firewall">🔥</div>
-                  <div className="exam-section-title">ส่วนที่ 3 — Firewall (UFW) &nbsp;⚡ ท้าทาย!</div>
-                  <span className="exam-section-score firewall">40 คะแนน</span>
-                </div>
-                <div className="exam-section-body">
-                  {/* --- Mission 3.1: Basic UFW --- */}
-                  <div style={{ marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ background: '#fee2e2', color: '#dc2626', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.1</span>
-                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>เปิดใช้งาน UFW และตั้งค่า Default Policy (10 คะแนน)</span>
-                    </div>
-                    <ul className="exam-task-list">
-                      <li>เปิดใช้งาน UFW (Uncomplicated Firewall) บน Ubuntu Server</li>
-                      <li>ตั้ง Default Policy ให้ <strong>ปิดกั้น traffic ขาเข้าทั้งหมด</strong></li>
-                      <li>ตั้ง Default Policy ให้ <strong>อนุญาต traffic ขาออกทั้งหมด</strong></li>
-                    </ul>
-                  </div>
-
-                  {/* --- Mission 3.2: Port Management --- */}
-                  <div style={{ marginBottom: '16px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ background: '#dbeafe', color: '#2563eb', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.2</span>
-                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>จัดการ Port — เปิด / ปิด (10 คะแนน)</span>
-                    </div>
-                    <ul className="exam-task-list">
-                      <li><strong>อนุญาต (Allow)</strong> port ต่อไปนี้:</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>22</code> (SSH) — ⚠️ ต้องเปิดก่อน enable UFW!</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>80</code> (HTTP) — เว็บ Nginx</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>443</code> (HTTPS)</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>53</code> ทั้ง TCP และ UDP (DNS)</li>
-                      <li><strong>ปิดกั้น (Deny)</strong> port ต่อไปนี้:</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>3306</code> (MySQL/MariaDB) — ไม่ให้เข้าถึง Database จากภายนอก</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>8080</code> — ปิดไม่ให้ใช้งาน</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>23</code> (Telnet) — ไม่ปลอดภัย ปิดกั้นเสมอ</li>
-                      <li style={{ paddingLeft: '24px' }}>Port range <code>6000:6063</code> เฉพาะ TCP (X11) — ปิดทั้ง range</li>
-                    </ul>
-                  </div>
-
-                  {/* --- Mission 3.3: IP Management --- */}
-                  <div style={{ marginBottom: '16px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ background: '#fef3c7', color: '#b45309', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.3</span>
-                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>จัดการ IP — บล็อค / อนุญาตเฉพาะ (10 คะแนน)</span>
-                    </div>
-                    <ul className="exam-task-list">
-                      <li><strong>บล็อค IP</strong> ต่อไปนี้ไม่ให้เข้าถึงเครื่องได้เลย:</li>
-                      <li style={{ paddingLeft: '24px' }}>IP <code>192.168.1.100</code></li>
-                      <li style={{ paddingLeft: '24px' }}>IP <code>10.0.0.50</code></li>
-                      <li><strong>อนุญาตเฉพาะ IP</strong> ให้เข้า port ที่กำหนด:</li>
-                      <li style={{ paddingLeft: '24px' }}>อนุญาตให้ IP <code>192.168.1.1</code> เข้าถึงได้เฉพาะ port <code>22</code> เท่านั้น</li>
-                      <li><strong>อนุญาตทั้ง Subnet</strong> ให้เข้า port ที่กำหนด:</li>
-                      <li style={{ paddingLeft: '24px' }}>อนุญาตให้เครือข่าย <code>192.168.1.0/24</code> เข้าถึงได้เฉพาะ port <code>80</code></li>
-                    </ul>
-                  </div>
-
-                  {/* --- Mission 3.4: Verification & Bonus --- */}
-                  <div style={{ paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.4</span>
-                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>ตรวจสอบและ Bonus (10 คะแนน)</span>
-                    </div>
-                    <ul className="exam-task-list">
-                      <li>แสดงสถานะ Firewall แบบมีเลข rule ให้อาจารย์ตรวจ</li>
-                      <li>แสดงรายละเอียด Firewall ให้เห็น default policy ที่ตั้งค่าไว้</li>
-                      <li><strong>⭐ Bonus:</strong> ตั้ง Rate Limiting บน port SSH เพื่อป้องกัน Brute Force Attack (จำกัดไม่เกิน 6 ครั้งใน 30 วินาที)</li>
-                    </ul>
-                  </div>
-
-                  <div className="exam-note" style={{ marginTop: '16px' }}>
-                    <strong>⚠️ สำคัญมาก:</strong> ต้อง Allow port SSH <strong>ก่อน</strong>เปิด UFW เสมอ! 
-                    ถ้าไม่ทำ จะไม่สามารถ SSH กลับเข้าเครื่องได้อีก — คิดลำดับการทำงานให้ดีก่อนเริ่ม
-                  </div>
-                </div>
-              </div>
-
-              {/* ===== กฎการสอบ ===== */}
-              <div className="exam-rules">
-                <h4>📌 กฎและข้อปฏิบัติในการสอบ</h4>
-                <ul>
-                  <li>ทำงานบน Proxmox ของตนเอง — ใช้ Ubuntu Server ที่ได้รับมอบหมาย</li>
-                  <li>ส่งงานทีละส่วน — อาจารย์จะตรวจให้คะแนนทีละส่วน</li>
-                  <li>สามารถเปิดดูเอกสาร/คู่มือได้ แต่ห้ามส่งคำตอบให้เพื่อน</li>
-                  <li>ถ้าติดปัญหา ให้ยกมือถามอาจารย์ได้</li>
-                  <li>เมื่อทำเสร็จแต่ละส่วน ให้เรียกอาจารย์ตรวจ</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
-    </>
-  );
-}
-
 export default function Home() {
   const [weekGroups, setWeekGroups] = useState<WeekGroup[]>([]);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({"Week 1": true});
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "Week 1": true });
   const [activeWeek, setActiveWeek] = useState<string>("1a");
   const [weekData, setWeekData] = useState<WeekData | null>(null);
   const [slideIdx, setSlideIdx] = useState(0);
@@ -9947,9 +9322,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/data/weeks.json?v=${Date.now()}`).then(r => r.json()).then((d: WeekGroup[]) => { 
-      setWeekGroups(d); 
-      setLoading(false); 
+    fetch(`/data/weeks.json?v=${Date.now()}`).then(r => r.json()).then((d: WeekGroup[]) => {
+      setWeekGroups(d);
+      setLoading(false);
       const exp: Record<string, boolean> = {};
       d.forEach(g => exp[g.weekLabel] = true);
       setExpandedGroups(exp);
@@ -10024,17 +9399,16 @@ export default function Home() {
 
   /* --- Normal View --- */
   return (
-    <>
-      <div className="app-layout">
+    <div className="app-layout">
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "" : "collapsed"}`}>
         <div className="sidebar-header">
           <div className="sidebar-logo">
             <svg className="logo-icon" viewBox="0 0 32 32" fill="none">
-              <rect x="4" y="4" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-              <rect x="18" y="4" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-              <rect x="4" y="18" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-              <rect x="18" y="18" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+              <rect x="4" y="4" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+              <rect x="18" y="4" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+              <rect x="4" y="18" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
+              <rect x="18" y="18" width="10" height="10" rx="2" stroke="currentColor" strokeWidth="1.5" />
             </svg>
             <div>
               <div className="logo-title">NOS</div>
@@ -10047,9 +9421,9 @@ export default function Home() {
         <div className="week-list">
           {weekGroups.map(group => (
             <div key={group.weekLabel} className="week-group" style={{ marginBottom: '8px' }}>
-              <div 
-                className="week-group-header" 
-                onClick={() => setExpandedGroups(prev => ({...prev, [group.weekLabel]: !prev[group.weekLabel]}))}
+              <div
+                className="week-group-header"
+                onClick={() => setExpandedGroups(prev => ({ ...prev, [group.weekLabel]: !prev[group.weekLabel] }))}
                 style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 15px', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}
               >
                 <span>{group.weekLabel}</span>
@@ -10062,13 +9436,13 @@ export default function Home() {
                     className={`week-item ${s.id === activeWeek ? "active" : ""}`}
                     onClick={() => !s.disabled && setActiveWeek(s.id)}
                     disabled={s.disabled}
-                    style={{ 
-                      paddingLeft: '24px', 
-                      opacity: s.disabled ? 0.3 : 1, 
-                      cursor: s.disabled ? 'not-allowed' : 'pointer' 
+                    style={{
+                      paddingLeft: '24px',
+                      opacity: s.disabled ? 0.3 : 1,
+                      cursor: s.disabled ? 'not-allowed' : 'pointer'
                     }}
                   >
-                    <span className="week-num" style={{fontSize: '13px', width: '36px', height: '36px'}}>{s.displayNum}</span>
+                    <span className="week-num" style={{ fontSize: '13px', width: '36px', height: '36px' }}>{s.displayNum}</span>
                     <span className="week-label">
                       {s.title}
                       <span className="week-topic">{s.topic}</span>
@@ -10278,7 +9652,6 @@ export default function Home() {
         )}
       </main>
     </div>
-    </>
   );
 }
 
@@ -10295,20 +9668,20 @@ function TCPUDPAnimation({ s }: { s: SlideData }) {
   const [udpDone, setUdpDone] = useState(false);
 
   const tcpSteps = [
-    { label: "SYN",     fullname: "Synchronize",             color: "#3b82f6", desc: "1️⃣ Client ส่ง SYN ขอเปิดการเชื่อมต่อ" },
-    { label: "SYN-ACK", fullname: "Synchronize-Acknowledge",  color: "#8b5cf6", desc: "2️⃣ Server ตอบรับด้วย SYN-ACK ยืนยันพร้อม" },
-    { label: "ACK",     fullname: "Acknowledge",              color: "#3b82f6", desc: "3️⃣ Client ส่ง ACK — Handshake สำเร็จ!" },
-    { label: "DATA 1",  fullname: "Data Segment #1",          color: "#10b981", desc: "4️⃣ ส่งข้อมูลชุดที่ 1" },
-    { label: "ACK ✓",   fullname: "Acknowledge #1",           color: "#8b5cf6", desc: "5️⃣ Server ยืนยันรับชุดที่ 1" },
-    { label: "DATA 2",  fullname: "Data Segment #2",          color: "#10b981", desc: "6️⃣ ส่งข้อมูลชุดที่ 2" },
-    { label: "ACK ✓",   fullname: "Acknowledge #2",           color: "#8b5cf6", desc: "7️⃣ Server ยืนยันรับชุดที่ 2 ✅ ครบถ้วน!" },
+    { label: "SYN", fullname: "Synchronize", color: "#3b82f6", desc: "1️⃣ Client ส่ง SYN ขอเปิดการเชื่อมต่อ" },
+    { label: "SYN-ACK", fullname: "Synchronize-Acknowledge", color: "#8b5cf6", desc: "2️⃣ Server ตอบรับด้วย SYN-ACK ยืนยันพร้อม" },
+    { label: "ACK", fullname: "Acknowledge", color: "#3b82f6", desc: "3️⃣ Client ส่ง ACK — Handshake สำเร็จ!" },
+    { label: "DATA 1", fullname: "Data Segment #1", color: "#10b981", desc: "4️⃣ ส่งข้อมูลชุดที่ 1" },
+    { label: "ACK ✓", fullname: "Acknowledge #1", color: "#8b5cf6", desc: "5️⃣ Server ยืนยันรับชุดที่ 1" },
+    { label: "DATA 2", fullname: "Data Segment #2", color: "#10b981", desc: "6️⃣ ส่งข้อมูลชุดที่ 2" },
+    { label: "ACK ✓", fullname: "Acknowledge #2", color: "#8b5cf6", desc: "7️⃣ Server ยืนยันรับชุดที่ 2 ✅ ครบถ้วน!" },
   ];
 
   const udpSteps = [
-    { label: "DATA 1", fullname: "Datagram #1", color: "#f59e0b", desc: "1️⃣ ส่งชุดที่ 1 ออกไปเลย ไม่รอ",                  lost: false },
-    { label: "DATA 2", fullname: "Datagram #2", color: "#f59e0b", desc: "2️⃣ ส่งชุดที่ 2 ต่อเนื่อง ไม่รอยืนยัน",           lost: false },
-    { label: "DATA 3", fullname: "Datagram #3", color: "#ef4444", desc: "3️⃣ ชุดที่ 3 หายกลางทาง! ❌ ไม่มีการแจ้งเตือน",   lost: true  },
-    { label: "DATA 4", fullname: "Datagram #4", color: "#f59e0b", desc: "4️⃣ ส่งชุดที่ 4 ต่อ — ปลายทางไม่รู้ว่าหาย!",    lost: false },
+    { label: "DATA 1", fullname: "Datagram #1", color: "#f59e0b", desc: "1️⃣ ส่งชุดที่ 1 ออกไปเลย ไม่รอ", lost: false },
+    { label: "DATA 2", fullname: "Datagram #2", color: "#f59e0b", desc: "2️⃣ ส่งชุดที่ 2 ต่อเนื่อง ไม่รอยืนยัน", lost: false },
+    { label: "DATA 3", fullname: "Datagram #3", color: "#ef4444", desc: "3️⃣ ชุดที่ 3 หายกลางทาง! ❌ ไม่มีการแจ้งเตือน", lost: true },
+    { label: "DATA 4", fullname: "Datagram #4", color: "#f59e0b", desc: "4️⃣ ส่งชุดที่ 4 ต่อ — ปลายทางไม่รู้ว่าหาย!", lost: false },
   ];
 
   const runTCP = () => {
@@ -10634,10 +10007,14 @@ function SocketBindingAnimation({ s }: { s: SlideData }) {
 
           {/* Detail card */}
           {[
-            { addr: "0.0.0.0", icon: "🌍", title: "0.0.0.0 — รับสายจากทุก Interface", color: "#ef4444",
-              points: ["รับสายจากทุก IP Address ที่เข้ามา", "แฮกเกอร์ภายนอกเชื่อมต่อได้โดยตรง", "⚠️ ต้องใช้ Firewall ป้องกันทุกครั้ง", "Config: bind-address = 0.0.0.0"] },
-            { addr: "127.0.0.1", icon: "🔒", title: "127.0.0.1 — Loopback เท่านั้น", color: "#10b981",
-              points: ["รับเฉพาะ localhost ภายในเครื่อง", "ภายนอกเชื่อมต่อไม่ได้แม้ไม่มีไฟร์วอลล์", "PHP/Python ในเครื่องเดียวกันเชื่อมได้", "Config: bind-address = 127.0.0.1"] },
+            {
+              addr: "0.0.0.0", icon: "🌍", title: "0.0.0.0 — รับสายจากทุก Interface", color: "#ef4444",
+              points: ["รับสายจากทุก IP Address ที่เข้ามา", "แฮกเกอร์ภายนอกเชื่อมต่อได้โดยตรง", "⚠️ ต้องใช้ Firewall ป้องกันทุกครั้ง", "Config: bind-address = 0.0.0.0"]
+            },
+            {
+              addr: "127.0.0.1", icon: "🔒", title: "127.0.0.1 — Loopback เท่านั้น", color: "#10b981",
+              points: ["รับเฉพาะ localhost ภายในเครื่อง", "ภายนอกเชื่อมต่อไม่ได้แม้ไม่มีไฟร์วอลล์", "PHP/Python ในเครื่องเดียวกันเชื่อมได้", "Config: bind-address = 127.0.0.1"]
+            },
           ].filter(item => item.addr === binding).map(item => (
             <div key={item.addr} style={{ background: `${item.color}08`, borderRadius: "10px", padding: "12px", border: `1px solid ${item.color}25`, flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: "12px", color: item.color, marginBottom: "8px" }}>{item.icon} {item.title}</div>
@@ -10668,19 +10045,19 @@ function SocketBindingAnimation({ s }: { s: SlideData }) {
 ───────────────────────────────────────────────────────────────────────── */
 function PortScanAnimation({ s }: { s: SlideData }) {
   const ports = [
-    { port: 22,   name: "SSH",      color: "#3b82f6", open: true,  icon: "🔑" },
-    { port: 80,   name: "HTTP",     color: "#10b981", open: true,  icon: "🌐" },
-    { port: 443,  name: "HTTPS",    color: "#10b981", open: false, icon: "🔐" },
-    { port: 3306, name: "MariaDB",  color: "#ef4444", open: true,  icon: "🗄️" },
-    { port: 445,  name: "Samba",    color: "#f59e0b", open: false, icon: "📁" },
+    { port: 22, name: "SSH", color: "#3b82f6", open: true, icon: "🔑" },
+    { port: 80, name: "HTTP", color: "#10b981", open: true, icon: "🌐" },
+    { port: 443, name: "HTTPS", color: "#10b981", open: false, icon: "🔐" },
+    { port: 3306, name: "MariaDB", color: "#ef4444", open: true, icon: "🗄️" },
+    { port: 445, name: "Samba", color: "#f59e0b", open: false, icon: "📁" },
     { port: 8080, name: "HTTP-Alt", color: "#8b5cf6", open: false, icon: "🔧" },
-    { port: 1883, name: "MQTT",     color: "#06b6d4", open: false, icon: "📡" },
+    { port: 1883, name: "MQTT", color: "#06b6d4", open: false, icon: "📡" },
     { port: 9999, name: "Unknown?", color: "#ef4444", open: false, icon: "❓" },
   ];
 
   const [scanning, setScanning] = useState(false);
   const [scannedIdx, setScannedIdx] = useState(-1);
-  const [phase, setPhase] = useState<"idle"|"scanning"|"found"|"exploiting"|"pwned">("idle");
+  const [phase, setPhase] = useState<"idle" | "scanning" | "found" | "exploiting" | "pwned">("idle");
 
   const startScan = () => {
     if (scanning) return;
@@ -10771,8 +10148,10 @@ function PortScanAnimation({ s }: { s: SlideData }) {
                 }}>
                   <span style={{ fontSize: "16px", opacity: scanned ? 1 : 0.3 }}>{p.icon}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: "12px", fontWeight: 700, fontFamily: "monospace",
-                      color: !scanned ? "rgba(255,255,255,0.2)" : p.open ? p.color : "rgba(255,255,255,0.4)" }}>
+                    <div style={{
+                      fontSize: "12px", fontWeight: 700, fontFamily: "monospace",
+                      color: !scanned ? "rgba(255,255,255,0.2)" : p.open ? p.color : "rgba(255,255,255,0.4)"
+                    }}>
                       :{p.port}
                     </div>
                     <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)" }}>{p.name}</div>
@@ -10865,13 +10244,13 @@ function IPAddressInfographic({ s }: { s: SlideData }) {
   ];
 
   const commands = [
-    { cmd: "ip a",            desc: "ดู IP และ Network Interface ทั้งหมด",    color: "#6366f1" },
-    { cmd: "ip a show eth0",  desc: "ดูเฉพาะการ์ดแลนชื่อ eth0",              color: "#3b82f6" },
-    { cmd: "hostname -I",     desc: "แสดง IP Address อย่างรวดเร็ว",          color: "#10b981" },
-    { cmd: "ip route",        desc: "ดู Routing Table และ Default Gateway",   color: "#f59e0b" },
+    { cmd: "ip a", desc: "ดู IP และ Network Interface ทั้งหมด", color: "#6366f1" },
+    { cmd: "ip a show eth0", desc: "ดูเฉพาะการ์ดแลนชื่อ eth0", color: "#3b82f6" },
+    { cmd: "hostname -I", desc: "แสดง IP Address อย่างรวดเร็ว", color: "#10b981" },
+    { cmd: "ip route", desc: "ดู Routing Table และ Default Gateway", color: "#f59e0b" },
   ];
 
-  const ipParts  = ["192", "168", "1", "100"];
+  const ipParts = ["192", "168", "1", "100"];
   const ipColors = ["#6366f1", "#8b5cf6", "#a78bfa", "#c4b5fd"];
 
   return (
@@ -10882,19 +10261,19 @@ function IPAddressInfographic({ s }: { s: SlideData }) {
       position: "relative", overflow: "hidden",
     }}>
       {/* BG orbs */}
-      <div style={{ position:"absolute", top:"-80px", right:"-80px", width:"260px", height:"260px", borderRadius:"50%", background:"radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%)", pointerEvents:"none" }} />
-      <div style={{ position:"absolute", bottom:"-60px", left:"-60px", width:"200px", height:"200px", borderRadius:"50%", background:"radial-gradient(circle,rgba(16,185,129,0.08) 0%,transparent 70%)", pointerEvents:"none" }} />
+      <div style={{ position: "absolute", top: "-80px", right: "-80px", width: "260px", height: "260px", borderRadius: "50%", background: "radial-gradient(circle,rgba(99,102,241,0.12) 0%,transparent 70%)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: "-60px", left: "-60px", width: "200px", height: "200px", borderRadius: "50%", background: "radial-gradient(circle,rgba(16,185,129,0.08) 0%,transparent 70%)", pointerEvents: "none" }} />
 
       {/* Header */}
-      <div style={{ flexShrink:0, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <div style={{ flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <span style={{ fontSize:"11px", color:"#6366f1", fontWeight:700, textTransform:"uppercase", letterSpacing:"2px" }}>🌐 พื้นฐานเครือข่าย</span>
-          <h2 style={{ margin:"3px 0 0", fontSize:"clamp(18px,2.2vw,26px)", fontWeight:800, letterSpacing:"-0.5px" }}>{s.title}</h2>
+          <span style={{ fontSize: "11px", color: "#6366f1", fontWeight: 700, textTransform: "uppercase", letterSpacing: "2px" }}>🌐 พื้นฐานเครือข่าย</span>
+          <h2 style={{ margin: "3px 0 0", fontSize: "clamp(18px,2.2vw,26px)", fontWeight: 800, letterSpacing: "-0.5px" }}>{s.title}</h2>
         </div>
         <button onClick={() => setShowCmd(!showCmd)} style={{
-          padding:"7px 14px", borderRadius:"10px", border:`1px solid rgba(99,102,241,0.3)`, cursor:"pointer",
+          padding: "7px 14px", borderRadius: "10px", border: `1px solid rgba(99,102,241,0.3)`, cursor: "pointer",
           background: showCmd ? "#6366f1" : "rgba(99,102,241,0.15)",
-          color: showCmd ? "#fff" : "#a5b4fc", fontWeight:700, fontSize:"12px", transition:"all 0.25s",
+          color: showCmd ? "#fff" : "#a5b4fc", fontWeight: 700, fontSize: "12px", transition: "all 0.25s",
         }}>
           {showCmd ? "📊 ดู Infographic" : "💻 ดูคำสั่ง CLI"}
         </button>
@@ -10903,105 +10282,105 @@ function IPAddressInfographic({ s }: { s: SlideData }) {
       {!showCmd ? (
         <>
           {/* IP breakdown */}
-          <div style={{ background:"rgba(99,102,241,0.07)", borderRadius:"16px", padding:"12px 18px", border:"1px solid rgba(99,102,241,0.2)", flexShrink:0, display:"flex", flexDirection:"column", gap:"8px" }}>
-            <div style={{ fontSize:"11px", color:"#a5b4fc", fontWeight:700, letterSpacing:"1px" }}>🔍 กายวิภาค IP Address</div>
-            <div style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:"0" }}>
+          <div style={{ background: "rgba(99,102,241,0.07)", borderRadius: "16px", padding: "12px 18px", border: "1px solid rgba(99,102,241,0.2)", flexShrink: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+            <div style={{ fontSize: "11px", color: "#a5b4fc", fontWeight: 700, letterSpacing: "1px" }}>🔍 กายวิภาค IP Address</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0" }}>
               {ipParts.map((part, i) => (
                 <React.Fragment key={i}>
-                  <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:"4px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "4px" }}>
                     <div style={{
-                      fontSize:"clamp(20px,2.8vw,32px)", fontWeight:900, fontFamily:"monospace",
-                      color:ipColors[i], padding:"7px 14px",
-                      background:`${ipColors[i]}15`, borderRadius:"10px", border:`2px solid ${ipColors[i]}40`,
-                      minWidth:"62px", textAlign:"center",
+                      fontSize: "clamp(20px,2.8vw,32px)", fontWeight: 900, fontFamily: "monospace",
+                      color: ipColors[i], padding: "7px 14px",
+                      background: `${ipColors[i]}15`, borderRadius: "10px", border: `2px solid ${ipColors[i]}40`,
+                      minWidth: "62px", textAlign: "center",
                     }}>{part}</div>
-                    <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.4)", fontWeight:600 }}>{["ตัวที่ 1","ตัวที่ 2","ตัวที่ 3","ตัวที่ 4"][i]}</div>
+                    <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)", fontWeight: 600 }}>{["ตัวที่ 1", "ตัวที่ 2", "ตัวที่ 3", "ตัวที่ 4"][i]}</div>
                   </div>
-                  {i < 3 && <div style={{ fontSize:"26px", fontWeight:900, color:"rgba(255,255,255,0.25)", padding:"0 3px", marginBottom:"16px" }}>.</div>}
+                  {i < 3 && <div style={{ fontSize: "26px", fontWeight: 900, color: "rgba(255,255,255,0.25)", padding: "0 3px", marginBottom: "16px" }}>.</div>}
                 </React.Fragment>
               ))}
-              <div style={{ marginLeft:"18px", background:"rgba(255,255,255,0.04)", borderRadius:"10px", padding:"7px 14px", border:"1px solid rgba(255,255,255,0.08)", textAlign:"center" }}>
-                <div style={{ fontSize:"10px", color:"#94a3b8" }}>ช่วงที่ใช้ได้</div>
-                <div style={{ fontSize:"15px", fontWeight:700, color:"#e2e8f0" }}>0 – 255</div>
-                <div style={{ fontSize:"9px", color:"#94a3b8" }}>ต่อชุด</div>
+              <div style={{ marginLeft: "18px", background: "rgba(255,255,255,0.04)", borderRadius: "10px", padding: "7px 14px", border: "1px solid rgba(255,255,255,0.08)", textAlign: "center" }}>
+                <div style={{ fontSize: "10px", color: "#94a3b8" }}>ช่วงที่ใช้ได้</div>
+                <div style={{ fontSize: "15px", fontWeight: 700, color: "#e2e8f0" }}>0 – 255</div>
+                <div style={{ fontSize: "9px", color: "#94a3b8" }}>ต่อชุด</div>
               </div>
             </div>
           </div>
 
           {/* 4 cards */}
-          <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:"10px", flex:1 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "10px", flex: 1 }}>
             {components.map((c, i) => (
               <div key={i} onClick={() => setActiveCard(activeCard === i ? null : i)} style={{
-                borderRadius:"16px", padding:"14px 12px", cursor:"pointer",
+                borderRadius: "16px", padding: "14px 12px", cursor: "pointer",
                 background: activeCard === i ? `${c.color}18` : "rgba(255,255,255,0.04)",
-                border:`1.5px solid ${activeCard === i ? c.color+"66" : "rgba(255,255,255,0.08)"}`,
-                transition:"all 0.25s", display:"flex", flexDirection:"column", gap:"9px",
+                border: `1.5px solid ${activeCard === i ? c.color + "66" : "rgba(255,255,255,0.08)"}`,
+                transition: "all 0.25s", display: "flex", flexDirection: "column", gap: "9px",
                 boxShadow: activeCard === i ? `0 8px 28px ${c.shadow}` : "none",
                 transform: activeCard === i ? "translateY(-2px)" : "none",
               }}>
-                <div style={{ display:"flex", alignItems:"center", gap:"8px" }}>
-                  <div style={{ fontSize:"20px", width:"40px", height:"40px", borderRadius:"11px", background:`${c.color}20`, display:"flex", alignItems:"center", justifyContent:"center", border:`1px solid ${c.color}30`, flexShrink:0 }}>{c.icon}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <div style={{ fontSize: "20px", width: "40px", height: "40px", borderRadius: "11px", background: `${c.color}20`, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${c.color}30`, flexShrink: 0 }}>{c.icon}</div>
                   <div>
-                    <div style={{ fontWeight:800, fontSize:"12px", color:c.color }}>{c.label}</div>
-                    <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.35)", marginTop:"1px" }}>คลิกดูรายละเอียด</div>
+                    <div style={{ fontWeight: 800, fontSize: "12px", color: c.color }}>{c.label}</div>
+                    <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.35)", marginTop: "1px" }}>คลิกดูรายละเอียด</div>
                   </div>
                 </div>
-                <div style={{ background:`${c.color}15`, borderRadius:"8px", padding:"7px 9px", border:`1px solid ${c.color}25` }}>
-                  <div style={{ fontSize:"10px", fontWeight:700, color:c.color, fontFamily:"monospace" }}>{c.value}</div>
-                  <div style={{ fontSize:"10px", color:"rgba(255,255,255,0.5)", marginTop:"2px" }}>🏷️ <span style={{ color:"rgba(255,255,255,0.65)" }}>{c.analogy}</span></div>
+                <div style={{ background: `${c.color}15`, borderRadius: "8px", padding: "7px 9px", border: `1px solid ${c.color}25` }}>
+                  <div style={{ fontSize: "10px", fontWeight: 700, color: c.color, fontFamily: "monospace" }}>{c.value}</div>
+                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.5)", marginTop: "2px" }}>🏷️ <span style={{ color: "rgba(255,255,255,0.65)" }}>{c.analogy}</span></div>
                 </div>
                 {activeCard === i && (
-                  <div style={{ animation:"fadeIn 0.2s ease" }}>
-                    <div style={{ fontSize:"11px", color:"rgba(255,255,255,0.75)", lineHeight:1.65, marginBottom:"7px" }}>{c.desc}</div>
-                    <div style={{ background:"rgba(255,255,255,0.05)", borderRadius:"6px", padding:"5px 8px", fontSize:"10px", color:"rgba(255,255,255,0.45)" }}>📏 {c.range}</div>
+                  <div style={{ animation: "fadeIn 0.2s ease" }}>
+                    <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.75)", lineHeight: 1.65, marginBottom: "7px" }}>{c.desc}</div>
+                    <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "6px", padding: "5px 8px", fontSize: "10px", color: "rgba(255,255,255,0.45)" }}>📏 {c.range}</div>
                   </div>
                 )}
-                <div style={{ textAlign:"center", color:`${c.color}80`, fontSize:"11px", marginTop:"auto" }}>{activeCard === i ? "▲" : "▼"}</div>
+                <div style={{ textAlign: "center", color: `${c.color}80`, fontSize: "11px", marginTop: "auto" }}>{activeCard === i ? "▲" : "▼"}</div>
               </div>
             ))}
           </div>
 
           {/* Network strip */}
-          <div style={{ background:"rgba(255,255,255,0.03)", borderRadius:"14px", padding:"10px 16px", border:"1px solid rgba(255,255,255,0.06)", flexShrink:0, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-            <div style={{ fontSize:"11px", color:"#64748b", fontWeight:700, whiteSpace:"nowrap" }}>ตัวอย่าง:</div>
+          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "14px", padding: "10px 16px", border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ fontSize: "11px", color: "#64748b", fontWeight: 700, whiteSpace: "nowrap" }}>ตัวอย่าง:</div>
             {[
-              { icon:"💻", label:"เครื่องคุณ",   ip:"192.168.1.100", color:"#6366f1" },
-              { icon:"→",  label:"",             ip:"",              color:"#334155" },
-              { icon:"📡", label:"Switch",        ip:"Layer 2",       color:"#3b82f6" },
-              { icon:"→",  label:"",             ip:"",              color:"#334155" },
-              { icon:"🌐", label:"Router/GW",     ip:"192.168.1.1",   color:"#10b981" },
-              { icon:"→",  label:"",             ip:"",              color:"#334155" },
-              { icon:"☁️", label:"Internet",      ip:"DNS: 8.8.8.8",  color:"#f59e0b" },
+              { icon: "💻", label: "เครื่องคุณ", ip: "192.168.1.100", color: "#6366f1" },
+              { icon: "→", label: "", ip: "", color: "#334155" },
+              { icon: "📡", label: "Switch", ip: "Layer 2", color: "#3b82f6" },
+              { icon: "→", label: "", ip: "", color: "#334155" },
+              { icon: "🌐", label: "Router/GW", ip: "192.168.1.1", color: "#10b981" },
+              { icon: "→", label: "", ip: "", color: "#334155" },
+              { icon: "☁️", label: "Internet", ip: "DNS: 8.8.8.8", color: "#f59e0b" },
             ].map((n, i) => n.icon === "→"
-              ? <div key={i} style={{ fontSize:"18px", color:"#334155" }}>→</div>
+              ? <div key={i} style={{ fontSize: "18px", color: "#334155" }}>→</div>
               : (
-                <div key={i} style={{ textAlign:"center" }}>
-                  <div style={{ fontSize:"22px" }}>{n.icon}</div>
-                  <div style={{ fontSize:"10px", fontWeight:700, color:n.color, marginTop:"2px" }}>{n.label}</div>
-                  <div style={{ fontSize:"9px", color:"rgba(255,255,255,0.4)", fontFamily:"monospace" }}>{n.ip}</div>
+                <div key={i} style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: "22px" }}>{n.icon}</div>
+                  <div style={{ fontSize: "10px", fontWeight: 700, color: n.color, marginTop: "2px" }}>{n.label}</div>
+                  <div style={{ fontSize: "9px", color: "rgba(255,255,255,0.4)", fontFamily: "monospace" }}>{n.ip}</div>
                 </div>
               )
             )}
           </div>
         </>
       ) : (
-        <div style={{ flex:1, display:"flex", flexDirection:"column", gap:"10px" }}>
-          <div style={{ fontSize:"12px", color:"#94a3b8", fontWeight:600 }}>💻 คำสั่งดูข้อมูลเครือข่ายบน Linux Terminal:</div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 600 }}>💻 คำสั่งดูข้อมูลเครือข่ายบน Linux Terminal:</div>
           {commands.map((c, i) => (
-            <div key={i} style={{ background:"rgba(15,23,42,0.8)", borderRadius:"14px", padding:"15px 20px", border:`1px solid ${c.color}30`, display:"flex", alignItems:"center", gap:"16px" }}>
-              <div style={{ background:`${c.color}20`, borderRadius:"10px", padding:"9px 16px", fontFamily:"monospace", fontSize:"14px", fontWeight:700, color:c.color, border:`1px solid ${c.color}40`, whiteSpace:"nowrap", flexShrink:0 }}>
+            <div key={i} style={{ background: "rgba(15,23,42,0.8)", borderRadius: "14px", padding: "15px 20px", border: `1px solid ${c.color}30`, display: "flex", alignItems: "center", gap: "16px" }}>
+              <div style={{ background: `${c.color}20`, borderRadius: "10px", padding: "9px 16px", fontFamily: "monospace", fontSize: "14px", fontWeight: 700, color: c.color, border: `1px solid ${c.color}40`, whiteSpace: "nowrap", flexShrink: 0 }}>
                 $ {c.cmd}
               </div>
-              <div style={{ fontSize:"13px", color:"rgba(255,255,255,0.85)", fontWeight:600 }}>{c.desc}</div>
+              <div style={{ fontSize: "13px", color: "rgba(255,255,255,0.85)", fontWeight: 600 }}>{c.desc}</div>
             </div>
           ))}
-          <div style={{ background:"rgba(99,102,241,0.08)", borderRadius:"14px", padding:"14px 18px", border:"1px solid rgba(99,102,241,0.2)", display:"flex", gap:"14px", alignItems:"flex-start" }}>
-            <span style={{ fontSize:"22px", flexShrink:0 }}>💡</span>
+          <div style={{ background: "rgba(99,102,241,0.08)", borderRadius: "14px", padding: "14px 18px", border: "1px solid rgba(99,102,241,0.2)", display: "flex", gap: "14px", alignItems: "flex-start" }}>
+            <span style={{ fontSize: "22px", flexShrink: 0 }}>💡</span>
             <div>
-              <div style={{ fontWeight:700, fontSize:"13px", color:"#a5b4fc", marginBottom:"5px" }}>อ่านผลลัพธ์ ip a อย่างไร?</div>
-              <div style={{ fontSize:"12px", color:"rgba(255,255,255,0.7)", lineHeight:1.7 }}>
-                ในผลลัพธ์จะเห็น <span style={{ color:"#6366f1", fontFamily:"monospace", fontWeight:700 }}>inet</span> แสดง IPv4 และ <span style={{ color:"#8b5cf6", fontFamily:"monospace", fontWeight:700 }}>inet6</span> แสดง IPv6 ของแต่ละการ์ดเครือข่าย
-                <br />การ์ดเครือข่ายใน LXC/VM มักชื่อว่า <span style={{ color:"#10b981", fontFamily:"monospace" }}>eth0</span> หรือ <span style={{ color:"#10b981", fontFamily:"monospace" }}>ens18</span>
+              <div style={{ fontWeight: 700, fontSize: "13px", color: "#a5b4fc", marginBottom: "5px" }}>อ่านผลลัพธ์ ip a อย่างไร?</div>
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.7)", lineHeight: 1.7 }}>
+                ในผลลัพธ์จะเห็น <span style={{ color: "#6366f1", fontFamily: "monospace", fontWeight: 700 }}>inet</span> แสดง IPv4 และ <span style={{ color: "#8b5cf6", fontFamily: "monospace", fontWeight: 700 }}>inet6</span> แสดง IPv6 ของแต่ละการ์ดเครือข่าย
+                <br />การ์ดเครือข่ายใน LXC/VM มักชื่อว่า <span style={{ color: "#10b981", fontFamily: "monospace" }}>eth0</span> หรือ <span style={{ color: "#10b981", fontFamily: "monospace" }}>ens18</span>
               </div>
             </div>
           </div>
@@ -11100,42 +10479,42 @@ function PacketFlowAnimation({ s }: { s: SlideData }) {
       position: "relative", overflow: "hidden",
     }}>
       {/* BG decoration */}
-      <div style={{ position:"absolute", top:"-100px", right:"-100px", width:"300px", height:"300px", borderRadius:"50%", background:`radial-gradient(circle,${currentStep.color}18 0%,transparent 70%)`, pointerEvents:"none", transition:"background 0.5s" }} />
+      <div style={{ position: "absolute", top: "-100px", right: "-100px", width: "300px", height: "300px", borderRadius: "50%", background: `radial-gradient(circle,${currentStep.color}18 0%,transparent 70%)`, pointerEvents: "none", transition: "background 0.5s" }} />
 
       {/* Header */}
-      <div style={{ flexShrink:0, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+      <div style={{ flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <span style={{ fontSize:"11px", color:"#6366f1", fontWeight:700, textTransform:"uppercase", letterSpacing:"2px" }}>แนวคิดการส่งข้อมูล</span>
-          <h2 style={{ margin:"3px 0 0", fontSize:"clamp(15px,2vw,22px)", fontWeight:800 }}>{s.title}</h2>
+          <span style={{ fontSize: "11px", color: "#6366f1", fontWeight: 700, textTransform: "uppercase", letterSpacing: "2px" }}>แนวคิดการส่งข้อมูล</span>
+          <h2 style={{ margin: "3px 0 0", fontSize: "clamp(15px,2vw,22px)", fontWeight: 800 }}>{s.title}</h2>
         </div>
-        <div style={{ display:"flex", gap:"6px" }}>
-          <button onClick={() => { setStep(0); setPlaying(false); }} style={{ padding:"6px 12px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.15)", background:"transparent", color:"rgba(255,255,255,0.5)", cursor:"pointer", fontSize:"11px", fontWeight:600 }}>↺ รีเซต</button>
-          <button onClick={() => setPlaying(!playing)} style={{ padding:"6px 14px", borderRadius:"8px", border:"none", cursor:"pointer", fontWeight:700, fontSize:"12px", background: playing ? "rgba(239,68,68,0.25)" : `${currentStep.color}`, color:"#fff", transition:"all 0.2s" }}>
-            {playing ? "⏸ หยุด" : step === steps.length-1 ? "✅ จบแล้ว" : "▶ Auto Play"}
+        <div style={{ display: "flex", gap: "6px" }}>
+          <button onClick={() => { setStep(0); setPlaying(false); }} style={{ padding: "6px 12px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.15)", background: "transparent", color: "rgba(255,255,255,0.5)", cursor: "pointer", fontSize: "11px", fontWeight: 600 }}>↺ รีเซต</button>
+          <button onClick={() => setPlaying(!playing)} style={{ padding: "6px 14px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 700, fontSize: "12px", background: playing ? "rgba(239,68,68,0.25)" : `${currentStep.color}`, color: "#fff", transition: "all 0.2s" }}>
+            {playing ? "⏸ หยุด" : step === steps.length - 1 ? "✅ จบแล้ว" : "▶ Auto Play"}
           </button>
         </div>
       </div>
 
-      <div style={{ display:"grid", gridTemplateColumns:"1.1fr 0.9fr", gap:"14px", flex:1 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "14px", flex: 1 }}>
 
         {/* Left: Layer stepper */}
-        <div style={{ display:"flex", flexDirection:"column", gap:"8px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
           {/* Progress steps */}
-          <div style={{ display:"flex", gap:"4px", alignItems:"center", flexShrink:0 }}>
+          <div style={{ display: "flex", gap: "4px", alignItems: "center", flexShrink: 0 }}>
             {steps.map((st, i) => (
               <React.Fragment key={i}>
                 <button onClick={() => { setStep(i); setPlaying(false); }} style={{
-                  width:"32px", height:"32px", borderRadius:"50%", border:"none", cursor:"pointer",
+                  width: "32px", height: "32px", borderRadius: "50%", border: "none", cursor: "pointer",
                   background: i <= step ? layerColors[i] : "rgba(255,255,255,0.08)",
-                  color:"#fff", fontWeight:800, fontSize:"13px", transition:"all 0.3s",
+                  color: "#fff", fontWeight: 800, fontSize: "13px", transition: "all 0.3s",
                   boxShadow: i === step ? `0 0 0 3px ${layerColors[i]}44` : "none",
                   transform: i === step ? "scale(1.15)" : "scale(1)",
-                  flexShrink:0,
+                  flexShrink: 0,
                 }}>
                   {i < step ? "✓" : i + 1}
                 </button>
                 {i < steps.length - 1 && (
-                  <div style={{ flex:1, height:"2px", background: i < step ? layerColors[i] : "rgba(255,255,255,0.08)", transition:"background 0.4s", minWidth:"8px" }} />
+                  <div style={{ flex: 1, height: "2px", background: i < step ? layerColors[i] : "rgba(255,255,255,0.08)", transition: "background 0.4s", minWidth: "8px" }} />
                 )}
               </React.Fragment>
             ))}
@@ -11143,79 +10522,79 @@ function PacketFlowAnimation({ s }: { s: SlideData }) {
 
           {/* Current step card */}
           <div style={{
-            background: `${currentStep.color}10`, borderRadius:"16px", padding:"18px",
-            border:`1.5px solid ${currentStep.color}40`, flex:1,
-            display:"flex", flexDirection:"column", gap:"12px", transition:"all 0.4s",
+            background: `${currentStep.color}10`, borderRadius: "16px", padding: "18px",
+            border: `1.5px solid ${currentStep.color}40`, flex: 1,
+            display: "flex", flexDirection: "column", gap: "12px", transition: "all 0.4s",
           }}>
-            <div style={{ display:"flex", alignItems:"center", gap:"12px" }}>
-              <div style={{ fontSize:"28px", width:"52px", height:"52px", borderRadius:"14px", background:`${currentStep.color}20`, display:"flex", alignItems:"center", justifyContent:"center", border:`1px solid ${currentStep.color}35`, flexShrink:0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ fontSize: "28px", width: "52px", height: "52px", borderRadius: "14px", background: `${currentStep.color}20`, display: "flex", alignItems: "center", justifyContent: "center", border: `1px solid ${currentStep.color}35`, flexShrink: 0 }}>
                 {currentStep.icon}
               </div>
               <div>
-                <div style={{ fontSize:"10px", color:`${currentStep.color}`, fontWeight:700, letterSpacing:"1px", textTransform:"uppercase" }}>{currentStep.layer}</div>
-                <div style={{ fontSize:"15px", fontWeight:800, color:"#f1f5f9", marginTop:"3px" }}>{currentStep.title}</div>
+                <div style={{ fontSize: "10px", color: `${currentStep.color}`, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" }}>{currentStep.layer}</div>
+                <div style={{ fontSize: "15px", fontWeight: 800, color: "#f1f5f9", marginTop: "3px" }}>{currentStep.title}</div>
               </div>
             </div>
 
-            <div style={{ background:"rgba(255,255,255,0.04)", borderRadius:"10px", padding:"10px 14px", border:"1px solid rgba(255,255,255,0.08)", fontSize:"12px", color:"rgba(255,255,255,0.7)" }}>
+            <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: "10px", padding: "10px 14px", border: "1px solid rgba(255,255,255,0.08)", fontSize: "12px", color: "rgba(255,255,255,0.7)" }}>
               {currentStep.desc}
             </div>
 
             {/* Packet visual */}
-            <div style={{ fontFamily:"monospace" }}>
-              <div style={{ fontSize:"10px", color:"rgba(255,255,255,0.4)", marginBottom:"6px", fontWeight:600 }}>📦 PACKET ณ ขั้นตอนนี้:</div>
+            <div style={{ fontFamily: "monospace" }}>
+              <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", marginBottom: "6px", fontWeight: 600 }}>📦 PACKET ณ ขั้นตอนนี้:</div>
               <div style={{
-                background:"rgba(10,15,30,0.8)", borderRadius:"10px", padding:"12px 14px",
-                border:`1px solid ${currentStep.color}50`,
-                whiteSpace:"pre", fontSize:"11px", color:`${currentStep.color}`,
-                fontWeight:600, lineHeight:1.7,
+                background: "rgba(10,15,30,0.8)", borderRadius: "10px", padding: "12px 14px",
+                border: `1px solid ${currentStep.color}50`,
+                whiteSpace: "pre", fontSize: "11px", color: `${currentStep.color}`,
+                fontWeight: 600, lineHeight: 1.7,
               }}>{currentStep.packet.label}</div>
             </div>
 
             {/* Explanation */}
-            <div style={{ background:`${currentStep.color}08`, borderRadius:"10px", padding:"10px 14px", border:`1px solid ${currentStep.color}20`, marginTop:"auto" }}>
-              <div style={{ fontSize:"10px", color:`${currentStep.color}`, fontWeight:700, marginBottom:"4px" }}>💡 ทำไมถึงต้องมีชั้นนี้?</div>
-              <div style={{ fontSize:"11px", color:"rgba(255,255,255,0.75)", lineHeight:1.7 }}>{currentStep.explain}</div>
+            <div style={{ background: `${currentStep.color}08`, borderRadius: "10px", padding: "10px 14px", border: `1px solid ${currentStep.color}20`, marginTop: "auto" }}>
+              <div style={{ fontSize: "10px", color: `${currentStep.color}`, fontWeight: 700, marginBottom: "4px" }}>💡 ทำไมถึงต้องมีชั้นนี้?</div>
+              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.75)", lineHeight: 1.7 }}>{currentStep.explain}</div>
             </div>
           </div>
 
           {/* Prev / Next */}
-          <div style={{ display:"flex", gap:"8px", flexShrink:0 }}>
-            <button onClick={goPrev} disabled={step === 0} style={{ flex:1, padding:"10px", borderRadius:"10px", border:"1px solid rgba(255,255,255,0.1)", background:"transparent", color: step === 0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.7)", cursor: step === 0 ? "default" : "pointer", fontWeight:700, fontSize:"13px" }}>
+          <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+            <button onClick={goPrev} disabled={step === 0} style={{ flex: 1, padding: "10px", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: step === 0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.7)", cursor: step === 0 ? "default" : "pointer", fontWeight: 700, fontSize: "13px" }}>
               ← ย้อนกลับ
             </button>
-            <button onClick={goNext} disabled={step === steps.length-1} style={{ flex:1, padding:"10px", borderRadius:"10px", border:"none", background: step === steps.length-1 ? "rgba(255,255,255,0.06)" : currentStep.color, color: step === steps.length-1 ? "rgba(255,255,255,0.3)" : "#fff", cursor: step === steps.length-1 ? "default" : "pointer", fontWeight:700, fontSize:"13px", transition:"all 0.2s" }}>
+            <button onClick={goNext} disabled={step === steps.length - 1} style={{ flex: 1, padding: "10px", borderRadius: "10px", border: "none", background: step === steps.length - 1 ? "rgba(255,255,255,0.06)" : currentStep.color, color: step === steps.length - 1 ? "rgba(255,255,255,0.3)" : "#fff", cursor: step === steps.length - 1 ? "default" : "pointer", fontWeight: 700, fontSize: "13px", transition: "all 0.2s" }}>
               ถัดไป →
             </button>
           </div>
         </div>
 
         {/* Right: Encapsulation visual */}
-        <div style={{ display:"flex", flexDirection:"column", gap:"10px" }}>
-          <div style={{ fontSize:"11px", color:"#64748b", fontWeight:700 }}>🧅 การห่อชั้น (Encapsulation) — เหมือนหัวหอม</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <div style={{ fontSize: "11px", color: "#64748b", fontWeight: 700 }}>🧅 การห่อชั้น (Encapsulation) — เหมือนหัวหอม</div>
 
-          <div style={{ flex:1, display:"flex", flexDirection:"column", justifyContent:"center", gap:"5px" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", gap: "5px" }}>
             {[
-              { num:2, name:"Ethernet Frame", sub:"MAC Address", color:"#f59e0b", active: step >= 3 },
-              { num:3, name:"IP Packet",       sub:"Source / Dest IP", color:"#10b981", active: step >= 2 },
-              { num:4, name:"TCP Segment",     sub:"Port 54321 → 80", color:"#3b82f6", active: step >= 1 },
-              { num:7, name:"HTTP Request",    sub:"GET / HTTP/1.1",   color:"#6366f1", active: step >= 0 },
+              { num: 2, name: "Ethernet Frame", sub: "MAC Address", color: "#f59e0b", active: step >= 3 },
+              { num: 3, name: "IP Packet", sub: "Source / Dest IP", color: "#10b981", active: step >= 2 },
+              { num: 4, name: "TCP Segment", sub: "Port 54321 → 80", color: "#3b82f6", active: step >= 1 },
+              { num: 7, name: "HTTP Request", sub: "GET / HTTP/1.1", color: "#6366f1", active: step >= 0 },
             ].map((layer, i) => (
               <div key={i} style={{
-                padding: `${9 - i*1}px ${12 + i*10}px`,
-                borderRadius:"10px",
+                padding: `${9 - i * 1}px ${12 + i * 10}px`,
+                borderRadius: "10px",
                 background: layer.active ? `${layer.color}18` : "rgba(255,255,255,0.03)",
-                border:`1px solid ${layer.active ? layer.color+"55" : "rgba(255,255,255,0.06)"}`,
-                transition:"all 0.5s", opacity: layer.active ? 1 : 0.3,
-                display:"flex", alignItems:"center", justifyContent:"space-between",
+                border: `1px solid ${layer.active ? layer.color + "55" : "rgba(255,255,255,0.06)"}`,
+                transition: "all 0.5s", opacity: layer.active ? 1 : 0.3,
+                display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
                 <div>
-                  <div style={{ fontSize:"11px", fontWeight:700, color: layer.active ? layer.color : "rgba(255,255,255,0.3)" }}>
+                  <div style={{ fontSize: "11px", fontWeight: 700, color: layer.active ? layer.color : "rgba(255,255,255,0.3)" }}>
                     Layer {layer.num}: {layer.name}
                   </div>
-                  <div style={{ fontSize:"10px", color:"rgba(255,255,255,0.4)", marginTop:"1px", fontFamily:"monospace" }}>{layer.sub}</div>
+                  <div style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", marginTop: "1px", fontFamily: "monospace" }}>{layer.sub}</div>
                 </div>
-                {layer.active && <span style={{ fontSize:"14px" }}>✅</span>}
+                {layer.active && <span style={{ fontSize: "14px" }}>✅</span>}
               </div>
             ))}
           </div>
@@ -11223,43 +10602,43 @@ function PacketFlowAnimation({ s }: { s: SlideData }) {
           {/* Firewall callout */}
           <div style={{
             background: step >= 4 ? "rgba(239,68,68,0.12)" : "rgba(255,255,255,0.03)",
-            borderRadius:"12px", padding:"12px 14px",
+            borderRadius: "12px", padding: "12px 14px",
             border: step >= 4 ? "1px solid rgba(239,68,68,0.4)" : "1px solid rgba(255,255,255,0.06)",
-            transition:"all 0.5s",
+            transition: "all 0.5s",
           }}>
-            <div style={{ fontWeight:700, fontSize:"12px", color: step >= 4 ? "#ef4444" : "rgba(255,255,255,0.2)", marginBottom:"5px" }}>
+            <div style={{ fontWeight: 700, fontSize: "12px", color: step >= 4 ? "#ef4444" : "rgba(255,255,255,0.2)", marginBottom: "5px" }}>
               🛡️ Firewall ทำงานที่ Layer 3-4
             </div>
-            <div style={{ fontSize:"11px", color: step >= 4 ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.2)", lineHeight:1.6 }}>
-              ตรวจสอบ <strong>IP Address</strong> และ <strong>Port Number</strong><br/>
+            <div style={{ fontSize: "11px", color: step >= 4 ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.2)", lineHeight: 1.6 }}>
+              ตรวจสอบ <strong>IP Address</strong> และ <strong>Port Number</strong><br />
               เพื่อ Allow หรือ Block ก่อนข้อมูลถึงปลายทาง
             </div>
             {step >= 4 && (
-              <div style={{ marginTop:"8px", fontFamily:"monospace", fontSize:"10px", color:"#10b981", background:"rgba(16,185,129,0.08)", borderRadius:"6px", padding:"6px 10px", border:"1px solid rgba(16,185,129,0.2)" }}>
-                ufw allow 80/tcp<br/>
+              <div style={{ marginTop: "8px", fontFamily: "monospace", fontSize: "10px", color: "#10b981", background: "rgba(16,185,129,0.08)", borderRadius: "6px", padding: "6px 10px", border: "1px solid rgba(16,185,129,0.2)" }}>
+                ufw allow 80/tcp<br />
                 ufw deny 3306/tcp
               </div>
             )}
           </div>
 
           {/* Network path */}
-          <div style={{ background:"rgba(255,255,255,0.03)", borderRadius:"12px", padding:"10px 14px", border:"1px solid rgba(255,255,255,0.06)", flexShrink:0 }}>
-            <div style={{ fontSize:"10px", color:"#64748b", fontWeight:700, marginBottom:"6px" }}>เส้นทาง:</div>
-            <div style={{ display:"flex", alignItems:"center", gap:"4px", fontSize:"11px" }}>
+          <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: "12px", padding: "10px 14px", border: "1px solid rgba(255,255,255,0.06)", flexShrink: 0 }}>
+            <div style={{ fontSize: "10px", color: "#64748b", fontWeight: 700, marginBottom: "6px" }}>เส้นทาง:</div>
+            <div style={{ display: "flex", alignItems: "center", gap: "4px", fontSize: "11px" }}>
               {[
-                { icon:"💻", label:"Client", color:"#6366f1", active: step >= 0 },
-                { icon:"→",  label:"",      color:"#334155", active: true },
-                { icon:"📡", label:"Switch", color:"#3b82f6", active: step >= 3 },
-                { icon:"→",  label:"",      color:"#334155", active: true },
-                { icon:"🛡️", label:"FW",    color:"#ef4444", active: step >= 4 },
-                { icon:"→",  label:"",      color:"#334155", active: true },
-                { icon:"🖥️", label:"Server", color:"#8b5cf6", active: step >= 5 },
+                { icon: "💻", label: "Client", color: "#6366f1", active: step >= 0 },
+                { icon: "→", label: "", color: "#334155", active: true },
+                { icon: "📡", label: "Switch", color: "#3b82f6", active: step >= 3 },
+                { icon: "→", label: "", color: "#334155", active: true },
+                { icon: "🛡️", label: "FW", color: "#ef4444", active: step >= 4 },
+                { icon: "→", label: "", color: "#334155", active: true },
+                { icon: "🖥️", label: "Server", color: "#8b5cf6", active: step >= 5 },
               ].map((n, i) => n.icon === "→"
-                ? <div key={i} style={{ color:"#334155", fontSize:"14px" }}>→</div>
+                ? <div key={i} style={{ color: "#334155", fontSize: "14px" }}>→</div>
                 : (
-                  <div key={i} style={{ textAlign:"center", opacity: n.active ? 1 : 0.3, transition:"opacity 0.4s" }}>
-                    <div style={{ fontSize:"18px" }}>{n.icon}</div>
-                    <div style={{ fontSize:"9px", color: n.color, fontWeight:700 }}>{n.label}</div>
+                  <div key={i} style={{ textAlign: "center", opacity: n.active ? 1 : 0.3, transition: "opacity 0.4s" }}>
+                    <div style={{ fontSize: "18px" }}>{n.icon}</div>
+                    <div style={{ fontSize: "9px", color: n.color, fontWeight: 700 }}>{n.label}</div>
                   </div>
                 )
               )}
@@ -11397,12 +10776,11 @@ function UFWRulesVisualizer({ s }: { s: SlideData }) {
                   display: "flex", alignItems: "center", gap: "10px", padding: "10px 14px", borderRadius: "10px",
                   background: isMatched ? (rule.action === "ALLOW" ? "rgba(16,185,129,0.18)" : "rgba(239,68,68,0.18)")
                     : isEvaluating ? "rgba(99,102,241,0.15)"
-                    : "rgba(255,255,255,0.04)",
-                  border: `1.5px solid ${
-                    isMatched ? (rule.action === "ALLOW" ? "#10b981" : "#ef4444")
+                      : "rgba(255,255,255,0.04)",
+                  border: `1.5px solid ${isMatched ? (rule.action === "ALLOW" ? "#10b981" : "#ef4444")
                       : isEvaluating ? "#6366f1"
-                      : "rgba(255,255,255,0.06)"
-                  }`,
+                        : "rgba(255,255,255,0.06)"
+                    }`,
                   transition: "all 0.3s"
                 }}>
                   <span style={{ fontSize: "11px", fontFamily: "monospace", color: "rgba(255,255,255,0.4)" }}>[{idx + 1}]</span>
@@ -13379,9 +12757,9 @@ function StatefulConnectionTracking({ s }: { s: SlideData }) {
                   <tr key={idx} style={{
                     borderBottom: "1px solid rgba(255,255,255,0.05)",
                     background: (activeStep === "new_syn" && conn.state === "NEW") ||
-                                (activeStep === "reply" && conn.srcIP === "192.168.1.75" && conn.state === "ESTABLISHED") ||
-                                (activeStep === "ftp_data" && conn.srcPort === 20)
-                                ? "rgba(99,102,241,0.15)" : "transparent",
+                      (activeStep === "reply" && conn.srcIP === "192.168.1.75" && conn.state === "ESTABLISHED") ||
+                      (activeStep === "ftp_data" && conn.srcPort === 20)
+                      ? "rgba(99,102,241,0.15)" : "transparent",
                     transition: "all 0.3s"
                   }}>
                     <td style={{ padding: "8px", fontWeight: "bold", color: "#6366f1" }}>{conn.proto.toUpperCase()}</td>
@@ -13674,18 +13052,18 @@ function UFWLogDissector({ s }: { s: SlideData }) {
 
   // Color categories for each token type
   const categories: Record<string, { color: string; label: string }> = {
-    timestamp:  { color: "#f59e0b", label: "เวลา" },
-    action:     { color: "#ef4444", label: "การกระทำ" },
-    in_iface:   { color: "#a78bfa", label: "Network" },
-    out_iface:  { color: "#a78bfa", label: "Network" },
-    mac:        { color: "#64748b", label: "Layer 2" },
-    src_ip:     { color: "#f97316", label: "ต้นทาง" },
-    dst_ip:     { color: "#22d3ee", label: "ปลายทาง" },
-    len:        { color: "#6b7280", label: "Packet" },
-    proto:      { color: "#818cf8", label: "Protocol" },
-    src_port:   { color: "#fb923c", label: "ต้นทาง" },
-    dst_port:   { color: "#34d399", label: "ปลายทาง" },
-    flags:      { color: "#f43f5e", label: "TCP Flag" },
+    timestamp: { color: "#f59e0b", label: "เวลา" },
+    action: { color: "#ef4444", label: "การกระทำ" },
+    in_iface: { color: "#a78bfa", label: "Network" },
+    out_iface: { color: "#a78bfa", label: "Network" },
+    mac: { color: "#64748b", label: "Layer 2" },
+    src_ip: { color: "#f97316", label: "ต้นทาง" },
+    dst_ip: { color: "#22d3ee", label: "ปลายทาง" },
+    len: { color: "#6b7280", label: "Packet" },
+    proto: { color: "#818cf8", label: "Protocol" },
+    src_port: { color: "#fb923c", label: "ต้นทาง" },
+    dst_port: { color: "#34d399", label: "ปลายทาง" },
+    flags: { color: "#f43f5e", label: "TCP Flag" },
   };
 
   const rawLog = [
@@ -13914,7 +13292,7 @@ function UFWLogHomework({ s }: { s: SlideData }) {
 
       {/* Main Workspace Layout */}
       <div style={{ display: "grid", gridTemplateColumns: "0.6fr 1.4fr", gap: "16px", flex: 1, minHeight: 0 }}>
-        
+
         {/* Left Side: Question List Navigation */}
         <div style={{ display: "flex", flexDirection: "column", gap: "8px", overflowY: "auto" }}>
           {homeworkItems.map((item, idx) => {
@@ -13951,7 +13329,7 @@ function UFWLogHomework({ s }: { s: SlideData }) {
 
         {/* Right Side: Log display and Written Questions */}
         <div style={{ display: "flex", flexDirection: "column", gap: "12px", minHeight: 0 }}>
-          
+
           {/* Active Log Box */}
           <div style={{
             background: "rgba(0,0,0,0.8)", borderRadius: "12px", padding: "14px 18px",
@@ -14128,7 +13506,7 @@ function WorkshopArchitecture({ s }: { s: SlideData }) {
       <div style={{ flexShrink: 0 }}>
         <span style={{ fontSize: "11px", color: "#10b981", fontWeight: 700, textTransform: "uppercase" }}>
           Workshop Security Blueprint
-          </span>
+        </span>
         <h2 style={{ margin: "3px 0 0", fontSize: "clamp(16px, 2vw, 22px)", fontWeight: 800 }}>{s.title}</h2>
       </div>
 
