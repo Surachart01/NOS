@@ -1,58 +1,56 @@
 {
   "week": "11a",
-  "title": "การจัดการ Container Platform (Proxmox LXC & Docker)",
-  "topic": "Container Platform: LXC & Docker Engine",
-  "description": "ทำความเข้าใจเทคโนโลยีตู้คอนเทนเนอร์ (Containerization) เปรียบเทียบ LXC และ Docker เรียนรู้วิธีการติดตั้ง Docker Engine บน Ubuntu Server เพื่อเตรียมพร้อมเครื่องเป็นแพลตฟอร์มรันแอปพลิเคชันเสมือนขนาดเล็ก",
+  "title": "สัปดาห์ที่ 11 (วันอังคาร): สอบปฏิบัติการประจำภาคเรียน (NOS Practical Examination)",
+  "topic": "Practical Examination: Nginx Web Server, MariaDB Database & UFW Firewall Hardening",
+  "description": "การประเมินผลสอบปฏิบัติการประจำภาคเรียน วิชา ระบบปฏิบัติการบนเครื่องแม่ข่าย (NOS) บน Proxmox Virtual Environment โดยทดสอบทักษะการติดตั้ง Nginx จัดทำเว็บ Portfolio การเปิดบริการ MariaDB และการตั้งค่า UFW Firewall รักษานิรภัยเซิร์ฟเวอร์",
   "learningObjectives": [
-    "อธิบายแนวคิดเรื่อง Containerization ความต่างระหว่าง LXC และ Docker Engine ได้",
-    "ติดตั้งและบริหารจัดการ Docker Engine บนระบบปฏิบัติการ Linux ได้สำเร็จ",
-    "เตรียมความพร้อมตู้คอนเทนเนอร์และเรียนรู้โครงสร้าง Docker Hub เพื่อดึงภาพระบบมาใช้งาน"
+    "ทดสอบทักษะการติดตั้งและกำหนดค่า Nginx Web Server สร้างหน้าเว็บ Portfolio ส่วนตัวได้",
+    "ทดสอบทักษะการติดตั้งและตรวจสอบบริการ MariaDB Server บนระบบปฏิบัติการ Linux ได้",
+    "ทดสอบทักษะการตั้งค่า UFW Firewall กำหนดนโยบาย Default, การเปิด/ปิดพอร์ต และการบล็อก IP ได้"
   ],
   "slides": [
     {
       "id": "w11a-s1",
       "type": "cover",
-      "title": "เทคโนโลยีตู้คอนเทนเนอร์ และบริการ Container Platform",
-      "subtitle": "Container Platform: LXC & Docker Engine",
-      "tag": "สัปดาห์ที่ 11 (วันอังคาร - 3 ชม.)",
-      "body": "วันนี้เราจะก้าวเข้าสู่การสร้าง Container Platform บนเซิร์ฟเวอร์ของเรา เรียนรู้แนวคิด LXC (ระบบจำลองระดับ OS) และการติดตั้ง Docker Engine (ระบบรันแอปขนาดเล็กแบบแยกขาด) เพื่อขยายบริการได้อย่างรวดเร็วและใช้ทรัพยากรต่ำ",
-      "speakerNotes": "สวัสดีครับทุกคน คาบนี้ตามคำอธิบายรายวิชา เราต้องรันบริการด้าน Container Platform วันนี้เราจะลงลึกถึงการตั้งตู้คอนเทนเนอร์ใน Proxmox และการลง Docker บน Linux Server กันครับ"
+      "tag": "สัปดาห์ที่ 11 • วันอังคาร (3 ชั่วโมง)",
+      "title": "สอบปฏิบัติการประจำภาคเรียน (NOS Practical Examination)",
+      "subtitle": "การประเมินทักษะปฏิบัติการบน Proxmox Ubuntu Server Container",
+      "body": "วันนี้เป็นการสอบปฏิบัติการเก็บคะแนนประจำภาคเรียน ให้นักศึกษาสอบบน Proxmox Container ประจำตัว และปฏิบัติตามโจทย์การสอบทั้ง 3 ส่วนตามที่กำหนดไว้ในระบบ",
+      "speakerNotes": "สวัสดีครับนักศึกษาทุกคน วันนี้เราเป็นการสอบปฏิบัติการประจำภาคเรียน ขอให้นักศึกษาทุกคนตั้งใจทำโจทย์ทั้ง 3 ส่วนอย่างเต็มที่ครับ"
     },
     {
       "id": "w11a-s2",
       "type": "content",
-      "title": "สถาปัตยกรรม Container: LXC vs Docker",
-      "tag": "ทฤษฎีเทคโนโลยีตู้จำลอง",
+      "tag": "โครงสร้างการสอบ",
+      "title": "รายละเอียดและสัดส่วนคะแนนการสอบปฏิบัติ (100 คะแนน)",
       "items": [
-        "1. Linux Container (LXC):",
-        "  - ออกแบบมาเพื่อจำลองระบบปฏิบัติการทั้งระบบ (System Container) ทำงานคล้าย VM แต่เบากว่า",
-        "  - เหมาะสำหรับการทำเครื่องเซิร์ฟเวอร์ย่อยที่ต้องการรัน System Services หลายอย่างพร้อมกัน",
-        "2. Docker Engine (Application Container):",
-        "  - ออกแบบมาเพื่อจำลองและบรรจุเฉพาะ 1 แอปพลิเคชันย่อย (เช่น ตู้รันเฉพาะ Nginx, ตู้รันเฉพาะ Node.js)",
-        "  - แยกขาดในระดับสแต็กแอปพลิเคชัน บูตเสร็จเกือบจะทันที และเคลื่อนย้ายแพลตฟอร์มสะดวกผ่าน Docker Image",
-        "💡 ในการให้บริการ เราสามารถรัน Docker Engine ซ้อนอยู่ภายใน Proxmox LXC Container ได้ เพื่อแบ่งเบาและกระจายสแต็กแอปพลิเคชันอย่างเป็นระบบ"
+        "🌐 ส่วนที่ 1: Nginx Web Server — Portfolio Page (30 คะแนน)",
+        "  - ติดตั้ง Nginx ให้บริการเสิร์ฟหน้าเว็บ Portfolio แนะนำตัวเอง (ชื่อ-นามสกุล, ข้อมูลส่วนตัว, สโลแกนประจำตัว, ตารางข้อมูล, ลิงก์เชื่อมโยง)",
+        "",
+        "🗄️ ส่วนที่ 2: MariaDB Database (30 คะแนน)",
+        "  - ติดตั้ง MariaDB Server ให้สำเร็จ ตรวจสอบบริการ active/running และสามารถล็อกอินเข้าสู่หน้า MySQL Console ได้สำเร็จ",
+        "",
+        "🔥 ส่วนที่ 3: Firewall (UFW) Security Hardening (40 คะแนน)",
+        "  - Mission 3.1: ตั้งค่า Default Policy (deny incoming, allow outgoing) และ enable UFW",
+        "  - Mission 3.2: จัดการ Allow/Deny พอร์ตบริการ (22, 80, 443, 53, 3306, 8080, 23, 6000:6063)",
+        "  - Mission 3.3: จัดการบล็อก/อนุญาต IP Specific & Subnet",
+        "  - Mission 3.4: แสดงสถานะ ufw status และการตั้งค่า SSH Rate Limiting"
       ],
-      "speakerNotes": "อธิบายให้นักศึกษาเห็นภาพชัดเจนว่า LXC ทำหน้าที่เหมือนตู้คอนโดส่วนตัว ส่วน Docker เหมือนกล่องขนมย่อยๆ ที่เราซื้อมาวางไว้ในตู้คอนโดนั้นอีกที"
+      "speakerNotes": "ชี้แจงเกณฑ์การสอบและคะแนนเต็ม 100 คะแนนให้นักศึกษาทราบ"
     },
     {
       "id": "w11a-s3",
-      "type": "content",
-      "title": "ขั้นตอนการติดตั้ง Docker Engine บน Ubuntu Server",
-      "tag": "การติดตั้งระบบเซิร์ฟเวอร์",
+      "type": "summary",
+      "tag": "ข้อปฏิบัติการสอบ",
+      "title": "กฎและข้อปฏิบัติในการสอบปฏิบัติการ",
       "items": [
-        "ล้างแพ็กเกจเก่าที่อาจจะตกค้างอยู่ในเครื่อง:",
-        "  $ sudo apt-get remove docker docker-engine docker.io containerd runc",
-        "ติดตั้งเครื่องมือเตรียมรับรองคีย์และแหล่งดาวน์โหลดอย่างเป็นทางการ:",
-        "  $ sudo apt update && sudo apt install -y ca-certificates curl gnupg lsb-release",
-        "ดาวน์โหลด GPG Key ของ Docker:",
-        "  $ sudo mkdir -p /etc/apt/keyrings",
-        "  - $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
-        "เพิ่มที่อยู่ Repository เข้าไปยังระบบแพ็กเกจ apt:",
-        "  - $ echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
-        "ติดตั้งซอฟต์แวร์แกนหลักของระบบตู้คลาวด์:",
-        "  $ sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin"
+        "📌 1. ทำงานบน Proxmox LXC Container ประจำตัวของนักศึกษาเองเท่านั้น",
+        "📌 2. ส่งงานและเรียกอาจารย์ตรวจทีละส่วนตามลำดับความพร้อม",
+        "📌 3. อนุญาตให้ดูคู่มือและเอกสารการเรียนย้อนหลังได้ แต่งดเว้นการทุจริตคัดลอกกัน",
+        "📌 4. เมื่อทำเสร็จในแต่ละส่วน ให้ยกมือเรียกอาจารย์เพื่อบันทึกคะแนนในแบบฟอร์มตรวจ",
+        "📝 สัปดาห์ถัดไป (วันศุกร์): เริ่มเรียนรู้และปฏิบัติการติดตั้ง Proxmox VE บนเครื่องเซิร์ฟเวอร์จริง!"
       ],
-      "speakerNotes": "สอนการติดตั้งตามมาตรฐานทางการของ Docker เพื่อป้องกันปัญหาโปรแกรมหมดอายุ หรือได้เวอร์ชันเก่าที่ไม่รองรับ Docker Compose"
+      "speakerNotes": "เน้นย้ำกฎการสอบและความซื่อสัตย์ในการทำสอบ"
     }
   ]
 }

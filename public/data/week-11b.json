@@ -1,252 +1,259 @@
 {
   "week": "11b",
-  "title": "สัปดาห์ที่ 11 (วันศุกร์): ปฏิบัติการติดตั้งและบริหารจัดการ Docker Container Platform",
-  "topic": "Docker Installation, Container Lifecycle, Port Mapping (-p), Volume Mount (-v) & Web Application Deployment",
-  "description": "ฝึกปฏิบัติจริงตั้งแต่การติดตั้ง Docker Engine บน Ubuntu Server LXC บน Proxmox, ทดลองใช้คำสั่ง Docker CLI จัดการตู้ Container, แมปพอร์ตบริการเว็บ, ผูกสิทธิ์พื้นที่จัดเก็บข้อมูล (Bind Mount Volume) และตั้งค่า Firewall UFW เพื่อเปิดบริการเว็บผ่านเครือข่าย LAN",
+  "title": "สัปดาห์ที่ 11 (วันศุกร์): ทำความรู้จัก Proxmox VE และการติดตั้งบนเครื่องเซิร์ฟเวอร์จริง",
+  "topic": "Proxmox VE Overview, Type-1 Bare-Metal Hypervisor Architecture & Real Hardware Installation Lab",
+  "description": "ทำความเข้าใจสถาปัตยกรรมระบบจำลองเสมือน Proxmox Virtual Environment (Type-1 Hypervisor), เปรียบเทียบ KVM Virtual Machines และ LXC Containers, ฟีเจอร์ระดับองค์กร, และลงมือจับกลุ่มปฏิบัติการติดตั้ง Proxmox VE บนเครื่องเซิร์ฟเวอร์จริงจากสื่อบันทึก ISO พร้อมการตั้งค่าระบบเครือข่ายและการใช้งาน Proxmox Web GUI",
   "learningObjectives": [
-    "ติดตั้งและตรวจสอบบริการ Docker Engine บนระบบปฏิบัติการ Ubuntu Server ได้สำเร็จ",
-    "เข้าใจและใช้คำสั่งบริหารจัดการ Lifecycle ของ Container (run, ps, stop, start, rm, logs, exec) ได้ถูกต้อง",
-    "สามารถเปิดแมปพอร์ตบริการ (-p) และผูก Bind Mount Volume (-v) เชื่อมไฟล์เว็บบน Host ไปยัง Container ได้",
-    "ตั้งค่า UFW Firewall อนุญาตพอร์ตบริการและทดสอบเข้าชมเว็บไซต์ผ่านเครือข่าย LAN ได้สำเร็จ"
+    "อธิบายสถาปัตยกรรม Proxmox VE (Type-1 Bare-Metal Hypervisor) และความแตกต่างระหว่าง KVM กับ LXC ได้",
+    "เตรียมสื่อบันทึก ISO และกำหนดค่า BIOS/UEFI สำหรับการติดตั้ง Hypervisor บนเครื่องเซิร์ฟเวอร์จริงได้",
+    "ดำเนินการติดตั้ง Proxmox VE บนฮาร์ดแวร์จริง ตั้งค่า Management IP Address และ Root Access ได้สำเร็จ",
+    "เข้าใช้งาน Proxmox Web GUI (https://IP:8006) ดาวน์โหลด OS Template และสร้าง LXC Container ตู้แรกได้สำเร็จ"
   ],
   "slides": [
     {
       "id": "w11b-s1",
       "type": "cover",
       "tag": "สัปดาห์ที่ 11 • วันศุกร์ (2 ชั่วโมง)",
-      "title": "ปฏิบัติการ Docker Container Platform",
-      "subtitle": "ติดตั้ง Docker Engine, จัดการตู้ Container, แมปพอร์ต และรัน Web Application บน Ubuntu Server",
-      "body": "วันนี้เราจะลงมือปฏิบัติจริงบน Proxmox Container ของตัวเอง ติดตั้ง Docker Engine สั่งรัน Nginx Web Server แมปพอร์ต 8080 ผูกโฟลเดอร์ไฟล์เว็บ และทดสอบเข้าชมผ่านเบราว์เซอร์ในวง LAN",
-      "speakerNotes": "สวัสดีนักศึกษาทุกคนครับ วันศุกร์นี้เราจะเน้นการปฏิบัติลงมือทำจริงบนเครื่อง Container ของตนเอง ทุกคนจะได้ติดตั้ง Docker และรันเว็บแอปพลิเคชันเสร็จในเวลาไม่กี่นาทีครับ"
+      "title": "ทำความรู้จัก Proxmox VE & การติดตั้งบนเครื่องจริง",
+      "subtitle": "Proxmox Virtual Environment (Type-1 Hypervisor) Overview & Real Hardware Installation Lab",
+      "body": "วันนี้เราจะเริ่มต้นทำความรู้จัก Proxmox VE ซอฟต์แวร์จำลองระบบระดับเครื่องแม่ข่าย (Type-1 Hypervisor) เรียนรู้ฟีเจอร์เด็ด และลงมือจับกลุ่มติดตั้ง Proxmox VE บนเครื่องพีซี/เซิร์ฟเวอร์จริงตั้งแต่ศูนย์",
+      "speakerNotes": "สวัสดีนักศึกษาทุกคนครับ คาบวันศุกร์นี้เราจะลงมือติดตั้ง Proxmox VE ลงบนเครื่องพีซี/เซิร์ฟเวอร์จริงประจำกลุ่ม โดยครูจะอธิบายทฤษฎีว่า Proxmox ทำอะไรได้บ้างก่อนจะพาทำทีละขั้นตอนครับ"
     },
     {
       "id": "w11b-s2",
       "type": "content",
-      "tag": "1. เป้าหมายปฏิบัติการวันนี้",
-      "title": "เป้าหมายการเรียนรู้และภารกิจประจำคาบ (Lab Objectives)",
+      "tag": "1. ทำความรู้จัก Proxmox VE",
+      "title": "Proxmox VE คืออะไร? (Type-1 Hypervisor คืออะไร?)",
       "items": [
-        "📌 1. ติดตั้ง Docker Engine และ Docker CLI บน Ubuntu Server ให้พร้อมใช้งาน",
-        "📌 2. เข้าใจและใช้คำสั่งบริหารจัดการ Lifecycle ของ Container (run, ps, stop, start, rm, logs, exec)",
-        "📌 3. รัน Nginx Web Server บน Docker พร้อมการทำ Port Mapping (-p 8080:80)",
-        "📌 4. เชื่อมผูกโฟลเดอร์จัดเก็บข้อมูลด้วย Bind Mount Volume (-v ~/myweb:/usr/share/nginx/html)",
-        "📌 5. เปิด Firewall UFW อนุญาตพอร์ตเว็บ 8080/8081 และทดสอบเข้าชมผ่านวง LAN",
-        "🎯 ผลลัพธ์ท้ายคาบ: นักศึกษาทำเว็บ Portfolio บน Docker Container และส่งลิงก์/ภาพถ่ายหน้าจอให้อาจารย์ตรวจ"
+        "🚀 Proxmox Virtual Environment (PVE):",
+        "  คือ แพลตฟอร์มบริหารจัดการระบบจำลองเครื่องแม่ข่ายแบบ Open-Source (Enterprise Virtualization Platform)",
+        "",
+        "🏗️ เป็น Type-1 (Bare-Metal) Hypervisor:",
+        "  - ติดตั้งลงบนฮาร์ดแวร์เครื่องเซิร์ฟเวอร์โดยตรง (อยู่บนเลเยอร์ระดับดิสก์)",
+        "  - ไม่ต้องพึ่งพา OS อื่นเหมือน Type-2 Hypervisor (เช่น VirtualBox / VMware Workstation)",
+        "",
+        "⚡ ข้อดีของ Type-1 Hypervisor:",
+        "  - ประสิทธิภาพสูงเกือบเทียบเท่าเครื่องจริง (Near Bare-Metal Performance)",
+        "  - กินทรัพยากรส่วนกลางน้อยมาก เสถียรสูง มั่นใจได้ในระดับ Enterprise",
+        "",
+        "🐧 พัฒนาต่อยอดจาก Debian Linux & KVM Kernel:"
       ],
-      "speakerNotes": "อธิบายเป้าหมายให้ชัดเจนว่าวันนี้เมื่อจบคาบ นักเรียนทุกคนจะมี Web Server ที่รันอยู่บน Docker Container บนเครื่อง Ubuntu Server ของตัวเองครับ"
+      "speakerNotes": "เปรียบเทียบให้นักศึกษาเห็นภาพความต่างระหว่าง Type-1 (ลงทับดิสก์เครื่องจริง) กับ Type-2 (ลงแอปบน Windows) ว่า Type-1 แรงกว่าและนิ่งกว่ามาก"
     },
     {
       "id": "w11b-s3",
-      "type": "two-col",
-      "tag": "2. ทบทวนสถาปัตยกรรม",
-      "title": "เปรียบเทียบ Docker Image vs Docker Container",
-      "cols": [
-        {
-          "icon": "🖼️ Image",
-          "title": "Docker Image (พิมพ์เขียว / ต้นแบบ)",
-          "items": [
-            "เป็นไฟล์ Read-Only Template ที่บรรจุโค้ดและไลบรารีทั้งหมดที่แอปต้องใช้",
-            "ดาวน์โหลดได้จากคลาวด์ศูนย์กลาง (Docker Hub) เช่น nginx, ubuntu, mysql",
-            "เหมือนกับแผ่นดิสก์ติดตั้งโปรแกรมที่ไม่เปลี่ยนแปลงระหว่างทำงาน"
-          ]
-        },
-        {
-          "icon": "📦 Container",
-          "title": "Docker Container (ตู้เสมือนที่รันอยู่)",
-          "items": [
-            "เป็น Process เสมือนที่ถูกรันขึ้นมาจาก Docker Image (docker run) สดๆ",
-            "มีชั้นเขียนข้อมูล (Read-Write Layer) ซ้อนด้านบน สามารถรับส่งข้อมูลขณะทำงานได้",
-            "สั่งเปิด/ปิด/ลบตู้ได้รวดเร็วโดยไม่กระทบตัว Image ต้นฉบับ"
-          ]
-        }
+      "type": "content",
+      "tag": "1. ทำความรู้จัก Proxmox VE",
+      "title": "Proxmox VE ทำอะไรได้บ้าง? (ฟีเจอร์สำคัญที่องค์กรเลือกใช้)",
+      "items": [
+        "🖥️ 1. KVM (Kernel-based Virtual Machine):",
+        "  - สร้างเครื่องเสมือน (VM) รันระบบปฏิบัติการอะไรก็ได้ เช่น Windows Server, Ubuntu, RedHat, macOS",
+        "",
+        "📦 2. LXC (Linux Containers):",
+        "  - สร้างตู้คอนเทนเนอร์ระดับ OS นำเสนอการทำงานที่เบาและบูตขึ้นในมิลลิวินาที",
+        "",
+        "🌐 3. Web-based Management GUI:",
+        "  - มีแผงควบคุมกราฟิกผ่านเว็บเบราว์เซอร์ (https://IP:8006) จัดการได้จากทุกที่โดยไม่ต้องลงซอฟต์แวร์เพิ่ม",
+        "",
+        "💾 4. Advanced Storage & ZFS Support:",
+        "  - รองรับระบบจัดเก็บข้อมูลประสิทธิภาพสูง เช่น ZFS, LVM, Ceph SAN/NAS",
+        "",
+        "🔄 5. Backup / Restore & Live Migration:",
+        "  - สำรองข้อมูลตู้เสมือนและย้ายตู้ข้ามเครื่องเซิร์ฟเวอร์ได้โดยไม่ต้องหยุดบริการ (Zero Downtime)"
       ],
-      "speakerNotes": "ย้ำให้นักศึกษาเข้าใจความต่างระหว่าง Image (แผ่นโปรแกรมต้นแบบ) กับ Container (ตู้โปรแกรมที่เปิดทำงานจริง)"
+      "speakerNotes": "อธิบายจุดเด่นของ Proxmox ที่สามารถรันได้ทั้ง VM และ LXC ในตัวเดียว และจัดการทุกอย่างผ่านเว็บ GUI"
     },
     {
       "id": "w11b-s4",
-      "type": "content",
-      "tag": "3. ขั้นตอนการติดตั้ง",
-      "title": "ขั้นตอนที่ 1: การติดตั้ง Docker Engine บน Ubuntu Server",
-      "items": [
-        "📌 ขั้นที่ 1: ถอนการติดตั้งแพ็กเกจเก่าที่อาจตกค้าง:",
-        "  $ sudo apt-get remove docker docker-engine docker.io containerd runc",
-        "",
-        "📌 ขั้นที่ 2: อัปเดตระบบและติดตั้งแพ็กเกจเตรียมความพร้อม:",
-        "  $ sudo apt update && sudo apt install -y ca-certificates curl gnupg lsb-release",
-        "",
-        "📌 ขั้นที่ 3: ดาวน์โหลด GPG Key และเพิ่ม Docker Repository เข้าสู่ระบบ apt:",
-        "  $ sudo mkdir -p /etc/apt/keyrings",
-        "  $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg",
-        "  $ echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null",
-        "",
-        "📌 ขั้นที่ 4: ติดตั้ง Docker Engine และ Docker Compose:",
-        "  $ sudo apt update && sudo apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin"
+      "type": "two-col",
+      "tag": "1. ทำความรู้จัก Proxmox VE",
+      "title": "เปรียบเทียบสถาปัตยกรรม KVM Virtual Machines vs LXC Containers",
+      "cols": [
+        {
+          "icon": "🖥️ KVM VM",
+          "title": "KVM Virtual Machines (VM)",
+          "items": [
+            "จำลองฮาร์ดแวร์ทั้งชุด (Virtual Hardware: vCPU, vRAM, vDisk, vNIC)",
+            "รัน OS ต่างตระกูลได้ (เช่น รัน Windows บน Linux Host)",
+            "มีความปลอดภัยและแยกขาดสูง เหมาะกับงานที่ต้องการ OS เฉพาะ"
+          ]
+        },
+        {
+          "icon": "📦 LXC Container",
+          "title": "LXC Containers (CT)",
+          "items": [
+            "ใช้ Linux Kernel ร่วมกับเครื่อง Host",
+            "จำลองเฉพาะสภาพแวดล้อมระบบปฏิบัติการ (OS-level Virtualization)",
+            "บูตเร็วมาก กินแรมน้อย (เช่น 128MB RAM ก็รัน Nginx ได้แล้ว)"
+          ]
+        }
       ],
-      "speakerNotes": "ให้นักศึกษาคัดลอก/พิมพ์คำสั่งทีละบรรทัด คอยตรวจดูว่ามี error หรือไม่"
+      "speakerNotes": "เน้นย้ำให้นักศึกษาเห็นว่าทำไมในวิชานี้เรานิยมใช้ LXC Container เพราะกินแรมน้อยและสร้างตู้ได้หลายสิบตู้ในเครื่องเดียว"
     },
     {
       "id": "w11b-s5",
       "type": "content",
-      "tag": "3. ขั้นตอนการติดตั้ง",
-      "title": "ขั้นตอนที่ 2: ตรวจสอบและทดสอบระบบ Docker (Hello World)",
+      "tag": "2. การเตรียมความพร้อม",
+      "title": "ข้อกำหนดฮาร์ดแวร์และการเตรียมความพร้อมก่อนติดตั้ง",
       "items": [
-        "📌 ขั้นที่ 1: ตรวจสอบเวอร์ชันและสถานะของบริการ Docker:",
-        "  $ sudo docker --version",
-        "  $ sudo systemctl status docker",
-        "  → สถานะต้องแสดง: active (running)",
+        "💻 CPU Requirements:",
+        "  - 64-bit Intel หรือ AMD Processor (ต้องรองรับ Intel VT-x หรือ AMD-V Virtualization)",
         "",
-        "📌 ขั้นที่ 2: ทดลองรัน Container ทดสอบแรกของระบบ:",
-        "  $ sudo docker run hello-world",
-        "  → ระบบจะดึง Image 'hello-world' จาก Docker Hub มาสั่งรัน แล้วแสดงข้อความ 'Hello from Docker!'",
+        "🧠 RAM Requirements:",
+        "  - อย่างน้อย 4 GB (แนะนำ 8GB - 16GB ขึ้นไปสำหรับการรันหลายตู้พร้อมกัน)",
         "",
-        "📌 ขั้นที่ 3: สิทธิ์การใช้งานโดยไม่ต้องพิมพ์ sudo (Optional):",
-        "  $ sudo usermod -aG docker $USER",
-        "  (หลังจากรันคำสั่งนี้ ต้อง logout แล้ว login ใหม่เพื่อให้สิทธิ์มีผล)"
+        "💽 Harddisk / SSD:",
+        "  - ความจุอย่างน้อย 64GB - 120GB ขึ้นไปสำหรับลงตัวระบบและเก็บไฟล์ OS Image",
+        "",
+        "🔌 Network Interface:",
+        "  - การ์ดแลน 1Gbps Ethernet NIC อย่างน้อย 1 ช่อง",
+        "",
+        "📀 USB Flash Drive สำหรับทำสื่อบันทึกติดตั้ง:",
+        "  - ความจุ 4GB ขึ้นไป บันทึกไฟล์ ISO Proxmox VE ด้วยโปรแกรม Rufus หรือ Ventoy"
       ],
-      "speakerNotes": "ชี้ให้เห็นว่าพอสั่ง docker run ระบบจะทำการ Download (Pull) Image มาให้โดยอัตโนมัติหากยังไม่มีในเครื่อง"
+      "speakerNotes": "เช็คสเปกเครื่องเซิร์ฟเวอร์ประจำกลุ่มก่อนลงมือติดตั้งจริง"
     },
     {
       "id": "w11b-s6",
       "type": "content",
-      "tag": "4. การเปิดบริการเว็บ",
-      "title": "ขั้นตอนที่ 3: สั่งรัน Nginx Web Server และการทำ Port Mapping (-p)",
+      "tag": "3. ขั้นตอนการติดตั้งเครื่องจริง",
+      "title": "ขั้นตอนปฏิบัติการติดตั้งเครื่องจริง — 1. BIOS & USB Boot",
       "items": [
-        "💡 แนวคิด Port Mapping (-p HOST_PORT:CONTAINER_PORT):",
-        "  - Nginx ภายใน Container จะรันและรับฟังพอร์ต 80 เป็นปกติ",
-        "  - เครื่อง Host (Ubuntu) ต้องเปิดพอร์ตภายนอก (เช่น 8080) เชื่อมผ่านเข้าไปยังพอร์ต 80 ของตู้",
+        "📌 ขั้นที่ 1: เสียบ USB Bootable Proxmox เข้ากับเครื่องเซิร์ฟเวอร์จริงประจำกลุ่ม",
         "",
-        "📌 คำสั่งรัน Nginx Web Container ในโหมดทำงานเบื้องหลัง (Background / Detached):",
-        "  $ sudo docker run -d -p 8080:80 --name my-webserver nginx",
+        "📌 ขั้นที่ 2: เปิดเครื่องแล้วกดปุ่มเข้า BIOS Setup (เช่น F2, Del, F12 หรือ F11)",
         "",
-        "🔍 คำอธิบายออปชันที่สำคัญ:",
-        "  • -d  : Detached Mode (รันแอปเป็น Background Service ไม่ค้างหน้าจอคำสั่ง)",
-        "  • -p 8080:80 : Map พอร์ตภายนอก 8080 ของ Host เข้ากับ พอร์ต 80 ภายใน Container",
-        "  • --name my-webserver : ตั้งชื่อตู้เสมือนให้เรียกง่าย",
-        "  • nginx : ชื่อซอฟต์แวร์ Image จาก Docker Hub"
+        "📌 ขั้นที่ 3: เปิดใช้งาน Virtualization Technology ใน BIOS:",
+        "  - Intel CPU: เปลี่ยน Intel Virtualization Technology (VT-x) -> Enabled",
+        "  - AMD CPU: เปลี่ยน SVM Mode / AMD-V -> Enabled",
+        "",
+        "📌 ขั้นที่ 4: ปิดการทำงานของ Secure Boot (เปลี่ยน Secure Boot -> Disabled)",
+        "",
+        "📌 ขั้นที่ 5: บันทึกค่า (กด F10) และเลือกบูตจาก USB Flash Drive"
       ],
-      "speakerNotes": "อธิบายออปชัน -d, -p, --name ให้ชัดเจน อธิบายเรื่อง Port Mapping อย่างละเอียดย้ำความสำคัญ"
+      "speakerNotes": "พานักศึกษาเปิดเข้า BIOS ของเครื่องจริงและตรวจสอบว่า Virtualization Enabled เรียบร้อย"
     },
     {
       "id": "w11b-s7",
       "type": "content",
-      "tag": "4. การเปิดบริการเว็บ",
-      "title": "ขั้นตอนที่ 4: การตรวจสอบสถานะและการเข้าชมเว็บไซต์",
+      "tag": "3. ขั้นตอนการติดตั้งเครื่องจริง",
+      "title": "ขั้นตอนปฏิบัติการติดตั้งเครื่องจริง — 2. หน้าจอ Proxmox Installer",
       "items": [
-        "📌 ขั้นที่ 1: ตรวจสอบรายการ Container ที่กำลังทำงานอยู่:",
-        "  $ sudo docker ps",
-        "  → ตรวจดูคอลัมน์ PORTS จะเห็น 0.0.0.0:8080->80/tcp",
+        "📌 1. หน้าจอแรกของ Proxmox Installer:",
+        "  - เลือกเมนู 'Install Proxmox VE (Graphical)' แล้วกด Enter",
         "",
-        "📌 ขั้นที่ 2: ตรวจเช็คหมายเลข IP Address ของเครื่อง Ubuntu Server:",
-        "  $ ip a   หรือ   $ hostname -I",
+        "📌 2. อ่านและยอมรับข้อตกลงสิทธิ์ (EULA):",
+        "  - กดปุ่ม 'I Agree'",
         "",
-        "📌 ขั้นที่ 3: เปิดเว็บเบราว์เซอร์จากเครื่องเรียนในวง LAN แล้วกรอก URL:",
-        "  http://[หมายเลข-IP-ของเครื่อง]:8080",
-        "  🎉 จะพบกับหน้าจอ 'Welcome to nginx!' ซึ่งส่งตรงมาจาก Docker Container บนเซิร์ฟเวอร์!"
+        "📌 3. เลือกดิสก์สำหรับติดตั้ง (Target Harddisk):",
+        "  - เลือกไดรฟ์ SSD/HDD ที่ต้องการลงระบบ (เช่น /dev/sda) -> กด Next",
+        "",
+        "📌 4. กำหนดสถานที่และเขตเวลา (Location & Timezone):",
+        "  - Country: Thailand",
+        "  - Timezone: Asia/Bangkok -> กด Next"
       ],
-      "speakerNotes": "ให้นักเรียนทดลองกดเข้าเว็บจากเบราว์เซอร์เครื่องของตัวเอง และให้เพื่อนโต๊ะข้างๆ ลองกดเข้าเบราว์เซอร์ดูด้วยเพื่อยืนยันว่าเข้าผ่าน LAN ได้จริง"
+      "speakerNotes": "แนะนำทีละขั้นตอนบนหน้าจอ Graphical Installer"
     },
     {
       "id": "w11b-s8",
       "type": "content",
-      "tag": "5. การผูกพื้นที่ข้อมูล",
-      "title": "ขั้นตอนที่ 5: การผูกไฟล์เว็บด้วย Bind Mount Volume (-v)",
+      "tag": "3. ขั้นตอนการติดตั้งเครื่องจริง",
+      "title": "ขั้นตอนปฏิบัติการติดตั้งเครื่องจริง — 3. รหัสผ่านและระบบเครือข่าย",
       "items": [
-        "⚠️ ทำไมต้องผูก Volume (-v)?",
-        "  ถ้าเราไม่ผูก Volume พอสั่งลบ Container ข้อมูลไฟล์เว็บข้างในจะหายหมด! การใช้ Volume จะเอาโฟลเดอร์บนเครื่อง Host ยัดเข้าไปใน Container ทำให้แก้ไขไฟล์บนเครื่อง Host ได้สะดวก",
+        "📌 5. กำหนดรหัสผ่านผู้ดูแลระบบ (Root Password):",
+        "  - Password & Confirm Password: ตั้งรหัสผ่าน root สำหรับใช้เข้าเครื่อง",
+        "  - Email: ใส่ e-mail ของกลุ่ม",
         "",
-        "📌 ขั้นที่ 1: สร้างโฟลเดอร์และไฟล์ HTML หน้าแรกบนเครื่อง Host:",
-        "  $ mkdir -p ~/myweb",
-        "  $ nano ~/myweb/index.html",
-        "  (ใส่เนื้อหาเว็บ HTML Portfolio ชื่อ-นามสกุล และสโลแกนประจำตัว)",
+        "📌 6. ตั้งค่าระบบเครือข่ายหลัก (Management Network Configuration):",
+        "  - Management Interface: เลือกการ์ดแลนหลัก (เช่น eth0 / enp3s0)",
+        "  - Hostname (FQDN): เช่น pve-group1.lab.local",
+        "  - IP Address (CIDR): เช่น 192.168.1.100/24 (ตามที่อาจารย์กำหนด)",
+        "  - Gateway: 192.168.1.1",
+        "  - DNS Server: 192.168.1.1 หรือ 8.8.8.8",
         "",
-        "📌 ขั้นที่ 2: รัน Container ตัวใหม่โดยผูก Volume โฟลเดอร์ ~/myweb ไปยัง /usr/share/nginx/html:",
-        "  $ sudo docker run -d -p 8081:80 -v ~/myweb:/usr/share/nginx/html --name custom-web nginx",
-        "",
-        "📌 ขั้นที่ 3: เปิดเบราว์เซอร์ http://[IP-ของเครื่อง]:8081 จะพบหน้าเว็บส่วนตัวของเราทันที!"
+        "📌 7. ตรวจสอบข้อมูลสรุป (Summary) และกด Install:",
+        "  - รอระบบติดตั้งประมาณ 3-5 นาที เมื่อเสร็จแล้วดึง USB ออก แล้วกด Reboot"
       ],
-      "speakerNotes": "สอนให้นักเรียนเข้าใจว่า Bind Mount Volume ช่วยให้เราอัปเดตไฟล์ HTML บน Host แล้วเว็บใน Docker เปลี่ยนตามทันที"
+      "speakerNotes": "เน้นย้ำเรื่องการใส่หมายเลข IP Address ให้ถูกต้องตรงตามแผนของห้องแล็บ"
     },
     {
       "id": "w11b-s9",
       "type": "content",
-      "tag": "6. คำสั่งควบคุม Container",
-      "title": "คำสั่งบริหารจัดการ Lifecycle ของ Container ที่ต้องรู้",
+      "tag": "4. การบริหารจัดการผ่านเว็บ",
+      "title": "การเข้าใช้งานครั้งแรกผ่าน Proxmox Web GUI (https://IP:8006)",
       "items": [
-        "📋 1. ดูรายการ Container ทั้งหมด (รวมตู้ที่หยุดรันแล้ว):",
-        "  $ sudo docker ps -a",
+        "📌 1. เมื่อเครื่องเซิร์ฟเวอร์รีบูตเสร็จสิ้น หน้าจอดำจะแสดงผล:",
+        "  `Welcome to the Proxmox Virtual Environment.`",
+        "  `Please use your web browser to configure it.`",
+        "  `URL: https://192.168.1.100:8006/`",
         "",
-        "📋 2. ดู Log การทำงานหรือ Error ของตู้ Container:",
-        "  $ sudo docker logs custom-web   (เพิ่ม -f ถ้าต้องการดู realtime)",
+        "📌 2. เปิดเว็บเบราว์เซอร์จากเครื่องเรียนในวง LAN แล้วกรอก URL:",
+        "  `https://192.168.1.100:8006`  (ต้องมี https:// และพอร์ต :8006)",
         "",
-        "📋 3. สั่งหยุดการทำงาน / สั่งให้กลับมารันใหม่:",
-        "  $ sudo docker stop custom-web",
-        "  $ sudo docker start custom-web",
+        "📌 3. ยอมรับใบรับรองความปลอดภัยชั่วคราว (Advanced -> Proceed)",
         "",
-        "📋 4. สั่งลบ Container ออกจากระบบ:",
-        "  $ sudo docker rm -f custom-web   (-f หมายถึงบังคับลบแม้ตู้กำลังรันอยู่)",
-        "",
-        "📋 5. สั่งเข้าไปพิมพ์คำสั่งภายใน Container (Interactive Terminal):",
-        "  $ sudo docker exec -it custom-web bash"
+        "📌 4. เข้าสู่ระบบด้วยสิทธิ์ root:",
+        "  - User name: root",
+        "  - Password: รหัสผ่านที่ตั้งไว้ตอนติดตั้ง",
+        "  - Realm: Linux PAM standard authentication"
       ],
-      "speakerNotes": "ให้นักเรียนลองฝึกใช้คำสั่ง logs, stop, start, exec และ rm เพื่อให้คล่องมือ"
+      "speakerNotes": "พานักเรียนเข้าเว็บเบราว์เซอร์และล็อกอินเข้าหน้า Proxmox Web GUI พร้อมกัน"
     },
     {
       "id": "w11b-s10",
       "type": "content",
-      "tag": "7. Firewall & Network",
-      "title": "การเปิดพอร์ต UFW Firewall สำหรับบริการบน Docker",
+      "tag": "4. การบริหารจัดการผ่านเว็บ",
+      "title": "ทำความรู้จักเมนูใน Proxmox Web GUI และการดาวน์โหลด OS Template",
       "items": [
-        "🔒 หากเครื่อง Ubuntu มีการเปิดใช้งาน UFW Firewall อยู่:",
-        "  ต้องเปิดพอร์ตขาเข้าเพื่อให้เครื่องอื่นในวง LAN สามารถเข้าชมเว็บ Docker พอร์ต 8080/8081 ได้",
+        "🗂️ โครงสร้างเมนูด้านซ้าย (Tree View):",
+        "  - Datacenter : ภาพรวมของระบบเซิร์ฟเวอร์ทั้งหมดในกลุ่ม",
+        "  - pve-group1 (Node) : เครื่องเซิร์ฟเวอร์ฮาร์ดแวร์จริงของเรา",
+        "  - local (pve-group1) : ที่เก็บไฟล์ ISO และ LXC OS Templates",
+        "  - local-lvm : ที่เก็บดิสก์เสมือนของ VM และ Container",
         "",
-        "📌 คำสั่งเปิดพอร์ต 8080 และ 8081 บน UFW:",
-        "  $ sudo ufw allow 8080/tcp",
-        "  $ sudo ufw allow 8081/tcp",
-        "",
-        "📌 ตรวจสอบรายการกฎของ UFW Firewall:",
-        "  $ sudo ufw status numbered",
-        "",
-        "💡 หมายเหตุเกี่ยวกับ Docker & UFW:",
-        "  Docker มีการจัดการ iptables ของตัวเองในพื้นหลัง แต่การเปิด ufw allow ไว้จะช่วยการันตีความถูกต้องของความปลอดภัยในระบบ"
+        "📥 วิธีดาวน์โหลด LXC OS Template มาใช้งาน:",
+        "  1. คลิกเลือก local (pve-group1) ด้านซ้าย",
+        "  2. คลิกหัวข้อ CT Templates -> กดปุ่ม Templates",
+        "  3. ค้นหาและเลือก ubuntu-22.04-standard แล้วกดปุ่ม Download"
       ],
-      "speakerNotes": "สอนการตั้งค่า UFW ให้ตรงกับพอร์ตที่เราแมปไว้ใน Docker"
+      "speakerNotes": "แนะนำเมนูหลักๆ ในแผงควบคุม Proxmox Web GUI"
     },
     {
       "id": "w11b-s11",
       "type": "lab",
-      "tag": "8. ปฏิบัติการและส่งงาน",
-      "title": "ภารกิจปฏิบัติการประจำสัปดาห์ที่ 11 (Lab Assignment)",
+      "tag": "5. ปฏิบัติการและส่งงาน",
+      "title": "ภารกิจปฏิบัติการประจำวันศุกร์ (Lab Assignment)",
       "duration": "1.5 ชั่วโมง",
       "objectives": [
-        "ติดตั้ง Docker Engine บน Ubuntu Server Container ของตนเองได้สำเร็จ",
-        "สร้างโฟลเดอร์ ~/myweb และเขียนไฟล์ index.html เป็นเว็บ Portfolio ของตนเอง (ชื่อ-นามสกุล, สโลแกน)",
-        "รัน Docker Container (Nginx) แบบ Bind Mount Volume และแมปพอร์ต 8080 เข้าชมได้ผ่านวง LAN"
+        "จับกลุ่มทำการติดตั้ง Proxmox VE บนเครื่องเซิร์ฟเวอร์จริงได้สำเร็จ",
+        "เข้าใช้งาน Proxmox Web GUI (https://IP:8006) ผ่านเครือข่าย LAN ได้",
+        "ดาวน์โหลด OS Template และทดลองสร้าง LXC Container ตู้แรกของกลุ่มได้สำเร็จ"
       ],
       "steps": [
-        "1. ทำการติดตั้ง Docker Engine ตามขั้นตอนในสไลด์ให้เรียบร้อย",
-        "2. สร้างโฟลเดอร์ ~/myweb และไฟล์ index.html ที่มีชื่อ-นามสกุล รหัสนักเรียน และสโลแกนประจำตัว",
-        "3. สั่งรัน Docker Container Nginx: sudo docker run -d -p 8080:80 -v ~/myweb:/usr/share/nginx/html --name student-portfolio nginx",
-        "4. เปิด UFW Firewall อนุญาตพอร์ต 8080: sudo ufw allow 8080/tcp",
-        "5. เปิดเบราว์เซอร์เข้าชม http://[IP-ของนักเรียน]:8080",
-        "6. ถ่ายภาพหน้าจอส่งงาน (2 รูป):",
-        "   - รูปที่ 1: ผลลัพธ์คำสั่ง 'sudo docker ps' บน Terminal",
-        "   - รูปที่ 2: หน้าจอเว็บเบราว์เซอร์ Portfolio บนพอร์ต 8080"
+        "1. จับกลุ่มทำการติดตั้ง Proxmox VE ลงบนเครื่องพีซี/เซิร์ฟเวอร์จริงประจำกลุ่ม",
+        "2. ตั้งค่า IP Address ประจำเครื่องเซิร์ฟเวอร์ตามที่อาจารย์กำหนด",
+        "3. เปิดเว็บเบราว์เซอร์เข้าสู่ Proxmox Web GUI (https://[IP-ของกลุ่ม]:8006)",
+        "4. ดาวน์โหลด LXC Template 'ubuntu-22.04-standard'",
+        "5. ทดลองกด 'Create CT' สร้าง Container ตู้แรกของกลุ่ม",
+        "6. ถ่ายภาพหน้าจอ (Screenshot) นำส่งอาจารย์:",
+        "   - ภาพที่ 1: หน้าจอ Proxmox Web GUI แสดงข้อมูล Node Status และหมายเลข IP ของกลุ่ม",
+        "   - ภาพที่ 2: หน้าจอแสดงรายการ Container ตู้แรกที่สร้างสำเร็จ"
       ],
-      "speakerNotes": "ชี้แจงเกณฑ์การส่งงาน ให้นักเรียนลงมือทำและยกมือให้อาจารย์ตรวจรับคะแนน"
+      "speakerNotes": "ตรวจงานกลุ่ม รับภาพหน้าจอการติดตั้งบนเครื่องจริงสำเร็จ"
     },
     {
       "id": "w11b-s12",
       "type": "summary",
-      "tag": "9. สรุปท้ายคาบ",
-      "title": "สรุปสาระสำคัญสัปดาห์ที่ 11 (Week Summary)",
+      "tag": "6. สรุปบทเรียน",
+      "title": "สรุปสาระสำคัญประจำสัปดาห์ที่ 11 (Week Summary)",
       "items": [
-        "✅ สถาปัตยกรรม Containerization ช่วยให้การรันบริการเบา บูตรวดเร็ว และประหยัดทรัพยากรกว่า VM",
-        "✅ Docker Image คือพิมพ์เขียว Read-Only / Docker Container คือตู้เสมือน Read-Write ที่รันงานอยู่",
-        "✅ คำสั่ง docker run -d -p [host]:[container] -v [host_dir]:[container_dir] เป็นคำสั่งหัวใจหลักในการเปิดบริการ",
-        "✅ การบริหารจัดการตู้ใช้ docker ps, docker logs, docker stop, docker rm และ docker exec",
-        "📝 ส่งงาน Lab 11: ภาพถ่ายหน้าจอ docker ps + หน้าเว็บ Portfolio พอร์ต 8080",
-        "📚 สัปดาห์หน้า: การสร้างบริการคลาวด์และบริหารจัดการฐานข้อมูลด้วย Docker Compose"
+        "✅ Proxmox VE เป็น Type-1 Bare-Metal Hypervisor ประสิทธิภาพสูง รองรับทั้ง KVM และ LXC",
+        "✅ การติดตั้งบนเครื่องจริงทำได้ผ่าน ISO USB ตั้งค่า IP Management และจัดการผ่าน Web GUI (:8006)",
+        "✅ เข้าใจการใช้งานเมนู Datacenter, Node, Storage และการโหลด Template",
+        "📝 ส่งงาน Lab 11b: ภาพถ่ายหน้าจอ Proxmox Web GUI บนเครื่องจริง + Container ตู้แรก",
+        "📚 สัปดาห์หน้า (สัปดาห์ที่ 12): โครงการกลุ่ม — การจัดสรรตู้ Container ประจำตัวสมาชิกและการนำ React Web App ขึ้นใช้งานจริง!"
       ],
-      "speakerNotes": "สรุปภาพรวมและอธิบายล่วงหน้าเกี่ยวกับบทเรียนสัปดาห์ถัดไป"
+      "speakerNotes": "สรุปภาพรวมของคาบวันศุกร์ และเตรียมพร้อมสำหรับสัปดาห์ที่ 12"
     }
   ]
 }

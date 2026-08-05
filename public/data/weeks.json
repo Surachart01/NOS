@@ -113,19 +113,19 @@
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 11: Container Platform (Proxmox LXC & Docker Engine)",
+    "weekLabel": "สัปดาห์ที่ 11: สอบปฏิบัติการและการติดตั้ง Proxmox VE บนเครื่องจริง",
     "sessions": [
       {
         "id": "11a",
         "displayNum": "อ.",
-        "title": "การจัดการ Container Platform และสถาปัตยกรรม LXC vs Docker",
-        "topic": "Container Platform: LXC & Docker Engine"
+        "title": "สอบปฏิบัติการประจำภาคเรียน (NOS Practical Examination)",
+        "topic": "Practical Exam: Nginx, MariaDB & UFW Firewall Hardening"
       },
       {
         "id": "11b",
         "displayNum": "ศ.",
-        "title": "ปฏิบัติการติดตั้งและจัดการ Docker Container บน Ubuntu Server",
-        "topic": "Docker Engine, Container Life-cycle & Web Application Lab"
+        "title": "ทำความรู้จัก Proxmox VE และปฏิบัติการติดตั้งระบบบนเครื่องเซิร์ฟเวอร์จริง",
+        "topic": "Proxmox VE Overview, Type-1 Hypervisor & Bare-Metal Installation Lab"
       }
     ]
   },
