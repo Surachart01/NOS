@@ -9316,7 +9316,7 @@ function ExamNotificationBanner() {
   const [dismissed, setDismissed] = useState(false);
 
   // === DATE CONTROL ===
-  const forceVisible = true; // ← เปลี่ยนเป็น false เมื่อสอบเสร็จแล้ว
+  const forceVisible = false; // ← ซ่อนแถบสอบปฏิบัติแล้ว
 
   const isExamDay = () => {
     if (forceVisible) return true;

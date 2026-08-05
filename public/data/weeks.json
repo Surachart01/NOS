@@ -111,5 +111,22 @@
         "topic": "vsftpd, User, Permission, Passive Ports & Firewall"
       }
     ]
+  },
+  {
+    "weekLabel": "สัปดาห์ที่ 11: Container Platform (Proxmox LXC & Docker Engine)",
+    "sessions": [
+      {
+        "id": "11a",
+        "displayNum": "อ.",
+        "title": "การจัดการ Container Platform และสถาปัตยกรรม LXC vs Docker",
+        "topic": "Container Platform: LXC & Docker Engine"
+      },
+      {
+        "id": "11b",
+        "displayNum": "ศ.",
+        "title": "ปฏิบัติการติดตั้งและจัดการ Docker Container บน Ubuntu Server",
+        "topic": "Docker Engine, Container Life-cycle & Web Application Lab"
+      }
+    ]
   }
 ]
