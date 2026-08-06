@@ -113,14 +113,8 @@
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 11: สอบปฏิบัติการและการติดตั้ง Proxmox VE บนเครื่องจริง",
+    "weekLabel": "สัปดาห์ที่ 11: ทำความรู้จัก Proxmox VE และการติดตั้งบนเครื่องจริง",
     "sessions": [
-      {
-        "id": "11a",
-        "displayNum": "อ.",
-        "title": "สอบปฏิบัติการประจำภาคเรียน (NOS Practical Examination)",
-        "topic": "Practical Exam: Nginx, MariaDB & UFW Firewall Hardening"
-      },
       {
         "id": "11b",
         "displayNum": "ศ.",
