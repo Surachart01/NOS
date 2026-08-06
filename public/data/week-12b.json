@@ -1,13 +1,13 @@
 {
   "week": "12b",
   "title": "สัปดาห์ที่ 12 (วันศุกร์): ปฏิบัติการนำ React Web Application ขึ้นใช้งานจริงบน Proxmox Container",
-  "topic": "React Web App Deployment, Production Build, Nginx Hosting, Docker Containerization & LAN Testing Lab",
-  "description": "ฝึกปฏิบัติการนำ React Web Application ของตนเองขึ้นโฮสต์ให้บริการบน Proxmox LXC Container ประจำตัว เรียนรู้กระบวนการ Build Production Asset (npm run build), การตั้งค่า Nginx Web Server, การตั้งค่า React Router fallback (try_files), การรันผ่าน Docker Container และการทดสอบเข้าชมในวง LAN",
+  "topic": "React Web App Deployment, Production Build, Nginx Hosting, PM2 Process Manager & LAN Testing Lab",
+  "description": "ฝึกปฏิบัติการนำ React Web Application ของตนเองขึ้นโฮสต์ให้บริการบน Proxmox LXC Container ประจำตัว เรียนรู้กระบวนการ Build Production Asset (npm run build), การตั้งค่า Nginx Web Server, การตั้งค่า React Router fallback (try_files), การจัดการบริการด้วย PM2 Process Manager และการทดสอบเข้าชมในวง LAN",
   "learningObjectives": [
     "อธิบายความแตกต่างระหว่าง Development Mode (npm start) และ Production Build (npm run build) ได้ถูกต้อง",
     "คอมไพล์และนำไฟล์ Static Asset ของโปรเจกต์ React ขึ้นบริการด้วย Nginx บน Proxmox Container ได้สำเร็จ",
     "ตั้งค่า Nginx Config แก้ปัญหา 404 Not Found เมื่อใช้งาน React Client-Side Routing (try_files) ได้",
-    "รันบริการเว็บ React ผ่าน Docker Container หรือ PM2 ได้อย่างมีประสิทธิภาพ",
+    "ใชัโปรแกรม PM2 Process Manager บริหารจัดการ Node.js Web Application บน Container ได้อย่างมีประสิทธิภาพ",
     "เปิด UFW Firewall อนุญาตพอร์ต 80 และทดสอบการเข้าชมแอปพลิเคชัน React ของสมาชิกทุกคนผ่านวง LAN"
   ],
   "slides": [
@@ -17,7 +17,7 @@
       "tag": "สัปดาห์ที่ 12 • วันศุกร์ (2 ชั่วโมง)",
       "title": "ปฏิบัติการนำ React Web App ขึ้น Proxmox Container",
       "subtitle": "React App Production Deployment Lab on Member LXC Container",
-      "body": "คาบนี้สมาชิกทุกคนจะได้นำเว็บแอปพลิเคชัน React ที่พัฒนาไว้ ขึ้นโฮสต์ใช้งานจริงบน LXC Container ของตนเองผ่าน Nginx / Docker และเปิดให้เพื่อนร่วมชั้นและอาจารย์เข้าชมได้ผ่านวง LAN",
+      "body": "คาบนี้สมาชิกทุกคนจะได้นำเว็บแอปพลิเคชัน React ที่พัฒนาไว้ ขึ้นโฮสต์ใช้งานจริงบน LXC Container ของตนเองผ่าน Nginx และ PM2 และเปิดให้เพื่อนร่วมชั้นและอาจารย์เข้าชมได้ผ่านวง LAN",
       "speakerNotes": "สวัสดีวันศุกร์แล็บปฏิบัติการครับ คาบนี้ทุกคนจะได้เอาเว็บ React ของตัวเองขึ้นเซิร์ฟเวอร์จริงในตู้ Proxmox Container ของตัวเองครับ!"
     },
     {
@@ -96,28 +96,25 @@
     {
       "id": "w12b-s5",
       "type": "content",
-      "tag": "3. วิธีที่ 2: Deploy ด้วย Docker",
-      "title": "วิธีที่ 2 (Container Native): รันเว็บ React ผ่าน Docker บน Container",
+      "tag": "3. วิธีที่ 2: Deploy ด้วย Node.js & PM2",
+      "title": "วิธีที่ 2 (Node.js Service): บริหารการรันแอปด้วย PM2 Process Manager",
       "items": [
-        "📌 หากต้องการรันแอปพลิเคชัน React ผ่าน Docker บนเครื่อง Proxmox Container:",
-        "1. เขียนไฟล์ `Dockerfile` ในโฟลเดอร์โปรเจกต์ React:",
-        "   FROM node:18-alpine AS build",
-        "   WORKDIR /app",
-        "   COPY package*.json ./",
-        "   RUN npm install",
-        "   COPY . .",
-        "   RUN npm run build",
+        "📌 ขั้นที่ 1: ติดตั้ง Node.js และตัวเสิร์ฟ `serve` บน Proxmox LXC Container:",
+        "  $ curl -fsSL https://deb.nodesource.com/setup_20.x | bash -",
+        "  $ apt install -y nodejs",
+        "  $ npm install -g serve pm2",
         "",
-        "   FROM nginx:alpine",
-        "   COPY --from=build /app/dist /usr/share/nginx/html",
-        "   EXPOSE 80",
-        "   CMD [\"nginx\", \"-g\", \"daemon off;\"]",
+        "📌 ขั้นที่ 2: อัปโหลดไฟล์โปรเจกต์ React ไปไว้ที่ /var/www/my-react-app บน Container",
         "",
-        "2. สั่ง Build & Run Container บน Proxmox LXC Container:",
-        "   $ sudo docker build -t my-react-app .",
-        "   $ sudo docker run -d -p 80:80 --name react-web --restart always my-react-app"
+        "📌 ขั้นที่ 3: สั่งรันบริการให้ทำงานเป็น Background Service ด้วย PM2:",
+        "  $ cd /var/www/my-react-app",
+        "  $ pm2 start \"serve -s dist -l 80\" --name \"react-web\"",
+        "",
+        "📌 ขั้นที่ 4: ตั้งค่าให้ PM2 สตาร์ตแอปพลิเคชันอัตโนมัติทุกครั้งเมื่อเปิดเครื่อง:",
+        "  $ pm2 save",
+        "  $ pm2 startup"
       ],
-      "speakerNotes": "เสนอทางเลือกแนวคิด Docker Multi-Stage Build ให้นักศึกษาเห็นว่าสร้างตู้รัน React แบบสำเร็จรูปได้อย่างไร"
+      "speakerNotes": "สอนการใช้ PM2 เป็นอีกทางเลือกยอดนิยมในการรัน Node.js / React Web App บน Production Server"
     },
     {
       "id": "w12b-s6",
@@ -133,7 +130,7 @@
         "",
         "📌 ตรวจสอบสถานะการรับฟังพอร์ตเว็บ (Port 80):",
         "  $ ss -tulpn | grep 80",
-        "  → ต้องพบกระบวนการ `nginx` หรือ `docker` รับฟังพอร์ต 80",
+        "  → ต้องพบกระบวนการ `nginx` หรือ `node/serve` รับฟังพอร์ต 80",
         "",
         "🌐 การทดสอบเปิดเว็บในวง LAN:",
         "  เปิดเว็บเบราว์เซอร์จากเครื่องเพื่อนร่วมคลาสหรือเครื่องอาจารย์ แล้วกรอก URL:",
@@ -174,7 +171,7 @@
       "items": [
         "✅ สามารถติดตั้ง Proxmox VE เซิร์ฟเวอร์กลุ่มแบบ Bare-Metal ได้สำเร็จ",
         "✅ จัดสรรตู้เสมือน LXC Container ประจำตัวสมาชิกพร้อมหมายเลข IP อิสระ",
-        "✅ มีความเข้าใจและปฏิบัติการนำ React App ขึ้น Production ด้วย Nginx / Docker ได้อย่างถูกต้อง",
+        "✅ มีความเข้าใจและปฏิบัติการนำ React App ขึ้น Production ด้วย Nginx / PM2 ได้อย่างถูกต้อง",
         "✅ แก้ไขปัญหา React Client-Side Routing (try_files) และเปิดไฟร์วอลล์ให้บริการผ่านวง LAN",
         "🏆 ขอแสดงความยินดีกับนักเรียนทุกคนที่สามารถสร้าง Infrastructure และ Deploy บริการเว็บได้จริง!"
       ],

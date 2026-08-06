@@ -9547,7 +9547,7 @@ export default function Home() {
   }, []);
 
   // Load week data
-  const documentModes = ["docker-guide", "proxmox-guide", "post-ubuntu-stack-guide"];
+  const documentModes = ["proxmox-guide", "post-ubuntu-stack-guide"];
 
   useEffect(() => {
     if (documentModes.includes(activeWeek)) {
@@ -9698,30 +9698,6 @@ export default function Home() {
             </div>
           </button>
 
-          <button
-            className={`pinned-docker-btn ${activeWeek === "docker-guide" ? "active" : ""}`}
-            onClick={() => setActiveWeek("docker-guide")}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              border: activeWeek === "docker-guide" ? '1px solid var(--accent)' : '1px solid var(--border)',
-              background: activeWeek === "docker-guide" ? 'var(--accent-dim)' : 'var(--bg-elevated)',
-              color: activeWeek === "docker-guide" ? 'var(--accent)' : 'var(--text-primary)',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              textAlign: 'left'
-            }}
-          >
-            <span style={{ fontSize: '20px', flexShrink: 0 }}>🐳</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: '700', fontSize: '12px', lineHeight: '1.2' }}>คู่มือ Ubuntu & Docker</div>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>เอกสารติดตั้ง Web Server (LAN)</div>
-            </div>
-          </button>
 
           <button
             className={`pinned-proxmox-btn ${activeWeek === "proxmox-guide" ? "active" : ""}`}
@@ -9785,22 +9761,6 @@ export default function Home() {
               </div>
             </header>
             <PostUbuntuStackGuideDocument />
-          </div>
-        ) : activeWeek === "docker-guide" ? (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-            <header className="topbar" style={{ flexShrink: 0 }}>
-              <div className="topbar-left">
-                {!sidebarOpen && (
-                  <button className="icon-btn mobile-toggle" style={{ display: "flex" }} onClick={() => setSidebarOpen(true)}>
-                    <MenuIcon />
-                  </button>
-                )}
-                <span className="topbar-chapter" style={{ fontWeight: 'bold', color: 'var(--accent)' }}>
-                  📖 คู่มือติดตั้ง Ubuntu Server 26.04 LTS & Docker Web App
-                </span>
-              </div>
-            </header>
-            <DockerGuideDocument />
           </div>
         ) : activeWeek === "proxmox-guide" ? (
           <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>

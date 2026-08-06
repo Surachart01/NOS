@@ -136,7 +136,7 @@
         "id": "12b",
         "displayNum": "ศ.",
         "title": "ปฏิบัติการนำ React Web Application ขึ้นใช้งานบน Proxmox Container ของตนเอง",
-        "topic": "React Production Build, Nginx Hosting, Docker & LAN Testing Lab"
+        "topic": "React Production Build, Nginx Hosting, PM2 & LAN Testing Lab"
       }
     ]
   }
