@@ -124,19 +124,13 @@
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 12: โครงการกลุ่ม — การติดตั้ง Proxmox VE และการนำ React App ขึ้นระบบ",
+    "weekLabel": "สัปดาห์ที่ 13: การติดตั้ง Proxmox VE และการสร้าง Container",
     "sessions": [
       {
-        "id": "12a",
+        "id": "13a",
         "displayNum": "อ.",
-        "title": "การติดตั้ง Proxmox VE และการจัดสรร LXC Container ประจำตัวสมาชิกกลุ่ม",
-        "topic": "Proxmox VE Installation, Web GUI & Member LXC Container Allocation"
-      },
-      {
-        "id": "12b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการนำ React Web Application ขึ้นใช้งานบน Proxmox Container ของตนเอง",
-        "topic": "React Production Build, Nginx Hosting, PM2 & LAN Testing Lab"
+        "title": "ทำความรู้จัก Proxmox VE การติดตั้ง และวิธีสร้าง Container",
+        "topic": "Proxmox VE Overview, Installation & LXC Container Creation"
       }
     ]
   }

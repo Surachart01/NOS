@@ -1,179 +1,100 @@
 {
   "week": "12a",
-  "title": "สัปดาห์ที่ 12 (วันอังคาร): โครงการกลุ่ม — การติดตั้ง Proxmox VE และการจัดสรร LXC Container ประจำตัว",
-  "topic": "Proxmox VE Installation, Bare-Metal Setup, Network Bridge & Member LXC Container Allocation",
-  "description": "ฝึกปฏิบัติการติดตั้ง Proxmox VE (Type-1 Hypervisor) บนเครื่องเซิร์ฟเวอร์กลุ่มจากสื่อบันทึก ISO, ตั้งค่าแผงควบคุมระบบเครือข่าย Proxmox Web GUI, กำหนดสิทธิ์ทรัพยากร และสร้าง LXC Container ประจำตัวให้กับสมาชิกทุกคนในกลุ่มเพื่อเตรียมพร้อมสำหรับติดตั้ง React Web Application",
+  "title": "สัปดาห์ที่ 12 (วันอังคาร): ทำความรู้จัก Proxmox VE การติดตั้ง และวิธีสร้าง Container",
+  "topic": "Proxmox VE Overview, Installation & LXC Container Creation",
+  "description": "ทำความเข้าใจบทบาทของ Proxmox VE และประโยชน์ของ LXC Container, ขั้นตอนการติดตั้ง Proxmox VE แบบ Step-by-Step พร้อมหน้าจอจำลอง, และวิธีสร้าง LXC Container สำหรับใช้งานจริงอย่างเป็นระบบ",
   "learningObjectives": [
-    "อธิบายแนวคิดการทำงานของ Proxmox VE (Type-1 Hypervisor) และสถาปัตยกรรมของโครงการกลุ่มได้",
-    "ดำเนินการติดตั้ง Proxmox VE จากสื่อบันทึก ISO ลงบนเครื่องเซิร์ฟเวอร์กลุ่มได้สำเร็จ",
-    "เข้าใช้งานและตั้งค่า Proxmox Web Management GUI (https://IP:8006) ได้ถูกต้อง",
-    "ดาวน์โหลด OS Template และสร้าง LXC Container แยกไอพีอิสระประจำตัวสมาชิกทุกคนในกลุ่มได้สำเร็จ"
+    "อธิบายหน้าที่การทำงานและประโยชน์ของ Proxmox VE (Type-1 Hypervisor) และ LXC Container ได้ถูกต้อง",
+    "เข้าใจและสามารถดำเนินการติดตั้ง Proxmox VE ลงบนเครื่องเซิร์ฟเวอร์ตามขั้นตอนได้สำเร็จ",
+    "เข้าใช้งานและจัดการระบบผ่าน Proxmox Web GUI (https://IP:8006) ได้อย่างถูกต้อง",
+    "ดาวน์โหลด OS Template และสร้างตู้ LXC Container กำหนด IP พร้อมเปิดใช้งานได้สำเร็จ"
   ],
   "slides": [
     {
       "id": "w12a-s1",
       "type": "cover",
-      "tag": "สัปดาห์ที่ 12 • วันอังคาร (3 ชั่วโมง)",
-      "title": "โครงการกลุ่ม: การติดตั้ง Proxmox VE & จัดสรรเครื่องประจำตัว",
-      "subtitle": "Proxmox VE Bare-Metal Setup & Member Container Allocation Lab",
-      "body": "ในบทเรียนนี้ สมาชิกจะจับกลุ่มเพื่อติดตั้ง Proxmox VE บนเครื่องเซิร์ฟเวอร์ประจำกลุ่ม ตั้งค่าระบบเครือข่าย และแจกจ่ายตู้ LXC Container แยกหมายเลข IP อิสระให้กับสมาชิกทุกคน เพื่อเตรียมนำ React Web Application ขึ้นใช้งานจริง",
-      "speakerNotes": "สวัสดีครับทุกคน คาบนี้จะเป็นจุดเริ่มต้นของโครงการกลุ่มประจำท้ายเทอม ทุกกลุ่มจะได้ติดตั้ง Proxmox บนเครื่องเซิร์ฟเวอร์จริง และแบ่งพื้นที่ตู้เซิร์ฟเวอร์เสมือนให้สมาชิกทุกคนในกลุ่มครับ"
+      "tag": "สัปดาห์ที่ 12 • วันอังคาร",
+      "title": "Proxmox VE: พื้นฐาน การติดตั้ง และการสร้าง Container",
+      "subtitle": "Proxmox VE Overview, Installation & Container Creation Guide",
+      "body": "เรียนรู้ว่า Proxmox VE ทำอะไรได้บ้าง, ขั้นตอนการติดตั้งลงบนเครื่องเซิร์ฟเวอร์แบบ Step-by-Step และวิธีสร้าง LXC Container สำหรับใช้งานจริง",
+      "speakerNotes": "สวัสดีครับทุกคน ในคาบนี้เราจะมาเรียนรู้การทำงานของ Proxmox VE, ขั้นตอนการติดตั้งทีละสเต็ป และการสร้าง Container เพื่อนำไปใช้งานจริงครับ"
     },
     {
       "id": "w12a-s2",
       "type": "two-col",
-      "tag": "1. ภาพรวมโครงการกลุ่ม",
-      "title": "สถาปัตยกรรมระบบเซิร์ฟเวอร์โครงการกลุ่ม (Group Server Topology)",
+      "tag": "1. Proxmox & Container",
+      "title": "Proxmox VE ทำอะไรได้บ้าง และทำไมถึงใช้ Container (LXC)?",
       "cols": [
         {
-          "icon": "🖥️ Hardware",
-          "title": "เครื่องแม่ข่ายหลักของกลุ่ม (Host Node)",
+          "icon": "🖥️ Proxmox VE",
+          "title": "Proxmox VE ทำหน้าที่อะไร?",
           "items": [
-            "เครื่อง PC / Server ประจำกลุ่ม ติดตั้ง Proxmox VE 8.x (Type-1 Hypervisor)",
-            "เข้าถึงแผงควบคุมกลางผ่าน Proxmox Web GUI (https://192.168.1.X:8006)",
-            "ทำหน้าที่จัดสรร CPU, Memory, Storage และ Network Bridge (vmbr0)"
+            "**Type-1 Bare-Metal Hypervisor**: ติดตั้งตรงบน Hardware ควบคุมทรัพยากรเครื่องได้เต็มประสิทธิภาพ",
+            "**จัดการผ่าน Web GUI**: บริหารทั้ง Host, VM และ Container ได้ง่ายๆ ผ่านเบราว์เซอร์ (`พอร์ต 8006`)",
+            "**จัดสรรทรัพยากร**: แบ่งสัดส่วน CPU, RAM, Disk และระบบ Network Bridge ให้แต่ละตู้ได้อย่างอิสระ"
           ]
         },
         {
-          "icon": "📦 Member Containers",
-          "title": "ตู้เสมือนประจำตัวสมาชิก (LXC Containers)",
+          "icon": "⚡ LXC Container",
+          "title": "ทำไมเราถึงใช้ LXC Container?",
           "items": [
-            "สมาชิกแต่ละคนได้ LXC Container ประจำตัว (เช่น CT 101, CT 102, CT 103...)",
-            "แต่ละตู้มี Static IP Address แยกขาดชัดเจน (เช่น 192.168.1.101, .102, .103)",
-            "สมาชิกมีสิทธิ์ root เต็มรูปแบบ สามารถติดตั้ง Nginx, Docker และ React App ได้อิสระ"
+            "**แชร์ Linux Kernel**: กินทรัพยากรน้อยมาก รันเว็บได้ด้วย RAM เพียง 256MB - 512MB",
+            "**บูตเร็วระดับ 1-2 วินาที**: เปิดเครื่องพร้อมใช้งานได้แทบจะทันที",
+            "**ได้ Static IP อิสระ**: แต่ละตู้มี IP ประจำตัวในวง LAN เสมือนมีเครื่องเซิร์ฟเวอร์ส่วนตัวแยกเฉพาะ"
           ]
         }
       ],
-      "speakerNotes": "อธิบายให้นักศึกษาเห็นภาพรวมว่า Proxmox เปรียบเหมือนตู้คอนโดใหญ่ ส่วนตู้ของแต่ละคนคือห้องคอนโดย่อยที่ทุกคนจะเอาเว็บ React ของตนเองไปเปิดให้บริการ"
+      "speakerNotes": "อธิบายให้นักศึกษาเห็นภาพรวมของ Proxmox และจุดเด่นของ LXC Container ที่เบา เร็ว และประหยัดทรัพยากร เหมาะกับการแจกจ่ายเครื่องให้ทุกคนในห้องแล็บ"
     },
     {
       "id": "w12a-s3",
-      "type": "content",
+      "type": "proxmox-install-steps",
       "tag": "2. การติดตั้ง Proxmox VE",
-      "title": "ขั้นตอนที่ 1: การเตรียมสื่อบันทึก ISO และเริ่มการติดตั้ง Proxmox VE",
-      "items": [
-        "📌 1. การเตรียมสื่อบันทึก (Bootable USB):",
-        "  - ดาวน์โหลด Proxmox VE ISO Installer จากเว็บไซต์อย่างเป็นทางการ proxmox.com",
-        "  - เขียนไฟล์ ISO ลง USB Flash Drive ด้วยโปรแกรม Rufus หรือ Ventoy",
-        "",
-        "📌 2. การเปิดเครื่องและเลือกเปิดโหมด Virtualization ใน BIOS:",
-        "  - กด F2 / Del / F12 เพื่อเข้า BIOS Setup",
-        "  - เปิดใช้งาน Intel VT-x หรือ AMD-V (Virtualization Technology) เป็น Enabled",
-        "",
-        "📌 3. เริ่มต้นกระบวนการติดตั้ง (Proxmox Graphical Installer):",
-        "  - เลือกเมนู 'Install Proxmox VE (Graphical)'",
-        "  - ยอมรับข้อตกลงสิทธิ์การใช้งาน (EULA)",
-        "  - เลือกดิสก์สำหรับติดตั้ง (Target Harddisk / SSD เช่น /dev/sda หรือ /dev/nvme0n1)"
-      ],
-      "speakerNotes": "แนะแนวนักศึกษาเรื่องการเปิดโหมด Virtualization ใน BIOS ซึ่งเป็นจุดสำคัญหากไม่เปิดจะสร้าง Container หรือ VM ไม่ได้"
+      "title": "ขั้นตอนการติดตั้ง Proxmox VE ลงบนเครื่องเซิร์ฟเวอร์จริง (Step-by-Step)",
+      "speakerNotes": "กดปุ่มขั้นตอนถัดไปเพื่อพานักศึกษาดูหน้าจอการติดตั้งทีละสเต็ป ตั้งแต่การเปิด BIOS VT-x จนถึงการตั้งค่า Management IP Address และเข้าหน้าเว็บ"
     },
     {
       "id": "w12a-s4",
-      "type": "content",
-      "tag": "2. การติดตั้ง Proxmox VE",
-      "title": "ขั้นตอนที่ 2: การตั้งค่ารหัสผ่าน ระบบเวลา และการกำหนด IP แอดเดรส",
-      "items": [
-        "📌 1. ตั้งค่าประเทศและเขตเวลา (Location & Timezone):",
-        "  - Country: Thailand",
-        "  - Timezone: Asia/Bangkok",
-        "  - Keyboard Layout: U.S. English",
-        "",
-        "📌 2. กำหนดรหัสผ่านผู้ดูแลระบบ (Root Password):",
-        "  - Password & Confirm Password: กำหนดรหัสผ่านรวดเร็วและปลอดภัยสำหรับกลุ่ม",
-        "  - Email Address: ใส่ e-mail ผู้รับแจ้งเตือนของกลุ่ม",
-        "",
-        "📌 3. ตั้งค่าระบบเครือข่ายเซิร์ฟเวอร์หลัก (Management Network Configuration):",
-        "  - Management Interface: เลือกการ์ดแลนด์หลัก (เช่น enp3s0 / eth0)",
-        "  - Hostname (FQDN): เช่น `proxmox-group1.lab.local`",
-        "  - IP Address (CIDR): เช่น `192.168.1.50/24` (กำหนด IP ประจำกลุ่มไม่ให้ชนกับกลุ่มอื่น)",
-        "  - Gateway: `192.168.1.1` (IP ของ Router ห้องแล็บ)",
-        "  - DNS Server: `192.168.1.1` หรือ `8.8.8.8`"
-      ],
-      "speakerNotes": "เน้นย้ำเรื่องการตั้ง IP Address ของเครื่อง Proxmox หลักไม่ให้ชนกับกลุ่มอื่นในห้องเรียน"
+      "type": "proxmox-create-ct-steps",
+      "tag": "3. วิธีสร้าง Container",
+      "title": "วิธีสร้าง LXC Container บน Proxmox VE ทีละขั้นตอน (Create CT Wizard)",
+      "speakerNotes": "กดดูแท็บการตั้งค่าทีละสเต็ปของหน้าต่าง Create CT และสาธิตการคลิกปุ่ม Test SSH Connect เพื่อให้นักศึกษาเห็นภาพการล็อกอินใช้งานจริง"
     },
     {
       "id": "w12a-s5",
       "type": "content",
-      "tag": "3. การใช้งาน Web GUI",
-      "title": "ขั้นตอนที่ 3: การเข้าสู่ Proxmox Web GUI และการดาวน์โหลด OS Template",
+      "tag": "4. การเข้าใช้งาน & ควบคุม",
+      "title": "การเชื่อมต่อเข้าควบคุม Container ผ่าน Web Console และ SSH",
       "items": [
-        "📌 1. เมื่อติดตั้งเสร็จสิ้นและสั่ง Reboot เครื่อง เซิร์ฟเวอร์จะแสดงข้อความ:",
-        "  `Welcome to Proxmox VE. Please use your web browser to configure it.`",
-        "  `URL: https://192.168.1.50:8006/`",
+        "📌 1. การเข้าควบคุมผ่าน Proxmox Web Console:",
+        "  - คลิกที่ชื่อตู้ Container (เช่น `101 (web-server-01)`) แล้วคลิกเมนู `Console`",
+        "  - ล็อกอินด้วย Username: `root` และรหัสผ่านที่ตั้งไว้ตอนสร้างตู้",
         "",
-        "📌 2. เปิดเบราว์เซอร์จากเครื่องเรียนในวง LAN แล้วกดเข้า URL:",
-        "  `https://192.168.1.50:8006` (กด Advanced -> Proceed เพื่อยอมรับ SSL Certificate)",
-        "  - Username: `root`",
-        "  - Password: รหัสผ่านที่ตั้งไว้ตอนติดตั้ง",
+        "📌 2. การเชื่อมต่อผ่านโปรแกรม Terminal ด้วย SSH:",
+        "  $ ssh root@192.168.1.101",
         "",
-        "📌 3. ดาวน์โหลดแม่แบบระบบปฏิบัติการ (LXC Container Template):",
-        "  - ไปที่เมนูเมนูด้านซ้าย: Server Node -> `local (proxmox-group1)`",
-        "  - คลิกหัวข้อ `CT Templates` -> คลิกปุ่ม `Templates`",
-        "  - ค้นหาและเลือกดาวน์โหลด `ubuntu-22.04-standard` กด Download"
+        "📌 3. การอัปเดตระบบและเริ่มติดตั้งโปรแกรมใน Container:",
+        "  $ apt update && apt upgrade -y",
+        "  $ apt install -y nginx curl git",
+        "",
+        "📌 4. ตรวจสอบสถานะบริการ:",
+        "  $ systemctl status nginx",
+        "  🎉 ขณะนี้คุณมีเครื่องเซิร์ฟเวอร์เสมือนส่วนตัวพร้อมสำหรับพัฒนาและเปิดให้บริการเว็บแล้ว!"
       ],
-      "speakerNotes": "สอนการยอมรับใบรับรอง SSL ชั่วคราว และชี้จุดเมนูดาวน์โหลด CT Templates ใน Proxmox Web GUI"
+      "speakerNotes": "แนะนำให้นักศึกษาทดสอบทั้งการเข้าผ่าน Web Console ในหน้า Proxmox และการยิง SSH ผ่าน Terminal จากเครื่องของตนเอง"
     },
     {
       "id": "w12a-s6",
-      "type": "content",
-      "tag": "4. การสร้าง Container ให้สมาชิก",
-      "title": "ขั้นตอนที่ 4: การสร้าง LXC Container ประจำตัวให้สมาชิกทุกคนในกลุ่ม",
-      "items": [
-        "📌 สมาชิกทุกคนในกลุ่มรับผิดชอบสร้างตู้ของตนเองผ่าน Proxmox Web GUI ดังนี้:",
-        "  1. คลิกปุ่มสีฟ้าด้านบนขวา `Create CT`",
-        "  2. หน้าต่าง General:",
-        "     • CT ID: เช่น `101` (สมาชิกคนที่ 1), `102` (คนที่ 2), `103` (คนที่ 3)",
-        "     • Hostname: เช่น `std1-react-web`, `std2-react-web`",
-        "     • Password: ตั้งรหัสผ่าน root สำหรับตู้ตนเอง",
-        "  3. หน้าต่าง Template: เลือก `ubuntu-22.04-standard`",
-        "  4. หน้าต่าง Disks: กำหนด Disk Size (เช่น `15 GB`)",
-        "  5. หน้าต่าง CPU: กำหนด `1 Core` หรือ `2 Cores`",
-        "  6. หน้าต่าง Memory: กำหนด Memory `1024 MB` (1GB RAM), Swap `512 MB`",
-        "  7. หน้าต่าง Network: Bridge `vmbr0`, IPv4 `Static`",
-        "     • IP Address: เช่น `192.168.1.101/24` (ตามเลขประจำตัวสมาชิก)",
-        "     • Gateway: `192.168.1.1`",
-        "  8. กด Finish เพื่อสร้าง Container"
-      ],
-      "speakerNotes": "ควบคุมดูแลให้ตู้ของสมาชิกแต่ละคนตั้งไอพีแยกกันอย่างเป็นระบบ"
-    },
-    {
-      "id": "w12a-s7",
-      "type": "content",
-      "tag": "5. การเปิดใช้งาน SSH",
-      "title": "ขั้นตอนที่ 5: การเปิดการเชื่อมต่อ SSH สำหรับเข้าจัดการเครื่องทางไกล",
-      "items": [
-        "📌 1. เริ่มสั่งเปิดใช้งานตู้ Container:",
-        "  - คลิกขวาที่หมายเลข Container ของตนเอง (เช่น 101) -> คลิก `Start`",
-        "  - คลิกเปิดเมนู `Console` บน Proxmox เพื่อเข้าสู่หน้าต่างคำสั่งของตู้",
-        "",
-        "📌 2. ล็อกอินเข้าใช้งานด้วย `root` และรหัสผ่านที่ตั้งไว้",
-        "",
-        "📌 3. อนุญาตให้ล็อกอิน root ผ่าน SSH ทางไกลได้:",
-        "  $ nano /etc/ssh/sshd_config",
-        "  - ค้นหาบรรทัด `#PermitRootLogin` แก้ไขเป็น:",
-        "    `PermitRootLogin yes`",
-        "  - บันทึกไฟล์ (Ctrl+O -> Enter -> Ctrl+X)",
-        "  - สั่งรีสตาร์ทบริการ SSH: `$ systemctl restart ssh`",
-        "",
-        "📌 4. ทดสอบ SSH เข้าสู่ตู้ของตนเองจากโปรแกรม Terminal บนเครื่องเรียน:",
-        "  $ ssh root@192.168.1.101",
-        "  🎉 ขณะนี้สมาชิกทุกคนมีเครื่องเซิร์ฟเวอร์เสมือนส่วนตัวพร้อมใช้งานแล้ว!"
-      ],
-      "speakerNotes": "ทดสอบเข้า SSH จากเครื่องไคลเอนต์เพื่อให้มั่นใจว่าทุกคนจัดการเครื่องของตนเองทางไกลได้"
-    },
-    {
-      "id": "w12a-s8",
       "type": "summary",
-      "tag": "6. สรุปท้ายคาบ",
-      "title": "สรุปผลปฏิบัติการสัปดาห์ที่ 12 (วันอังคาร)",
+      "tag": "5. สรุปบทเรียน",
+      "title": "สรุป 3 หัวใจสำคัญ: Proxmox VE & การสร้าง Container",
       "items": [
-        "✅ สามารถติดตั้ง Proxmox VE บนเครื่อง Bare-Metal เซิร์ฟเวอร์กลุ่มได้สำเร็จ",
-        "✅ ตั้งค่าการเชื่อมต่อแผงควบคุมกลาง Proxmox Web GUI (https://IP:8006) ได้ถูกต้อง",
-        "✅ สมาชิกทุกคนในกลุ่มมี LXC Container ประจำตัว แยกหมายเลข Static IP ชัดเจน",
-        "✅ เปิดสิทธิ์และทดสอบเชื่อมต่อ SSH เข้าสู่ Container ประจำตัวได้สำเร็จ",
-        "📚 คาบวันศุกร์ถัดไป: นำ React Web Application ของตนเองขึ้นสู่ Production Server บน Container"
+        "✅ **1. Proxmox ทำอะไร?**: Type-1 Hypervisor ควบคุมฮาร์ดแวร์เซิร์ฟเวอร์ และบริหารจัดการ VM / LXC Container ได้แบบรวมศูนย์ผ่าน Web GUI (พอร์ต 8006)",
+        "✅ **2. การติดตั้ง Proxmox**: บูตจาก USB, เปิด VT-x ใน BIOS, เลือกไดรฟ์, ตั้ง Timezone/Password และกำหนด Static Management IP (`https://IP:8006`)",
+        "✅ **3. วิธีสร้าง Container**: ดาวน์โหลด OS Template -> กด Create CT -> กำหนด CPU/RAM/Disk/Static IP -> สั่ง Start พร้อมใช้งานผ่าน Console และ SSH",
+        "🚀 **ก้าวถัดไป**: สมาชิกทุกคนมี Container ประจำตัวพร้อมแล้ว ในคาบถัดไปเราจะนำ React Web Application ขึ้นติดตั้งใช้งานจริง!"
       ],
-      "speakerNotes": "สรุปความสำเร็จของคาบอังคารและเตรียมความพร้อมสำหรับแล็บนำ React App ขึ้น Production ในวันศุกร์"
+      "speakerNotes": "สรุปเนื้อหาสำคัญ 3 ส่วน และชี้ให้เห็นว่าหลังจากมี Container แล้ว เราสามารถนำไปต่อยอดรันระบบอะไรก็ได้ในคาบถัดไป"
     }
   ]
 }

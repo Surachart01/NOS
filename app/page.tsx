@@ -8047,6 +8047,9 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "ufw-log-homework": return <UFWLogHomework s={slide} />;
     case "nmap-handshake-diagram": return <NmapHandshakeDiagram s={slide} />;
     case "workshop-architecture": return <WorkshopArchitecture s={slide} />;
+    case "proxmox-arch-visualizer": return <ProxmoxArchVisualizer s={slide} />;
+    case "proxmox-install-steps": return <ProxmoxInstallStepVisualizer s={slide} />;
+    case "proxmox-create-ct-steps": return <ProxmoxCreateCTVisualizer s={slide} />;
     default: return <ContentSlide s={slide} />;
   }
 }
@@ -13768,3 +13771,990 @@ function WorkshopArchitecture({ s }: { s: SlideData }) {
     </div>
   );
 }
+
+/* ============================================================
+   PROXMOX ARCHITECTURE & OVERVIEW VISUALIZER (WEEK 12a)
+   ============================================================ */
+function ProxmoxArchVisualizer({ s }: { s: SlideData }) {
+  const [selectedNode, setSelectedNode] = useState<string>("host");
+
+  const nodeDetails: Record<string, {
+    title: string;
+    subtitle: string;
+    icon: string;
+    badge: string;
+    color: string;
+    desc: string;
+    specs: string[];
+    useCase: string;
+    why: string;
+  }> = {
+    host: {
+      title: "Proxmox VE Host (Type-1 Bare-Metal Hypervisor)",
+      subtitle: "ระบบปฏิบัติการแม่ข่ายหลัก ติดตั้งตรงบน Hardware เซิร์ฟเวอร์",
+      icon: "🖥️",
+      badge: "Bare-Metal OS",
+      color: "#f97316",
+      desc: "Proxmox VE พัฒนาบนพื้นฐาน Debian Linux + KVM Kernel ทำหน้าที่เป็นศูนย์กลางบริหารจัดการฮาร์ดแวร์จริง ควบคุม Virtual Machine และ Container ทั้งหมดผ่านหน้าเว็บ Web GUI พอร์ต 8006",
+      specs: [
+        "🌐 Web GUI: https://192.168.1.50:8006 (จัดการได้จากเบราว์เซอร์ทุกเครื่องในวง LAN)",
+        "🌉 Virtual Switch (Bridge: vmbr0): กระจายเครือข่ายให้ทุก VM/CT เชื่อมต่อออกอินเทอร์เน็ตได้",
+        "💾 Storage Management: จัดการ Disk, ISO Image, OS Templates, และระบบ Backup อัตโนมัติ"
+      ],
+      useCase: "ใช้เป็นเซิร์ฟเวอร์แม่ข่ายของห้องแล็บ หรือศูนย์ข้อมูลองค์กรเพื่อรวมเครื่องหลายตัวให้เหลือเครื่องเดียว",
+      why: "เป็น Open-Source 100% ประสิทธิภาพสูงเกือบเทียบเท่าฮาร์ดแวร์จริง (Near Bare-Metal Performance)"
+    },
+    ct101: {
+      title: "LXC Container 101: Nginx Web Server",
+      subtitle: "ตู้คอนเทนเนอร์ระดับระบบปฏิบัติการ (OS-level Virtualization)",
+      icon: "📦",
+      badge: "LXC Container",
+      color: "#22c55e",
+      desc: "LXC ใช้ Linux Kernel ร่วมกับเครื่อง Host ทำให้ไม่ต้องจำลองฮาร์ดแวร์ใหม่ทั้งชุด บูตเปิดเครื่องได้ภายใน 1-2 วินาที และใช้ RAM เริ่มต้นน้อยมากเพียง 256-512MB",
+      specs: [
+        "🏷️ CT ID: 101 | Hostname: web-server-01",
+        "🌐 IP Address: 192.168.1.101/24 (Static IP อิสระในวงแล็บ)",
+        "⚡ ทรัพยากร: 1 Core CPU, 512 MB RAM, 10 GB Disk (เพียงพอสำหรับ Web Server)",
+        "🚀 บริการ: Nginx Web Server พอร์ต 80 (HTTP)"
+      ],
+      useCase: "เหมาะสำหรับจัดสรรให้นักศึกษา/ผู้เรียนแต่ละคนมีเครื่องเซิร์ฟเวอร์ประจำตัวคนละตู้ หรือรัน Web App",
+      why: "เบา เร็ว และประหยัดทรัพยากรที่สุด เครื่องเซิร์ฟเวอร์ 1 เครื่องสร้างได้หลายสิบตู้พร้อมกัน!"
+    },
+    ct102: {
+      title: "LXC Container 102: React / Node.js Backend",
+      subtitle: "ตู้คอนเทนเนอร์สำหรับรัน Application & Database",
+      icon: "⚡",
+      badge: "LXC Container",
+      color: "#3b82f6",
+      desc: "ตู้ Linux แยกอิสระ มีสภาพแวดล้อม Root Filesystem ของตนเอง สามารถติดตั้ง Node.js, Python, MariaDB, Docker ได้เหมือนเครื่องจริง",
+      specs: [
+        "🏷️ CT ID: 102 | Hostname: app-backend-02",
+        "🌐 IP Address: 192.168.1.102/24 (Static IP อิสระ)",
+        "⚡ ทรัพยากร: 2 Cores CPU, 1024 MB RAM, 15 GB Disk",
+        "🚀 บริการ: Node.js / PM2 Process Manager, React Build Server"
+      ],
+      useCase: "รัน Backend API, Database หรือ Web App โดยไม่รบกวนตู้ Container อื่นๆ",
+      why: "แยกสิทธิ์และพื้นที่การทำงานชัดเจน (Isolation) ตู้ใดตู้หนึ่งพัง จะไม่มีผลกระทบต่อตู้ข้างเคียง"
+    },
+    kvm: {
+      title: "KVM Virtual Machine 201: Full OS Emulation",
+      subtitle: "เครื่องเสมือนสมบูรณ์แบบ (จำลองทั้ง Virtual Hardware)",
+      icon: "💻",
+      badge: "KVM VM",
+      color: "#a855f7",
+      desc: "KVM (Kernel-based Virtual Machine) เป็นการจำลองคอมพิวเตอร์ทั้งเครื่อง (vCPU, vRAM, vDisk, BIOS) ทำให้สามารถติดตั้ง OS ตระกูลใดก็ได้ เช่น Windows Server หรือ Linux แบบ Custom Kernel",
+      specs: [
+        "🏷️ VM ID: 201 | Name: win-server-vm",
+        "🌐 IP Address: 192.168.1.201/24",
+        "⚡ ทรัพยากร: 4 Cores CPU, 4096 MB RAM, 50 GB Disk",
+        "🚀 ระบบปฏิบัติการ: Windows Server 2022 หรือ Linux พิเศษ"
+      ],
+      useCase: "งานที่ต้องการระบบปฏิบัติการที่ต่างจาก Host หรือต้องการความปลอดภัยแยกขาดระดับฮาร์ดแวร์",
+      why: "รองรับ OS ทุกประเภท แต่กินแรมและ CPU มากกว่า Container"
+    }
+  };
+
+  const current = nodeDetails[selectedNode] || nodeDetails.host;
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "2% 3%",
+      background: "radial-gradient(ellipse at 20% 0%, #0d1b2a 0%, #060913 70%, #020408 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "10px"
+    }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+        <div>
+          <span style={{ fontSize: "11px", color: "#f97316", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+            {s.tag || "1. Proxmox VE Architecture & Overview"}
+          </span>
+          <h2 style={{ margin: "2px 0 0", fontSize: "clamp(18px, 2.2vw, 24px)", fontWeight: 800, color: "#f8fafc" }}>
+            {s.title || "Proxmox ทำอะไรได้บ้าง? โครงสร้างและสถาปัตยกรรมระบบ"}
+          </h2>
+        </div>
+        <div style={{
+          background: "rgba(249, 115, 22, 0.15)", border: "1px solid rgba(249, 115, 22, 0.4)",
+          padding: "5px 12px", borderRadius: "20px", fontSize: "12px", color: "#fdba74", fontWeight: 600
+        }}>
+          💡 คลิกที่การ์ดเพื่อดูรายละเอียดการทำงาน
+        </div>
+      </div>
+
+      {/* Main Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: "14px", flex: 1, minHeight: 0 }}>
+        {/* Left: Interactive Diagram Map */}
+        <div style={{
+          background: "rgba(15, 23, 42, 0.6)", borderRadius: "14px", padding: "16px",
+          border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column", gap: "10px",
+          backdropFilter: "blur(8px)", position: "relative", overflow: "hidden"
+        }}>
+          {/* Top Level: Management Access */}
+          <div style={{
+            background: "rgba(30, 41, 59, 0.7)", borderRadius: "10px", padding: "10px 14px",
+            border: "1px dashed rgba(59, 130, 246, 0.4)", display: "flex", alignItems: "center", justifyContent: "space-between"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "18px" }}>🌐</span>
+              <div>
+                <div style={{ fontSize: "12px", fontWeight: 700, color: "#60a5fa" }}>Web Management Interface (GUI)</div>
+                <div style={{ fontSize: "11px", color: "#94a3b8" }}>เข้าถึงผ่านเบราว์เซอร์: <code>https://192.168.1.50:8006</code></div>
+              </div>
+            </div>
+            <span style={{ fontSize: "10px", background: "rgba(59, 130, 246, 0.2)", color: "#93c5fd", padding: "2px 8px", borderRadius: "6px" }}>พอร์ต 8006</span>
+          </div>
+
+          {/* Middle Level: Virtual Guests Grid (LXC vs VM) */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", flex: 1 }}>
+            {/* CT 101 Card */}
+            <div
+              onClick={() => setSelectedNode("ct101")}
+              style={{
+                background: selectedNode === "ct101" ? "rgba(34, 197, 94, 0.2)" : "rgba(30, 41, 59, 0.5)",
+                border: selectedNode === "ct101" ? "2px solid #22c55e" : "1px solid rgba(34, 197, 94, 0.3)",
+                borderRadius: "10px", padding: "10px", cursor: "pointer", transition: "all 0.2s",
+                display: "flex", flexDirection: "column", justifyContent: "space-between"
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "16px" }}>📦</span>
+                  <span style={{ fontSize: "9px", background: "#22c55e", color: "#000", fontWeight: 700, padding: "1px 5px", borderRadius: "4px" }}>LXC</span>
+                </div>
+                <div style={{ fontSize: "12px", fontWeight: 700, marginTop: "6px", color: "#4ade80" }}>CT 101: Web</div>
+                <div style={{ fontSize: "10px", color: "#cbd5e1" }}>IP: 192.168.1.101</div>
+                <div style={{ fontSize: "9.5px", color: "#94a3b8", marginTop: "2px" }}>Nginx Web Server</div>
+              </div>
+              <div style={{ fontSize: "9px", color: "#86efac", background: "rgba(34, 197, 94, 0.15)", padding: "2px 4px", borderRadius: "4px", textAlign: "center" }}>
+                RAM 512MB • บูต 1s
+              </div>
+            </div>
+
+            {/* CT 102 Card */}
+            <div
+              onClick={() => setSelectedNode("ct102")}
+              style={{
+                background: selectedNode === "ct102" ? "rgba(59, 130, 246, 0.2)" : "rgba(30, 41, 59, 0.5)",
+                border: selectedNode === "ct102" ? "2px solid #3b82f6" : "1px solid rgba(59, 130, 246, 0.3)",
+                borderRadius: "10px", padding: "10px", cursor: "pointer", transition: "all 0.2s",
+                display: "flex", flexDirection: "column", justifyContent: "space-between"
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "16px" }}>⚡</span>
+                  <span style={{ fontSize: "9px", background: "#3b82f6", color: "#fff", fontWeight: 700, padding: "1px 5px", borderRadius: "4px" }}>LXC</span>
+                </div>
+                <div style={{ fontSize: "12px", fontWeight: 700, marginTop: "6px", color: "#60a5fa" }}>CT 102: App</div>
+                <div style={{ fontSize: "10px", color: "#cbd5e1" }}>IP: 192.168.1.102</div>
+                <div style={{ fontSize: "9.5px", color: "#94a3b8", marginTop: "2px" }}>Node.js / React</div>
+              </div>
+              <div style={{ fontSize: "9px", color: "#93c5fd", background: "rgba(59, 130, 246, 0.15)", padding: "2px 4px", borderRadius: "4px", textAlign: "center" }}>
+                RAM 1GB • Isolation
+              </div>
+            </div>
+
+            {/* KVM 201 Card */}
+            <div
+              onClick={() => setSelectedNode("kvm")}
+              style={{
+                background: selectedNode === "kvm" ? "rgba(168, 85, 247, 0.2)" : "rgba(30, 41, 59, 0.5)",
+                border: selectedNode === "kvm" ? "2px solid #a855f7" : "1px solid rgba(168, 85, 247, 0.3)",
+                borderRadius: "10px", padding: "10px", cursor: "pointer", transition: "all 0.2s",
+                display: "flex", flexDirection: "column", justifyContent: "space-between"
+              }}
+            >
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: "16px" }}>💻</span>
+                  <span style={{ fontSize: "9px", background: "#a855f7", color: "#fff", fontWeight: 700, padding: "1px 5px", borderRadius: "4px" }}>KVM VM</span>
+                </div>
+                <div style={{ fontSize: "12px", fontWeight: 700, marginTop: "6px", color: "#c084fc" }}>VM 201: Full OS</div>
+                <div style={{ fontSize: "10px", color: "#cbd5e1" }}>IP: 192.168.1.201</div>
+                <div style={{ fontSize: "9.5px", color: "#94a3b8", marginTop: "2px" }}>Windows / Linux</div>
+              </div>
+              <div style={{ fontSize: "9px", color: "#d8b4fe", background: "rgba(168, 85, 247, 0.15)", padding: "2px 4px", borderRadius: "4px", textAlign: "center" }}>
+                Full Hardware VM
+              </div>
+            </div>
+          </div>
+
+          {/* Proxmox VE Hypervisor Core Card */}
+          <div
+            onClick={() => setSelectedNode("host")}
+            style={{
+              background: selectedNode === "host" ? "rgba(249, 115, 22, 0.25)" : "rgba(249, 115, 22, 0.12)",
+              border: selectedNode === "host" ? "2px solid #f97316" : "1px solid rgba(249, 115, 22, 0.4)",
+              borderRadius: "10px", padding: "10px 14px", cursor: "pointer", transition: "all 0.2s",
+              display: "flex", justifyContent: "space-between", alignItems: "center"
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <span style={{ fontSize: "20px" }}>🖥️</span>
+              <div>
+                <div style={{ fontSize: "13px", fontWeight: 800, color: "#fb923c" }}>Proxmox Virtual Environment (PVE)</div>
+                <div style={{ fontSize: "10.5px", color: "#cbd5e1" }}>Type-1 Bare-Metal Hypervisor (Debian Kernel + KVM + LXC Core)</div>
+              </div>
+            </div>
+            <span style={{ fontSize: "10px", background: "#f97316", color: "#000", fontWeight: 700, padding: "3px 8px", borderRadius: "6px" }}>
+              HOST NODE
+            </span>
+          </div>
+
+          {/* Bottom Level: Physical Hardware & Bridge */}
+          <div style={{
+            background: "rgba(15, 23, 42, 0.9)", borderRadius: "10px", padding: "8px 12px",
+            border: "1px solid rgba(255, 255, 255, 0.05)", display: "flex", justifyContent: "space-around",
+            fontSize: "10px", color: "#94a3b8"
+          }}>
+            <span>⚙️ CPU: Intel/AMD VT-x</span>
+            <span>💾 Storage: NVMe / SSD / ZFS</span>
+            <span>🌉 Network: Bridge vmbr0</span>
+            <span>🔌 LAN: 1 GbE NIC</span>
+          </div>
+        </div>
+
+        {/* Right: Inspector Detail Panel */}
+        <div style={{
+          background: "rgba(15, 23, 42, 0.7)", borderRadius: "14px", padding: "16px",
+          border: `1px solid ${current.color}40`, display: "flex", flexDirection: "column",
+          gap: "10px", overflowY: "auto"
+        }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div>
+              <span style={{
+                background: `${current.color}25`, color: current.color,
+                padding: "2px 8px", borderRadius: "6px", fontSize: "10px", fontWeight: 700
+              }}>
+                {current.badge}
+              </span>
+              <h3 style={{ margin: "6px 0 2px", fontSize: "16px", fontWeight: 800, color: "#f8fafc" }}>
+                {current.icon} {current.title}
+              </h3>
+              <p style={{ margin: 0, fontSize: "11px", color: "#94a3b8" }}>{current.subtitle}</p>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div style={{ fontSize: "12px", color: "#e2e8f0", lineHeight: 1.5, background: "rgba(0,0,0,0.25)", padding: "10px", borderRadius: "8px" }}>
+            {current.desc}
+          </div>
+
+          {/* Specs & Capabilities */}
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: current.color, marginBottom: "4px" }}>
+              📋 รายละเอียดและบทบาทหน้าที่:
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+              {current.specs.map((spec, i) => (
+                <div key={i} style={{ fontSize: "11px", color: "#cbd5e1", background: "rgba(255,255,255,0.03)", padding: "5px 8px", borderRadius: "6px" }}>
+                  {spec}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Use case & Why */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: "6px", marginTop: "auto" }}>
+            <div style={{ background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.25)", borderRadius: "8px", padding: "8px" }}>
+              <div style={{ fontSize: "10.5px", fontWeight: 700, color: "#4ade80" }}>🎯 การนำไปใช้งานจริง:</div>
+              <div style={{ fontSize: "10.5px", color: "#e2e8f0", marginTop: "2px" }}>{current.useCase}</div>
+            </div>
+            <div style={{ background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.25)", borderRadius: "8px", padding: "8px" }}>
+              <div style={{ fontSize: "10.5px", fontWeight: 700, color: "#60a5fa" }}>💡 ทำไมต้องใช้?</div>
+              <div style={{ fontSize: "10.5px", color: "#e2e8f0", marginTop: "2px" }}>{current.why}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   PROXMOX INSTALLATION STEPS VISUALIZER (WEEK 12a)
+   ============================================================ */
+function ProxmoxInstallStepVisualizer({ s }: { s: SlideData }) {
+  const [activeStep, setActiveStep] = useState<number>(0);
+
+  const steps = [
+    {
+      num: "1",
+      name: "USB & BIOS",
+      title: "ขั้นตอนที่ 1: เตรียม Flash Drive ISO & เปิด Virtualization ใน BIOS",
+      tag: "Hardware Prep & BIOS",
+      icon: "💽",
+      color: "#3b82f6",
+      keySummary: "ดาวน์โหลดไฟล์ ISO เขียนลง USB และเปิด Intel VT-x / AMD-V ใน BIOS",
+      screenTitle: "BIOS / UEFI Setup Utility — Advanced CPU Configuration",
+      screenLines: [
+        "CPU Configuration:",
+        "> Intel (VMX) Virtualization Technology ............ [Enabled]  <-- สำคัญมาก!",
+        "> VT-d / AMD-V Support ............................. [Enabled]",
+        "> Secure Boot ...................................... [Disabled / Other OS]",
+        "> Boot Option #1 ................................... [UEFI: SanDisk USB 3.0]"
+      ],
+      checkList: [
+        "ดาวน์โหลด Proxmox VE ISO Installer จากเว็บไซต์ทางการ proxmox.com",
+        "เขียนไฟล์ ISO ลงแฟลชไดรฟ์ด้วยโปรแกรม Rufus (เลือกโหมด DD) หรือ BalenaEtcher",
+        "เสียบ Flash Drive เข้าเซิร์ฟเวอร์ เปิดเครื่องแล้วกด F2, F12 หรือ Del เข้า BIOS",
+        "เปิด Virtualization Technology (Intel VT-x หรือ AMD-V) ให้เป็น Enabled เสมอ!"
+      ],
+      tip: "💡 หากใน BIOS ปิด VT-x ไว้ Proxmox จะแจ้งเตือน 'KVM acceleration not available' และไม่สามารถเปิดเครื่องเสมือนได้"
+    },
+    {
+      num: "2",
+      name: "บูต & เลือกดิสก์",
+      title: "ขั้นตอนที่ 2: เริ่มต้นตัวติดตั้ง (Installer) & เลือก Target Harddisk",
+      tag: "Boot & Target Disk",
+      icon: "🖥️",
+      color: "#06b6d4",
+      keySummary: "เลือก Install Proxmox VE (Graphical), ยอมรับ EULA และเลือกไดรฟ์ SSD",
+      screenTitle: "Proxmox VE 8.x Graphical Installer — Target Harddisk",
+      screenLines: [
+        "+----------------------------------------------------------------+",
+        "| Proxmox Virtual Environment (PVE)                              |",
+        "|                                                                |",
+        "|  Target Harddisk: [/dev/nvme0n1 - 500GB NVMe SSD          v]   |",
+        "|  Filesystem:      [ext4 (หรือ zfs-raid1 ในกรณีมี 2 ลูก)    v]   |",
+        "|                                                                |",
+        "|  [ Options ]                                [ Next Step -> ]   |",
+        "+----------------------------------------------------------------+"
+      ],
+      checkList: [
+        "ที่เมนูบูต เลือก 'Install Proxmox VE (Graphical)' แล้วกด Enter",
+        "อ่านและกดยอมรับข้อตกลงสิทธิ์การใช้งาน (End User License Agreement: EULA)",
+        "เลือกดิสก์เป้าหมายสำหรับติดตั้ง (Target Harddisk เช่น SSD หรือ NVMe หลักของเครื่อง)",
+        "ข้อควรระวัง: ระบบจะ Format ลบข้อมูลเก่าทั้งหมดในดิสก์ที่เลือกเพื่อเตรียมพื้นที่ใหม่"
+      ],
+      tip: "⚠️ ตรวจสอบให้แน่ใจว่าเลือกดิสก์ถูกต้อง เพราะข้อมูลเดิมในไดรฟ์นั้นจะถูกล้างทิ้งทั้งหมด"
+    },
+    {
+      num: "3",
+      name: "Timezone & ภาษา",
+      title: "ขั้นตอนที่ 3: กำหนดประเทศ โซนเวลา และภาษาคีย์บอร์ด",
+      tag: "Location & Timezone",
+      icon: "🌍",
+      color: "#10b981",
+      keySummary: "ตั้งค่า Country เป็น Thailand และ Timezone เป็น Asia/Bangkok",
+      screenTitle: "Proxmox VE Installer — Location and Time Zone Selection",
+      screenLines: [
+        "+----------------------------------------------------------------+",
+        "| Location and Time Zone:                                        |",
+        "|                                                                |",
+        "|  Country:         [ Thailand                               v]  |",
+        "|  Time zone:       [ Asia/Bangkok                           v]  |",
+        "|  Keyboard Layout: [ U.S. English                           v]  |",
+        "|                                                                |",
+        "|  [ <- Back ]                                [ Next Step -> ]   |",
+        "+----------------------------------------------------------------+"
+      ],
+      checkList: [
+        "ช่อง Country พิมพ์ค้นหา 'Thailand'",
+        "ช่อง Time zone จะเลือกเป็น 'Asia/Bangkok' โดยอัตโนมัติ",
+        "Keyboard Layout เลือกเป็น 'U.S. English'",
+        "กดปุ่ม Next เพื่อไปยังขั้นตอนถัดไป"
+      ],
+      tip: "🕒 การตั้ง Timezone ให้ถูกต้องจะทำให้ Log และเวลาของระบบใน Container ตรงกับเวลาจริงในประเทศไทย"
+    },
+    {
+      num: "4",
+      name: "รหัสผ่าน Admin",
+      title: "ขั้นตอนที่ 4: ตั้งรหัสผ่านผู้ดูแลระบบ (Root Password) & Email",
+      tag: "Admin Credentials",
+      icon: "🔑",
+      color: "#f59e0b",
+      keySummary: "ตั้งรหัสผ่านสำหรับ user root และกรอกอีเมลแจ้งเตือนของกลุ่ม",
+      screenTitle: "Proxmox VE Installer — Administration Password and Email",
+      screenLines: [
+        "+----------------------------------------------------------------+",
+        "| Administrator Password & Email:                                |",
+        "|                                                                |",
+        "|  Password:         [ ••••••••••••••••                        ] |",
+        "|  Confirm Password: [ ••••••••••••••••                        ] |",
+        "|  Email:            [ admin-group1@lab.local                  ] |",
+        "|                                                                |",
+        "|  [ <- Back ]                                [ Next Step -> ]   |",
+        "+----------------------------------------------------------------+"
+      ],
+      checkList: [
+        "กำหนดรหัสผ่าน root ที่ปลอดภัยและจำได้สำหรับสมาชิกในกลุ่ม",
+        "พิมพ์รหัสผ่านซ้ำในช่อง Confirm Password ให้ตรงกัน",
+        "กรอก Email สำหรับรับการแจ้งเตือนสถานะความผิดปกติของเซิร์ฟเวอร์",
+        "จดบันทึกรหัสผ่าน root ไว้ เพราะต้องใช้เข้าหน้า Web GUI และคำสั่ง root ทาง SSH"
+      ],
+      tip: "🔒 รหัสผ่าน root นี้มีสิทธิ์สูงสุดในการควบคุมเซิร์ฟเวอร์ทั้งหมด ห้ามลืมเด็ดขาด!"
+    },
+    {
+      num: "5",
+      name: "ตั้งค่า IP Network",
+      title: "ขั้นตอนที่ 5: กำหนดค่าเครือข่าย Management Network (หัวใจสำคัญ)",
+      tag: "Management IP & Network",
+      icon: "🌐",
+      color: "#8b5cf6",
+      keySummary: "กำหนด Hostname, Static IP (เช่น 192.168.1.50/24), Gateway และ DNS",
+      screenTitle: "Proxmox VE Installer — Management Network Configuration",
+      screenLines: [
+        "+----------------------------------------------------------------+",
+        "| Management Network Configuration:                              |",
+        "|                                                                |",
+        "|  Management Interface: [ enp3s0 (00:1a:2b:3c:4d:5e)         v] |",
+        "|  Hostname (FQDN):      [ proxmox-g1.lab.local                ] |",
+        "|  IP Address (CIDR):    [ 192.168.1.50/24                     ] |",
+        "|  Gateway:              [ 192.168.1.1                         ] |",
+        "|  DNS Server:           [ 192.168.1.1                         ] |",
+        "|                                                                |",
+        "|  [ <- Back ]                                [ Install Now! ]   |",
+        "+----------------------------------------------------------------+"
+      ],
+      checkList: [
+        "Management Interface: เลือกการ์ดแลนที่ต่อสายแลนจริง (เช่น enp3s0 หรือ eth0)",
+        "Hostname (FQDN): ตั้งชื่อเครื่อง เช่น proxmox-g1.lab.local",
+        "IP Address (CIDR): ใส่ IP คงที่ของเครื่อง เช่น 192.168.1.50/24 (ห้ามชนกับกลุ่มอื่น!)",
+        "Gateway & DNS: ระบุ IP ของ Router ห้องแล็บ เช่น 192.168.1.1",
+        "กด Install แล้วรอแถบความคืบหน้าจนครบ 100% เครื่องจะรีบูตเข้าสู่ Proxmox"
+      ],
+      tip: "⭐ IP นี้จะเป็น IP Address ถาวรที่ใช้เปิดหน้าเว็บควบคุม Proxmox Web GUI"
+    },
+    {
+      num: "6",
+      name: "เข้าใช้งาน Web GUI",
+      title: "ขั้นตอนที่ 6: การติดตั้งเสร็จสมบูรณ์ และการเข้าสู่ Proxmox Web GUI",
+      tag: "Login & Web GUI",
+      icon: "🚀",
+      color: "#ec4899",
+      keySummary: "เปิดเบราว์เซอร์เข้า https://IP:8006 ล็อกอินด้วย root และรหัสผ่านที่ตั้งไว้",
+      screenTitle: "Web Browser — Proxmox Virtual Environment Web Management",
+      screenLines: [
+        "URL: https://192.168.1.50:8006/",
+        "-----------------------------------------------------------------",
+        "  Welcome to Proxmox VE Web Management Console",
+        "",
+        "  User name: [ root                                           ]",
+        "  Password:  [ ••••••••••••••••                               ]",
+        "  Realm:     [ Linux PAM standard authentication             v]",
+        "  Language:  [ English                                       v]",
+        "",
+        "  [ Login ] -> เข้าสู่ระบบสำเร็จ ยินดีต้อนรับสู่ Proxmox VE!"
+      ],
+      checkList: [
+        "เมื่อบูตเสร็จ หน้าจอเซิร์ฟเวอร์จะขึ้นข้อความ: Welcome to Proxmox VE URL: https://IP:8006",
+        "เปิดเว็บเบราว์เซอร์จากคอมพิวเตอร์ในวง LAN พิมพ์ URL: https://192.168.1.50:8006",
+        "เบราว์เซอร์จะขึ้นเตือน SSL ให้กด 'Advanced' -> 'Proceed to IP (unsafe)'",
+        "กรอก User name: 'root' และ Password ที่ตั้งไว้ -> กด Login เพื่อเข้าสู่แผงควบคุม"
+      ],
+      tip: "🎉 ยินดีด้วย! เครื่องเซิร์ฟเวอร์ของคุณพร้อมสำหรับสร้าง Container แล้ว"
+    }
+  ];
+
+  const current = steps[activeStep];
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "2% 3%",
+      background: "radial-gradient(ellipse at 50% 0%, #0c1a2e 0%, #060913 75%, #020408 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "10px"
+    }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+        <div>
+          <span style={{ fontSize: "11px", color: current.color, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+            {s.tag || "2. Proxmox Installation Steps"}
+          </span>
+          <h2 style={{ margin: "2px 0 0", fontSize: "clamp(18px, 2.2vw, 24px)", fontWeight: 800, color: "#f8fafc" }}>
+            {s.title || "ขั้นตอนการติดตั้ง Proxmox VE ลงบนเครื่องเซิร์ฟเวอร์จริง"}
+          </h2>
+        </div>
+
+        {/* Step Prev/Next buttons */}
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <button
+            onClick={() => setActiveStep(prev => Math.max(0, prev - 1))}
+            disabled={activeStep === 0}
+            style={{
+              background: activeStep === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.12)",
+              border: "1px solid rgba(255,255,255,0.15)", color: activeStep === 0 ? "#64748b" : "#fff",
+              padding: "5px 12px", borderRadius: "8px", cursor: activeStep === 0 ? "not-allowed" : "pointer",
+              fontSize: "12px", fontWeight: 600
+            }}
+          >
+            ◀ ย้อนกลับ
+          </button>
+          <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 700 }}>
+            {activeStep + 1} / {steps.length}
+          </span>
+          <button
+            onClick={() => setActiveStep(prev => Math.min(steps.length - 1, prev + 1))}
+            disabled={activeStep === steps.length - 1}
+            style={{
+              background: activeStep === steps.length - 1 ? "rgba(255,255,255,0.05)" : current.color,
+              border: "1px solid rgba(255,255,255,0.2)", color: activeStep === steps.length - 1 ? "#64748b" : "#000",
+              padding: "5px 12px", borderRadius: "8px", cursor: activeStep === steps.length - 1 ? "not-allowed" : "pointer",
+              fontSize: "12px", fontWeight: 700
+            }}
+          >
+            ขั้นตอนถัดไป ▶
+          </button>
+        </div>
+      </div>
+
+      {/* Step Pills Bar */}
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${steps.length}, 1fr)`, gap: "6px", flexShrink: 0 }}>
+        {steps.map((st, i) => {
+          const isActive = activeStep === i;
+          return (
+            <div
+              key={i}
+              onClick={() => setActiveStep(i)}
+              style={{
+                background: isActive ? `${st.color}25` : "rgba(30, 41, 59, 0.4)",
+                border: isActive ? `2px solid ${st.color}` : "1px solid rgba(255, 255, 255, 0.08)",
+                borderRadius: "8px", padding: "6px 8px", cursor: "pointer", transition: "all 0.2s",
+                display: "flex", alignItems: "center", gap: "6px"
+              }}
+            >
+              <div style={{
+                width: "20px", height: "20px", borderRadius: "50%",
+                background: isActive ? st.color : "rgba(255,255,255,0.1)",
+                color: isActive ? "#000" : "#94a3b8", fontWeight: 800, fontSize: "11px",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+              }}>
+                {st.num}
+              </div>
+              <div style={{ fontSize: "11px", fontWeight: isActive ? 800 : 500, color: isActive ? "#fff" : "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {st.name}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Main Content: Screen Mockup & Checklist */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: "14px", flex: 1, minHeight: 0 }}>
+        {/* Left: Graphical Screen Mockup */}
+        <div style={{
+          background: "#080c14", borderRadius: "14px", border: `1px solid ${current.color}40`,
+          display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: `0 8px 30px rgba(0,0,0,0.5)`
+        }}>
+          {/* Screen Titlebar */}
+          <div style={{
+            background: "#111827", padding: "8px 14px", borderBottom: "1px solid rgba(255,255,255,0.1)",
+            display: "flex", alignItems: "center", justifyContent: "space-between"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444", display: "inline-block" }} />
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#22c55e", display: "inline-block" }} />
+              <span style={{ fontSize: "11px", color: "#94a3b8", marginLeft: "8px", fontWeight: 600, fontFamily: "monospace" }}>
+                {current.screenTitle}
+              </span>
+            </div>
+            <span style={{ fontSize: "10px", background: `${current.color}30`, color: current.color, padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
+              STEP {current.num}
+            </span>
+          </div>
+
+          {/* Screen Body */}
+          <div style={{
+            padding: "16px", flex: 1, display: "flex", flexDirection: "column",
+            justifyContent: "center", fontFamily: "monospace", fontSize: "12px",
+            lineHeight: "1.7", color: "#e2e8f0", background: "linear-gradient(180deg, #090d16 0%, #030712 100%)"
+          }}>
+            {current.screenLines.map((line, idx) => (
+              <div
+                key={idx}
+                style={{
+                  color: line.includes("Enabled") || line.includes("100%") || line.includes("Login")
+                    ? "#4ade80"
+                    : line.includes("192.168.1.50") || line.includes("Password")
+                    ? "#60a5fa"
+                    : line.includes("Thailand") || line.includes("Asia/Bangkok")
+                    ? "#fcd34d"
+                    : "#cbd5e1"
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+
+          {/* Screen Footer Status */}
+          <div style={{
+            background: "#0f172a", padding: "8px 14px", borderTop: "1px solid rgba(255,255,255,0.06)",
+            fontSize: "11px", color: "#94a3b8", display: "flex", justifyContent: "space-between"
+          }}>
+            <span>📌 สถานะ: รอดำเนินการตามขั้นตอน</span>
+            <span style={{ color: current.color, fontWeight: 700 }}>{current.tag}</span>
+          </div>
+        </div>
+
+        {/* Right: Step Checklist & Tips */}
+        <div style={{
+          background: "rgba(15, 23, 42, 0.7)", borderRadius: "14px", padding: "16px",
+          border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column",
+          gap: "10px", overflowY: "auto"
+        }}>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: current.color, textTransform: "uppercase" }}>
+              {current.icon} สรุปการตั้งค่าในขั้นตอนนี้
+            </div>
+            <h3 style={{ margin: "4px 0 2px", fontSize: "15px", fontWeight: 800, color: "#f8fafc" }}>
+              {current.title}
+            </h3>
+            <p style={{ margin: 0, fontSize: "11.5px", color: "#94a3b8" }}>{current.keySummary}</p>
+          </div>
+
+          {/* Checklist */}
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "#cbd5e1", marginBottom: "6px" }}>
+              ✅ สิ่งที่ต้องปฏิบัติ:
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+              {current.checkList.map((item, idx) => (
+                <div key={idx} style={{
+                  display: "flex", alignItems: "flex-start", gap: "8px", fontSize: "11.5px",
+                  color: "#e2e8f0", background: "rgba(255,255,255,0.03)", padding: "7px 10px", borderRadius: "8px"
+                }}>
+                  <span style={{ color: current.color, fontWeight: 700 }}>•</span>
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tip Box */}
+          <div style={{
+            background: "rgba(245, 158, 11, 0.1)", border: "1px solid rgba(245, 158, 11, 0.3)",
+            borderRadius: "10px", padding: "10px 12px", marginTop: "auto", fontSize: "11px", color: "#fef3c7", lineHeight: 1.5
+          }}>
+            {current.tip}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   PROXMOX CREATE CONTAINER STEP-BY-STEP VISUALIZER (WEEK 12a)
+   ============================================================ */
+function ProxmoxCreateCTVisualizer({ s }: { s: SlideData }) {
+  const [activeTab, setActiveTab] = useState<number>(0);
+  const [sshConnected, setSshConnected] = useState(false);
+
+  const tabs = [
+    {
+      id: "template",
+      tabName: "1. โหลด Template",
+      icon: "📥",
+      title: "ขั้นตอนที่ 1: ดาวน์โหลดแม่แบบระบบปฏิบัติการ (OS Template)",
+      badge: "Storage: local",
+      color: "#06b6d4",
+      desc: "ก่อนสร้างตู้ Container จะต้องดาวน์โหลดแม่แบบ OS (เช่น Ubuntu 22.04) มาเก็บไว้ในเครื่อง Proxmox ก่อน โดยทำเพียงครั้งเดียว",
+      uiPreview: {
+        location: "Node: pve-server > local (pve-server) > CT Templates",
+        fields: [
+          { label: "เลือก Storage", value: "local", note: "ไดรฟ์จัดเก็บไฟล์ระบบของ Proxmox" },
+          { label: "เมนู", value: "CT Templates -> คลิกปุ่ม 'Templates'", note: "เปิดหน้ารายการ OS ที่มีให้โหลด" },
+          { label: "เลือกดาวน์โหลด", value: "ubuntu-22.04-standard_22.04-1_amd64.tar.zst", note: "Ubuntu 22.04 LTS ยอดนิยม" }
+        ],
+        action: "คลิกปุ่ม 'Download' แล้วรอจนขึ้นข้อความ TASK OK"
+      },
+      hint: "💡 นอกจาก Ubuntu ยังมี Debian, Alpine (ขนาดเล็กเพียง 5MB) และ CentOS ให้เลือกใช้"
+    },
+    {
+      id: "general",
+      tabName: "2. General & รหัส",
+      icon: "🏷️",
+      title: "ขั้นตอนที่ 2: กดปุ่ม Create CT & กำหนดชื่อตู้และรหัสผ่าน",
+      badge: "Dialog: General",
+      color: "#3b82f6",
+      desc: "คลิกปุ่มสีฟ้า 'Create CT' ที่มุมขวาบนของหน้าจอ Proxmox แล้วระบุข้อมูลพื้นฐานของตู้",
+      uiPreview: {
+        location: "Create: LXC Container Wizard > Tab 1: General",
+        fields: [
+          { label: "Node", value: "pve-server", note: "เครื่องแม่ข่ายหลัก" },
+          { label: "CT ID", value: "101", note: "หมายเลขประจำตู้ (เช่น 101, 102... ห้ามซ้ำกัน)" },
+          { label: "Hostname", value: "web-server-01", note: "ชื่อเครื่อง Container ของคุณ" },
+          { label: "Password", value: "••••••••", note: "ตั้งรหัสผ่าน root สำหรับล็อกอินเข้าตู้นี้" },
+          { label: "Confirm Password", value: "••••••••", note: "ยืนยันรหัสผ่านอีกครั้ง" }
+        ],
+        action: "กดปุ่ม 'Next' เพื่อไปเลือก Template"
+      },
+      hint: "🔑 รหัสผ่านนี้คือรหัสผ่าน root ของ Container เอง (คนละตัวกับรหัสผ่าน Proxmox หลัก)"
+    },
+    {
+      id: "template_disk",
+      tabName: "3. Disks & Storage",
+      icon: "💾",
+      title: "ขั้นตอนที่ 3: เลือก OS Template และกำหนดขนาดความจุพื้นที่ดิสก์",
+      badge: "Dialog: Disks",
+      color: "#10b981",
+      desc: "เลือกไฟล์ Ubuntu Template ที่โหลดไว้ และกำหนดขนาดพื้นที่ Harddisk ที่ตู้จะได้รับ",
+      uiPreview: {
+        location: "Create: LXC Container Wizard > Tab 2 & 3: Template & Disks",
+        fields: [
+          { label: "Storage (Template)", value: "local", note: "ตำแหน่งที่เก็บ Template" },
+          { label: "Template", value: "ubuntu-22.04-standard", note: "เลือกไฟล์ที่ดาวน์โหลดไว้ในขั้นตอนที่ 1" },
+          { label: "Storage (Root Disk)", value: "local-lvm (หรือ local)", note: "Storage สำหรับเก็บ Disk ของตู้" },
+          { label: "Disk Size (GiB)", value: "15 GiB", note: "พื้นที่ดิสก์สำหรับ OS และโปรแกรม (10-20GB)" }
+        ],
+        action: "กดปุ่ม 'Next' เพื่อไปกำหนด CPU & RAM"
+      },
+      hint: "📦 15 GB เพียงพอสำหรับระบบปฏิบัติการ, Nginx, Node.js และเว็บแอปพลิเคชันทั่วไป"
+    },
+    {
+      id: "cpu_ram",
+      tabName: "4. CPU & RAM",
+      icon: "⚡",
+      title: "ขั้นตอนที่ 4: จัดสรรทรัพยากรประมวลผล (CPU Cores) และหน่วยความจำ (RAM)",
+      badge: "Dialog: CPU & Memory",
+      color: "#f59e0b",
+      desc: "กำหนดจำนวน Core และ RAM ให้เหมาะสมกับงานที่ต้องการรัน",
+      uiPreview: {
+        location: "Create: LXC Container Wizard > Tab 4 & 5: CPU & Memory",
+        fields: [
+          { label: "Cores (CPU)", value: "1 Core (หรือ 2 Cores)", note: "จำนวนแกนประมวลผล" },
+          { label: "Memory (MB)", value: "1024 MB (1 GB RAM)", note: "หน่วยความจำ RAM ประจำตู้" },
+          { label: "Swap (MB)", value: "512 MB", note: "พื้นที่แรมเสมือนบนดิสก์สำรอง" }
+        ],
+        action: "กดปุ่ม 'Next' เพื่อไปตั้งค่าระบบเครือข่าย IP"
+      },
+      hint: "⚡ LXC มีประสิทธิภาพสูงมาก 1GB RAM สามารถรัน Web Server และ React ได้อย่างลื่นไหล"
+    },
+    {
+      id: "network",
+      tabName: "5. Network (Static IP)",
+      icon: "🌐",
+      title: "ขั้นตอนที่ 5: ตั้งค่าเครือข่าย Bridge & กำหนดหมายเลข Static IP",
+      badge: "Dialog: Network",
+      color: "#8b5cf6",
+      desc: "กำหนดหมายเลข IP ประจำตู้ในวง LAN เพื่อให้คนอื่นสามารถเข้าชมเว็บหรือ SSH เข้ามาได้",
+      uiPreview: {
+        location: "Create: LXC Container Wizard > Tab 6: Network",
+        fields: [
+          { label: "Name (Interface)", value: "eth0", note: "การ์ดแลนเสมือนของตู้" },
+          { label: "Bridge", value: "vmbr0", note: "เชื่อมต่อกับ Bridge หลักของ Proxmox" },
+          { label: "IPv4", value: "Static", note: "เลือกเป็นแบบ Static กำหนด IP คงที่" },
+          { label: "IPv4/CIDR", value: "192.168.1.101/24", note: "หมายเลข IP ประจำตู้ (ห้ามชนกับตู้คนอื่น!)" },
+          { label: "Gateway (IPv4)", value: "192.168.1.1", note: "IP ของ Router เพื่อให้ออกเน็ตได้" }
+        ],
+        action: "กด 'Next' -> ตรวจสอบข้อมูลในแท็บ Confirm -> กดปุ่ม 'Finish'"
+      },
+      hint: "🌐 การใส่ /24 ด้านหลัง IP (CIDR notation) หมายถึง Subnet Mask 255.255.255.0"
+    },
+    {
+      id: "start_ssh",
+      tabName: "6. Start & ควบคุม",
+      icon: "🚀",
+      title: "ขั้นตอนที่ 6: สั่ง Start ตู้ และล็อกอินเข้าใช้งานผ่าน Console หรือ SSH",
+      badge: "Start & Manage",
+      color: "#ec4899",
+      desc: "สั่งรัน Container และทดสอบล็อกอินเข้าไปติดตั้งโปรแกรมได้ทันที",
+      uiPreview: {
+        location: "Proxmox Tree > 101 (web-server-01) > Console / SSH",
+        fields: [
+          { label: "1. สั่งเปิดตู้", value: "คลิกปุ่ม 'Start' ด้านบนขวา", note: "ตู้จะพร้อมทำงานใน 1-2 วินาที" },
+          { label: "2. เข้าผ่าน Web Console", value: "คลิกเมนู 'Console' บนหน้าเว็บ Proxmox", note: "ล็อกอินด้วย root + Password" },
+          { label: "3. เชื่อมต่อผ่าน SSH", value: "ssh root@192.168.1.101", note: "เข้าควบคุมทางไกลผ่าน Terminal" }
+        ],
+        action: "พร้อมติดตั้งโปรแกรม: apt update && apt install -y nginx"
+      },
+      hint: "🎉 Container ของคุณพร้อมใช้งานแล้ว สามารถติดตั้ง Nginx หรือ Node.js ได้เหมือนเครื่องเซิร์ฟเวอร์จริง!"
+    }
+  ];
+
+  const current = tabs[activeTab];
+
+  return (
+    <div className="slide slide-content" style={{
+      display: "flex", flexDirection: "column", height: "100%", padding: "2% 3%",
+      background: "radial-gradient(ellipse at 50% 0%, #0f172a 0%, #060913 75%, #020408 100%)",
+      color: "#fff", fontFamily: "'Noto Sans Thai', sans-serif", boxSizing: "border-box", gap: "10px"
+    }}>
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }}>
+        <div>
+          <span style={{ fontSize: "11px", color: current.color, fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px" }}>
+            {s.tag || "3. How to Create LXC Container"}
+          </span>
+          <h2 style={{ margin: "2px 0 0", fontSize: "clamp(18px, 2.2vw, 24px)", fontWeight: 800, color: "#f8fafc" }}>
+            {s.title || "วิธีสร้าง LXC Container บน Proxmox VE แบบ Step-by-Step"}
+          </h2>
+        </div>
+
+        {/* Step Prev/Next buttons */}
+        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <button
+            onClick={() => setActiveTab(prev => Math.max(0, prev - 1))}
+            disabled={activeTab === 0}
+            style={{
+              background: activeTab === 0 ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.12)",
+              border: "1px solid rgba(255,255,255,0.15)", color: activeTab === 0 ? "#64748b" : "#fff",
+              padding: "5px 12px", borderRadius: "8px", cursor: activeTab === 0 ? "not-allowed" : "pointer",
+              fontSize: "12px", fontWeight: 600
+            }}
+          >
+            ◀ ย้อนกลับ
+          </button>
+          <span style={{ fontSize: "12px", color: "#94a3b8", fontWeight: 700 }}>
+            {activeTab + 1} / {tabs.length}
+          </span>
+          <button
+            onClick={() => setActiveTab(prev => Math.min(tabs.length - 1, prev + 1))}
+            disabled={activeTab === tabs.length - 1}
+            style={{
+              background: activeTab === tabs.length - 1 ? "rgba(255,255,255,0.05)" : current.color,
+              border: "1px solid rgba(255,255,255,0.2)", color: activeTab === tabs.length - 1 ? "#64748b" : "#000",
+              padding: "5px 12px", borderRadius: "8px", cursor: activeTab === tabs.length - 1 ? "not-allowed" : "pointer",
+              fontSize: "12px", fontWeight: 700
+            }}
+          >
+            ขั้นตอนถัดไป ▶
+          </button>
+        </div>
+      </div>
+
+      {/* Tabs Bar */}
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${tabs.length}, 1fr)`, gap: "6px", flexShrink: 0 }}>
+        {tabs.map((tb, i) => {
+          const isActive = activeTab === i;
+          return (
+            <div
+              key={i}
+              onClick={() => setActiveTab(i)}
+              style={{
+                background: isActive ? `${tb.color}25` : "rgba(30, 41, 59, 0.4)",
+                border: isActive ? `2px solid ${tb.color}` : "1px solid rgba(255, 255, 255, 0.08)",
+                borderRadius: "8px", padding: "6px 8px", cursor: "pointer", transition: "all 0.2s",
+                display: "flex", alignItems: "center", gap: "6px"
+              }}
+            >
+              <span style={{ fontSize: "14px" }}>{tb.icon}</span>
+              <div style={{ fontSize: "11px", fontWeight: isActive ? 800 : 500, color: isActive ? "#fff" : "#94a3b8", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {tb.tabName}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Main Content Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: "14px", flex: 1, minHeight: 0 }}>
+        {/* Left: Form Mockup / Dialog UI */}
+        <div style={{
+          background: "#080c14", borderRadius: "14px", border: `1px solid ${current.color}40`,
+          display: "flex", flexDirection: "column", overflow: "hidden", boxShadow: "0 8px 30px rgba(0,0,0,0.5)"
+        }}>
+          {/* Modal Header */}
+          <div style={{
+            background: "#1e293b", padding: "8px 14px", borderBottom: "1px solid rgba(255,255,255,0.1)",
+            display: "flex", alignItems: "center", justifyContent: "space-between"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <span style={{ fontSize: "14px" }}>📦</span>
+              <span style={{ fontSize: "12px", fontWeight: 700, color: "#f8fafc" }}>
+                {current.uiPreview.location}
+              </span>
+            </div>
+            <span style={{ fontSize: "10px", background: `${current.color}30`, color: current.color, padding: "2px 8px", borderRadius: "4px", fontWeight: 700 }}>
+              {current.badge}
+            </span>
+          </div>
+
+          {/* Form Fields Simulation */}
+          <div style={{
+            padding: "16px", flex: 1, display: "flex", flexDirection: "column", gap: "10px",
+            background: "linear-gradient(180deg, #090d16 0%, #030712 100%)", overflowY: "auto"
+          }}>
+            {current.uiPreview.fields.map((f, idx) => (
+              <div key={idx} style={{
+                background: "rgba(30, 41, 59, 0.5)", border: "1px solid rgba(255,255,255,0.06)",
+                borderRadius: "8px", padding: "8px 12px", display: "flex", justifyContent: "space-between", alignItems: "center"
+              }}>
+                <div>
+                  <div style={{ fontSize: "11px", color: "#94a3b8" }}>{f.label}</div>
+                  <div style={{ fontSize: "12.5px", fontWeight: 700, color: "#60a5fa", fontFamily: "monospace", marginTop: "2px" }}>
+                    {f.value}
+                  </div>
+                </div>
+                <div style={{ fontSize: "10px", color: "#cbd5e1", background: "rgba(0,0,0,0.3)", padding: "3px 8px", borderRadius: "6px", maxWidth: "45%", textAlign: "right" }}>
+                  {f.note}
+                </div>
+              </div>
+            ))}
+
+            {/* Action Bar */}
+            <div style={{
+              marginTop: "auto", background: "rgba(16, 185, 129, 0.15)", border: "1px solid rgba(16, 185, 129, 0.3)",
+              borderRadius: "8px", padding: "8px 12px", display: "flex", alignItems: "center", justifyContent: "space-between"
+            }}>
+              <span style={{ fontSize: "11px", color: "#a7f3d0", fontWeight: 600 }}>👉 การดำเนินการ:</span>
+              <span style={{ fontSize: "11px", color: "#34d399", fontWeight: 700 }}>{current.uiPreview.action}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Step Explanation & Interactive Simulation */}
+        <div style={{
+          background: "rgba(15, 23, 42, 0.7)", borderRadius: "14px", padding: "16px",
+          border: "1px solid rgba(255, 255, 255, 0.08)", display: "flex", flexDirection: "column",
+          gap: "10px", overflowY: "auto"
+        }}>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: current.color, textTransform: "uppercase" }}>
+              {current.icon} สรุปขั้นตอน
+            </div>
+            <h3 style={{ margin: "4px 0 2px", fontSize: "15px", fontWeight: 800, color: "#f8fafc" }}>
+              {current.title}
+            </h3>
+            <p style={{ margin: 0, fontSize: "11.5px", color: "#94a3b8" }}>{current.desc}</p>
+          </div>
+
+          {/* Interactive Simulation Box */}
+          <div style={{
+            background: "#030712", borderRadius: "10px", border: "1px solid rgba(255,255,255,0.1)",
+            padding: "10px", display: "flex", flexDirection: "column", gap: "8px"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontSize: "11px", color: "#94a3b8", fontWeight: 700 }}>🖥️ Terminal Simulation</span>
+              <button
+                onClick={() => setSshConnected(!sshConnected)}
+                style={{
+                  background: sshConnected ? "#ef4444" : "#22c55e", color: "#fff",
+                  border: "none", padding: "3px 10px", borderRadius: "6px", fontSize: "10px",
+                  fontWeight: 700, cursor: "pointer"
+                }}
+              >
+                {sshConnected ? "🔌 Disconnect" : "🚀 Test SSH Connect"}
+              </button>
+            </div>
+
+            <div style={{ fontFamily: "monospace", fontSize: "11px", lineHeight: 1.5, color: "#e2e8f0" }}>
+              <div>$ ssh root@192.168.1.101</div>
+              {sshConnected ? (
+                <div style={{ color: "#4ade80", marginTop: "4px" }}>
+                  <div>Welcome to Ubuntu 22.04.4 LTS (GNU/Linux x86_64)</div>
+                  <div>root@web-server-01:~# systemctl status nginx</div>
+                  <div style={{ color: "#93c5fd" }}>● nginx.service - active (running) [Port 80]</div>
+                </div>
+              ) : (
+                <div style={{ color: "#64748b", marginTop: "4px" }}>
+                  // กดปุ่ม Test SSH Connect ด้านบนเพื่อจำลองการเชื่อมต่อ
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Hint */}
+          <div style={{
+            background: "rgba(59, 130, 246, 0.1)", border: "1px solid rgba(59, 130, 246, 0.25)",
+            borderRadius: "10px", padding: "10px 12px", marginTop: "auto", fontSize: "11px", color: "#bfdbfe", lineHeight: 1.5
+          }}>
+            {current.hint}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
