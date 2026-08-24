@@ -9313,213 +9313,593 @@ sudo ss -tulpn`}</Code>
 /* ======================================= */
 /* --- MAIN APP --- */
 /* ======================================= */
-/* ===== EXAM NOTIFICATION BANNER ===== */
+/* ===== PROXMOX PRACTICAL EXAM MODAL ===== */
+/* ======================================= */
+interface ExamSetData {
+  id: number;
+  title: string;
+  role: string;
+  badgeColor: string;
+  icon: string;
+  ctId: string;
+  hostname: string;
+  password: string;
+  template: string;
+  disk: string;
+  cpu: string;
+  ram: string;
+  swap: string;
+  ip: string;
+  gateway: string;
+  dns: string;
+  headingText: string;
+}
+
+const examSetsData: ExamSetData[] = [
+  {
+    id: 1,
+    title: "ชุดที่ 1",
+    role: "Web Frontend Service",
+    badgeColor: "#10b981",
+    icon: "🌐",
+    ctId: "101",
+    hostname: "frontend-web-01",
+    password: "Nos@2026_ct101",
+    template: "ubuntu-22.04-standard",
+    disk: "10 GiB",
+    cpu: "1 Core",
+    ram: "512 MB",
+    swap: "256 MB",
+    ip: "192.168.1.101/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 1] WEB FRONTEND SERVICE"
+  },
+  {
+    id: 2,
+    title: "ชุดที่ 2",
+    role: "API Backend Gateway",
+    badgeColor: "#3b82f6",
+    icon: "⚡",
+    ctId: "102",
+    hostname: "api-gateway-02",
+    password: "Nos@2026_ct102",
+    template: "ubuntu-22.04-standard",
+    disk: "12 GiB",
+    cpu: "2 Cores",
+    ram: "1024 MB",
+    swap: "512 MB",
+    ip: "192.168.1.102/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 2] API BACKEND GATEWAY"
+  },
+  {
+    id: 3,
+    title: "ชุดที่ 3",
+    role: "Authentication Portal",
+    badgeColor: "#8b5cf6",
+    icon: "🔐",
+    ctId: "103",
+    hostname: "auth-portal-03",
+    password: "Nos@2026_ct103",
+    template: "ubuntu-22.04-standard",
+    disk: "15 GiB",
+    cpu: "1 Core",
+    ram: "1024 MB",
+    swap: "512 MB",
+    ip: "192.168.1.103/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 3] AUTHENTICATION PORTAL SERVICE"
+  },
+  {
+    id: 4,
+    title: "ชุดที่ 4",
+    role: "E-Commerce Online Store",
+    badgeColor: "#f59e0b",
+    icon: "🛍️",
+    ctId: "104",
+    hostname: "shop-online-04",
+    password: "Nos@2026_ct104",
+    template: "ubuntu-22.04-standard",
+    disk: "10 GiB",
+    cpu: "2 Cores",
+    ram: "1024 MB",
+    swap: "512 MB",
+    ip: "192.168.1.104/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 4] E-COMMERCE ONLINE STORE"
+  },
+  {
+    id: 5,
+    title: "ชุดที่ 5",
+    role: "Student Information System",
+    badgeColor: "#06b6d4",
+    icon: "🎓",
+    ctId: "105",
+    hostname: "student-sis-05",
+    password: "Nos@2026_ct105",
+    template: "ubuntu-22.04-standard",
+    disk: "15 GiB",
+    cpu: "1 Core",
+    ram: "1536 MB",
+    swap: "512 MB",
+    ip: "192.168.1.105/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 5] STUDENT INFORMATION SYSTEM (SIS)"
+  },
+  {
+    id: 6,
+    title: "ชุดที่ 6",
+    role: "Corporate News & Blog",
+    badgeColor: "#ec4899",
+    icon: "📰",
+    ctId: "106",
+    hostname: "corp-news-06",
+    password: "Nos@2026_ct106",
+    template: "ubuntu-22.04-standard",
+    disk: "8 GiB",
+    cpu: "1 Core",
+    ram: "512 MB",
+    swap: "256 MB",
+    ip: "192.168.1.106/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 6] CORPORATE NEWS & BLOG PORTAL"
+  },
+  {
+    id: 7,
+    title: "ชุดที่ 7",
+    role: "Payment Gateway Web",
+    badgeColor: "#14b8a6",
+    icon: "💳",
+    ctId: "107",
+    hostname: "pay-gateway-07",
+    password: "Nos@2026_ct107",
+    template: "ubuntu-22.04-standard",
+    disk: "12 GiB",
+    cpu: "2 Cores",
+    ram: "1024 MB",
+    swap: "512 MB",
+    ip: "192.168.1.107/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 7] PAYMENT GATEWAY SERVICE"
+  },
+  {
+    id: 8,
+    title: "ชุดที่ 8",
+    role: "Customer Support Helpdesk",
+    badgeColor: "#eab308",
+    icon: "🎧",
+    ctId: "108",
+    hostname: "helpdesk-web-08",
+    password: "Nos@2026_ct108",
+    template: "ubuntu-22.04-standard",
+    disk: "10 GiB",
+    cpu: "1 Core",
+    ram: "1024 MB",
+    swap: "512 MB",
+    ip: "192.168.1.108/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 8] CUSTOMER SUPPORT HELPDESK"
+  },
+  {
+    id: 9,
+    title: "ชุดที่ 9",
+    role: "Realtime Monitoring Dashboard",
+    badgeColor: "#6366f1",
+    icon: "📊",
+    ctId: "109",
+    hostname: "monitor-dash-09",
+    password: "Nos@2026_ct109",
+    template: "ubuntu-22.04-standard",
+    disk: "15 GiB",
+    cpu: "2 Cores",
+    ram: "2048 MB",
+    swap: "512 MB",
+    ip: "192.168.1.109/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 9] REALTIME MONITORING DASHBOARD"
+  },
+  {
+    id: 10,
+    title: "ชุดที่ 10",
+    role: "File Repository & Assets Web",
+    badgeColor: "#84cc16",
+    icon: "📁",
+    ctId: "110",
+    hostname: "repo-assets-10",
+    password: "Nos@2026_ct110",
+    template: "ubuntu-22.04-standard",
+    disk: "20 GiB",
+    cpu: "1 Core",
+    ram: "1024 MB",
+    swap: "512 MB",
+    ip: "192.168.1.110/24",
+    gateway: "192.168.1.1",
+    dns: "8.8.8.8",
+    headingText: "[ชุดที่ 10] FILE REPOSITORY & ASSETS WEB"
+  }
+];
+
 function ExamNotificationBanner() {
   const [showPanel, setShowPanel] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [activeSetId, setActiveSetId] = useState<number | "host">(1);
+  const [copiedText, setCopiedText] = useState<string | null>(null);
 
-  // === DATE CONTROL ===
-  const forceVisible = false; // ← ซ่อนแถบสอบปฏิบัติแล้ว
+  useEffect(() => {
+    const handleOpen = () => setShowPanel(true);
+    window.addEventListener('open-exam-modal', handleOpen);
+    return () => window.removeEventListener('open-exam-modal', handleOpen);
+  }, []);
 
-  const isExamDay = () => {
-    if (forceVisible) return true;
-    const now = new Date();
-    return now.getDate() === 14 && now.getMonth() === 6 && now.getFullYear() === 2026;
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedText(label);
+    setTimeout(() => setCopiedText(null), 2000);
   };
 
-  if (!isExamDay() || dismissed) return null;
+  const currentSet = examSetsData.find(s => s.id === activeSetId) || examSetsData[0];
 
   return (
     <>
+      {/* Top Banner Bar */}
       <div className="exam-notification-wrapper">
-        <div className="exam-notification-bar" onClick={() => setShowPanel(!showPanel)}>
-          <span className="exam-badge">📋 สอบ</span>
+        <div
+          className="exam-notification-bar"
+          onClick={() => setShowPanel(!showPanel)}
+          style={{
+            background: "linear-gradient(135deg, #b91c1c 0%, #c2410c 50%, #b45309 100%)",
+            boxShadow: "0 4px 20px rgba(194, 65, 12, 0.4)"
+          }}
+        >
+          <span className="exam-badge" style={{ background: "#fff", color: "#b91c1c" }}>📋 สอบปฏิบัติ</span>
           <span className="exam-notification-text">
-            🔔 สอบปฏิบัติ NOS — คลิกเพื่อดูโจทย์สอบ
+            🔔 โจทย์สอบปฏิบัติการ: การติดตั้ง Proxmox VE และการตั้งค่า LXC Container (10 ชุดข้อสอบ) — คลิกเพื่อเปิดดูโจทย์
           </span>
           <span className="exam-notification-arrow">{showPanel ? '▲' : '▼'}</span>
         </div>
       </div>
 
+      {/* Modal Popup */}
       {showPanel && (
         <>
           <div className="exam-panel-overlay" onClick={() => setShowPanel(false)} />
-          <div className="exam-panel">
-            <div className="exam-panel-header">
-              <h2>📝 โจทย์สอบปฏิบัติ — วิชา NOS</h2>
-              <p>สอบบน Proxmox (Ubuntu Server)</p>
-              <button className="exam-panel-close" onClick={() => setShowPanel(false)}>✕</button>
+          <div className="exam-panel" style={{
+            maxWidth: "1000px", borderRadius: "18px",
+            background: "#0a0f1d", color: "#f8fafc",
+            border: "1px solid rgba(255, 255, 255, 0.12)",
+            boxShadow: "0 25px 70px rgba(0,0,0,0.8)"
+          }}>
+            {/* Modal Header */}
+            <div className="exam-panel-header" style={{
+              background: "linear-gradient(135deg, #111827 0%, #1e293b 100%)",
+              borderBottom: "1px solid rgba(255,255,255,0.1)",
+              padding: "16px 24px", display: "flex", justifyContent: "space-between", alignItems: "flex-start"
+            }}>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "4px" }}>
+                  <span style={{ background: "#dc2626", color: "#fff", fontSize: "11px", fontWeight: 800, padding: "3px 10px", borderRadius: "99px", letterSpacing: "0.5px" }}>
+                    PRACTICAL EXAM
+                  </span>
+                  <span style={{ fontSize: "12px", color: "#f59e0b", fontWeight: 700 }}>
+                    ⏱️ เวลาสอบ 2 ชั่วโมง (120 นาที) • คะแนนเต็ม 20 คะแนน
+                  </span>
+                </div>
+                <h2 style={{ fontSize: "20px", fontWeight: 800, color: "#fff", margin: "4px 0 2px" }}>
+                  📝 โจทย์สอบปฏิบัติการ: การติดตั้ง Proxmox VE และการสร้าง LXC Container
+                </h2>
+                <p style={{ fontSize: "12px", color: "#94a3b8", margin: 0 }}>
+                  วิชา: ระบบปฏิบัติการเครื่องแม่ข่าย (NOS) • เลือกชุดข้อสอบของตนเองด้านล่าง (ชุดที่ 1 ถึง 10)
+                </p>
+              </div>
+              <button
+                className="exam-panel-close"
+                onClick={() => setShowPanel(false)}
+                style={{ background: "rgba(255,255,255,0.1)", color: "#fff", borderRadius: "50%", width: "32px", height: "32px", border: "none", cursor: "pointer", fontSize: "16px" }}
+              >
+                ✕
+              </button>
             </div>
 
-            <div className="exam-panel-body">
-              {/* ===== ส่วนที่ 1: Nginx ===== */}
-              <div className="exam-section">
-                <div className="exam-section-header">
-                  <div className="exam-section-icon nginx">🌐</div>
-                  <div className="exam-section-title">ส่วนที่ 1 — Nginx Web Server</div>
-                  <span className="exam-section-score nginx">30 คะแนน</span>
-                </div>
-                <div className="exam-section-body">
-                  <ul className="exam-task-list">
-                    <li>ติดตั้ง Nginx บน Ubuntu Server ให้สามารถใช้งานได้</li>
-                    <li>สร้างหน้าเว็บ <strong>Portfolio แนะนำตัวเอง</strong> ที่มีองค์ประกอบดังนี้:</li>
-                    <li style={{ paddingLeft: '24px' }}>มี <strong>หัวข้อ (Heading)</strong> ที่แสดงชื่อ-นามสกุลของนักเรียน</li>
-                    <li style={{ paddingLeft: '24px' }}>มี <strong>ข้อมูลส่วนตัว</strong> เช่น ชื่อเล่น, อายุ, สาขาที่เรียน, งานอดิเรก ฯลฯ</li>
-                    <li style={{ paddingLeft: '24px' }}>⭐ มี <strong style={{ color: '#dc2626' }}>สโลแกนของตัวเอง</strong> — ห้ามขาด!</li>
-                    <li style={{ paddingLeft: '24px' }}>มี <strong>ตาราง (Table)</strong> อย่างน้อย 1 ตาราง แสดงข้อมูลอะไรก็ได้</li>
-                    <li style={{ paddingLeft: '24px' }}>มี <strong>ลิงก์ (Link)</strong> อย่างน้อย 1 ลิงก์ ที่สามารถคลิกไปยังเว็บอื่นได้</li>
-                    <li>เว็บไซต์ต้องสามารถเข้าถึงได้ผ่าน <strong>วง LAN</strong> (เครื่องอื่นในห้องเข้าดูได้)</li>
-                  </ul>
+            {/* Set Selection Tabs */}
+            <div style={{
+              background: "#0f172a", padding: "12px 20px", borderBottom: "1px solid rgba(255,255,255,0.08)",
+              display: "flex", gap: "6px", overflowX: "auto", flexWrap: "wrap"
+            }}>
+              <button
+                onClick={() => setActiveSetId("host")}
+                style={{
+                  background: activeSetId === "host" ? "#f97316" : "rgba(255,255,255,0.05)",
+                  color: activeSetId === "host" ? "#000" : "#cbd5e1",
+                  border: activeSetId === "host" ? "2px solid #fdba74" : "1px solid rgba(255,255,255,0.1)",
+                  padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700,
+                  cursor: "pointer", display: "flex", alignItems: "center", gap: "6px"
+                }}
+              >
+                <span>🖥️</span> ติดตั้ง Proxmox แม่ข่าย
+              </button>
 
-                  {/* ตัวอย่างผลลัพธ์ */}
-                  <div style={{ marginTop: '16px', marginBottom: '12px', fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
-                    📺 ตัวอย่างผลลัพธ์ที่ต้องการ (ไม่จำเป็นต้องเหมือนทุกอย่าง ขอให้มีองค์ประกอบครบ)
+              <div style={{ width: "1px", height: "26px", background: "rgba(255,255,255,0.15)", margin: "0 4px" }} />
+
+              {examSetsData.map(set => {
+                const isActive = activeSetId === set.id;
+                return (
+                  <button
+                    key={set.id}
+                    onClick={() => setActiveSetId(set.id)}
+                    style={{
+                      background: isActive ? `${set.badgeColor}25` : "rgba(255,255,255,0.03)",
+                      color: isActive ? "#fff" : "#94a3b8",
+                      border: isActive ? `2px solid ${set.badgeColor}` : "1px solid rgba(255,255,255,0.08)",
+                      padding: "6px 12px", borderRadius: "8px", fontSize: "12px", fontWeight: isActive ? 800 : 500,
+                      cursor: "pointer", display: "flex", alignItems: "center", gap: "6px", transition: "all 0.15s"
+                    }}
+                  >
+                    <span>{set.icon}</span>
+                    <span>{set.title}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Modal Body */}
+            <div className="exam-panel-body" style={{ padding: "20px 24px", background: "#0a0f1d" }}>
+              {activeSetId === "host" ? (
+                /* Proxmox Host Setup Guide */
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  <div style={{ background: "rgba(249, 115, 22, 0.12)", border: "1px solid rgba(249, 115, 22, 0.3)", borderRadius: "12px", padding: "16px" }}>
+                    <h3 style={{ fontSize: "16px", fontWeight: 800, color: "#fb923c", margin: "0 0 6px" }}>
+                      📌 ขั้นตอนมาตรฐาน: การติดตั้ง Proxmox VE บนเครื่องเซิร์ฟเวอร์ (Host Machine)
+                    </h3>
+                    <p style={{ fontSize: "12px", color: "#cbd5e1", margin: 0, lineHeight: 1.6 }}>
+                      ขั้นตอนนี้เป็นการติดตั้งระบบปฏิบัติการ Hypervisor ลงบนเครื่องเซิร์ฟเวอร์กลุ่ม นักศึกษาทุกคนใช้ค่า Configuration มาตรฐานเดียวกัน
+                    </p>
                   </div>
-                  <div style={{ border: '1px solid #cbd5e1', borderRadius: '10px', overflow: 'hidden', background: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-                    <div style={{ background: '#f1f5f9', padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '6px', borderBottom: '1px solid #e2e8f0' }}>
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#eab308' }} />
-                      <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e' }} />
-                      <div style={{ flex: 1, marginLeft: '8px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', color: '#64748b', fontFamily: "'JetBrains Mono', monospace" }}>http://192.168.x.x</div>
+
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+                    <div style={{ background: "rgba(30, 41, 59, 0.6)", borderRadius: "10px", padding: "14px", border: "1px solid rgba(255,255,255,0.06)" }}>
+                      <div style={{ fontSize: "12px", fontWeight: 700, color: "#38bdf8", marginBottom: "8px" }}>
+                        1. การเตรียมระบบ & เลือกไดรฟ์
+                      </div>
+                      <ul style={{ fontSize: "11.5px", color: "#cbd5e1", paddingLeft: "16px", margin: 0, lineHeight: 1.8 }}>
+                        <li>เปิด BIOS ตรวจสอบว่าเปิด <code>Intel VT-x / AMD-V</code> เป็น Enabled</li>
+                        <li>บูตตัวติดตั้ง เลือก <code>Install Proxmox VE (Graphical)</code></li>
+                        <li>อ่านและกดยอมรับข้อตกลงสิทธิ์การใช้งาน (EULA)</li>
+                        <li>เลือก Target Harddisk สำหรับติดตั้งระบบ (ข้อมูลเดิมจะถูกล้าง)</li>
+                      </ul>
                     </div>
-                    <div style={{ padding: '20px 24px', fontFamily: 'sans-serif' }}>
-                      <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#1e293b', marginBottom: '4px' }}>
-                        👤 นาย สมชาย ใจดี
-                        <span style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 400, marginLeft: '8px' }}>← Heading ชื่อ-นามสกุล</span>
-                      </h3>
-                      <div style={{ fontSize: '13px', color: '#6366f1', fontStyle: 'italic', marginBottom: '14px', paddingLeft: '2px' }}>
-                        &quot;ทำวันนี้ให้ดีที่สุด เพราะวันพรุ่งนี้ยังมาไม่ถึง&quot;
-                        <span style={{ fontSize: '10px', color: '#dc2626', fontStyle: 'normal', fontWeight: 700, marginLeft: '6px' }}>← ⭐ สโลแกน (ห้ามขาด!)</span>
+
+                    <div style={{ background: "rgba(30, 41, 59, 0.6)", borderRadius: "10px", padding: "14px", border: "1px solid rgba(255,255,255,0.06)" }}>
+                      <div style={{ fontSize: "12px", fontWeight: 700, color: "#38bdf8", marginBottom: "8px" }}>
+                        2. Timezone & รหัสผ่าน Root
                       </div>
-                      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px', marginBottom: '14px', fontSize: '12px', color: '#334155', lineHeight: 1.8 }}>
-                        <div>🎈 <strong>ชื่อเล่น:</strong> เก่ง</div>
-                        <div>🎂 <strong>อายุ:</strong> 19 ปี</div>
-                        <div>📚 <strong>สาขา:</strong> เทคโนโลยีสารสนเทศ</div>
-                        <div>🎮 <strong>งานอดิเรก:</strong> เล่นเกม, เขียนโค้ด</div>
-                        <span style={{ fontSize: '10px', color: '#94a3b8' }}>↑ ข้อมูลส่วนตัว (ใส่กี่อย่างก็ได้)</span>
+                      <ul style={{ fontSize: "11.5px", color: "#cbd5e1", paddingLeft: "16px", margin: 0, lineHeight: 1.8 }}>
+                        <li>Country: <code>Thailand</code> | Timezone: <code>Asia/Bangkok</code></li>
+                        <li>Keyboard Layout: <code>U.S. English</code></li>
+                        <li>Password: ตั้งรหัสผ่าน root สำหรับ Proxmox (เช่น <code>Proxmox@2026</code>)</li>
+                        <li>Email: ระบุอีเมลแจ้งเตือนของกลุ่ม</li>
+                      </ul>
+                    </div>
+
+                    <div style={{ background: "rgba(30, 41, 59, 0.6)", borderRadius: "10px", padding: "14px", border: "1px solid rgba(255,255,255,0.06)", gridColumn: "span 2" }}>
+                      <div style={{ fontSize: "12px", fontWeight: 700, color: "#f59e0b", marginBottom: "8px" }}>
+                        3. การตั้งค่า Management Network & การเข้าใช้งาน Web GUI
                       </div>
-                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '4px' }}>
-                        <thead><tr style={{ background: '#f1f5f9' }}>
-                          <th style={{ padding: '7px 10px', textAlign: 'left', borderBottom: '2px solid #cbd5e1', color: '#475569', fontWeight: 600 }}>วิชาที่ชอบ</th>
-                          <th style={{ padding: '7px 10px', textAlign: 'left', borderBottom: '2px solid #cbd5e1', color: '#475569', fontWeight: 600 }}>เหตุผล</th>
-                        </tr></thead>
-                        <tbody>
-                          <tr><td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>NOS</td><td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>ได้ลงมือทำจริง</td></tr>
-                          <tr><td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>Network</td><td style={{ padding: '6px 10px', borderBottom: '1px solid #e2e8f0', color: '#334155' }}>ชอบเรื่อง Server</td></tr>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px", fontFamily: "monospace", fontSize: "11.5px" }}>
+                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "8px", borderRadius: "6px" }}>
+                          <span style={{ color: "#94a3b8" }}>Hostname:</span><br /><strong style={{ color: "#60a5fa" }}>pve-server.lab.local</strong>
+                        </div>
+                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "8px", borderRadius: "6px" }}>
+                          <span style={{ color: "#94a3b8" }}>Management IP:</span><br /><strong style={{ color: "#4ade80" }}>192.168.1.50/24</strong>
+                        </div>
+                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "8px", borderRadius: "6px" }}>
+                          <span style={{ color: "#94a3b8" }}>Gateway:</span><br /><strong style={{ color: "#fcd34d" }}>192.168.1.1</strong>
+                        </div>
+                        <div style={{ background: "rgba(0,0,0,0.3)", padding: "8px", borderRadius: "6px" }}>
+                          <span style={{ color: "#94a3b8" }}>DNS Server:</span><br /><strong style={{ color: "#fcd34d" }}>8.8.8.8</strong>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: "10px", fontSize: "11.5px", color: "#a7f3d0", background: "rgba(16, 185, 129, 0.15)", padding: "8px 12px", borderRadius: "6px" }}>
+                        🌐 เมื่อรีบูตเสร็จสิ้น เปิดเบราว์เซอร์เข้า: <strong>https://192.168.1.50:8006</strong> ล็อกอินด้วย User: <code>root</code>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Individual Container Exam Set */
+                <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                  {/* Set Banner */}
+                  <div style={{
+                    background: `linear-gradient(135deg, ${currentSet.badgeColor}20 0%, rgba(15, 23, 42, 0.8) 100%)`,
+                    border: `1px solid ${currentSet.badgeColor}50`, borderRadius: "14px", padding: "16px",
+                    display: "flex", justifyContent: "space-between", alignItems: "center"
+                  }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <span style={{ fontSize: "24px" }}>{currentSet.icon}</span>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 800, color: "#fff" }}>
+                            ข้อสอบปฏิบัติการ {currentSet.title} : ระบบ {currentSet.role}
+                          </h3>
+                          <span style={{ fontSize: "12px", color: currentSet.badgeColor, fontWeight: 700 }}>
+                            CT ID: {currentSet.ctId} • Hostname: {currentSet.hostname} • IP: {currentSet.ip}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => copyToClipboard(`ssh root@${currentSet.ip.split('/')[0]}`, 'ssh')}
+                      style={{
+                        background: copiedText === 'ssh' ? '#22c55e' : 'rgba(255,255,255,0.1)',
+                        color: '#fff', border: '1px solid rgba(255,255,255,0.2)',
+                        padding: '6px 14px', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer'
+                      }}
+                    >
+                      {copiedText === 'ssh' ? '✓ คัดลอกคำสั่ง SSH แล้ว' : `📋 Copy SSH Command`}
+                    </button>
+                  </div>
+
+                  {/* Configuration Table Grid */}
+                  <div>
+                    <div style={{ fontSize: "12px", fontWeight: 700, color: "#f8fafc", marginBottom: "8px" }}>
+                      ⚙️ ตารางพารามิเตอร์ที่ต้องตั้งค่าใน Proxmox (ชุดที่ {currentSet.id}):
+                    </div>
+                    <div style={{
+                      background: "rgba(15, 23, 42, 0.8)", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.08)",
+                      overflow: "hidden"
+                    }}>
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px", fontFamily: "sans-serif" }}>
+                        <thead>
+                          <tr style={{ background: "rgba(30, 41, 59, 0.8)", color: "#94a3b8", textAlign: "left" }}>
+                            <th style={{ padding: "8px 14px", borderBottom: "1px solid rgba(255,255,255,0.1)", width: "20%" }}>เมนู / แท็บ</th>
+                            <th style={{ padding: "8px 14px", borderBottom: "1px solid rgba(255,255,255,0.1)", width: "35%" }}>รายการพารามิเตอร์</th>
+                            <th style={{ padding: "8px 14px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>ค่าที่ต้องกำหนดเป๊ะๆ (Values)</th>
+                          </tr>
+                        </thead>
+                        <tbody style={{ color: "#e2e8f0" }}>
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            <td style={{ padding: "8px 14px", fontWeight: 700, color: "#38bdf8" }} rowSpan={3}>General</td>
+                            <td style={{ padding: "8px 14px" }}>CT ID</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#4ade80", fontWeight: 700 }}>{currentSet.ctId}</td>
+                          </tr>
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            <td style={{ padding: "8px 14px" }}>Hostname</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#60a5fa", fontWeight: 700 }}>{currentSet.hostname}</td>
+                          </tr>
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            <td style={{ padding: "8px 14px" }}>Root Password</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#fcd34d" }}>{currentSet.password}</td>
+                          </tr>
+
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+                            <td style={{ padding: "8px 14px", fontWeight: 700, color: "#38bdf8" }}>Template</td>
+                            <td style={{ padding: "8px 14px" }}>OS Template</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#cbd5e1" }}>{currentSet.template}</td>
+                          </tr>
+
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            <td style={{ padding: "8px 14px", fontWeight: 700, color: "#38bdf8" }}>Disks</td>
+                            <td style={{ padding: "8px 14px" }}>Disk Size</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#a78bfa", fontWeight: 700 }}>{currentSet.disk}</td>
+                          </tr>
+
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+                            <td style={{ padding: "8px 14px", fontWeight: 700, color: "#38bdf8" }}>CPU</td>
+                            <td style={{ padding: "8px 14px" }}>Cores</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#a78bfa", fontWeight: 700 }}>{currentSet.cpu}</td>
+                          </tr>
+
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            <td style={{ padding: "8px 14px", fontWeight: 700, color: "#38bdf8" }}>Memory</td>
+                            <td style={{ padding: "8px 14px" }}>Memory (RAM) / Swap</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#a78bfa", fontWeight: 700 }}>{currentSet.ram} (Swap: {currentSet.swap})</td>
+                          </tr>
+
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+                            <td style={{ padding: "8px 14px", fontWeight: 700, color: "#38bdf8" }} rowSpan={3}>Network</td>
+                            <td style={{ padding: "8px 14px" }}>Bridge</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#cbd5e1" }}>vmbr0</td>
+                          </tr>
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+                            <td style={{ padding: "8px 14px" }}>IPv4 (Static)</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#4ade80", fontWeight: 700 }}>{currentSet.ip}</td>
+                          </tr>
+                          <tr style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", background: "rgba(255,255,255,0.01)" }}>
+                            <td style={{ padding: "8px 14px" }}>Gateway (IPv4) / DNS</td>
+                            <td style={{ padding: "8px 14px", fontFamily: "monospace", color: "#cbd5e1" }}>{currentSet.gateway} (DNS: {currentSet.dns})</td>
+                          </tr>
                         </tbody>
                       </table>
-                      <div style={{ fontSize: '10px', color: '#94a3b8', marginBottom: '10px' }}>↑ Table แสดงข้อมูลอะไรก็ได้</div>
-                      <div style={{ fontSize: '12px', color: '#334155' }}>
-                        🔗 เว็บที่ชอบ:{' '}<span style={{ color: '#2563eb', textDecoration: 'underline' }}>https://www.google.com</span>
-                        <span style={{ fontSize: '10px', color: '#94a3b8', marginLeft: '6px' }}>← Link ไปเว็บอื่น</span>
+                    </div>
+                  </div>
+
+                  {/* Tasks & Instructions */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px" }}>
+                    <div style={{ background: "rgba(30, 41, 59, 0.6)", borderRadius: "12px", padding: "16px", border: "1px solid rgba(255,255,255,0.06)" }}>
+                      <div style={{ fontSize: "13px", fontWeight: 800, color: "#38bdf8", marginBottom: "10px" }}>
+                        🛠️ ขั้นตอนการปฏิบัติงาน (4 ขั้นตอน):
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "12px", color: "#cbd5e1" }}>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <span style={{ color: "#38bdf8", fontWeight: 800 }}>1.</span>
+                          <span>คลิกปุ่ม <strong>Create CT</strong> ที่มุมบนขวาของหน้าเว็บ Proxmox</span>
+                        </div>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <span style={{ color: "#38bdf8", fontWeight: 800 }}>2.</span>
+                          <span>กรอกข้อมูลและจัดสรรทรัพยากร (General, Template, Disks, CPU, Memory, Network, DNS) ให้ตรงตามตารางเป๊ะๆ</span>
+                        </div>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <span style={{ color: "#38bdf8", fontWeight: 800 }}>3.</span>
+                          <span>กด <strong>Finish</strong> เพื่อสร้างตู้ จากนั้นคลิกเลือกตู้ <code>{currentSet.ctId}</code> แล้วกดปุ่ม <strong>Start</strong></span>
+                        </div>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <span style={{ color: "#38bdf8", fontWeight: 800 }}>4.</span>
+                          <span>ตรวจสอบว่าไอคอนตู้ขึ้นสถานะ <strong>สีเขียว (Running)</strong> และเปิด <strong>Console</strong> หรือ SSH ล็อกอินตรวจสอบ IP <code>{currentSet.ip.split('/')[0]}</code></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Proxmox CT Status Summary Preview */}
+                    <div style={{
+                      background: "#080c14", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.1)",
+                      display: "flex", flexDirection: "column", overflow: "hidden"
+                    }}>
+                      <div style={{
+                        background: "#1e293b", padding: "8px 12px", display: "flex", alignItems: "center", justifyContent: "space-between",
+                        borderBottom: "1px solid rgba(255,255,255,0.06)"
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                          <span style={{ width: 8, height: 8, borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
+                          <span style={{ fontSize: "11px", fontWeight: 700, color: "#f8fafc" }}>CT {currentSet.ctId} ({currentSet.hostname})</span>
+                        </div>
+                        <span style={{ background: "rgba(34, 197, 94, 0.2)", color: "#4ade80", fontSize: "10px", fontWeight: 700, padding: "2px 8px", borderRadius: "4px" }}>
+                          ● RUNNING
+                        </span>
+                      </div>
+
+                      <div style={{ padding: "14px", color: "#f8fafc", fontFamily: "sans-serif", flex: 1, display: "flex", flexDirection: "column", gap: "8px", fontSize: "11.5px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "4px" }}>
+                          <span style={{ color: "#94a3b8" }}>Node / Server:</span>
+                          <strong style={{ color: "#38bdf8" }}>pve-server</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "4px" }}>
+                          <span style={{ color: "#94a3b8" }}>IPv4 Address:</span>
+                          <strong style={{ color: "#4ade80", fontFamily: "monospace" }}>{currentSet.ip}</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "4px" }}>
+                          <span style={{ color: "#94a3b8" }}>CPU Cores:</span>
+                          <strong style={{ color: "#fcd34d" }}>{currentSet.cpu}</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,0.05)", paddingBottom: "4px" }}>
+                          <span style={{ color: "#94a3b8" }}>Memory / Swap:</span>
+                          <strong style={{ color: "#c084fc" }}>{currentSet.ram} / {currentSet.swap}</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <span style={{ color: "#94a3b8" }}>Disk Size:</span>
+                          <strong style={{ color: "#c084fc" }}>{currentSet.disk}</strong>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="exam-note" style={{ marginTop: '12px' }}>
-                    <strong>💡 หมายเหตุ:</strong> ยังไม่ต้องทำ Reverse Proxy — ขอแค่ใช้ Nginx เสิร์ฟหน้าเว็บได้ก็พอ สามารถตกแต่งเพิ่มเติมได้ตามใจชอบ แต่ต้องมีองค์ประกอบครบตามที่กำหนด
-                  </div>
-                </div>
-              </div>
 
-              {/* ===== ส่วนที่ 2: MariaDB ===== */}
-              <div className="exam-section">
-                <div className="exam-section-header">
-                  <div className="exam-section-icon mariadb">🗄️</div>
-                  <div className="exam-section-title">ส่วนที่ 2 — MariaDB Database</div>
-                  <span className="exam-section-score mariadb">30 คะแนน</span>
-                </div>
-                <div className="exam-section-body">
-                  <ul className="exam-task-list">
-                    <li>ติดตั้ง MariaDB Server บน Ubuntu Server ให้สำเร็จ</li>
-                    <li>ตรวจสอบว่า MariaDB Service ทำงานอยู่</li>
-                    <li>เข้าหน้า MariaDB ให้ได้ แล้วแสดงให้อาจารย์ดู</li>
-                  </ul>
-                  <div className="exam-note">
-                    <strong>💡 หมายเหตุ:</strong> ขอแค่เข้าหน้า MariaDB ได้ก็ผ่าน — ยังไม่ต้องสร้าง Database หรือตาราง
+                  {/* Rubric Score */}
+                  <div style={{
+                    background: "rgba(34, 197, 94, 0.1)", border: "1px solid rgba(34, 197, 94, 0.25)",
+                    borderRadius: "10px", padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center",
+                    fontSize: "11.5px", color: "#dcfce7"
+                  }}>
+                    <span>📊 <strong>เกณฑ์คะแนน (20 คะแนน):</strong> General & Template (5) + Specs Resources (5) + Network Static IP (5) + สถานะ Start Running (5)</span>
+                    <span style={{ fontWeight: 800, color: "#4ade80" }}>พร้อมตรวจหน้าเครื่อง</span>
                   </div>
                 </div>
-              </div>
-
-              {/* ===== ส่วนที่ 3: Firewall ===== */}
-              <div className="exam-section">
-                <div className="exam-section-header">
-                  <div className="exam-section-icon firewall">🔥</div>
-                  <div className="exam-section-title">ส่วนที่ 3 — Firewall (UFW) &nbsp;⚡ ท้าทาย!</div>
-                  <span className="exam-section-score firewall">40 คะแนน</span>
-                </div>
-                <div className="exam-section-body">
-                  <div style={{ marginBottom: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ background: '#fee2e2', color: '#dc2626', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.1</span>
-                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>เปิดใช้งาน UFW และตั้งค่า Default Policy (10 คะแนน)</span>
-                    </div>
-                    <ul className="exam-task-list">
-                      <li>เปิดใช้งาน UFW (Uncomplicated Firewall) บน Ubuntu Server</li>
-                      <li>ตั้ง Default Policy ให้ <strong>ปิดกั้น traffic ขาเข้าทั้งหมด</strong></li>
-                      <li>ตั้ง Default Policy ให้ <strong>อนุญาต traffic ขาออกทั้งหมด</strong></li>
-                    </ul>
-                  </div>
-                  <div style={{ marginBottom: '16px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ background: '#dbeafe', color: '#2563eb', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.2</span>
-                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>จัดการ Port — เปิด / ปิด (10 คะแนน)</span>
-                    </div>
-                    <ul className="exam-task-list">
-                      <li><strong>อนุญาต (Allow)</strong> port ต่อไปนี้:</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>22</code> (SSH) — ⚠️ ต้องเปิดก่อน enable UFW!</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>80</code> (HTTP) — เว็บ Nginx</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>443</code> (HTTPS)</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>53</code> ทั้ง TCP และ UDP (DNS)</li>
-                      <li><strong>ปิดกั้น (Deny)</strong> port ต่อไปนี้:</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>3306</code> (MySQL/MariaDB)</li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>8080</code></li>
-                      <li style={{ paddingLeft: '24px' }}>Port <code>23</code> (Telnet)</li>
-                      <li style={{ paddingLeft: '24px' }}>Port range <code>6000:6063</code> เฉพาะ TCP (X11)</li>
-                    </ul>
-                  </div>
-                  <div style={{ marginBottom: '16px', paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ background: '#fef3c7', color: '#b45309', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.3</span>
-                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>จัดการ IP — บล็อค / อนุญาตเฉพาะ (10 คะแนน)</span>
-                    </div>
-                    <ul className="exam-task-list">
-                      <li><strong>บล็อค IP</strong> ต่อไปนี้ไม่ให้เข้าถึงเครื่องได้เลย:</li>
-                      <li style={{ paddingLeft: '24px' }}>IP <code>192.168.1.100</code></li>
-                      <li style={{ paddingLeft: '24px' }}>IP <code>10.0.0.50</code></li>
-                      <li><strong>อนุญาตเฉพาะ IP</strong> ให้เข้า port ที่กำหนด:</li>
-                      <li style={{ paddingLeft: '24px' }}>อนุญาตให้ IP <code>192.168.1.1</code> เข้าถึงได้เฉพาะ port <code>22</code> เท่านั้น</li>
-                      <li><strong>อนุญาตทั้ง Subnet</strong> ให้เข้า port ที่กำหนด:</li>
-                      <li style={{ paddingLeft: '24px' }}>อนุญาตให้เครือข่าย <code>192.168.1.0/24</code> เข้าถึงได้เฉพาะ port <code>80</code></li>
-                    </ul>
-                  </div>
-                  <div style={{ paddingTop: '16px', borderTop: '1px dashed #e2e8f0' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-                      <span style={{ background: '#dcfce7', color: '#16a34a', fontSize: '11px', fontWeight: 700, padding: '2px 10px', borderRadius: '99px' }}>Mission 3.4</span>
-                      <span style={{ fontWeight: 700, fontSize: '13px', color: '#0f172a' }}>ตรวจสอบและ Bonus (10 คะแนน)</span>
-                    </div>
-                    <ul className="exam-task-list">
-                      <li>แสดงสถานะ Firewall แบบมีเลข rule ให้อาจารย์ตรวจ</li>
-                      <li>แสดงรายละเอียด Firewall ให้เห็น default policy ที่ตั้งค่าไว้</li>
-                      <li><strong>⭐ Bonus:</strong> ตั้ง Rate Limiting บน port SSH เพื่อป้องกัน Brute Force Attack (จำกัดไม่เกิน 6 ครั้งใน 30 วินาที)</li>
-                    </ul>
-                  </div>
-                  <div className="exam-note" style={{ marginTop: '16px' }}>
-                    <strong>⚠️ สำคัญมาก:</strong> ต้อง Allow port SSH <strong>ก่อน</strong>เปิด UFW เสมอ! ถ้าไม่ทำ จะไม่สามารถ SSH กลับเข้าเครื่องได้อีก — คิดลำดับการทำงานให้ดีก่อนเริ่ม
-                  </div>
-                </div>
-              </div>
-
-              {/* กฎการสอบ */}
-              <div className="exam-rules">
-                <h4>📌 กฎและข้อปฏิบัติในการสอบ</h4>
-                <ul>
-                  <li>ทำงานบน Proxmox ของตนเอง — ใช้ Ubuntu Server ที่ได้รับมอบหมาย</li>
-                  <li>ส่งงานทีละส่วน — อาจารย์จะตรวจให้คะแนนทีละส่วน</li>
-                  <li>สามารถเปิดดูเอกสาร/คู่มือได้ แต่ห้ามส่งคำตอบให้เพื่อน</li>
-                  <li>ถ้าติดปัญหา ให้ยกมือถามอาจารย์ได้</li>
-                  <li>เมื่อทำเสร็จแต่ละส่วน ให้เรียกอาจารย์ตรวจ</li>
-                </ul>
-              </div>
+              )}
             </div>
           </div>
         </>
@@ -9527,6 +9907,7 @@ function ExamNotificationBanner() {
     </>
   );
 }
+
 
 export default function Home() {
   const [weekGroups, setWeekGroups] = useState<WeekGroup[]>([]);
@@ -9724,6 +10105,31 @@ export default function Home() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: '700', fontSize: '12px', lineHeight: '1.2' }}>คู่มือติดตั้ง Proxmox VE</div>
               <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>วิธีการลง Hypervisor แบบละเอียด</div>
+            </div>
+          </button>
+
+          <button
+            className="pinned-exam-btn"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-exam-modal'))}
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '10px 14px',
+              borderRadius: '8px',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.15))',
+              color: '#f87171',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              textAlign: 'left'
+            }}
+          >
+            <span style={{ fontSize: '20px', flexShrink: 0 }}>📋</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: '800', fontSize: '12px', lineHeight: '1.2', color: '#fca5a5' }}>โจทย์สอบปฏิบัติ Proxmox & CT</div>
+              <div style={{ fontSize: '10px', color: '#cbd5e1', marginTop: '2px' }}>ชุดข้อสอบ 10 ชุดรายบุคคล</div>
             </div>
           </button>
         </div>
