@@ -1,6 +1,6 @@
 {
   "week": "9b",
-  "title": "สัปดาห์ 9-10: ทบทวนและปฏิบัติ FTP Server บน Proxmox Container",
+  "title": "ทบทวนและปฏิบัติ FTP Server บน Proxmox Container",
   "topic": "FTP Concept, vsftpd, User Permission, Passive Ports, Firewall และ FileZilla",
   "description": "คาบทบทวน FTP ใหม่ตั้งแต่ต้น เนื่องจากครั้งก่อนยังไม่ได้ทดลองจริงครบทุกคน นักเรียนจะติดตั้ง vsftpd ตั้งค่าผู้ใช้ กำหนดโฟลเดอร์ เปิด Firewall และทดสอบ Upload/Download ด้วย FileZilla บน Container ของตนเอง",
   "learningObjectives": [
@@ -15,7 +15,7 @@
     {
       "id": "w9b-s1",
       "type": "cover",
-      "tag": "Week 9-10 • FTP Review Lab",
+      "tag": "Unit 5 • FTP Review Lab",
       "title": "ทบทวนใหม่: FTP Server",
       "subtitle": "จากศูนย์จนทดสอบด้วย FileZilla",
       "body": "วันนี้เราจะเริ่ม FTP ใหม่แบบค่อย ๆ ทำ ทุกคนใช้ Container ของตัวเอง และจบคาบด้วยการอัปโหลด/ดาวน์โหลดไฟล์ได้จริง",

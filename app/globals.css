@@ -192,6 +192,37 @@ html, body { height: 100%; background: var(--bg-base); color: var(--text-primary
 }
 .col-box ul li::before { content: '–'; color: var(--text-muted); flex-shrink: 0; }
 
+/* Compact teaching deck: keep the complete Week 10 HTTPS lesson visible at 16:9. */
+.week10-compact.slide-content,
+.week10-compact.slide-two-col,
+.week10-compact.slide-summary { padding: 3.5% 5%; }
+.week10-compact .slide-tag { font-size: 13px; margin-bottom: 6px; }
+.week10-compact.slide-content h2,
+.week10-compact.slide-two-col h2,
+.week10-compact.slide-summary h2 {
+  font-size: clamp(25px,3vw,36px);
+  line-height: 1.2;
+  margin-bottom: 14px;
+}
+.week10-compact.slide-content ul { gap: 8px; }
+.week10-compact.slide-content ul li {
+  font-size: clamp(16px,1.5vw,22px);
+  line-height: 1.38;
+}
+.week10-compact .two-col-grid { gap: 14px; }
+.week10-compact .col-box { padding: 16px 18px; border-radius: 8px; }
+.week10-compact .col-box h3 { font-size: 18px; margin-bottom: 10px; }
+.week10-compact .col-box ul { gap: 8px; }
+.week10-compact .col-box ul li {
+  font-size: clamp(14px,1.35vw,18px);
+  line-height: 1.38;
+}
+.week10-compact.slide-summary ul { gap: 10px; }
+.week10-compact.slide-summary ul li {
+  font-size: clamp(17px,1.9vw,25px);
+  line-height: 1.45;
+}
+
 /* Scoring / Table */
 .slide-scoring { padding: 5% 6%; }
 .slide-scoring h2 {
@@ -718,3 +749,246 @@ svg:not(.security-diagram-svg) rect[fill="#f43f5e"] { fill: var(--red) !importan
   font-size: 12px;
 }
 
+/* Unit 7: Git -> GitHub -> Server animation */
+.git-autoplay-button {
+  min-width: 154px;
+  height: 38px;
+  border: 1px solid;
+  border-radius: 8px;
+  background: var(--bg-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 160ms ease, box-shadow 160ms ease;
+}
+.git-autoplay-button:hover { background: var(--bg-elevated); }
+.git-autoplay-button:focus-visible,
+.git-step-tabs button:focus-visible {
+  outline: 3px solid rgba(2, 132, 199, .28);
+  outline-offset: 2px;
+}
+.git-step-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 12px;
+}
+.git-step-tabs button {
+  min-height: 44px;
+  border: 1px solid;
+  border-radius: 7px;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  line-height: 1.25;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+.git-step-tabs button span {
+  display: inline-grid;
+  place-items: center;
+  width: 19px;
+  height: 19px;
+  margin-right: 5px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 10px;
+}
+.git-route-stage {
+  position: relative;
+  flex: 1;
+  min-height: 210px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: 54px;
+  padding: 20px 26px;
+  background: #f8fafc;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+.git-route-line {
+  position: absolute;
+  left: 15%;
+  right: 15%;
+  top: 50%;
+  height: 2px;
+  background: #cbd5e1;
+}
+.git-route-line::before,
+.git-route-line::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-top: 2px solid #94a3b8;
+  border-right: 2px solid #94a3b8;
+  transform: translateY(-50%) rotate(45deg);
+}
+.git-route-line::before { left: 25%; }
+.git-route-line::after { left: 75%; }
+.git-route-node {
+  position: relative;
+  z-index: 2;
+  min-height: 146px;
+  padding: 17px 14px 13px;
+  background: #fff;
+  border: 1px solid #d7dee8;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, .06);
+  transition: border-color 220ms ease, box-shadow 220ms ease;
+}
+.git-route-node.is-active {
+  border-color: var(--git-step-color);
+  box-shadow: 0 10px 26px color-mix(in srgb, var(--git-step-color) 16%, transparent);
+}
+.git-github-node { background: #0d1117; border-color: #30363d; }
+.git-github-node .git-node-title { color: #f0f6fc; }
+.git-github-node .git-node-detail { color: #9da7b3; }
+.git-node-label {
+  color: var(--git-step-color);
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+.git-node-title {
+  margin: 6px 0 4px;
+  color: #0f172a;
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 800;
+}
+.git-node-detail { color: #64748b; font-size: 11px; line-height: 1.35; }
+.git-node-status {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 10px;
+  font-size: 10.5px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+.git-local-event {
+  display: inline-block;
+  margin-top: 9px;
+  padding: 4px 8px;
+  border: 1px solid;
+  border-radius: 5px;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 800;
+}
+.git-online-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 8px;
+  color: #15803d;
+  font-size: 10px;
+  font-weight: 800;
+}
+.git-online-indicator span,
+.git-packet-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.git-route-packet {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  min-width: 122px;
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 9.5px;
+  font-weight: 800;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--git-step-color) 28%, transparent);
+}
+.git-packet-dot { background: #fff; }
+.git-step-explanation {
+  display: grid;
+  grid-template-columns: minmax(190px, .65fr) minmax(0, 1.8fr);
+  gap: 18px;
+  align-items: center;
+  padding: 13px 4px 0;
+}
+.git-command-pill {
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid;
+  border-radius: 7px;
+  background: #0d1117;
+  padding: 8px 12px;
+  font-family: "JetBrains Mono", "Courier New", monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+}
+.git-step-explanation strong { font-size: 13.5px; }
+.git-step-explanation p {
+  margin: 3px 0 0;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .git-step-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .git-route-stage { gap: 10px; padding-inline: 10px; min-height: 190px; }
+  .git-route-node { min-height: 135px; padding-inline: 8px; }
+  .git-node-title { font-size: 14px; }
+  .git-node-detail, .git-node-status { font-size: 9px; }
+  .git-route-packet { min-width: 88px; font-size: 8px; padding-inline: 6px; }
+  .git-step-explanation { grid-template-columns: 1fr; gap: 6px; }
+}
+
+/* Dense pages in the Git lesson stay fully visible in the 16:9 stage. */
+.git-dense-slide.slide-content { padding: 2.7% 5%; }
+.git-dense-slide.slide-content h2 { font-size: clamp(23px, 2.7vw, 32px); margin-bottom: 10px; }
+.git-dense-slide.slide-content ul { gap: 5px; }
+.git-dense-slide.slide-content ul li { font-size: clamp(14px, 1.3vw, 18px); line-height: 1.3; }
+.git-dense-slide .terminal-prompt-box > div:first-child { padding: 5px 12px !important; }
+.git-dense-slide .terminal-prompt-box > div:last-child {
+  padding: 7px 14px !important;
+  font-size: 11.5px !important;
+  line-height: 1.48 !important;
+}
+.git-summary-compact.slide-summary { padding: 2.8% 5%; }
+.git-summary-compact.slide-summary h2 {
+  font-size: clamp(24px, 2.8vw, 33px);
+  margin-bottom: 10px;
+}
+.git-summary-compact.slide-summary ul { gap: 6px; }
+.git-summary-compact.slide-summary ul li { font-size: clamp(15px, 1.55vw, 20px); line-height: 1.34; }
+.git-lab-compact.slide-lab { padding: 2.7% 5%; }
+.git-lab-compact.slide-lab h2 {
+  font-size: clamp(24px, 2.8vw, 33px);
+  line-height: 1.2;
+  margin-bottom: 7px;
+}
+.git-lab-compact .slide-tag { font-size: 13px; margin-bottom: 5px; }
+.git-lab-compact .lab-meta { margin-bottom: 9px; }
+.git-lab-compact .lab-meta span { font-size: 13px; }
+.git-lab-compact .lab-grid { gap: 18px; }
+.git-lab-compact .lab-section-title { font-size: 16px; margin-bottom: 8px; }
+.git-lab-compact .lab-col ul { gap: 6px; }
+.git-lab-compact .lab-col ul li { font-size: clamp(13px, 1.25vw, 17px); line-height: 1.33; gap: 8px; }
+.git-lab-compact .lab-col ul.objectives li::before { font-size: 15px; }
+.git-lab-compact .lab-col ul.steps li::before { font-size: 13px; min-width: 22px; }

@@ -1,6 +1,6 @@
 {
   "week": "13a",
-  "title": "สัปดาห์ที่ 13 (วันอังคาร): ทำความรู้จัก Proxmox VE การติดตั้ง และวิธีสร้าง Container",
+  "title": "ทำความรู้จัก Proxmox VE การติดตั้ง และวิธีสร้าง Container",
   "topic": "Proxmox VE Overview, Installation & LXC Container Creation",
   "description": "ทำความเข้าใจบทบาทของ Proxmox VE และประโยชน์ของ LXC Container, ขั้นตอนการติดตั้ง Proxmox VE แบบ Step-by-Step พร้อมหน้าจอจำลอง, และวิธีสร้าง LXC Container สำหรับใช้งานจริงอย่างเป็นระบบ",
   "learningObjectives": [
@@ -13,7 +13,7 @@
     {
       "id": "w13a-s1",
       "type": "cover",
-      "tag": "สัปดาห์ที่ 13 • วันอังคาร",
+      "tag": "หน่วยที่ 6 • วันอังคาร",
       "title": "Proxmox VE: พื้นฐาน การติดตั้ง และการสร้าง Container",
       "subtitle": "Proxmox VE Overview, Installation & Container Creation Guide",
       "body": "เรียนรู้ว่า Proxmox VE ทำอะไรได้บ้าง, ขั้นตอนการติดตั้งลงบนเครื่องเซิร์ฟเวอร์แบบ Step-by-Step และวิธีสร้าง LXC Container สำหรับใช้งานจริง",

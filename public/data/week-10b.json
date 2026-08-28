@@ -1,57 +1,368 @@
 {
   "week": "10b",
-  "title": "ปฏิบัติการติดตั้ง HTTPS และการชี้ทางพอร์ต SSL อัตโนมัติ",
-  "topic": "HTTPS Enforcement & SSL Configurations",
-  "description": "ฝึกปฏิบัติสร้างใบรับรอง Self-Signed SSL, ตั้งค่า Nginx บังคับใช้พอร์ต 443 (HTTPS) และจัดระเบียบส่งต่อการเชื่อมต่อจากพอร์ต 80 แบบ 301 Redirect ถาวร",
+  "title": "HTTPS ทำงานอย่างไร และตั้งค่าบน Nginx",
+  "topic": "SSL/TLS Certificate, Port 443 และ Self-signed Lab",
+  "description": "บทเรียนสรุปท้ายภาคแบบจบในคาบเดียว เริ่มจากความต่างของ HTTP กับ HTTPS คำศัพท์สำคัญ ขั้นตอน TLS Handshake และการลงมือเปิด HTTPS ให้ Nginx Reverse Proxy ที่เชื่อมกับ Node.js เดิม",
   "learningObjectives": [
-    "สร้างใบรับรองความปลอดภัย Self-Signed Certificate และ Private Key ด้วย OpenSSL ได้สำเร็จ",
-    "ปรับตั้งค่า Nginx Server Block ให้รองรับการทำงานพอร์ต SSL 443 ได้อย่างถูกต้อง",
-    "ตั้งสลับลิงก์ผู้ใช้อัตโนมัติจาก HTTP ไป HTTPS ทันทีที่ล็อกอินเข้ามา"
+    "อธิบายได้ว่า HTTPS ปกป้องความลับ ความถูกต้องของข้อมูล และช่วยยืนยันตัว Server อย่างไร",
+    "อธิบายคำศัพท์ TLS, Certificate, CA, Public Key, Private Key, SAN และ Session Key ด้วยภาษาของตนเองได้",
+    "สร้าง Self-signed Certificate และตั้งค่า Nginx ให้รับ HTTPS ที่พอร์ต 443 ได้",
+    "ตรวจสอบ Redirect, Certificate, Firewall และแก้ปัญหาเบื้องต้นจากอาการที่พบได้"
   ],
   "slides": [
     {
       "id": "w10b-s1",
       "type": "cover",
-      "title": "ปฏิบัติการติดตั้ง HTTPS และตั้งค่า Redirect ความปลอดภัย",
-      "subtitle": "HTTPS Enforcement & SSL Configurations Lab",
-      "tag": "สัปดาห์ที่ 10 (วันศุกร์ - 2 ชม.)",
-      "body": "ในคาบปฏิบัติการ 2 ชั่วโมงนี้ ทุกคนจะได้ลองใช้ openssl ออกใบรับรองส่วนตัว นำไปติดตั้งบนเว็บเซิร์ฟเวอร์ Nginx และเขียนกฎการ redirect พอร์ตเพื่อให้ผู้ใช้ทุกคนใช้งานได้เฉพาะช่องทางที่เข้ารหัสปลอดภัยสูง",
-      "speakerNotes": "สวัสดีครับวันศุกร์ วันนี้เราจะทำให้เว็บ LNMP ของเรารับการสื่อสารแบบ HTTPS แม่กุญแจล็อกเพื่อความมั่นใจในการกรอกข้อมูลต่างๆ ครับ"
+      "title": "HTTPS ทำงานอย่างไร",
+      "subtitle": "และตั้งค่าบน Nginx ให้ใช้งานได้จริง",
+      "tag": "หน่วยที่ 6 • สรุปจบในคาบเดียว",
+      "body": "จากเว็บ HTTP เดิม ไปสู่ HTTPS พอร์ต 443 พร้อมเข้าใจ TLS Certificate และทดลองสร้าง Self-signed Certificate ด้วยตนเอง",
+      "speakerNotes": "เปิดคาบด้วยคำถามว่า เวลาเห็น https หน้าชื่อเว็บไซต์ เรามั่นใจอะไรได้บ้าง จากนั้นบอกนักเรียนว่าเราจะตอบคำถามนี้ด้วยทั้งภาพการทำงานและการตั้งค่า Server จริง"
     },
     {
       "id": "w10b-s2",
-      "type": "lab",
-      "title": "Lab 10.2 — ออกใบรับรองความปลอดภัยและบังคับใช้ HTTPS กับ Nginx",
-      "tag": "ปฏิบัติการประจำวันศุกร์",
-      "duration": "1.5 ชั่วโมง",
-      "objectives": [
-        "สร้างไฟล์ใบรับรอง Self-signed SSL สำเร็จด้วยคำสั่ง OpenSSL",
-        "แก้ไขคอนฟิก Nginx เพื่อรองรับพอร์ต 443 และสั่ง Redirect 301 ได้ถูกต้อง",
-        "เปิดเบราว์เซอร์เข้าลิงก์และตรวจเช็คความปลอดภัยสำเร็จ"
+      "type": "two-col",
+      "title": "HTTP กับ HTTPS ต่างกันตรงไหน",
+      "tag": "เริ่มจากภาพรวม",
+      "cols": [
+        {
+          "icon": "80",
+          "title": "HTTP — เหมือนไปรษณียบัตร",
+          "items": [
+            "ใช้พอร์ต `80` เป็นค่ามาตรฐาน",
+            "ข้อมูลเป็น `Plaintext` หรือข้อความที่ยังไม่เข้ารหัส",
+            "ถ้ามีผู้ดักข้อมูลระหว่างทาง อาจอ่าน Request และ Response ได้",
+            "ไม่มี Certificate มาช่วยตรวจว่า Server เป็นเครื่องที่เราตั้งใจติดต่อจริงหรือไม่"
+          ]
+        },
+        {
+          "icon": "443",
+          "title": "HTTPS — เหมือนซองจดหมายที่ปิดผนึก",
+          "items": [
+            "คือ HTTP ที่ทำงานอยู่ภายในช่องทาง `TLS`",
+            "ใช้พอร์ต `443` เป็นค่ามาตรฐาน",
+            "ข้อมูลระหว่าง Client กับ Server ถูกเข้ารหัส",
+            "Certificate ช่วยให้ Browser ตรวจสอบตัวตนของ Server"
+          ]
+        }
       ],
-      "steps": [
-        "1. สร้างโฟลเดอร์สำหรับจัดเก็บกุญแจเข้ารหัส: \n$ sudo mkdir -p /etc/nginx/ssl",
-        "2. สั่งออกใบรับรอง Self-signed แบบไม่มีรหัสผ่านผ่าน OpenSSL: \n$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/self.key -out /etc/nginx/ssl/self.crt \n(กรอกรหัสประเทศ TH และข้อมูลพื้นฐานตามข้อบังคับ)",
-        "3. แก้ไขไฟล์คอนฟิกพอร์ตของ Nginx: \n$ sudo nano /etc/nginx/sites-available/default",
-        "4. เพิ่มบล็อกรับฟังพอร์ต 443 ร่วมกับใบรับรอง พร้อมจัดทำระบบ Redirect บนพอร์ต 80: \nserver {\n    listen 80 default_server;\n    return 301 https://$host$request_uri;\n}\nserver {\n    listen 443 ssl default_server;\n    ssl_certificate /etc/nginx/ssl/self.crt;\n    ssl_certificate_key /etc/nginx/ssl/self.key;\n    root /var/www/html;\n    index index.php index.html;\n}",
-        "5. ตรวจสอบการตั้งค่าและรีสตาร์ทบริการ: \n$ sudo nginx -t \n$ sudo systemctl restart nginx",
-        "6. อนุมัติพอร์ต 443 บนไฟร์วอลล์เครื่อง: \n$ sudo ufw allow 443/tcp",
-        "7. พิมพ์เข้าเว็บ http://[IP เครื่องตนเอง] บนเบราว์เซอร์ และทดสอบการเปลี่ยนเส้นทางไปยัง https:// อัตโนมัติ"
-      ],
-      "speakerNotes": "คอยชี้แจงเด็กๆ เรื่องความแตกต่างของใบรับรอง Self-signed กับ Let's Encrypt ว่าในระบบอินเทอร์เน็ตจริงจะใช้ Let's Encrypt เพื่อรับสัญลักษณ์แม่กุญแจล็อกสีเขียวสวยงาม"
+      "speakerNotes": "ย้ำว่า HTTPS ไม่ใช่โปรโตคอลเว็บคนละแบบ แต่ยังเป็น HTTP เดิมที่ถูกห่อด้วย TLS ก่อนวิ่งผ่านเครือข่าย"
     },
     {
       "id": "w10b-s3",
-      "type": "summary",
-      "title": "สรุปสัปดาห์ที่ 10",
-      "tag": "Week Summary",
+      "type": "content",
+      "title": "HTTPS ช่วย 3 เรื่อง และไม่ได้ช่วยทุกเรื่อง",
+      "tag": "เป้าหมายของความปลอดภัย",
       "items": [
-        "✅ ตั้งค่าการทำงานของ Nginx ทำหน้าที่เป็น Reverse Proxy สมบูรณ์",
-        "✅ ออกใบรับรอง SSL/TLS และบังคับใช้การเปลี่ยนเส้นทางทราฟฟิกไปยัง HTTPS พอร์ต 443",
-        "📝 ส่งงาน: ผลลัพธ์การเปลี่ยนเส้นทาง https:// และสิทธิ์การอ่านกุญแจเข้ารหัส",
-        "📚 สัปดาห์หน้า: การศึกษาและใช้งาน Container Platform (Proxmox LXC & Docker)"
+        "`Confidentiality` — ความลับ: คนที่ดักข้อมูลระหว่างทางอ่านเนื้อหาไม่ได้",
+        "`Integrity` — ความครบถ้วน: ตรวจได้ว่าข้อมูลไม่ถูกแก้ระหว่างส่ง",
+        "`Authentication` — การยืนยันตัวตน: Certificate ช่วยตรวจว่าเรากำลังคุยกับ Server ใด",
+        "ข้อจำกัด: HTTPS ไม่ได้ยืนยันว่าเจ้าของเว็บไซต์เป็นคนดี และไม่ได้ป้องกันไวรัสหรือช่องโหว่ในโปรแกรมทั้งหมด"
       ],
-      "speakerNotes": "จบคลาสวันศุกร์และย้ำให้นักศึกษารู้จักรักษาความลับของ Private Key (.key) ห้ามแจกจ่ายให้ผู้อื่นเด็ดขาด"
+      "speakerNotes": "ยกตัวอย่างเว็บไซต์หลอกลวงก็สามารถมี HTTPS ได้ เพราะแม่กุญแจบอกว่าช่องทางถูกเข้ารหัส ไม่ได้บอกว่าเนื้อหาหรือเจ้าของเว็บน่าเชื่อถือเสมอไป"
+    },
+    {
+      "id": "w10b-s4",
+      "type": "two-col",
+      "title": "คำศัพท์การเข้ารหัสที่ต้องรู้",
+      "tag": "ศัพท์ยาก แปลให้ง่าย",
+      "cols": [
+        {
+          "icon": "A",
+          "title": "ข้อมูลเปลี่ยนรูปอย่างไร",
+          "items": [
+            "`Plaintext` — ข้อมูลต้นฉบับที่คนอ่านเข้าใจได้",
+            "`Encryption` — กระบวนการเปลี่ยนข้อมูลให้อ่านไม่ออก",
+            "`Ciphertext` — ข้อมูลหลังเข้ารหัส ซึ่งดูเหมือนข้อความไร้ความหมาย",
+            "`Decryption` — เปลี่ยน Ciphertext กลับเป็นข้อมูลเดิม"
+          ]
+        },
+        {
+          "icon": "B",
+          "title": "กุญแจใช้ทำอะไร",
+          "items": [
+            "`Key` — ค่าที่ใช้ควบคุมการเข้ารหัสหรือถอดรหัส",
+            "`Session Key` — กุญแจชั่วคราวของการเชื่อมต่อหนึ่งครั้ง",
+            "TLS ใช้วิธีแบบกุญแจคู่ตอนเริ่มต้น แล้วใช้ Session Key ส่งข้อมูลจริงเพราะทำงานได้เร็วกว่า",
+            "เมื่อจบการเชื่อมต่อ Session Key นั้นจะไม่ถูกนำไปใช้ตลอดไป"
+          ]
+        }
+      ],
+      "speakerNotes": "ให้เด็กลองเล่าเส้นทาง Plaintext ไปเป็น Ciphertext แล้วกลับมาเป็น Plaintext อีกครั้ง โดยยังไม่ต้องลงรายละเอียดคณิตศาสตร์ของการเข้ารหัส"
+    },
+    {
+      "id": "w10b-s5",
+      "type": "two-col",
+      "title": "TLS และ Certificate คืออะไร",
+      "tag": "ศัพท์ที่เห็นบ่อยบน Server",
+      "cols": [
+        {
+          "icon": "TLS",
+          "title": "SSL กับ TLS",
+          "items": [
+            "`SSL` เป็นชื่อเทคโนโลยีรุ่นเก่าที่เลิกใช้งานแล้ว",
+            "`TLS` คือมาตรฐานรุ่นใหม่ที่ HTTPS ใช้อยู่จริง",
+            "คนทั่วไปยังเรียกติดปากว่า SSL Certificate แม้ระบบปัจจุบันใช้ TLS",
+            "ในการตั้งค่านี้เราจะอนุญาต `TLS 1.2` และ `TLS 1.3`"
+          ]
+        },
+        {
+          "icon": "CERT",
+          "title": "Certificate และกุญแจคู่",
+          "items": [
+            "`Certificate` — เอกสารดิจิทัลที่บอกชื่อหรือ IP อายุ และ Public Key ของ Server",
+            "`Public Key` — กุญแจสาธารณะที่ส่งให้ Client ดูได้",
+            "`Private Key` — กุญแจลับที่ต้องเก็บไว้บน Server และห้ามแจก",
+            "`SAN` — รายชื่อ Domain หรือ IP ที่ Certificate ใบนี้ใช้ยืนยันได้"
+          ]
+        }
+      ],
+      "speakerNotes": "เปรียบ Certificate เป็นบัตรประจำตัว ส่วน Private Key เป็นลายเซ็นลับของเจ้าของบัตร ถ้า Private Key หลุด คนอื่นอาจปลอมเป็น Server ของเราได้"
+    },
+    {
+      "id": "w10b-s6",
+      "type": "content",
+      "title": "พอร์ต 80, พอร์ต 443 และ Redirect ทำงานร่วมกัน",
+      "tag": "เส้นทางของ Request",
+      "items": [
+        "`Port 80` รับ HTTP เพื่อบอกทางแก่ผู้ใช้ที่ยังพิมพ์ http://",
+        "`301 Moved Permanently` คือคำตอบว่า URL นี้ถูกย้ายไปที่ใหม่แบบถาวร",
+        "Browser รับคำตอบ 301 แล้วเปิด `https://` ที่พอร์ต `443` แทน",
+        "เส้นทางที่เห็น: `http://SERVER_IP` → `301 Redirect` → `https://SERVER_IP`",
+        "การเปิดพอร์ต 443 อย่างเดียวไม่ทำให้พอร์ต 80 Redirect อัตโนมัติ เราต้องเขียนกฎใน Nginx"
+      ],
+      "speakerNotes": "วาดลูกศรสามช่วงบนกระดาน แล้วชี้ว่าคำตอบ 301 มีหน้าที่บอก Browser ให้สร้าง Request ใหม่ไปยัง HTTPS ไม่ได้เปลี่ยนข้อมูลเดิมกลางทาง"
+    },
+    {
+      "id": "w10b-s7",
+      "type": "tls-handshake-anim",
+      "title": "TLS Handshake: ก่อนส่งหน้าเว็บเกิดอะไรขึ้น",
+      "tag": "Animation • TLS Handshake",
+      "speakerNotes": "ปล่อยให้ภาพเล่นครบหนึ่งรอบก่อน แล้วกดหยุดเล่นอัตโนมัติ ใช้ปุ่มแต่ละขั้นอธิบายช้า ๆ ว่า Handshake เกิดก่อน Request และ Response ของเว็บไซต์"
+    },
+    {
+      "id": "w10b-s8",
+      "type": "two-col",
+      "title": "Self-signed กับ CA-signed ต่างกันอย่างไร",
+      "tag": "เลือก Certificate ให้ตรงงาน",
+      "cols": [
+        {
+          "icon": "LAB",
+          "title": "Self-signed Certificate",
+          "items": [
+            "Server สร้างและเซ็น Certificate ให้ตนเอง",
+            "ข้อมูลยังถูกเข้ารหัส แต่ Browser ไม่รู้จักผู้รับรอง จึงแสดงคำเตือน",
+            "เหมาะกับห้องทดลอง ระบบภายใน หรือการทดสอบชั่วคราว",
+            "ในคาบนี้ใช้แบบนี้ เพราะเราเข้าด้วย IP ภายในและไม่มี Domain สาธารณะ"
+          ]
+        },
+        {
+          "icon": "CA",
+          "title": "CA-signed Certificate",
+          "items": [
+            "`CA` หรือ Certificate Authority คือผู้รับรองที่ Browser เชื่อถือ",
+            "CA ตรวจสิทธิ์การควบคุม Domain ก่อนออก Certificate",
+            "เหมาะกับเว็บไซต์จริงบน Internet เช่น Certificate จาก Let's Encrypt",
+            "อย่ากดข้ามคำเตือน Certificate บนเว็บไซต์สาธารณะที่เราไม่รู้จัก"
+          ]
+        }
+      ],
+      "speakerNotes": "แหล่งอ่านเพิ่ม: https://letsencrypt.org/docs/ ย้ำอีกครั้งว่า Self-signed เข้ารหัสได้ แต่ยังไม่มีบุคคลที่สามมารับรองตัวตน"
+    },
+    {
+      "id": "w10b-s9",
+      "type": "summary",
+      "title": "ภาพรวมการลงมือทำ 6 ขั้น",
+      "tag": "แผนปฏิบัติในคาบ",
+      "items": [
+        "1. ตรวจ IP และตรวจว่า Node.js พอร์ต 3000 ยังทำงาน",
+        "2. สำรองไฟล์ Nginx เดิม และสร้างโฟลเดอร์เก็บ Certificate",
+        "3. สร้าง Self-signed Certificate และ Private Key ด้วย OpenSSL",
+        "4. เพิ่ม Redirect พอร์ต 80 และ HTTPS พอร์ต 443 ในไฟล์ `myapp`",
+        "5. ตรวจ Config, Reload Nginx และอนุญาตผ่าน UFW",
+        "6. ทดสอบจาก Browser และอ่านรายละเอียดใน Certificate"
+      ],
+      "speakerNotes": "ให้นักเรียนดูภาพรวมทั้งหมดก่อนเริ่มลงมือ เพื่อรู้ว่าตอนนี้กำลังอยู่ขั้นใดและแต่ละขั้นเชื่อมกันอย่างไร"
+    },
+    {
+      "id": "w10b-s10",
+      "type": "content",
+      "title": "ขั้นที่ 1 — ตรวจของเดิมและสำรองไฟล์",
+      "tag": "ทำใน Proxmox GUI Console",
+      "items": [
+        "ทำ 4 อย่างก่อนเริ่ม: หา IP, ทดสอบ Node.js, สำรอง Config และสร้างโฟลเดอร์เก็บ Certificate",
+        "$ hostname -I",
+        "$ curl http://127.0.0.1:3000",
+        "$ sudo cp /etc/nginx/sites-available/myapp /etc/nginx/sites-available/myapp.bak",
+        "$ sudo mkdir -p /etc/nginx/ssl",
+        "`hostname -I` ใช้ดู IP ส่วน `curl` ใช้ถาม Node.js โดยตรง ถ้าเห็น HTML แปลว่าพอร์ต 3000 พร้อมทำงาน",
+        "`cp` สร้างไฟล์สำรองชื่อ `myapp.bak` และ `mkdir -p` สร้างโฟลเดอร์ `ssl` ถ้ายังไม่มี",
+        "Checkpoint: รู้ IP, Node.js ตอบกลับ, มีไฟล์ `myapp.bak` และโฟลเดอร์ `ssl`"
+      ],
+      "speakerNotes": "ทุกคำสั่งในสไลด์นี้ทำที่ Console ของ Container ใน Proxmox ได้ ไม่จำเป็นต้อง SSH หาก curl พอร์ต 3000 ไม่ตอบ ให้เปิด Node.js จากบทเรียนเดิมก่อนเดินต่อ"
+    },
+    {
+      "id": "w10b-s11",
+      "type": "content",
+      "title": "ขั้นที่ 2 — สร้าง Certificate และ Private Key",
+      "tag": "OpenSSL • เปลี่ยน IP ให้ตรงเครื่อง",
+      "items": [
+        "ตัวอย่างใช้ IP `192.168.1.120` นักเรียนต้องเปลี่ยน IP ทั้ง 2 ตำแหน่งให้เป็น IP ของ Container ตนเอง",
+        "$ sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\",
+        "    -keyout /etc/nginx/ssl/server.key \\",
+        "    -out /etc/nginx/ssl/server.crt \\",
+        "    -subj \"/C=TH/O=NOS-Lab/CN=192.168.1.120\" \\",
+        "    -addext \"subjectAltName=IP:192.168.1.120\"",
+        "$ sudo ls -l /etc/nginx/ssl",
+        "Checkpoint: ต้องเห็น `server.crt` และ `server.key` โดยไฟล์ `.key` คือความลับของ Server"
+      ],
+      "speakerNotes": "แหล่งอ้างอิงคำสั่ง: https://docs.openssl.org/3.2/man1/openssl-req/ ให้หยุดตรวจ IP ทีละคนก่อนกด Enter เพราะถ้า SAN ไม่ตรง Browser จะรายงานชื่อหรือ IP ไม่ตรง Certificate"
+    },
+    {
+      "id": "w10b-s12",
+      "type": "two-col",
+      "title": "อ่านคำสั่ง OpenSSL ทีละส่วน",
+      "tag": "อย่าพิมพ์โดยไม่รู้ความหมาย",
+      "cols": [
+        {
+          "icon": "01",
+          "title": "สร้างอะไรและอยู่นานเท่าไร",
+          "items": [
+            "`req` — สร้างหรือจัดการคำขอและ Certificate",
+            "`-x509` — สร้าง Certificate แบบ X.509 โดยตรง",
+            "`-nodes` — ไม่ใส่รหัสผ่านให้ Private Key เพื่อให้ Nginx เปิดบริการอัตโนมัติได้",
+            "`-days 365` — กำหนดอายุ 365 วัน",
+            "`-newkey rsa:2048` — สร้างกุญแจ RSA ใหม่ขนาด 2048 บิต"
+          ]
+        },
+        {
+          "icon": "02",
+          "title": "บันทึกที่ไหนและยืนยันอะไร",
+          "items": [
+            "`-keyout` — ตำแหน่งบันทึก Private Key",
+            "`-out` — ตำแหน่งบันทึก Certificate",
+            "`-subj` — ระบุข้อมูลเจ้าของโดยไม่ต้องตอบคำถามทีละช่อง",
+            "`CN` — Common Name หรือชื่อหลักที่ใส่ใน Certificate",
+            "`subjectAltName` — ระบุ IP ที่ Browser ต้องใช้ตรวจให้ตรง"
+          ]
+        }
+      ],
+      "speakerNotes": "ชี้ให้เห็นว่าไฟล์ crt แจกให้ Client ตรวจได้ แต่ key ห้ามส่งออกจาก Server แม้ทั้งสองไฟล์จะถูกสร้างพร้อมกันก็ตาม"
+    },
+    {
+      "id": "w10b-s13",
+      "type": "https-nginx-config",
+      "title": "ขั้นที่ 3 — ตั้งค่า Nginx ให้ใช้ HTTPS",
+      "tag": "Nginx Server Block",
+      "speakerNotes": "แหล่งอ้างอิง: https://nginx.org/en/docs/http/configuring_https_servers.html ให้นักเรียนสังเกตว่าบล็อกพอร์ต 80 มีหน้าที่ Redirect เท่านั้น ส่วนบล็อก 443 จึงค่อยถอดรหัสและส่งต่อไป Node.js พอร์ต 3000"
+    },
+    {
+      "id": "w10b-s14",
+      "type": "content",
+      "title": "ขั้นที่ 4 — ตรวจ Config ก่อน Reload",
+      "tag": "ทดสอบก่อนให้บริการจริง",
+      "items": [
+        "ตรวจไวยากรณ์ก่อน ถ้าผิดระบบจะบอกชื่อไฟล์และเลขบรรทัด ต้องเห็น `syntax is ok` และ `test is successful` จึงทำต่อ",
+        "$ sudo nginx -t",
+        "$ sudo systemctl reload nginx",
+        "$ sudo ufw allow 'Nginx Full'",
+        "$ sudo ufw status",
+        "`Nginx Full` เปิดทั้ง HTTP พอร์ต 80 และ HTTPS พอร์ต 443",
+        "Checkpoint: ห้าม Reload ถ้า `nginx -t` ยังไม่ผ่าน และ `ufw status` ต้องเห็น Nginx Full"
+      ],
+      "speakerNotes": "อธิบายว่า reload อ่าน Config ใหม่โดยไม่หยุดบริการทั้งหมด ส่วน nginx -t เป็นด่านป้องกันไม่ให้ Config ที่พิมพ์ผิดกระทบ Server"
+    },
+    {
+      "id": "w10b-s15",
+      "type": "two-col",
+      "title": "ขั้นที่ 5 — ทดสอบจาก Browser ของเครื่องนักเรียน",
+      "tag": "พิสูจน์จาก Client อีกเครื่อง",
+      "cols": [
+        {
+          "icon": "TEST",
+          "title": "สิ่งที่ต้องทดลอง",
+          "items": [
+            "เปิด `http://CONTAINER_IP` ไม่ต้องพิมพ์ https ก่อน",
+            "ดูว่า URL เปลี่ยนเป็น `https://CONTAINER_IP` หรือไม่",
+            "ในห้อง Lab นี้จะเห็นคำเตือน Self-signed เป็นเรื่องที่คาดไว้",
+            "เลือก Advanced แล้ว Proceed เฉพาะ IP ของ Lab ที่รู้ว่าเป็นเครื่องตนเอง",
+            "หน้าเว็บ Node.js เดิมต้องยังแสดงผ่าน HTTPS ได้"
+          ]
+        },
+        {
+          "icon": "CHECK",
+          "title": "หลักฐานว่าทำงานครบ",
+          "items": [
+            "Redirect ทำงาน: พิมพ์ http แล้ว Browser เปลี่ยนเป็น https",
+            "TLS ทำงาน: Browser แสดงรายละเอียด Certificate ได้",
+            "SAN ตรง: Certificate ระบุ IP เดียวกับที่ใช้เปิด",
+            "Reverse Proxy ทำงาน: หน้าเว็บจาก Node.js พอร์ต 3000 แสดงได้",
+            "บนเว็บไซต์สาธารณะจริง อย่ากดข้ามคำเตือน Certificate ที่ผิดปกติ"
+          ]
+        }
+      ],
+      "speakerNotes": "ถามนักเรียนทีละหลักฐานว่าแต่ละอย่างพิสูจน์ส่วนใด Redirect พิสูจน์พอร์ต 80, Certificate พิสูจน์ TLS และหน้า Node.js พิสูจน์ Reverse Proxy"
+    },
+    {
+      "id": "w10b-s16",
+      "type": "content",
+      "title": "ขั้นที่ 6 — อ่าน Certificate จาก Terminal",
+      "tag": "ตรวจข้อมูล ไม่เดา",
+      "items": [
+        "ใช้คำสั่งนี้ดูข้อมูลสำคัญโดยไม่แสดง Private Key",
+        "$ sudo openssl x509 -in /etc/nginx/ssl/server.crt -noout -subject -issuer -dates -ext subjectAltName",
+        "`subject` บอกว่าออกให้ใคร ส่วน `issuer` บอกผู้ออก ถ้าสองค่านี้เหมือนกันแสดงว่าเป็น Self-signed",
+        "`notBefore / notAfter` คือวันเริ่มใช้และวันหมดอายุ",
+        "`Subject Alternative Name` คือรายชื่อ Domain หรือ IP ที่ Certificate ยืนยันได้",
+        "Checkpoint: SAN ต้องมี IP เดียวกับ URL ที่ใช้เปิด"
+      ],
+      "speakerNotes": "ให้นักเรียนจับคู่ผลที่ Terminal กับหน้ารายละเอียด Certificate ใน Browser เพื่อเห็นว่าทั้งสองหน้ากำลังอ่านไฟล์ใบเดียวกัน"
+    },
+    {
+      "id": "w10b-s17",
+      "type": "two-col",
+      "title": "ถ้าไม่สำเร็จ ให้ดูอาการก่อนแก้",
+      "tag": "Troubleshooting",
+      "cols": [
+        {
+          "icon": "ERROR",
+          "title": "อาการและสาเหตุที่เป็นไปได้",
+          "items": [
+            "`nginx -t` ไม่ผ่าน — ดูชื่อไฟล์และเลขบรรทัดที่ระบบแจ้ง",
+            "Connection refused — Nginx ไม่ทำงาน หรือ Firewall ยังไม่อนุญาต 443",
+            "`502 Bad Gateway` — Nginx ทำงาน แต่ Node.js พอร์ต 3000 ไม่ตอบ",
+            "Certificate file error — พาธ `.crt` หรือ `.key` ใน Config ไม่ตรงไฟล์จริง",
+            "IP mismatch — IP ใน URL ไม่อยู่ใน SAN ของ Certificate"
+          ]
+        },
+        {
+          "icon": "FIX",
+          "title": "ตรวจและย้อนกลับอย่างปลอดภัย",
+          "items": [
+            "ดูบริการ: `sudo systemctl status nginx`",
+            "ดูพอร์ต: `sudo ss -lntp | grep -E ':80|:443|:3000'`",
+            "คืนไฟล์สำรอง: `sudo cp /etc/nginx/sites-available/myapp.bak /etc/nginx/sites-available/myapp`",
+            "ตรวจอีกครั้ง: `sudo nginx -t`",
+            "เมื่อผ่านแล้ว: `sudo systemctl reload nginx`"
+          ]
+        }
+      ],
+      "speakerNotes": "ฝึกให้นักเรียนอ่านอาการก่อนแก้ 502 ไม่ใช่ปัญหา Certificate เพราะ TLS ผ่านมาถึง Nginx แล้ว แต่บริการปลายทางพอร์ต 3000 ไม่ตอบ"
+    },
+    {
+      "id": "w10b-s18",
+      "type": "summary",
+      "title": "สรุป HTTPS ให้จบใน 6 ประโยค",
+      "tag": "ทบทวนท้ายคาบ",
+      "items": [
+        "HTTPS คือ HTTP ที่รับส่งผ่านช่องทาง TLS ซึ่งเข้ารหัสข้อมูล",
+        "TLS Handshake เกิดก่อนการส่ง Request และ Response ของหน้าเว็บ",
+        "Certificate มี Public Key ส่วน Private Key ต้องเก็บเป็นความลับบน Server",
+        "Self-signed เข้ารหัสได้ แต่ Browser ยังไม่เชื่อถือผู้รับรอง",
+        "Nginx รับ HTTPS ที่พอร์ต 443 แล้วส่งต่อไป Node.js พอร์ต 3000",
+        "ตรวจ `nginx -t` ก่อน Reload และทดสอบทั้ง Redirect, Certificate และหน้าเว็บจริง"
+      ],
+      "speakerNotes": "ปิดคาบด้วยการสุ่มให้นักเรียนอธิบายคนละหนึ่งประโยค แล้วให้ทุกคนตรวจสามหลักฐานสุดท้าย: http เปลี่ยนเป็น https, เปิดดู Certificate ได้ และหน้า Node.js แสดงผล"
     }
   ]
 }

@@ -1,136 +1,156 @@
 [
   {
-    "weekLabel": "สัปดาห์ที่ 1: พื้นฐานและอุปกรณ์เครือข่าย",
+    "weekLabel": "หน่วยที่ 1: พื้นฐานระบบปฏิบัติการเครื่องแม่ข่าย เครือข่าย และสาย LAN",
     "sessions": [
       {
         "id": "1a",
-        "displayNum": "จ.",
-        "title": "ระบบปฏิบัติการเครื่องแม่ข่าย & OSI Model",
-        "topic": "NOS & OSI 7 Layers"
+        "displayNum": "1.1",
+        "title": "ระบบปฏิบัติการเครื่องแม่ข่าย อุปกรณ์เครือข่าย และ OSI Model",
+        "topic": "NOS, Network Equipment & OSI 7 Layers"
       },
       {
         "id": "1b",
-        "displayNum": "ศ.",
-        "title": "พื้นฐานสายแลนและการเข้าหัว RJ-45",
-        "topic": "UTP Cable & RJ-45 Crimping"
+        "displayNum": "1.2",
+        "title": "พื้นฐานสาย LAN และการเข้าหัว RJ-45",
+        "topic": "UTP Cable, T568A/T568B & RJ-45 Crimping"
       }
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 2: ระบบปฏิบัติการลินุกซ์และการใช้คอนโซลพื้นฐาน",
+    "weekLabel": "หน่วยที่ 2: การติดตั้ง Ubuntu Server คำสั่ง Linux และบริการ DNS/DHCP",
     "sessions": [
       {
         "id": "2a",
-        "displayNum": "อ.",
-        "title": "ทำความรู้จัก ลินุกซ์ (Linux) เซิร์ฟเวอร์ (Server) และการติดตั้งระบบ",
-        "topic": "Linux OS & Installation"
+        "displayNum": "2.1",
+        "title": "ทำความรู้จัก Linux Server และการติดตั้งระบบ",
+        "topic": "Linux OS, Server Architecture & Installation"
       },
       {
         "id": "2b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการกำหนดค่าระบบหลังติดตั้งและการใช้งานคำสั่งควบคุมที่จำเป็น",
-        "topic": "System Post-Installation & Basic Commands"
-      }
-    ]
-  },
-  {
-    "weekLabel": "สัปดาห์ที่ 3: บริการเครือข่ายพื้นฐาน DNS & DHCP",
-    "sessions": [
-      {
-        "id": "3a",
-        "displayNum": "อ.",
-        "title": "ระบบ DNS และ DHCP บริการเครือข่ายพื้นฐานที่ต้องรู้",
-        "topic": "DNS & DHCP Services"
+        "displayNum": "2.2",
+        "title": "คำสั่งพื้นฐานและการตั้งค่าหลังติดตั้ง Linux Server",
+        "topic": "Post-Installation & Essential Linux CLI"
       },
       {
         "id": "3b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการทบทวนคำสั่งควบคุมลินุกซ์พื้นฐาน (Linux CLI Commands Review)",
-        "topic": "Linux CLI Review"
+        "displayNum": "2.3",
+        "title": "ทบทวนการใช้คำสั่งควบคุม Linux Server",
+        "topic": "Linux CLI Commands Review"
+      },
+      {
+        "id": "3a",
+        "displayNum": "2.4",
+        "title": "หลักการทำงานของบริการ DNS และ DHCP",
+        "topic": "DNS & DHCP Fundamentals"
       }
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 4-5: การทำระบบจำลองและการติดตั้ง Nginx",
+    "weekLabel": "หน่วยที่ 3: การติดตั้ง Web Server, Database และ Node.js Server Stack",
     "sessions": [
       {
         "id": "4a",
-        "displayNum": "อ.",
-        "title": "ส่วนประกอบเครื่องเซิร์ฟเวอร์และการติดตั้ง Proxmox VE",
-        "topic": "Server Components & Proxmox VE Setup"
+        "displayNum": "3.1",
+        "title": "ติดตั้ง Nginx, MariaDB และ Node.js บน Server",
+        "topic": "Nginx, MariaDB & Node.js Server Stack"
       },
       {
         "id": "4b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการติดตั้ง Nginx Web Server บนตู้เสมือนส่วนตัว",
-        "topic": "Nginx Web Server on LXC"
+        "displayNum": "3.2",
+        "title": "ปฏิบัติการติดตั้งและทดสอบ Nginx Web Server",
+        "topic": "Nginx Web Server Setup on LXC"
+      },
+      {
+        "id": "9a",
+        "displayNum": "3.3",
+        "title": "ฐานข้อมูลเชิงสัมพันธ์และคำสั่งพื้นฐานของ MariaDB",
+        "topic": "MariaDB Database Server & SQL Basics"
+      },
+      {
+        "id": "10a",
+        "displayNum": "3.4",
+        "title": "สถาปัตยกรรม Nginx Reverse Proxy และแนวคิด SSL/TLS",
+        "topic": "Nginx Reverse Proxy & SSL/TLS Concepts"
       }
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 6: การจัดการผู้ใช้ สิทธิ์ และความปลอดภัย SSH",
+    "weekLabel": "หน่วยที่ 4: การจัดการผู้ใช้ SSH เครือข่าย และความปลอดภัย Server",
     "sessions": [
       {
         "id": "6a",
-        "displayNum": "อ.",
-        "title": "การจัดการผู้ใช้ สิทธิ์ และความปลอดภัย SSH",
-        "topic": "User & Permission Management & SSH Hardening"
+        "displayNum": "4.1",
+        "title": "การจัดการผู้ใช้ กลุ่ม และสิทธิ์บน Linux Server",
+        "topic": "User, Group, chmod & chown"
       },
       {
         "id": "6b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการจัดการสิทธิ์เข้าถึง และการตั้งค่าความปลอดภัย SSH ขั้นสูง",
-        "topic": "Advanced Permissions & SSH Keys Lab"
-      }
-    ]
-  },
-  {
-    "weekLabel": "สัปดาห์ที่ 7: เครือข่ายเซิร์ฟเวอร์ การตรวจสอบพอร์ต และการรักษาความปลอดภัย UFW",
-    "sessions": [
+        "displayNum": "4.2",
+        "title": "การจัดการสิทธิ์ขั้นสูงและความปลอดภัย SSH",
+        "topic": "Advanced Permissions & SSH Keys"
+      },
       {
         "id": "7a",
-        "displayNum": "อ.",
-        "title": "เครือข่ายภายในเซิร์ฟเวอร์และการตรวจสอบพอร์ต",
-        "topic": "Server Network Diagnostics & Port Monitoring"
+        "displayNum": "4.3",
+        "title": "เครือข่ายภายใน Server และการตรวจสอบพอร์ต",
+        "topic": "Network Diagnostics, Socket & Port Monitoring"
       },
       {
         "id": "7b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการตั้งค่า UFW Firewall, IP Whitelisting และการตรวจสอบด้วย Nmap",
-        "topic": "UFW Firewall Rules, IP Whitelisting & Security Audit Lab"
+        "displayNum": "4.4",
+        "title": "การตั้งค่า UFW Firewall และตรวจสอบด้วย Nmap",
+        "topic": "UFW Rules, IP Whitelisting & Nmap"
       }
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 9-10: FTP Server บน Proxmox Container",
+    "weekLabel": "หน่วยที่ 5: การติดตั้งและทดสอบ FTP Server",
     "sessions": [
       {
         "id": "9b",
-        "displayNum": "ศ.",
-        "title": "ปฏิบัติการติดตั้ง FTP Server บน Container ส่วนตัว",
-        "topic": "vsftpd, User, Permission, Passive Ports & Firewall"
+        "displayNum": "5.1",
+        "title": "ทบทวนและปฏิบัติ FTP Server ด้วย vsftpd และ FileZilla",
+        "topic": "FTP, Passive Ports, Permission, Firewall & FileZilla"
       }
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 11: ทำความรู้จัก Proxmox VE และการติดตั้งบนเครื่องจริง",
+    "weekLabel": "หน่วยที่ 6: Proxmox VE, LXC Container และการนำเว็บขึ้นใช้งาน",
     "sessions": [
       {
         "id": "11b",
-        "displayNum": "ศ.",
-        "title": "ทำความรู้จัก Proxmox VE และปฏิบัติการติดตั้งระบบบนเครื่องเซิร์ฟเวอร์จริง",
-        "topic": "Proxmox VE Overview, Type-1 Hypervisor & Bare-Metal Installation Lab"
+        "displayNum": "6.1",
+        "title": "ทำความรู้จักและติดตั้ง Proxmox VE บนเครื่อง Server",
+        "topic": "Proxmox VE, Type-1 Hypervisor & Bare-Metal Installation"
+      },
+      {
+        "id": "13a",
+        "displayNum": "6.2",
+        "title": "การสร้างและควบคุม LXC Container บน Proxmox VE",
+        "topic": "LXC Container Creation & Management"
+      },
+      {
+        "id": "12b",
+        "displayNum": "6.3",
+        "title": "นำ React Web Application ขึ้นใช้งานจริง",
+        "topic": "Production Build, Nginx Hosting, PM2 & LAN Testing"
+      },
+      {
+        "id": "10b",
+        "displayNum": "6.4",
+        "title": "ตั้งค่า HTTPS และ SSL/TLS Certificate บน Nginx",
+        "topic": "TLS Handshake, Self-signed Certificate & Nginx HTTPS"
       }
     ]
   },
   {
-    "weekLabel": "สัปดาห์ที่ 13: การติดตั้ง Proxmox VE และการสร้าง Container",
+    "weekLabel": "หน่วยที่ 7: ดาวน์โหลดระบบจาก GitHub มาติดตั้งบน Server",
     "sessions": [
       {
-        "id": "13a",
-        "displayNum": "อ.",
-        "title": "ทำความรู้จัก Proxmox VE การติดตั้ง และวิธีสร้าง Container",
-        "topic": "Proxmox VE Overview, Installation & LXC Container Creation"
+        "id": "7git",
+        "displayNum": "7.1",
+        "title": "ติดตั้ง Git และ Clone ระบบจาก GitHub มารันบน Server",
+        "topic": "Git Installation, GitHub Repository, Clone & Deployment"
       }
     ]
   }

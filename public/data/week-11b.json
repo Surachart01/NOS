@@ -1,6 +1,6 @@
 {
   "week": "11b",
-  "title": "สัปดาห์ที่ 11 (วันศุกร์): ทำความรู้จัก Proxmox VE และการติดตั้งบนเครื่องเซิร์ฟเวอร์จริง",
+  "title": "ทำความรู้จัก Proxmox VE และการติดตั้งบนเครื่องเซิร์ฟเวอร์จริง",
   "topic": "Proxmox VE Overview, Type-1 Bare-Metal Hypervisor Architecture & Real Hardware Installation Lab",
   "description": "ทำความเข้าใจสถาปัตยกรรมระบบจำลองเสมือน Proxmox Virtual Environment (Type-1 Hypervisor), เปรียบเทียบ KVM Virtual Machines และ LXC Containers, ฟีเจอร์ระดับองค์กร, และลงมือจับกลุ่มปฏิบัติการติดตั้ง Proxmox VE บนเครื่องเซิร์ฟเวอร์จริงจากสื่อบันทึก ISO พร้อมการตั้งค่าระบบเครือข่ายและการใช้งาน Proxmox Web GUI",
   "learningObjectives": [
@@ -13,7 +13,7 @@
     {
       "id": "w11b-s1",
       "type": "cover",
-      "tag": "สัปดาห์ที่ 11 • วันศุกร์ (2 ชั่วโมง)",
+      "tag": "หน่วยที่ 6 • วันศุกร์ (2 ชั่วโมง)",
       "title": "ทำความรู้จัก Proxmox VE & การติดตั้งบนเครื่องจริง",
       "subtitle": "Proxmox Virtual Environment (Type-1 Hypervisor) Overview & Real Hardware Installation Lab",
       "body": "วันนี้เราจะเริ่มต้นทำความรู้จัก Proxmox VE ซอฟต์แวร์จำลองระบบระดับเครื่องแม่ข่าย (Type-1 Hypervisor) เรียนรู้ฟีเจอร์เด็ด และลงมือจับกลุ่มติดตั้ง Proxmox VE บนเครื่องพีซี/เซิร์ฟเวอร์จริงตั้งแต่ศูนย์",
@@ -245,15 +245,15 @@
       "id": "w11b-s12",
       "type": "summary",
       "tag": "6. สรุปบทเรียน",
-      "title": "สรุปสาระสำคัญประจำสัปดาห์ที่ 11 (Week Summary)",
+      "title": "สรุปสาระสำคัญประจำหน่วยที่ 6 (Unit Summary)",
       "items": [
         "✅ Proxmox VE เป็น Type-1 Bare-Metal Hypervisor ประสิทธิภาพสูง รองรับทั้ง KVM และ LXC",
         "✅ การติดตั้งบนเครื่องจริงทำได้ผ่าน ISO USB ตั้งค่า IP Management และจัดการผ่าน Web GUI (:8006)",
         "✅ เข้าใจการใช้งานเมนู Datacenter, Node, Storage และการโหลด Template",
         "📝 ส่งงาน Lab 11b: ภาพถ่ายหน้าจอ Proxmox Web GUI บนเครื่องจริง + Container ตู้แรก",
-        "📚 สัปดาห์หน้า (สัปดาห์ที่ 12): โครงการกลุ่ม — การจัดสรรตู้ Container ประจำตัวสมาชิกและการนำ React Web App ขึ้นใช้งานจริง!"
+        "📚 เนื้อหาถัดไป (หน่วยที่ 6): โครงการกลุ่ม — การจัดสรรตู้ Container ประจำตัวสมาชิกและการนำ React Web App ขึ้นใช้งานจริง!"
       ],
-      "speakerNotes": "สรุปภาพรวมของคาบวันศุกร์ และเตรียมพร้อมสำหรับสัปดาห์ที่ 12"
+      "speakerNotes": "สรุปภาพรวมของคาบวันศุกร์ และเตรียมพร้อมสำหรับหน่วยที่ 6"
     }
   ]
 }

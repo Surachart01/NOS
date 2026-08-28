@@ -88,7 +88,7 @@ function ContentSlide({ s }: { s: SlideData }) {
       t.startsWith('MariaDB [(') ||
       t.startsWith('node@') ||
       /^\s{1,}(MariaDB|mysql|node|npm)\b/.test(line) ||
-      /^\s{2,}[a-z$#]/.test(line)   // indented lines inside a command block
+      /^\s{2,}[-a-z$#]/.test(line)  // indented continuation lines inside a command block
     );
   };
 
@@ -143,7 +143,7 @@ function ContentSlide({ s }: { s: SlideData }) {
   };
 
   return (
-    <div className="slide slide-content">
+    <div className={`slide slide-content ${/^(w10b|w7git)-/.test(s.id) ? "week10-compact" : ""} ${["w7git-s6", "w7git-s12"].includes(s.id) ? "git-dense-slide" : ""}`}>
       <div className="slide-tag">{s.tag}</div>
       <h2>{s.title}</h2>
       {s.body && <p style={{ fontSize: 'clamp(20px,2.5vw,32px)', color: 'var(--text-secondary)', marginBottom: 20 }}>{s.body}</p>}
@@ -181,7 +181,7 @@ function ContentSlide({ s }: { s: SlideData }) {
                   {/* Command lines */}
                   <div style={{ padding: '12px 16px', fontFamily: "'JetBrains Mono', 'Fira Code', 'Courier New', monospace", fontSize: '13px', lineHeight: '1.9', display: 'flex', flexDirection: 'column', gap: '1px' }}>
                     {g.lines.map((line, li) => (
-                      <div key={li}>{colourCmd(line)}</div>
+                      <div key={li} style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{colourCmd(line)}</div>
                     ))}
                   </div>
                 </li>
@@ -202,7 +202,7 @@ function ContentSlide({ s }: { s: SlideData }) {
 
 function TwoColSlide({ s }: { s: SlideData }) {
   return (
-    <div className="slide slide-content slide-two-col">
+    <div className={`slide slide-content slide-two-col ${/^(w10b|w7git)-/.test(s.id) ? "week10-compact" : ""}`}>
       <div className="slide-tag">{s.tag}</div>
       <h2>{s.title}</h2>
       <div className="two-col-grid">
@@ -3795,7 +3795,7 @@ function ScoringSlide({ s }: { s: SlideData }) {
 
 function LabSlide({ s }: { s: SlideData }) {
   return (
-    <div className="slide slide-lab">
+    <div className={`slide slide-lab ${s.id.startsWith("w7git-") ? "git-lab-compact" : ""}`}>
       <div className="slide-tag" style={{ color: "#22c55e" }}>{s.tag}</div>
       <h2>{s.title}</h2>
       <div className="lab-meta">
@@ -3887,7 +3887,7 @@ function LabSlide({ s }: { s: SlideData }) {
 
 function SummarySlide({ s }: { s: SlideData }) {
   return (
-    <div className="slide slide-summary">
+    <div className={`slide slide-summary ${/^(w10b|w7git)-/.test(s.id) ? "week10-compact" : ""} ${s.id.startsWith("w7git-") ? "git-summary-compact" : ""}`}>
       <div className="slide-tag">{s.tag}</div>
       <h2>{s.title}</h2>
       <ul>{s.items?.map((item, i) => <li key={i}><span style={{ flex: 1, minWidth: 0 }}>{renderFormattedText(item)}</span></li>)}</ul>
@@ -8006,6 +8006,564 @@ function ChmodChownVisualizer({ s }: { s: SlideData }) {
   );
 }
 
+/* ============================================================
+   GIT DEPLOYMENT ANIMATION — unit 7
+   ============================================================ */
+function GitDeployAnimation({ s }: { s: SlideData }) {
+  const [step, setStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  const steps = [
+    {
+      short: "เปิด Repository",
+      command: "github.com/OWNER/REPOSITORY",
+      direction: "browse",
+      color: "#0284c7",
+      explanation: "ผู้เรียนเปิด Repository ที่ผู้สอนกำหนด ตรวจว่าเป็น Public แล้วคัดลอก URL จาก Code → HTTPS",
+      local: "ได้ HTTPS URL แล้ว",
+      github: "Repository เปิดได้",
+      server: "ยังไม่มีระบบ"
+    },
+    {
+      short: "ติดตั้ง Git",
+      command: "sudo apt install git -y",
+      direction: "setup",
+      color: "#7c3aed",
+      explanation: "ติดตั้งโปรแกรม Git ใน Ubuntu ผ่าน Proxmox GUI Console เพื่อให้ Container รับคำสั่ง Clone ได้",
+      local: "ใช้ Proxmox Console",
+      github: "รอรับคำขอ",
+      server: "Git พร้อมใช้งาน"
+    },
+    {
+      short: "Clone ระบบ",
+      command: "git clone HTTPS_URL",
+      direction: "to-server",
+      color: "#0f766e",
+      explanation: "Git ใช้ HTTPS URL ร้องขอ Repository แล้วดาวน์โหลดไฟล์ทั้งชุดจาก GitHub ลงเป็นโฟลเดอร์ใหม่บน Server",
+      local: "ส่ง URL ให้ Git แล้ว",
+      github: "กำลังส่งไฟล์ระบบ",
+      server: "กำลังรับ Repository"
+    },
+    {
+      short: "ติดตั้งแพ็กเกจ",
+      command: "npm ci",
+      direction: "install",
+      color: "#c2410c",
+      explanation: "เมื่อไฟล์มาถึง Server แล้ว npm จะอ่าน package-lock.json และติดตั้ง Dependencies ที่ระบบต้องใช้",
+      local: "ไม่ต้องใช้ Browser แล้ว",
+      github: "ดาวน์โหลดเสร็จแล้ว",
+      server: "Dependencies พร้อม"
+    },
+    {
+      short: "เปิดบริการ",
+      command: "pm2 start ...  /  npm run build",
+      direction: "run",
+      color: "#15803d",
+      explanation: "เลือกเปิดด้วย PM2 สำหรับ Node.js Application หรือ Build แล้วให้ Nginx บริการสำหรับ Static Website",
+      local: "เสร็จขั้นตอนบน GitHub",
+      github: "เป็นแหล่งไฟล์ต้นฉบับ",
+      server: "ระบบเปิดใช้งานแล้ว"
+    }
+  ] as const;
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const timer = window.setTimeout(() => {
+      setStep(current => (current + 1) % steps.length);
+    }, 2900);
+    return () => window.clearTimeout(timer);
+  }, [step, isPlaying, steps.length]);
+
+  const current = steps[step];
+  const PlayIcon = () => (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+  const PauseIcon = () => (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+      <path d="M6 5h4v14H6zm8 0h4v14h-4z" />
+    </svg>
+  );
+
+  return (
+    <div className="slide slide-content git-deploy-slide week10-compact" style={{ overflow: "hidden" }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes git-packet-to-server {
+          0% { left: 50%; opacity: 0; transform: translate(-50%,-50%) scale(.9); }
+          14% { opacity: 1; }
+          86% { opacity: 1; }
+          100% { left: 83%; opacity: 0; transform: translate(-50%,-50%) scale(1); }
+        }
+        @keyframes git-local-save {
+          0% { opacity: 0; transform: translateY(8px) scale(.96); }
+          28%, 82% { opacity: 1; transform: translateY(0) scale(1); }
+          100% { opacity: .25; }
+        }
+        @keyframes git-server-run {
+          0%, 100% { box-shadow: 0 8px 22px rgba(15,23,42,.08); }
+          50% { box-shadow: 0 14px 30px rgba(21,128,61,.25); }
+        }
+        .git-route-packet.to-server { animation: git-packet-to-server 2.25s cubic-bezier(.16,1,.3,1) infinite; }
+        .git-local-event { animation: git-local-save 2.25s cubic-bezier(.16,1,.3,1) infinite; }
+        .git-server-online { animation: git-server-run 1.5s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .git-route-packet, .git-local-event, .git-server-online { animation: none !important; }
+          .git-route-packet.to-server { left: 83% !important; opacity: 1 !important; transform: translate(-50%,-50%) !important; }
+        }
+      `}} />
+
+      <div className="slide-tag">{s.tag}</div>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+        <h2 style={{ marginBottom: 12, fontSize: "clamp(25px,3vw,36px)", lineHeight: 1.2 }}>{s.title}</h2>
+        <button
+          type="button"
+          className="git-autoplay-button"
+          onClick={() => setIsPlaying(value => !value)}
+          aria-label={isPlaying ? "หยุดเล่นอัตโนมัติ" : "เล่นอัตโนมัติ"}
+          title={isPlaying ? "หยุดเล่นอัตโนมัติ" : "เล่นอัตโนมัติ"}
+          style={{ borderColor: current.color, color: current.color }}
+        >
+          {isPlaying ? <PauseIcon /> : <PlayIcon />}
+          {isPlaying ? "หยุดเล่นอัตโนมัติ" : "เล่นอัตโนมัติ"}
+        </button>
+      </div>
+
+      <div className="git-step-tabs" role="tablist" aria-label="ขั้นตอน Clone ระบบจาก GitHub มารันบน Server">
+        {steps.map((item, index) => (
+          <button
+            key={item.short}
+            type="button"
+            role="tab"
+            aria-selected={index === step}
+            onClick={() => { setStep(index); setIsPlaying(false); }}
+            style={{
+              borderColor: index === step ? item.color : "var(--border)",
+              background: index === step ? `${item.color}12` : "var(--bg-surface)",
+              color: index === step ? item.color : "var(--text-secondary)"
+            }}
+          >
+            <span>{index + 1}</span>{item.short}
+          </button>
+        ))}
+      </div>
+
+      <div className="git-route-stage" style={{ ["--git-step-color" as string]: current.color }}>
+        <div className="git-route-line" aria-hidden="true" />
+        {current.direction === "to-server" && (
+          <div
+            key={`${step}-${isPlaying}`}
+            className={`git-route-packet ${current.direction}`}
+            style={{
+              background: current.color,
+              animationPlayState: isPlaying ? "running" : "paused",
+              ...(!isPlaying ? {
+                animation: "none",
+                left: "83%",
+                opacity: 1,
+                transform: "translate(-50%,-50%)"
+              } : {})
+            }}
+          >
+            <span className="git-packet-dot" />
+            REPOSITORY กำลังดาวน์โหลด
+          </div>
+        )}
+
+        <div className={`git-route-node ${step === 0 ? "is-active" : ""}`}>
+          <div className="git-node-label">ผู้เรียน</div>
+          <div className="git-node-title">Repository URL</div>
+          <div className="git-node-detail">เปิด GitHub • Code • HTTPS</div>
+          {current.direction === "browse" && (
+            <div key={`${step}-${isPlaying}`} className="git-local-event" style={{ color: current.color, borderColor: `${current.color}55` }}>
+              คัดลอก URL แล้ว
+            </div>
+          )}
+          <div className="git-node-status" style={{ color: step === 0 ? current.color : "var(--text-secondary)" }}>{current.local}</div>
+        </div>
+
+        <div className={`git-route-node git-github-node ${step === 0 || step === 2 ? "is-active" : ""}`}>
+          <div className="git-node-label">PUBLIC REPOSITORY</div>
+          <div className="git-node-title">GitHub Repository</div>
+          <div className="git-node-detail">เก็บระบบที่ผู้สอนเตรียมไว้</div>
+          <div className="git-node-status" style={{ color: step === 0 || step === 2 ? current.color : "var(--text-secondary)" }}>{current.github}</div>
+        </div>
+
+        <div className={`git-route-node ${step >= 1 ? "is-active" : ""} ${current.direction === "install" || current.direction === "run" ? "git-server-online" : ""}`}>
+          <div className="git-node-label">UBUNTU SERVER</div>
+          <div className="git-node-title">Proxmox Container</div>
+          <div className="git-node-detail">Git • clone • npm • PM2/Nginx</div>
+          {current.direction === "run" && <div className="git-online-indicator"><span /> SYSTEM ONLINE</div>}
+          <div className="git-node-status" style={{ color: step >= 1 ? current.color : "var(--text-secondary)" }}>{current.server}</div>
+        </div>
+      </div>
+
+      <div className="git-step-explanation" aria-live="polite">
+        <div className="git-command-pill" style={{ borderColor: `${current.color}66`, color: current.color }}>{current.command}</div>
+        <div>
+          <strong style={{ color: current.color }}>{step + 1}. {current.short}</strong>
+          <p>{current.explanation}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   TLS HANDSHAKE ANIMATION — week-10b
+   ============================================================ */
+function TLSHandshakeAnimation({ s }: { s: SlideData }) {
+  const [step, setStep] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  const steps = [
+    {
+      label: "ClientHello",
+      plain: "Browser เริ่มทัก Server",
+      packet: "รองรับ TLS 1.2/1.3 • ชุดการเข้ารหัส • ค่าสุ่ม",
+      direction: "right",
+      color: "#0284c7",
+      detail: "Browser บอกว่าเข้าใจ TLS รุ่นใดและรองรับวิธีเข้ารหัสแบบไหน โดยยังไม่ส่งรหัสผ่านหรือข้อมูลหน้าเว็บ",
+      evidence: "ฝั่ง Server ได้ข้อมูลพอสำหรับเลือกวิธีสร้างช่องทางที่ปลอดภัย"
+    },
+    {
+      label: "ServerHello + Certificate",
+      plain: "Server เลือกวิธีและส่งใบรับรอง",
+      packet: "TLS 1.3 • Certificate • Public Key",
+      direction: "left",
+      color: "#16a34a",
+      detail: "Nginx เลือกวิธีที่ทั้งสองฝ่ายรองรับ แล้วส่ง Certificate ซึ่งมีชื่อหรือ IP อายุใบรับรอง ผู้รับรอง และ Public Key",
+      evidence: "Browser ได้หลักฐานสำหรับตรวจว่า Server ที่กำลังคุยอยู่เป็นใคร"
+    },
+    {
+      label: "Verify Certificate",
+      plain: "Browser ตรวจใบรับรอง",
+      packet: "ชื่อ/IP • วันหมดอายุ • ผู้รับรอง • ลายเซ็น",
+      direction: "local",
+      color: "#d97706",
+      detail: "Browser ตรวจชื่อหรือ IP วันหมดอายุ และสายความเชื่อถือ ถ้าเป็น Self-signed จะเข้ารหัสได้ แต่ Browser จะแจ้งว่าไม่รู้จักผู้รับรอง",
+      evidence: "คำเตือน Self-signed หมายถึงยังไม่เชื่อถือผู้รับรอง ไม่ได้แปลว่าไม่มีการเข้ารหัส"
+    },
+    {
+      label: "Key Agreement",
+      plain: "สร้าง Session Key ร่วมกัน",
+      packet: "ข้อมูลแลกกุญแจชั่วคราว",
+      direction: "both",
+      color: "#7c3aed",
+      detail: "Browser และ Server ใช้ข้อมูลจาก Handshake สร้าง Session Key เดียวกัน โดยไม่ส่ง Private Key ออกจาก Server",
+      evidence: "จากจุดนี้ทั้งสองฝั่งมีกุญแจชั่วคราวสำหรับการเชื่อมต่อครั้งนี้"
+    },
+    {
+      label: "Encrypted HTTPS",
+      plain: "เริ่มส่ง HTTP ที่เข้ารหัสแล้ว",
+      packet: "Encrypted GET /  ↔  Encrypted Response",
+      direction: "both",
+      color: "#db2777",
+      detail: "Request และ Response ถูกเข้ารหัสด้วย Session Key ผู้ที่ดักข้อมูลระหว่างทางจะเห็นเพียง Ciphertext ที่อ่านไม่ออก",
+      evidence: "แถบที่อยู่เปลี่ยนเป็น https:// และการรับส่งข้อมูลจริงเริ่มหลัง Handshake สำเร็จ"
+    }
+  ] as const;
+
+  useEffect(() => {
+    if (!isPlaying) return;
+    const timer = window.setTimeout(() => {
+      setStep(current => (current + 1) % steps.length);
+    }, 2800);
+    return () => window.clearTimeout(timer);
+  }, [step, isPlaying, steps.length]);
+
+  const current = steps[step];
+  const PlayIcon = () => (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+  const PauseIcon = () => (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+      <path d="M6 5h4v14H6zm8 0h4v14h-4z" />
+    </svg>
+  );
+
+  return (
+    <div className="slide slide-content tls-handshake-slide week10-compact" style={{ overflow: "hidden" }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes tls-send-right {
+          0% { left: 2%; opacity: 0; transform: translateY(-50%) scale(.92); }
+          12% { opacity: 1; }
+          88% { opacity: 1; }
+          100% { left: 98%; opacity: 0; transform: translate(-100%,-50%) scale(1); }
+        }
+        @keyframes tls-send-left {
+          0% { left: 98%; opacity: 0; transform: translate(-100%,-50%) scale(.92); }
+          12% { opacity: 1; }
+          88% { opacity: 1; }
+          100% { left: 2%; opacity: 0; transform: translateY(-50%) scale(1); }
+        }
+        @keyframes tls-check-local {
+          0% { left: 2%; opacity: 0; transform: translateY(-50%) scale(.75); }
+          30%, 70% { left: 9%; opacity: 1; transform: translateY(-50%) scale(1); }
+          100% { left: 2%; opacity: 0; transform: translateY(-50%) scale(.75); }
+        }
+        @keyframes tls-send-both {
+          0% { left: 8%; opacity: 0; transform: translateY(-50%) scale(.9); }
+          20% { opacity: 1; }
+          50% { left: 50%; opacity: 1; transform: translate(-50%,-50%) scale(1); }
+          80% { opacity: 1; }
+          100% { left: 92%; opacity: 0; transform: translate(-100%,-50%) scale(.9); }
+        }
+        @keyframes tls-node-pulse {
+          0%,100% { box-shadow: 0 8px 20px rgba(15,23,42,.06); }
+          50% { box-shadow: 0 12px 28px color-mix(in srgb, var(--tls-color) 30%, transparent); }
+        }
+        .tls-moving-packet { animation-duration: 2.15s; animation-timing-function: cubic-bezier(.16,1,.3,1); animation-iteration-count: infinite; }
+        .tls-moving-packet.right { animation-name: tls-send-right; }
+        .tls-moving-packet.left { animation-name: tls-send-left; }
+        .tls-moving-packet.local { animation-name: tls-check-local; }
+        .tls-moving-packet.both { animation-name: tls-send-both; animation-direction: alternate; }
+      `}} />
+      <div className="slide-tag">{s.tag}</div>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16 }}>
+        <h2 style={{ marginBottom: 12, fontSize: "clamp(25px,3vw,36px)", lineHeight: 1.2 }}>{s.title}</h2>
+        <button
+          type="button"
+          onClick={() => setIsPlaying(value => !value)}
+          aria-label={isPlaying ? "หยุดเล่นอัตโนมัติ" : "เล่นอัตโนมัติ"}
+          title={isPlaying ? "หยุดเล่นอัตโนมัติ" : "เล่นอัตโนมัติ"}
+          style={{
+            minWidth: 154, height: 38, border: `1px solid ${current.color}`,
+            borderRadius: 8, background: "var(--bg-surface)", color: current.color,
+            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+            fontSize: 13, fontWeight: 700, cursor: "pointer", flexShrink: 0
+          }}
+        >
+          {isPlaying ? <PauseIcon /> : <PlayIcon />}
+          {isPlaying ? "หยุดเล่นอัตโนมัติ" : "เล่นอัตโนมัติ"}
+        </button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(5,minmax(0,1fr))", gap: 7, marginBottom: 14 }}>
+        {steps.map((item, index) => (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => { setStep(index); setIsPlaying(false); }}
+            aria-label={`แสดงขั้นตอน ${index + 1}: ${item.plain}`}
+            style={{
+              minHeight: 44, borderRadius: 7, cursor: "pointer",
+              border: index === step ? `2px solid ${item.color}` : "1px solid var(--border)",
+              background: index === step ? `${item.color}12` : "var(--bg-surface)",
+              color: index === step ? item.color : "var(--text-secondary)",
+              fontSize: 11.5, fontWeight: index === step ? 700 : 600, padding: "6px 8px"
+            }}
+          >
+            {index + 1}. {item.label}
+          </button>
+        ))}
+      </div>
+
+      <div style={{ flex: 1, minHeight: 0, display: "grid", gridTemplateRows: "minmax(190px,1fr) auto", gap: 14 }}>
+        <div style={{
+          position: "relative", borderTop: "1px solid var(--border)", borderBottom: "1px solid var(--border)",
+          background: "#f8fafc", display: "grid", gridTemplateColumns: "180px minmax(260px,1fr) 180px",
+          alignItems: "center", padding: "18px 24px", overflow: "hidden"
+        }}>
+          <div style={{
+            position: "relative", zIndex: 2, border: `2px solid ${step === 2 ? current.color : "#38bdf8"}`,
+            borderRadius: 10, padding: "18px 12px", textAlign: "center", background: "white",
+            animation: step === 2 ? "tls-node-pulse 1.5s ease-in-out infinite" : undefined,
+            ["--tls-color" as string]: current.color
+          }}>
+            <div style={{ fontSize: 12, color: "#0369a1", fontWeight: 800, letterSpacing: 0 }}>CLIENT</div>
+            <div style={{ fontSize: 24, fontWeight: 800, margin: "5px 0" }}>Browser</div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>เครื่องนักเรียน</div>
+            {step === 2 && <div style={{ marginTop: 10, fontSize: 10.5, color: current.color, fontWeight: 700 }}>ตรวจ Trust Store ในเครื่อง</div>}
+          </div>
+
+          <div style={{ position: "relative", height: 100, margin: "0 18px" }}>
+            <div style={{ position: "absolute", left: 0, right: 0, top: "50%", height: 2, background: `linear-gradient(90deg,#38bdf8,${current.color},#22c55e)` }} />
+            <div style={{ position: "absolute", left: 8, top: "calc(50% + 13px)", fontSize: 10.5, color: "var(--text-muted)" }}>เครือข่าย</div>
+            <div style={{ position: "absolute", right: 8, top: "calc(50% + 13px)", fontSize: 10.5, color: "var(--text-muted)" }}>Port 443</div>
+            <div
+              key={`${step}-${isPlaying}`}
+              className={`tls-moving-packet ${current.direction}`}
+              style={{
+                position: "absolute", top: "50%", maxWidth: "84%", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                borderRadius: 6, padding: "8px 12px", background: current.color, color: "white",
+                fontSize: 11.5, fontWeight: 700, boxShadow: `0 8px 18px ${current.color}35`,
+                animationPlayState: isPlaying ? "running" : "paused"
+              }}
+            >
+              {current.packet}
+            </div>
+          </div>
+
+          <div style={{
+            position: "relative", zIndex: 2, border: "2px solid #22c55e", borderRadius: 10,
+            padding: "18px 12px", textAlign: "center", background: "white",
+            animation: step === 1 || step >= 3 ? "tls-node-pulse 1.5s ease-in-out infinite" : undefined,
+            ["--tls-color" as string]: current.color
+          }}>
+            <div style={{ fontSize: 12, color: "#15803d", fontWeight: 800, letterSpacing: 0 }}>SERVER</div>
+            <div style={{ fontSize: 24, fontWeight: 800, margin: "5px 0" }}>Nginx</div>
+            <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>Certificate + Private Key</div>
+          </div>
+        </div>
+
+        <div key={step} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22, padding: "0 4px" }}>
+          <div>
+            <div style={{ color: current.color, fontSize: 14, fontWeight: 800, marginBottom: 5 }}>{step + 1}. {current.plain}</div>
+            <div style={{ fontSize: 14, lineHeight: 1.55, color: "var(--text-primary)" }}>{current.detail}</div>
+          </div>
+          <div style={{ borderLeft: "1px solid var(--border)", paddingLeft: 22 }}>
+            <div style={{ color: "var(--text-secondary)", fontSize: 11, fontWeight: 800, marginBottom: 5 }}>หลักฐานที่เห็นในขั้นนี้</div>
+            <div style={{ fontSize: 14, lineHeight: 1.55, color: "var(--text-primary)" }}>{current.evidence}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   HTTPS NGINX CONFIG — week-10b
+   ============================================================ */
+function HttpsNginxConfigSlide({ s }: { s: SlideData }) {
+  const [section, setSection] = useState(0);
+  const sections = [
+    {
+      label: "1. Redirect พอร์ต 80",
+      cue: "ส่วนที่ 1 จาก 3 • เริ่มพิมพ์ตั้งแต่บรรทัดแรก",
+      lines: [
+        "server {",
+        "    listen 80;",
+        "    listen [::]:80;",
+        "    server_name _;",
+        "    return 301 https://$host$request_uri;",
+        "}"
+      ],
+      notes: [
+        ["listen 80", "รับ Request แบบ HTTP จาก IPv4"],
+        ["listen [::]:80", "รับ HTTP จาก IPv6 ด้วย"],
+        ["server_name _", "ใช้เป็น Server เริ่มต้นในห้อง Lab ที่เปิดด้วย IP"],
+        ["return 301", "ตอบ Browser ให้สร้าง Request ใหม่ไปยัง https:// และคง path เดิมไว้"]
+      ],
+      color: "#c2410c"
+    },
+    {
+      label: "2. เปิด TLS พอร์ต 443",
+      cue: "ส่วนที่ 2 จาก 3 • พิมพ์ต่อใต้บล็อกพอร์ต 80",
+      lines: [
+        "server {",
+        "    listen 443 ssl;",
+        "    listen [::]:443 ssl;",
+        "    server_name _;",
+        "",
+        "    ssl_certificate /etc/nginx/ssl/server.crt;",
+        "    ssl_certificate_key /etc/nginx/ssl/server.key;",
+        "    ssl_protocols TLSv1.2 TLSv1.3;"
+      ],
+      notes: [
+        ["443 ssl", "รับ HTTPS และเริ่ม TLS Handshake"],
+        ["server.crt", "Certificate ที่ Nginx ส่งให้ Browser ตรวจ"],
+        ["server.key", "Private Key ลับซึ่งต้องอยู่บน Server เท่านั้น"],
+        ["ssl_protocols", "อนุญาต TLS 1.2 และ TLS 1.3"]
+      ],
+      color: "#15803d"
+    },
+    {
+      label: "3. ส่งต่อไป Node.js",
+      cue: "ส่วนที่ 3 จาก 3 • พิมพ์ต่อแล้วปิดวงเล็บทั้ง location และ server",
+      lines: [
+        "",
+        "    location / {",
+        "        proxy_pass http://127.0.0.1:3000;",
+        "        proxy_http_version 1.1;",
+        "        proxy_set_header Host $host;",
+        "        proxy_set_header X-Real-IP $remote_addr;",
+        "        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;",
+        "        proxy_set_header X-Forwarded-Proto https;",
+        "    }",
+        "}"
+      ],
+      notes: [
+        ["location /", "ใช้กฎนี้กับทุก path ของเว็บไซต์"],
+        ["proxy_pass", "ส่ง Request ที่ถอดรหัสแล้วไป Node.js พอร์ต 3000"],
+        ["proxy_set_header", "ส่งข้อมูล Client และ Host เดิมไปให้แอปปลายทาง"],
+        ["X-Forwarded-Proto", "บอก Node.js ว่า Request ต้นทางเข้ามาด้วย HTTPS"]
+      ],
+      color: "#1d4ed8"
+    }
+  ] as const;
+  const current = sections[section];
+
+  return (
+    <div className="slide slide-content week10-compact" style={{ overflow: "hidden" }}>
+      <div className="slide-tag">{s.tag}</div>
+      <h2 style={{ marginBottom: 8 }}>{s.title}</h2>
+      <div style={{ fontSize: 12.5, color: "var(--text-secondary)", marginBottom: 8 }}>
+        เปิดไฟล์ด้วย <code style={{ color: "#0284c7", fontWeight: 800 }}>sudo nano /etc/nginx/sites-available/myapp</code> แล้วแทนเนื้อหาเดิมด้วยค่าด้านล่าง
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8, marginBottom: 9 }}>
+        {sections.map((item, index) => (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => setSection(index)}
+            style={{
+              minHeight: 35, borderRadius: 7, cursor: "pointer", padding: "5px 8px",
+              border: section === index ? `2px solid ${item.color}` : "1px solid var(--border)",
+              background: section === index ? `${item.color}10` : "var(--bg-surface)",
+              color: section === index ? item.color : "var(--text-secondary)",
+              fontSize: 11.5, fontWeight: 800
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.18fr) minmax(260px,.82fr)", gap: 22, flex: 1, minHeight: 0 }}>
+        <div style={{ background: "#0d1117", borderRadius: 8, overflow: "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+          <div style={{ height: 32, background: "#161b22", display: "flex", alignItems: "center", gap: 6, padding: "0 12px", borderBottom: "1px solid #30363d" }}>
+            <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#ff5f56" }} />
+            <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#ffbd2e" }} />
+            <span style={{ width: 9, height: 9, borderRadius: "50%", background: "#27c93f" }} />
+            <span style={{ color: "#8b949e", fontSize: 10.5, marginLeft: 6, fontFamily: "monospace" }}>/etc/nginx/sites-available/myapp</span>
+          </div>
+          <div style={{ padding: "11px 16px", overflow: "auto", flex: 1 }}>
+            <div style={{ color: "#8b949e", fontSize: 10.5, marginBottom: 7, fontFamily: "monospace" }}>{current.cue}</div>
+            {current.lines.map((line, index) => {
+              const isTls = /443|ssl_certificate|ssl_protocols/.test(line);
+              const isRedirect = /301/.test(line);
+              const isProxy = /proxy_/.test(line);
+              return (
+                <div key={index} style={{ display: "grid", gridTemplateColumns: "24px 1fr", minHeight: 20, fontFamily: "'JetBrains Mono','Courier New',monospace", fontSize: 10.8, lineHeight: 1.5 }}>
+                  <span style={{ color: "#484f58", textAlign: "right", paddingRight: 8, userSelect: "none" }}>{index + 1}</span>
+                  <code style={{ whiteSpace: "pre", color: isTls ? "#7ee787" : isRedirect ? "#ffa657" : isProxy ? "#79c0ff" : "#e6edf3" }}>{line || " "}</code>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: 10 }}>
+          {current.notes.map(([term, meaning], index) => (
+            <div key={term} style={{ display: "grid", gridTemplateColumns: "30px 1fr", gap: 10, alignItems: "start" }}>
+              <span style={{ width: 28, height: 28, borderRadius: "50%", background: `${current.color}10`, color: current.color, display: "grid", placeItems: "center", fontSize: 12, fontWeight: 800 }}>{index + 1}</span>
+              <div>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: "var(--text-primary)", marginBottom: 2 }}>{term}</div>
+                <div style={{ fontSize: 12.5, lineHeight: 1.45, color: "var(--text-secondary)" }}>{meaning}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ marginTop: 8, paddingTop: 7, borderTop: "1px solid var(--border)", fontSize: 11.5, color: "var(--text-secondary)" }}>
+        บันทึกใน nano: <strong style={{ color: "var(--text-primary)" }}>Ctrl + O → Enter → Ctrl + X</strong> จากนั้นต้องตรวจด้วย <code style={{ color: "#0284c7", fontWeight: 800 }}>sudo nginx -t</code> ก่อน Reload ทุกครั้ง
+      </div>
+    </div>
+  );
+}
+
 function SlideRenderer({ slide }: { slide: SlideData }) {
   switch (slide.type) {
     case "cover": return <CoverSlide s={slide} />;
@@ -8050,6 +8608,9 @@ function SlideRenderer({ slide }: { slide: SlideData }) {
     case "proxmox-arch-visualizer": return <ProxmoxArchVisualizer s={slide} />;
     case "proxmox-install-steps": return <ProxmoxInstallStepVisualizer s={slide} />;
     case "proxmox-create-ct-steps": return <ProxmoxCreateCTVisualizer s={slide} />;
+    case "git-deploy-anim": return <GitDeployAnimation s={slide} />;
+    case "tls-handshake-anim": return <TLSHandshakeAnimation s={slide} />;
+    case "https-nginx-config": return <HttpsNginxConfigSlide s={slide} />;
     default: return <ContentSlide s={slide} />;
   }
 }
@@ -9911,7 +10472,7 @@ function ExamNotificationBanner() {
 
 export default function Home() {
   const [weekGroups, setWeekGroups] = useState<WeekGroup[]>([]);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ "Week 1": true });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [activeWeek, setActiveWeek] = useState<string>("1a");
   const [weekData, setWeekData] = useState<WeekData | null>(null);
   const [slideIdx, setSlideIdx] = useState(0);
@@ -9925,7 +10486,7 @@ export default function Home() {
       setWeekGroups(d);
       setLoading(false);
       const exp: Record<string, boolean> = {};
-      d.forEach(g => exp[g.weekLabel] = true);
+      d.forEach((g, index) => exp[g.weekLabel] = index === 0);
       setExpandedGroups(exp);
     });
   }, []);
@@ -9970,6 +10531,8 @@ export default function Home() {
   const totalSlides = weekData?.slides.length ?? 0;
   const currentSlide = weekData?.slides[slideIdx] ?? null;
   const progressPct = totalSlides > 0 ? ((slideIdx + 1) / totalSlides * 100) : 0;
+  const activeUnitLabel = weekGroups.find(group => group.sessions.some(session => session.id === activeWeek))?.weekLabel ?? "";
+  const activeUnitName = activeUnitLabel.split(":")[0] || "หน่วยการเรียนรู้";
 
 
   /* --- Fullscreen View --- */
@@ -9978,7 +10541,7 @@ export default function Home() {
       <div className="fullscreen-overlay">
         <div className="fullscreen-topbar">
           <span style={{ fontSize: 12, color: "var(--text-secondary)" }}>
-            สัปดาห์ {activeWeek} — {currentSlide.title}
+            {activeUnitName} — {currentSlide.title}
           </span>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span className="slide-counter">{slideIdx + 1} / {totalSlides}</span>
@@ -9999,7 +10562,6 @@ export default function Home() {
   /* --- Normal View --- */
   return (
     <>
-      <ExamNotificationBanner />
       <div className="app-layout">
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? "" : "collapsed"}`}>
@@ -10024,11 +10586,11 @@ export default function Home() {
             <div key={group.weekLabel} className="week-group" style={{ marginBottom: '8px' }}>
               <div
                 className="week-group-header"
-                onClick={() => setExpandedGroups(prev => ({ ...prev, [group.weekLabel]: !prev[group.weekLabel] }))}
-                style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 15px', cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}
+                onClick={() => group.sessions.length > 0 && setExpandedGroups(prev => ({ ...prev, [group.weekLabel]: !prev[group.weekLabel] }))}
+                style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 15px', cursor: group.sessions.length > 0 ? 'pointer' : 'default', color: 'var(--text-secondary)', fontSize: '13px', fontWeight: 'bold', background: 'rgba(255,255,255,0.03)', borderRadius: '6px' }}
               >
                 <span>{group.weekLabel}</span>
-                <span style={{ fontSize: '10px' }}>{expandedGroups[group.weekLabel] ? '▼' : '▶'}</span>
+                {group.sessions.length > 0 && <span style={{ fontSize: '10px' }}>{expandedGroups[group.weekLabel] ? '▼' : '▶'}</span>}
               </div>
               {expandedGroups[group.weekLabel] && <div style={{ paddingTop: '4px' }}>
                 {group.sessions && group.sessions.map(s => (
@@ -10108,30 +10670,6 @@ export default function Home() {
             </div>
           </button>
 
-          <button
-            className="pinned-exam-btn"
-            onClick={() => window.dispatchEvent(new CustomEvent('open-exam-modal'))}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              border: '1px solid rgba(239, 68, 68, 0.4)',
-              background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(245, 158, 11, 0.15))',
-              color: '#f87171',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              textAlign: 'left'
-            }}
-          >
-            <span style={{ fontSize: '20px', flexShrink: 0 }}>📋</span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: '800', fontSize: '12px', lineHeight: '1.2', color: '#fca5a5' }}>โจทย์สอบปฏิบัติ Proxmox & CT</div>
-              <div style={{ fontSize: '10px', color: '#cbd5e1', marginTop: '2px' }}>ชุดข้อสอบ 10 ชุดรายบุคคล</div>
-            </div>
-          </button>
         </div>
 
         <div className="sidebar-footer" style={{ flexShrink: 0 }}>
@@ -10197,7 +10735,7 @@ export default function Home() {
                   </button>
                 )}
                 <span className="topbar-chapter">
-                  สัปดาห์ {activeWeek} — {weekData?.title || ""}
+                  {activeUnitName} — {weekData?.title || ""}
                 </span>
               </div>
               <div className="topbar-right">
@@ -13865,7 +14403,7 @@ function UFWLogHomework({ s }: { s: SlideData }) {
       <div style={{ flexShrink: 0, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <span style={{ fontSize: "10px", color: "#f59e0b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1.5px" }}>
-            📝 การบ้านประจำสัปดาห์ (Homework Assignment)
+            📝 การบ้านประจำหน่วย (Unit Assignment)
           </span>
           <h2 style={{ margin: "2px 0 0", fontSize: "clamp(14px, 2.2vw, 20px)", fontWeight: 800 }}>{s.title}</h2>
         </div>
@@ -15163,4 +15701,3 @@ function ProxmoxCreateCTVisualizer({ s }: { s: SlideData }) {
     </div>
   );
 }
-

@@ -1,6 +1,6 @@
 {
   "week": "12b",
-  "title": "สัปดาห์ที่ 12 (วันศุกร์): ปฏิบัติการนำ React Web Application ขึ้นใช้งานจริงบน Proxmox Container",
+  "title": "ปฏิบัติการนำ React Web Application ขึ้นใช้งานจริงบน Proxmox Container",
   "topic": "React Web App Deployment, Production Build, Nginx Hosting, PM2 Process Manager & LAN Testing Lab",
   "description": "ฝึกปฏิบัติการนำ React Web Application ของตนเองขึ้นโฮสต์ให้บริการบน Proxmox LXC Container ประจำตัว เรียนรู้กระบวนการ Build Production Asset (npm run build), การตั้งค่า Nginx Web Server, การตั้งค่า React Router fallback (try_files), การจัดการบริการด้วย PM2 Process Manager และการทดสอบเข้าชมในวง LAN",
   "learningObjectives": [
@@ -14,7 +14,7 @@
     {
       "id": "w12b-s1",
       "type": "cover",
-      "tag": "สัปดาห์ที่ 12 • วันศุกร์ (2 ชั่วโมง)",
+      "tag": "หน่วยที่ 6 • วันศุกร์ (2 ชั่วโมง)",
       "title": "ปฏิบัติการนำ React Web App ขึ้น Proxmox Container",
       "subtitle": "React App Production Deployment Lab on Member LXC Container",
       "body": "คาบนี้สมาชิกทุกคนจะได้นำเว็บแอปพลิเคชัน React ที่พัฒนาไว้ ขึ้นโฮสต์ใช้งานจริงบน LXC Container ของตนเองผ่าน Nginx และ PM2 และเปิดให้เพื่อนร่วมชั้นและอาจารย์เข้าชมได้ผ่านวง LAN",

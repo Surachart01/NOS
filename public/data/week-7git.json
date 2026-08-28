@@ -1,0 +1,356 @@
+{
+  "week": "7git",
+  "title": "ติดตั้ง Git และ Clone ระบบจาก GitHub มารันบน Server",
+  "topic": "Git Installation, GitHub Repository, HTTPS Clone and Server Deployment",
+  "description": "ฝึกใช้ Git ดาวน์โหลดระบบที่ผู้สอนเตรียมไว้บน GitHub ด้วยคำสั่ง git clone จากนั้นตรวจไฟล์ ติดตั้งแพ็กเกจ และนำระบบขึ้นทำงานบน Ubuntu Server ใน Proxmox Container",
+  "learningObjectives": [
+    "อธิบายได้ว่า GitHub Repository เป็นแหล่งเก็บระบบที่เตรียมไว้แล้ว",
+    "ติดตั้ง Git และตรวจสอบเวอร์ชันบน Ubuntu Server ได้",
+    "คัดลอก HTTPS URL และใช้ git clone ดาวน์โหลดระบบลง Server ได้",
+    "ตรวจสอบ README, package.json และโครงสร้างไฟล์หลัง Clone ได้",
+    "ติดตั้งแพ็กเกจและเลือกวิธีรันระบบให้เหมาะกับประเภทของโปรเจกต์ได้",
+    "ตรวจสอบบริการด้วย PM2, พอร์ต และ Browser ได้"
+  ],
+  "slides": [
+    {
+      "id": "w7git-s1",
+      "type": "cover",
+      "tag": "หน่วยที่ 7 • GitHub ไปสู่ Ubuntu Server",
+      "title": "Clone ระบบจาก GitHub",
+      "subtitle": "ติดตั้ง Git • ดาวน์โหลดระบบ • ติดตั้งแพ็กเกจ • เปิดใช้งาน",
+      "body": "คาบนี้ระบบถูกเตรียมไว้บน GitHub แล้ว หน้าที่ของเราคือดาวน์โหลดลง Container และทำให้ระบบเปิดใช้งานได้",
+      "speakerNotes": "เปิดคาบด้วยการกำหนดขอบเขตให้ชัดครับ วันนี้ไม่ได้สร้างหรืออัปโหลด Repository เรามีระบบต้นฉบับบน GitHub อยู่แล้ว และจะฝึกบทบาทผู้ดูแล Server ที่ต้องนำระบบนั้นลงมาติดตั้งและเปิดบริการ"
+    },
+    {
+      "id": "w7git-s2",
+      "type": "two-col",
+      "tag": "ขอบเขตของบทเรียน",
+      "title": "วันนี้ทำอะไร และไม่ต้องทำอะไร",
+      "cols": [
+        {
+          "icon": "ทำ",
+          "title": "สิ่งที่เราจะฝึก",
+          "items": [
+            "ติดตั้งโปรแกรม Git บน Ubuntu Server",
+            "เปิด Repository ที่ผู้สอนกำหนดและคัดลอก HTTPS URL",
+            "ใช้ `git clone` ดาวน์โหลดระบบลง Container",
+            "ติดตั้งส่วนประกอบและเปิดระบบให้ทำงาน"
+          ]
+        },
+        {
+          "icon": "ไม่ทำ",
+          "title": "สิ่งที่อยู่นอกบทเรียนนี้",
+          "items": [
+            "ไม่สร้าง Repository ใหม่บน GitHub",
+            "ไม่สอนการ Commit หรือ Push Source Code",
+            "ไม่ตั้งค่า SSH Key สำหรับ GitHub",
+            "ไม่แก้ไขหรือพัฒนาระบบบน GitHub"
+          ]
+        }
+      ],
+      "speakerNotes": "ย้ำว่านักเรียนไม่ต้องสมัครหรือ Login GitHub หาก Repository เป็น Public เราใช้ GitHub เป็นแหล่งดาวน์โหลดระบบที่ผู้สอนเตรียมไว้เท่านั้น ส่วนคำสั่งทั้งหมดจะพิมพ์ใน Console ของ Container"
+    },
+    {
+      "id": "w7git-s3",
+      "type": "content",
+      "tag": "เชื่อมโยงคำอธิบายรายวิชา",
+      "title": "งานนี้เป็นส่วนหนึ่งของการติดตั้งโปรแกรมให้บริการบนเครือข่าย",
+      "items": [
+        "GitHub เป็นแหล่งที่เก็บไฟล์ระบบหรือ Source Code ที่เตรียมไว้แล้ว",
+        "Git เป็นโปรแกรมบน Ubuntu ที่ใช้ติดต่อและดาวน์โหลด Repository",
+        "`git clone` คัดลอกไฟล์พร้อมโครงสร้างของ Repository ลงมาเป็นโฟลเดอร์ใหม่",
+        "หลังดาวน์โหลด เรายังต้องอ่านคู่มือ ติดตั้งแพ็กเกจ และตั้งค่าระบบก่อนเปิดบริการ",
+        "สอดคล้องกับคำอธิบายรายวิชาเรื่องการติดตั้งและบริหารจัดการโปรแกรมให้บริการในระบบเครือข่าย"
+      ],
+      "speakerNotes": "อธิบายให้นักเรียนเห็นว่า Clone เป็นเพียงขั้นรับไฟล์ ยังไม่เท่ากับติดตั้งสำเร็จ ผู้ดูแล Server ต้องตรวจว่าโปรเจกต์ต้องใช้ Node.js, Database, Environment Variable หรือพอร์ตใด แล้วจึงเปิดบริการให้ถูกต้อง"
+    },
+    {
+      "id": "w7git-s4",
+      "type": "two-col",
+      "tag": "คำศัพท์ที่ต้องรู้เพียงพอสำหรับคาบนี้",
+      "title": "แปลคำบน GitHub ก่อนเริ่ม Clone",
+      "cols": [
+        {
+          "icon": "WEB",
+          "title": "คำที่เห็นบนเว็บไซต์",
+          "items": [
+            "`Repository` — พื้นที่เก็บไฟล์ของระบบหนึ่งระบบ",
+            "`Public` — ทุกคนที่มี URL สามารถเปิดดูและ Clone ได้",
+            "`Code` — ปุ่มที่ใช้เปิดรายการ URL สำหรับดาวน์โหลด",
+            "`HTTPS URL` — ที่อยู่ Repository เช่น `https://github.com/...git`"
+          ]
+        },
+        {
+          "icon": "SERVER",
+          "title": "คำที่เกิดบน Container",
+          "items": [
+            "`Git` — โปรแกรมที่รับคำสั่ง Clone",
+            "`Clone` — ดาวน์โหลด Repository ทั้งชุดลงเป็นโฟลเดอร์ใหม่",
+            "`README` — คู่มือที่เจ้าของระบบเขียนไว้",
+            "`Dependencies` — แพ็กเกจที่ระบบต้องใช้และต้องติดตั้งเพิ่ม"
+          ]
+        }
+      ],
+      "speakerNotes": "นักเรียนไม่จำเป็นต้องรู้คำศัพท์ Git ทั้งหมดในคาบนี้ ให้จำเพียง Repository คือกล่องระบบ URL คือที่อยู่ และ Clone คือการนำสำเนาทั้งชุดลงมายัง Server"
+    },
+    {
+      "id": "w7git-s5",
+      "type": "git-deploy-anim",
+      "tag": "ภาพเคลื่อนไหว • ติดตามระบบจาก GitHub ถึง Server",
+      "title": "เมื่อสั่ง git clone ระบบเดินทางอย่างไร",
+      "speakerNotes": "ปล่อยภาพเล่นหนึ่งรอบ แล้วกดหยุดเพื่อชี้ทีละขั้น เริ่มจากนักเรียนคัดลอก URL ของ Repository ติดตั้ง Git ที่ Container จากนั้น git clone จึงร้องขอและรับไฟล์จาก GitHub เมื่อไฟล์มาถึงแล้วจึงติดตั้งแพ็กเกจและเปิด Application"
+    },
+    {
+      "id": "w7git-s6",
+      "type": "content",
+      "tag": "แผนที่การปฏิบัติ",
+      "title": "ลำดับงานตั้งแต่รับ URL จนเปิดระบบได้",
+      "items": [
+        "1. รับ URL ของ Public Repository จากผู้สอน",
+        "2. เปิด Proxmox GUI Console ของ Container ประจำตัว",
+        "3. ติดตั้ง Git และตรวจเวอร์ชัน",
+        "4. ใช้ `git clone` ดาวน์โหลดระบบลงโฟลเดอร์ใหม่",
+        "5. เข้าโฟลเดอร์และอ่าน `README.md` กับ `package.json`",
+        "6. ติดตั้ง Dependencies ด้วย `npm ci` หรือ `npm install`",
+        "7. เปิดระบบด้วย PM2 หรือ Build แล้วให้ Nginx บริการ",
+        "8. ตรวจสถานะ พอร์ต และเปิดผ่าน Browser"
+      ],
+      "speakerNotes": "ให้นักเรียนดูภาพรวมก่อนลงมือครับ ทุกคนทำตามลำดับเดียวกันและหยุดตรวจผลในแต่ละขั้น หาก Clone ไม่สำเร็จ ห้ามข้ามไป npm เพราะยังไม่มีไฟล์โปรเจกต์"
+    },
+    {
+      "id": "w7git-s7",
+      "type": "content",
+      "tag": "ขั้นที่ 1 • เตรียมข้อมูลก่อนเปิด Console",
+      "title": "รับ Repository URL และตรวจว่าเป็นระบบที่ต้องการ",
+      "items": [
+        "ผู้สอนส่ง URL ของ Repository ตัวอย่าง เช่น `https://github.com/OWNER/server-app`",
+        "เปิด URL ใน Browser แล้วตรวจชื่อเจ้าของและชื่อ Repository",
+        "ดูว่าหน้า Repository มีไฟล์ `README.md` และ `package.json` หรือไม่",
+        "ตรวจว่า Repository เป็น Public และสามารถเปิดได้โดยไม่ต้อง Login",
+        "ยังไม่ต้องดาวน์โหลด ZIP เพราะเราต้องการฝึกใช้คำสั่ง `git clone`"
+      ],
+      "speakerNotes": "จุดนี้ใช้ Browser เพียงเพื่อยืนยันว่า URL เปิดได้และเป็น Repository ที่ผู้สอนกำหนด ไม่ได้สอนเมนูอื่นของ GitHub หากหน้าเว็บขึ้น 404 ให้ตรวจ URL ก่อนเปิด Console"
+    },
+    {
+      "id": "w7git-s8",
+      "type": "content",
+      "tag": "ขั้นที่ 2 • พิมพ์ใน Proxmox GUI Console",
+      "title": "ติดตั้ง Git บน Ubuntu Server",
+      "items": [
+        "อัปเดตรายการแพ็กเกจ แล้วติดตั้งโปรแกรม Git",
+        "$ sudo apt update",
+        "$ sudo apt install git -y",
+        "$ git --version",
+        "Checkpoint: ต้องเห็นผลลัพธ์คล้าย `git version 2.x.x`",
+        "ถ้าเห็นหมายเลขเวอร์ชัน แปลว่า Container พร้อมรับคำสั่ง `git clone`"
+      ],
+      "speakerNotes": "ทุกคำสั่งในหน้านี้พิมพ์ผ่าน Proxmox GUI Console ครับ apt update รับรายการแพ็กเกจล่าสุด apt install ติดตั้ง Git และคำสั่งสุดท้ายใช้พิสูจน์ว่าระบบเรียกโปรแกรมได้จริง"
+    },
+    {
+      "id": "w7git-s9",
+      "type": "two-col",
+      "tag": "ขั้นที่ 3 • ทำบนหน้า Repository",
+      "title": "คัดลอก HTTPS URL ให้ถูกช่อง",
+      "cols": [
+        {
+          "icon": "1-2",
+          "title": "สิ่งที่ต้องกด",
+          "items": [
+            "เปิดหน้า Repository ที่ผู้สอนกำหนด",
+            "กดปุ่ม `Code`",
+            "เลือกแท็บ `Local` แล้วเลือก `HTTPS`",
+            "กดปุ่มคัดลอก URL ที่ลงท้ายด้วย `.git`"
+          ]
+        },
+        {
+          "icon": "ตรวจ",
+          "title": "รูปแบบที่ควรได้",
+          "items": [
+            "ตัวอย่าง `https://github.com/OWNER/REPOSITORY.git`",
+            "ต้องมีชื่อเจ้าของและชื่อ Repository ครบ",
+            "คาบนี้ไม่เลือก SSH เพราะไม่ต้องตั้งค่า Key",
+            "อย่าคัดลอก URL ของหน้าไฟล์ย่อยหรือหน้า README"
+          ]
+        }
+      ],
+      "speakerNotes": "สาธิตบนจอหนึ่งครั้งแล้วให้ทุกคนเปรียบเทียบ URL ตัวเองครับ จุดที่พลาดบ่อยคือคัดลอก URL จากแถบที่อยู่ขณะเปิดไฟล์ย่อย จึงควรใช้ปุ่ม Code และเลือก HTTPS โดยตรง"
+    },
+    {
+      "id": "w7git-s10",
+      "type": "content",
+      "tag": "ขั้นที่ 4 • พิมพ์ใน Proxmox GUI Console",
+      "title": "Clone ระบบลง Home Directory ของ Container",
+      "items": [
+        "กลับไปหน้า Console แล้วเข้า Home Directory ก่อน",
+        "$ cd ~",
+        "$ git clone https://github.com/OWNER/REPOSITORY.git",
+        "$ ls -la",
+        "Git จะสร้างโฟลเดอร์ชื่อเดียวกับ Repository ให้อัตโนมัติ",
+        "Checkpoint: ต้องเห็นข้อความ `Cloning into...` และโฟลเดอร์ใหม่ปรากฏในผลลัพธ์ `ls`",
+        "เปลี่ยน `OWNER/REPOSITORY` เป็น URL จริงที่ผู้สอนให้ ห้ามพิมพ์ตัวอย่างตามสไลด์ตรง ๆ"
+      ],
+      "speakerNotes": "อธิบายคำสั่งทีละส่วนครับ git clone คือคำสั่ง ส่วน URL บอกว่าให้รับระบบจากที่ใด หลังคำสั่งจบต้องกลับมาที่ Prompt โดยไม่มีคำว่า fatal และ ls ต้องเห็นโฟลเดอร์ใหม่"
+    },
+    {
+      "id": "w7git-s11",
+      "type": "content",
+      "tag": "ขั้นที่ 5 • ตรวจสิ่งที่ดาวน์โหลดมา",
+      "title": "เข้าโฟลเดอร์ อ่านคู่มือ และดูคำสั่งของโปรเจกต์",
+      "items": [
+        "เปลี่ยนชื่อโฟลเดอร์ให้ตรงกับชื่อ Repository ที่ Clone มา",
+        "$ cd ~/REPOSITORY",
+        "$ ls -la",
+        "$ cat README.md",
+        "$ cat package.json",
+        "`README.md` บอกขั้นตอนที่เจ้าของระบบกำหนด ส่วน `package.json` บอกแพ็กเกจและคำสั่งในส่วน scripts",
+        "Checkpoint: ต้องหาให้พบว่าระบบใช้คำสั่ง `npm start`, `npm run dev` หรือ `npm run build`"
+      ],
+      "speakerNotes": "สอนนิสัยสำคัญว่าอย่าเดาคำสั่งรันระบบ ให้เปิด README และ package.json ก่อน หากชื่อไฟล์ README ต่างกันให้ใช้ ls ดูชื่อจริง ส่วน scripts ใน package.json เป็นแหล่งบอกคำสั่งที่โปรเจกต์รองรับ"
+    },
+    {
+      "id": "w7git-s12",
+      "type": "content",
+      "tag": "ขั้นที่ 6 • ติดตั้ง Dependencies",
+      "title": "ติดตั้งแพ็กเกจที่ไม่ได้เก็บมากับ Repository",
+      "items": [
+        "โฟลเดอร์ `node_modules` มักไม่ถูกเก็บบน GitHub จึงต้องติดตั้งใหม่บน Server",
+        "$ cd ~/REPOSITORY",
+        "$ npm ci",
+        "ใช้ `npm ci` เมื่อมี `package-lock.json` เพื่อให้ได้เวอร์ชันแพ็กเกจตามที่ระบบกำหนด",
+        "ถ้าไม่มี `package-lock.json` จึงเปลี่ยนเป็น `$ npm install`",
+        "$ ls -d node_modules",
+        "Checkpoint: คำสั่งต้องจบโดยไม่มี Error และต้องเห็นโฟลเดอร์ `node_modules`"
+      ],
+      "speakerNotes": "อธิบายว่า Clone รับ Source Code แต่ไม่จำเป็นต้องรับแพ็กเกจขนาดใหญ่ทั้งหมด npm ci จึงอ่าน package-lock.json และติดตั้งแพ็กเกจที่ตรงกับระบบ หากหน้าจอขึ้น Error ให้หยุดอ่านก่อน ไม่ควรข้ามไปสั่งรัน"
+    },
+    {
+      "id": "w7git-s13",
+      "type": "two-col",
+      "tag": "ขั้นที่ 7 • เลือกตามประเภทโปรเจกต์",
+      "title": "ระบบที่ Clone มา ต้องเปิดด้วยวิธีใด",
+      "cols": [
+        {
+          "icon": "NODE",
+          "title": "Node.js Application",
+          "items": [
+            "ใน `package.json` มี script ชื่อ `start`",
+            "Application เปิดพอร์ต เช่น 3000",
+            "ใช้ PM2 ดูแล Process ให้ทำงานต่อเนื่อง",
+            "Nginx Reverse Proxy ส่ง Request มายังพอร์ตของ Application"
+          ]
+        },
+        {
+          "icon": "WEB",
+          "title": "React/Vite Static Website",
+          "items": [
+            "ใน `package.json` มี script ชื่อ `build`",
+            "คำสั่ง Build สร้างโฟลเดอร์ `dist`",
+            "คัดลอกไฟล์ใน `dist` ไปยัง `/var/www/html`",
+            "ให้ Nginx เป็นผู้เปิดไฟล์เว็บไซต์แก่ Client"
+          ]
+        }
+      ],
+      "speakerNotes": "อย่าให้เด็กพิมพ์ทั้งสองวิธีครับ ให้ดู package.json และ README ของ Repository ที่ผู้สอนเลือก แล้วทำเฉพาะฝั่งที่ตรงกับระบบ ถ้าเป็น Backend หรือ Full-stack ที่มี Server ใช้ PM2 ถ้าเป็นหน้าเว็บ Static ใช้ Build และ Nginx"
+    },
+    {
+      "id": "w7git-s14",
+      "type": "content",
+      "tag": "ทางเลือก A • Node.js Application",
+      "title": "เปิด Application ด้วย PM2 และตรวจพอร์ต",
+      "items": [
+        "ใช้หน้านี้เมื่อ README ระบุว่าสามารถเริ่มระบบด้วย `npm start`",
+        "$ cd ~/REPOSITORY",
+        "$ pm2 start npm --name github-app -- start",
+        "$ pm2 save",
+        "$ pm2 status",
+        "$ sudo ss -lntp | grep :3000",
+        "$ curl http://127.0.0.1:3000",
+        "Checkpoint: PM2 ต้องเป็น `online` และ curl ต้องได้รับ Response จาก Application"
+      ],
+      "speakerNotes": "ชื่อ github-app เป็นชื่อที่เราใช้เรียก Process ใน PM2 ส่วนพอร์ต 3000 เป็นตัวอย่าง ต้องเปลี่ยนให้ตรงกับ Repository ที่ใช้จริง หาก PM2 errored ให้เปิด pm2 logs github-app แล้วอ่านสาเหตุ"
+    },
+    {
+      "id": "w7git-s15",
+      "type": "content",
+      "tag": "ทางเลือก B • React/Vite Static Website",
+      "title": "Build เว็บไซต์แล้วให้ Nginx เปิดบริการ",
+      "items": [
+        "ใช้หน้านี้เมื่อ README ระบุให้สร้าง Production Build ด้วย `npm run build`",
+        "$ cd ~/REPOSITORY",
+        "$ npm run build",
+        "$ ls -la dist",
+        "$ sudo rm -rf /var/www/html/*",
+        "$ sudo cp -r dist/* /var/www/html/",
+        "$ sudo nginx -t",
+        "$ sudo systemctl reload nginx",
+        "Checkpoint: `nginx -t` ต้องผ่าน และเปิด `http://IP-ของ-Container` แล้วเห็นเว็บไซต์"
+      ],
+      "speakerNotes": "ย้ำว่า rm ลบเฉพาะไฟล์เดิมภายใน /var/www/html ไม่ได้ลบโฟลเดอร์หลัก จากนั้น copy ผลลัพธ์ Build ไปให้ Nginx บริการ ต้องตรวจ nginx -t ก่อน reload ทุกครั้ง"
+    },
+    {
+      "id": "w7git-s16",
+      "type": "lab",
+      "tag": "ภารกิจปฏิบัติ • Clone แล้วพิสูจน์ผล",
+      "title": "ทำให้ระบบจาก GitHub เปิดบน Container ของตนเอง",
+      "duration": "ทำตามลำดับและหยุดตรวจทุก Checkpoint",
+      "objectives": [
+        "แสดง `git --version` เพื่อยืนยันว่าติดตั้ง Git แล้ว",
+        "แสดงโฟลเดอร์ Repository ที่เกิดจาก `git clone`",
+        "อธิบายได้ว่า README และ package.json บอกข้อมูลใด",
+        "เปิดระบบและทดสอบจาก Browser หรือ curl ได้"
+      ],
+      "steps": [
+        "1. รับ HTTPS URL จากผู้สอนและตรวจว่าเปิด Repository ได้",
+        "2. ติดตั้ง Git แล้ว Clone Repository ลง Home Directory",
+        "3. เข้าโฟลเดอร์ อ่าน README และติดตั้ง Dependencies",
+        "4. เลือกวิธีรันตามประเภทโปรเจกต์: PM2 หรือ Build + Nginx",
+        "5. แสดงหลักฐานสถานะ Process, พอร์ต และหน้าเว็บที่เปิดได้"
+      ],
+      "speakerNotes": "เดินตรวจเป็นจุดครับ อย่าตรวจเฉพาะว่าหน้าเว็บเปิดได้ ให้ถามนักเรียนด้วยว่า URL มาจากไหน Clone สร้างโฟลเดอร์ใด และทำไมต้องติดตั้ง Dependencies หลังดาวน์โหลด"
+    },
+    {
+      "id": "w7git-s17",
+      "type": "two-col",
+      "tag": "แก้ปัญหาจากข้อความที่พบ",
+      "title": "Clone สำเร็จแต่ระบบยังไม่เปิด ต้องตรวจตรงไหน",
+      "cols": [
+        {
+          "icon": "CLONE",
+          "title": "ปัญหาช่วงดาวน์โหลด",
+          "items": [
+            "`Repository not found` — URL ผิดหรือ Repository ไม่เป็น Public",
+            "`Could not resolve host` — Container ยังออก Internet หรือค้น DNS ไม่ได้",
+            "`destination path already exists` — มีโฟลเดอร์ชื่อนั้นอยู่แล้ว",
+            "`git: command not found` — ยังไม่ได้ติดตั้ง Git"
+          ]
+        },
+        {
+          "icon": "RUN",
+          "title": "ปัญหาช่วงเปิดระบบ",
+          "items": [
+            "`npm ci` ไม่ผ่าน — ตรวจ Node.js และ package-lock.json",
+            "PM2 เป็น `errored` — ใช้ `pm2 logs github-app`",
+            "พอร์ตไม่เปิด — ตรวจ `ss -lntp` และคำสั่ง start",
+            "Nginx ขึ้น 502 — Application ไม่ทำงานหรือชี้พอร์ตไม่ตรง"
+          ]
+        }
+      ],
+      "speakerNotes": "ให้นักเรียนแยกก่อนว่าปัญหาเกิดก่อนหรือหลัง Clone ถ้ายัง Clone ไม่ได้ให้ตรวจ Network และ URL ถ้ามีไฟล์ครบแล้วแต่เว็บไม่เปิด ให้ตรวจ npm, Process, พอร์ต และ Nginx ตามลำดับ"
+    },
+    {
+      "id": "w7git-s18",
+      "type": "summary",
+      "tag": "สรุปหน่วยที่ 7",
+      "title": "เส้นทางสั้น ๆ จาก GitHub ถึง Server",
+      "items": [
+        "ผู้สอนเตรียม Public Repository และส่ง HTTPS URL ให้ผู้เรียน",
+        "ติดตั้ง Git บน Container แล้วใช้ `git clone URL` ดาวน์โหลดระบบ",
+        "เข้าโฟลเดอร์ อ่าน README และ package.json ก่อนพิมพ์คำสั่งติดตั้ง",
+        "ติดตั้ง Dependencies ด้วย `npm ci` หรือ `npm install` ตามไฟล์ที่มี",
+        "Node.js Application ใช้ PM2 ส่วน Static Website ใช้ Build และ Nginx",
+        "ตรวจผลตามลำดับ: ไฟล์ → แพ็กเกจ → Process → พอร์ต → Browser"
+      ],
+      "speakerNotes": "ปิดคาบด้วยให้นักเรียนพูดหกขั้นนี้กลับเองครับ จุดที่ต้องจำที่สุดคือ Clone เป็นเพียงการรับไฟล์ หลังจากนั้นยังต้องอ่านคู่มือและติดตั้งระบบให้เหมาะกับชนิดของโปรเจกต์"
+    }
+  ]
+}
